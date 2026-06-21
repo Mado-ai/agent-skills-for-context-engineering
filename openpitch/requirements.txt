@@ -1,0 +1,8 @@
+numpy>=1.24
+opencv-python-headless>=4.8
+fastapi>=0.110
+uvicorn[standard]>=0.27
+python-multipart>=0.0.9
+
+# Optional — enables the real YOLO detector backend (downloads PyTorch):
+# ultralytics>=8.1

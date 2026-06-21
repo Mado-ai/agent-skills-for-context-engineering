@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OpenPitch — AI Soccer Capture & Analytics</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>⚽ OpenPitch</h1>
+    <p class="tag">Automated capture · auto-production · performance analytics</p>
+  </header>
+
+  <main>
+    <section class="card controls">
+      <h2>1 · Ingest a match</h2>
+      <p>Upload a wide-angle / panoramic clip, or run the synthetic demo.</p>
+      <div class="row">
+        <input type="file" id="file" accept="video/*" />
+        <label class="detector">
+          Detector
+          <select id="detector">
+            <option value="color">color (no download)</option>
+            <option value="yolo">yolo (needs ultralytics)</option>
+          </select>
+        </label>
+        <button id="upload">Process upload</button>
+        <button id="demo" class="secondary">Run demo clip</button>
+      </div>
+      <div id="progress" class="progress hidden">
+        <div class="bar"><div id="barfill"></div></div>
+        <span id="status">…</span>
+      </div>
+    </section>
+
+    <section id="results" class="hidden">
+      <div class="card">
+        <h2>2 · Auto-produced broadcast</h2>
+        <p class="muted">Virtual cameraman: no operator — the system pans & zooms to follow play.</p>
+        <video id="broadcast" controls></video>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>3 · Possession</h2>
+          <div class="poss-bar">
+            <div id="poss-home"></div>
+            <div id="poss-away"></div>
+          </div>
+          <div class="poss-legend">
+            <span><i class="home"></i> <b id="home-name">Home</b> <span id="home-pct"></span></span>
+            <span><span id="away-pct"></span> <b id="away-name">Away</b> <i class="away"></i></span>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Match info</h2>
+          <ul id="meta" class="meta"></ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>4 · Positional heatmaps</h2>
+        <div class="heatmaps">
+          <figure><img id="hm-home" alt="home heatmap" /><figcaption>Home</figcaption></figure>
+          <figure><img id="hm-away" alt="away heatmap" /><figcaption>Away</figcaption></figure>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>5 · Player physical metrics</h2>
+          <table id="players">
+            <thead><tr><th>#</th><th>Team</th><th>Distance (m)</th><th>Top speed (m/s)</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h2>6 · Auto highlights</h2>
+          <div id="highlights" class="highlights"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>OpenPitch prototype · color-segmentation CV pipeline · swap in YOLO for real footage</footer>
+  <script src="app.js"></script>
+</body>
+</html>

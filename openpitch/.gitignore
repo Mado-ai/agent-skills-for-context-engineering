@@ -1,0 +1,8 @@
+runs/
+*.mp4
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
