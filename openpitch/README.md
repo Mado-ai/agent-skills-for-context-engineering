@@ -61,9 +61,28 @@ Outputs land in `runs/<name>/`: `broadcast.mp4`, `analytics`+`summary.json`,
 
 * **`color`** (default) — HSV segmentation. No downloads, deterministic,
   great for the synthetic demo and any colour-distinct footage.
-* **`yolo`** — set `--detector yolo` (CLI) or `OPENPITCH_DETECTOR=yolo`.
-  Requires `pip install ultralytics`; team identity is assigned by
-  jersey-colour clustering.
+* **`yolo`** — set `--detector yolo` (CLI) for **real footage**. Requires
+  `pip install ultralytics` (weights auto-download on first run). Uses a
+  COCO-pretrained model for `person` + `sports ball`; team identity is
+  assigned by jersey-hue (grass pixels masked out). Tunable via
+  `Config.yolo_weights / yolo_conf / yolo_imgsz / yolo_device` — raise
+  `yolo_imgsz` to catch small, fast balls. Note: the synthetic demo uses
+  coloured dots, not people, so YOLO only finds the ball there — point it at
+  real match video.
+
+### Pitch homography (calibration)
+
+To produce *true* metres (distance/speed) and a correct top-down heatmap,
+`homography.py` maps image pixels to a canonical 105×68 m pitch model:
+
+* **Automatic** — `detect_pitch_corners` finds the field boundary and maps its
+  four corners to the model. Works when the whole pitch is visible and roughly
+  rectangular (synthetic sample, elevated centre-line cameras).
+* **Manual** — set `Config.homography_corners` to four image points
+  (TL, TR, BR, BL) for trapezoidal real-camera views.
+
+When calibration fails, the pipeline falls back to an image-plane proxy and
+reports `"calibration": "proxy"` in `summary.json` (vs `"homography"`).
 
 ## Testing
 
@@ -81,15 +100,18 @@ with explainable, model-free defaults. It is **not** production-grade:
 * The tracker is greedy nearest-neighbour; ID swaps on player crossings are
   gated out of the physical metrics but a real system needs ByteTrack +
   re-identification.
-* No camera calibration / homography — analytics use the image plane as a
-  proxy pitch. Production needs pitch-line homography to map to true metres.
+* Homography auto-detection assumes a near-rectangular full-pitch view; angled
+  broadcast cameras need the manual-corner override (or learned pitch-keypoint
+  detection) and ideally per-frame re-estimation.
 * Jobs run in-memory on a thread; production needs a queue + object storage +
   GPU workers.
 
 ## Roadmap to a real product
 
-1. **Homography & calibration** — detect pitch lines, map to a top-down model.
-2. **Real detection/tracking** — fine-tuned YOLO ball model + ByteTrack + ReID.
+1. ✅ **Homography & calibration** — auto + manual pitch-corner mapping to a
+   top-down model (this prototype). Next: learned pitch-keypoint detection.
+2. ✅ **YOLO detection backend** (this prototype). Next: fine-tuned ball model +
+   ByteTrack + ReID for stable IDs through crossings.
 3. **Capture hardware** — fixed 4K panoramic rig, on-prem encoder, RTMP/SRT push.
 4. **Live, low-latency** — stream the virtual-camera output (LL-HLS/WebRTC).
 5. **Event model** — learned shot/goal/foul classifier + audio crowd-energy.

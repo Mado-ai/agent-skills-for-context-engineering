@@ -32,6 +32,10 @@ MAX_PLAYER_SPEED_MS = 12.0
 class Analytics:
     config: Config
     fps: float
+    # (width, height) of the source frame, required for homography mapping.
+    frame_size: tuple[int, int] | None = None
+    # Image->metres homography; when None, an image-plane proxy is used.
+    homography: "object | None" = None
     possession_frames: list[int] = field(default_factory=lambda: [0, 0])
     _positions: list[list[tuple[float, float]]] = field(
         default_factory=lambda: [[], []]
@@ -39,9 +43,19 @@ class Analytics:
     _player_paths: dict[int, dict] = field(default_factory=dict)
     ball_path: list[tuple[float, float]] = field(default_factory=list)
 
+    def _pitch_pos(self, cx: float, cy: float) -> tuple[float, float, float, float]:
+        """Return (X_m, Y_m, norm_x, norm_y) for a normalised image point."""
+        if self.homography is not None and self.frame_size is not None:
+            w, h = self.frame_size
+            X, Y = self.homography.to_pitch(cx * w, cy * h)
+            nx, ny = self.homography.to_pitch_norm(cx * w, cy * h)
+            return X, Y, nx, ny
+        # Proxy: treat the image plane as the pitch.
+        return cx * PITCH_LENGTH_M, cy * PITCH_WIDTH_M, cx, cy
+
     def update(self, state: FrameState) -> tuple[float, float]:
         """Ingest one frame; return cumulative possession (home, away) frames."""
-        # Possession: team of player nearest the ball within radius.
+        # Possession: team of player nearest the ball within radius (image space).
         if state.ball is not None and state.players:
             bx, by = state.ball
             nearest = min(
@@ -53,19 +67,18 @@ class Analytics:
             self.ball_path.append((bx, by))
 
         for p in state.players:
-            self._positions[p.team].append((p.cx, p.cy))
+            X, Y, nx, ny = self._pitch_pos(p.cx, p.cy)
+            self._positions[p.team].append((nx, ny))
             rec = self._player_paths.setdefault(
                 p.id, {"team": p.team, "last": None, "dist_m": 0.0, "top_speed": 0.0}
             )
             if rec["last"] is not None:
-                dx = (p.cx - rec["last"][0]) * PITCH_LENGTH_M
-                dy = (p.cy - rec["last"][1]) * PITCH_WIDTH_M
-                step = float(np.hypot(dx, dy))
+                step = float(np.hypot(X - rec["last"][0], Y - rec["last"][1]))
                 speed = step * self.fps  # m/s (one frame elapsed)
                 if speed <= MAX_PLAYER_SPEED_MS:
                     rec["dist_m"] += step
                     rec["top_speed"] = max(rec["top_speed"], speed)
-            rec["last"] = (p.cx, p.cy)
+            rec["last"] = (X, Y)
 
         return tuple(self.possession_frames)  # type: ignore[return-value]
 
@@ -100,7 +113,6 @@ class Analytics:
     def player_stats(self) -> list[dict]:
         rows = []
         for pid, rec in self._player_paths.items():
-            frames = rec  # noqa: F841
             rows.append(
                 {
                     "player_id": pid,
@@ -128,4 +140,5 @@ class Analytics:
             },
             "players": self.player_stats(),
             "ball_path_points": len(self.ball_path),
+            "calibration": "homography" if self.homography is not None else "proxy",
         }

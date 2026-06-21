@@ -24,6 +24,7 @@ from .analytics import Analytics
 from .config import Config
 from .detect import build_detector
 from .highlights import HighlightDetector, export_clips
+from .homography import calibrate
 from .ingest import VideoSource
 from .overlay import draw_scoreboard
 from .track import Tracker
@@ -61,7 +62,7 @@ def process_video(
     detector = build_detector(cfg)
     tracker = Tracker(cfg)
     vcam = VirtualCamera(cfg, meta.width, meta.height)
-    analytics = Analytics(cfg, fps=meta.fps)
+    analytics = Analytics(cfg, fps=meta.fps, frame_size=(meta.width, meta.height))
     highlighter = HighlightDetector(cfg, fps=meta.fps)
 
     broadcast_path = out_dir / "broadcast.mp4"
@@ -73,6 +74,10 @@ def process_video(
 
     total = max(meta.frame_count, 1)
     for idx, frame in src.frames():
+        if idx == 0 and cfg.auto_calibrate:
+            analytics.homography = calibrate(frame, cfg)
+            mode = "homography" if analytics.homography else "image-plane proxy"
+            report(0.04, f"calibration: {mode}")
         dets = detector.detect(frame)
         state = tracker.update(idx, dets)
 

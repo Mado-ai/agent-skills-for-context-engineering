@@ -58,6 +58,56 @@ def test_pipeline_produces_outputs(sample, tmp_path):
         assert 0 <= p["top_speed_ms"] <= 12.0
 
 
+def test_homography_detects_pitch_and_maps_corners(sample):
+    import cv2
+
+    from openpitch.homography import calibrate, detect_pitch_corners
+
+    cap = cv2.VideoCapture(str(sample))
+    ok, frame = cap.read()
+    cap.release()
+    assert ok
+
+    corners = detect_pitch_corners(frame)
+    assert corners is not None and corners.shape == (4, 2)
+
+    h = calibrate(frame, Config())
+    assert h is not None
+    # A detected corner maps near a pitch corner (metres); centre maps near mid.
+    cx, cy = corners[0]
+    X, Y = h.to_pitch(float(cx), float(cy))
+    assert -2 <= X <= 5 and -2 <= Y <= 5  # top-left corner ~ (0, 0)
+
+
+def test_pipeline_uses_homography(sample, tmp_path):
+    result = process_video(sample, tmp_path, Config())
+    summary = (tmp_path / "summary.json").read_text()
+    assert '"calibration": "homography"' in summary
+
+
+def test_yolo_backend_runs_if_available(sample):
+    """YOLO is optional; skip cleanly if ultralytics or weights are missing."""
+    pytest.importorskip("ultralytics")
+    import cv2
+
+    from openpitch.detect import YoloDetector
+
+    try:
+        det = YoloDetector(Config(detector="yolo", yolo_imgsz=640))
+    except Exception as exc:  # weights download blocked, etc.
+        pytest.skip(f"YOLO weights unavailable: {exc}")
+
+    cap = cv2.VideoCapture(str(sample))
+    ok, frame = cap.read()
+    cap.release()
+    assert ok
+    dets = det.detect(frame)
+    # Synthetic dots aren't people, so we only assert it runs and is well-formed.
+    assert isinstance(dets, list)
+    for d in dets:
+        assert d.cls in ("player", "ball")
+
+
 def test_virtual_camera_stays_in_bounds():
     from openpitch.track import FrameState, PlayerTrack
 

@@ -101,22 +101,38 @@ class ColorDetector:
 
 
 class YoloDetector:
-    """Optional real-footage backend (lazy import of ultralytics)."""
+    """Optional real-footage backend (lazy import of ultralytics).
 
-    def __init__(self, config: Config, weights: str = "yolov8n.pt"):
+    Detects people and the sports ball with a COCO-pretrained YOLO model and
+    assigns team identity by jersey-colour hue, ignoring green pitch pixels so
+    the grass doesn't dominate the colour estimate.
+    """
+
+    # Hue band (OpenCV 0-179) treated as pitch grass and excluded from jerseys.
+    _GRASS_HUE = (35, 90)
+
+    def __init__(self, config: Config):
         from ultralytics import YOLO  # noqa: PLC0415 (optional dependency)
 
         self.cfg = config
-        self.model = YOLO(weights)
+        self.model = YOLO(config.yolo_weights)
         # COCO ids: 0 person, 32 sports ball.
         self._classes = {0: "player", 32: "ball"}
 
     def _team_of(self, crop: np.ndarray) -> int:
-        """Nearest team by mean hue of the jersey crop."""
+        """Nearest team by mean jersey hue, masking out grass/low-saturation."""
         if crop.size == 0:
             return 0
-        hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
-        mean_h = float(np.mean(hsv[:, :, 0]))
+        # Focus on the torso (jersey), not legs/shadow.
+        h = crop.shape[0]
+        torso = crop[: max(1, h // 2)]
+        hsv = cv2.cvtColor(torso, cv2.COLOR_BGR2HSV)
+        hue, sat = hsv[:, :, 0], hsv[:, :, 1]
+        keep = (sat > 60) & ~((hue >= self._GRASS_HUE[0]) & (hue <= self._GRASS_HUE[1]))
+        sample = hue[keep]
+        if sample.size == 0:
+            return 0
+        mean_h = float(np.median(sample))
         best, best_d = 0, 1e9
         for i, team in enumerate(self.cfg.teams):
             ref_h = team.hsv_ranges[0][0][0]
@@ -127,7 +143,13 @@ class YoloDetector:
 
     def detect(self, frame: np.ndarray) -> list[Detection]:
         H, W = frame.shape[:2]
-        res = self.model.predict(frame, verbose=False)[0]
+        res = self.model.predict(
+            frame,
+            verbose=False,
+            conf=self.cfg.yolo_conf,
+            imgsz=self.cfg.yolo_imgsz,
+            device=self.cfg.yolo_device,
+        )[0]
         dets: list[Detection] = []
         for box in res.boxes:
             cid = int(box.cls[0])

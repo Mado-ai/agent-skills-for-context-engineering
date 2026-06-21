@@ -50,6 +50,12 @@ class Config:
     min_ball_area: int = 6
     max_ball_area: int = 400
 
+    # YOLO backend (used when detector == "yolo")
+    yolo_weights: str = "yolov8n.pt"
+    yolo_conf: float = 0.25
+    yolo_device: str | None = None  # e.g. "cpu", "0"; None lets ultralytics pick
+    yolo_imgsz: int = 1280  # higher helps tiny, fast-moving balls
+
     # --- tracking ---
     max_track_distance: float = 0.08  # normalised, ~max travel between frames
     max_disappeared: int = 12  # frames a track survives without a match
@@ -64,6 +70,13 @@ class Config:
     zoom_smoothing: float = 0.06
     max_pan_px: float = 26.0  # cap on crop-centre travel per frame
     ball_weight: float = 0.6  # action point = ball*w + players*(1-w)
+
+    # --- calibration ---
+    # Optional manual pitch corners in image pixels, ordered TL, TR, BR, BL.
+    # When set, overrides automatic detection. Required for real footage where
+    # the full pitch isn't a clean rectangle in-frame.
+    homography_corners: list[tuple[float, float]] | None = None
+    auto_calibrate: bool = True
 
     # --- analytics ---
     heatmap_bins: int = 32
