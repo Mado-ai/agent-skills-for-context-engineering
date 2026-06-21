@@ -37,12 +37,35 @@ python -m openpitch.cli demo --out runs/demo
 # 2) Or process your own panoramic video
 python -m openpitch.cli process my_match.mp4 --out runs/match1
 
-# 3) Web dashboard (upload / demo / view results)
+# 3) Web app — accounts + dashboard (upload / demo / view results)
 uvicorn openpitch.api:app --reload   # then open http://localhost:8000
 ```
 
 Outputs land in `runs/<name>/`: `broadcast.mp4`, `analytics`+`summary.json`,
 `heatmap_home.png`, `heatmap_away.png`, and `highlights/*.mp4`.
+
+## Web app & accounts
+
+The FastAPI backend (`openpitch/api.py`) serves a multi-page site:
+
+* **Landing + auth** (`/`) — sign in or create an account.
+* **Dashboard** (`/dashboard.html`) — every pipeline tool in one place: upload a
+  match, pick the detector, run the synthetic demo, browse your job history, and
+  view the auto-produced broadcast, possession, heatmaps, player metrics and
+  highlights.
+
+Auth is stdlib-only (PBKDF2 password hashing + HMAC-signed tokens); accounts and
+job history persist in SQLite. Jobs are isolated per user, and result files are
+served only with a valid token.
+
+On first launch an **admin account is seeded**. Configure via environment:
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `PLAYMETRICS_ADMIN_EMAIL` | `yazanalshuibe14@gmail.com` | Seeded admin login |
+| `PLAYMETRICS_ADMIN_PASSWORD` | `playmetrics-dev` | Seeded admin password — **change in production** |
+| `PLAYMETRICS_SECRET` | random per process | Token signing key — **set a fixed value in production** |
+| `PLAYMETRICS_DB` | `playmetrics.db` | SQLite database path |
 
 ## Architecture
 

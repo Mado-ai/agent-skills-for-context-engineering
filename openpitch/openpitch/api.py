@@ -1,23 +1,32 @@
-"""HTTP API + static frontend host.
+"""HTTP API + static website host for Play Metrics.
 
-A thin FastAPI layer over the pipeline so the browser dashboard can upload a
-clip, poll progress, and view the auto-produced broadcast, analytics and
-highlights. Jobs run on a background thread with an in-memory registry
-(swap for Celery/RQ + object storage in production).
+A FastAPI backend that turns the OpenPitch pipeline into a multi-user web
+app: account login, persistent per-user job history (SQLite), and every
+pipeline capability (upload, detector choice, pitch calibration, broadcast,
+analytics, heatmaps, highlights) exposed to an authenticated dashboard.
 
-    uvicorn openpitch.api:app --reload
+    uvicorn openpitch.api:app --reload      # http://localhost:8000
+
+On first start an admin account is seeded from PLAYMETRICS_ADMIN_EMAIL /
+PLAYMETRICS_ADMIN_PASSWORD (sensible dev defaults if unset).
 """
 
 from __future__ import annotations
 
+import os
+import subprocess
+import sys
 import threading
 import uuid
+from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, UploadFile
+from fastapi import Depends, FastAPI, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 
+from . import auth, db
 from .config import Config
 from .pipeline import process_video
 
@@ -26,84 +35,176 @@ RUNS = ROOT / "runs"
 FRONTEND = ROOT / "frontend"
 RUNS.mkdir(exist_ok=True)
 
-app = FastAPI(title="OpenPitch", version="0.1.0")
 
-# job_id -> {status, progress, message, summary?}
-JOBS: dict[str, dict] = {}
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    db.init_db()
+    email = os.environ.get("PLAYMETRICS_ADMIN_EMAIL", "yazanalshuibe14@gmail.com")
+    password = os.environ.get("PLAYMETRICS_ADMIN_PASSWORD", "playmetrics-dev")
+    if db.get_user_by_email(email) is None:
+        db.create_user(email, auth.hash_password(password), is_admin=True)
+        print(f"[seed] admin account created: {email}")
+    yield
 
+
+app = FastAPI(title="Play Metrics", version="0.2.0", lifespan=lifespan)
+_bearer = HTTPBearer(auto_error=False)
+
+
+# --- auth helpers -----------------------------------------------------------
+
+def current_user(
+    creds: HTTPAuthorizationCredentials | None = Depends(_bearer),
+) -> dict:
+    if creds is None:
+        raise HTTPException(401, "missing token")
+    data = auth.decode_token(creds.credentials)
+    if not data:
+        raise HTTPException(401, "invalid or expired token")
+    user = db.get_user_by_id(data["sub"])
+    if not user:
+        raise HTTPException(401, "unknown user")
+    return dict(user)
+
+
+def _user_from_token_str(token: str) -> dict | None:
+    data = auth.decode_token(token)
+    if not data:
+        return None
+    user = db.get_user_by_id(data["sub"])
+    return dict(user) if user else None
+
+
+# --- auth endpoints ---------------------------------------------------------
+
+@app.post("/api/auth/register")
+def register(email: str = Form(...), password: str = Form(...)) -> JSONResponse:
+    if len(password) < 6:
+        raise HTTPException(400, "password must be at least 6 characters")
+    if db.get_user_by_email(email):
+        raise HTTPException(409, "email already registered")
+    user = db.create_user(email, auth.hash_password(password))
+    token = auth.create_token(user["id"], user["email"])
+    return JSONResponse({"token": token, "email": user["email"]})
+
+
+@app.post("/api/auth/login")
+def login(email: str = Form(...), password: str = Form(...)) -> JSONResponse:
+    user = db.get_user_by_email(email)
+    if not user or not auth.verify_password(password, user["password_hash"]):
+        raise HTTPException(401, "invalid credentials")
+    token = auth.create_token(user["id"], user["email"])
+    return JSONResponse({"token": token, "email": user["email"]})
+
+
+@app.get("/api/auth/me")
+def me(user: dict = Depends(current_user)) -> JSONResponse:
+    return JSONResponse(
+        {"email": user["email"], "is_admin": bool(user["is_admin"])}
+    )
+
+
+# --- job execution ----------------------------------------------------------
 
 def _run_job(job_id: str, input_path: Path, detector: str) -> None:
     out_dir = RUNS / job_id
     try:
         def progress(p: float, msg: str) -> None:
-            JOBS[job_id].update(progress=p, message=msg, status="running")
+            db.update_job(job_id, progress=p, message=msg, status="running")
 
         result = process_video(input_path, out_dir, Config(detector=detector), progress)
-        JOBS[job_id].update(
+        db.update_job(
+            job_id,
             status="done",
             progress=1.0,
             message="done",
             summary={
                 "possession": result.analytics["possession"],
-                "players": result.analytics["players"][:12],
+                "players": result.analytics["players"][:14],
                 "heatmaps": result.analytics["heatmaps"],
                 "highlights": result.highlights,
                 "meta": result.meta,
             },
         )
     except Exception as exc:  # surface failures to the client
-        JOBS[job_id].update(status="error", message=str(exc))
+        db.update_job(job_id, status="error", message=str(exc))
 
 
-def _start(job_id: str, input_path: Path, detector: str) -> None:
-    JOBS[job_id] = {"status": "queued", "progress": 0.0, "message": "queued"}
+def _start(job_id: str, user_id: int, input_path: Path, detector: str,
+           input_name: str) -> None:
+    db.create_job(job_id, user_id, input_name, detector)
     threading.Thread(
         target=_run_job, args=(job_id, input_path, detector), daemon=True
     ).start()
 
 
+# --- job endpoints ----------------------------------------------------------
+
 @app.post("/api/jobs")
-async def create_job(file: UploadFile, detector: str = "color") -> JSONResponse:
+async def create_job(
+    file: UploadFile,
+    detector: str = Form("color"),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    if detector not in ("color", "yolo"):
+        raise HTTPException(400, "detector must be 'color' or 'yolo'")
     job_id = uuid.uuid4().hex[:12]
     out_dir = RUNS / job_id
     out_dir.mkdir(parents=True, exist_ok=True)
     input_path = out_dir / "input.mp4"
     input_path.write_bytes(await file.read())
-    _start(job_id, input_path, detector)
+    _start(job_id, user["id"], input_path, detector, file.filename or "upload.mp4")
     return JSONResponse({"job_id": job_id})
 
 
 @app.post("/api/demo")
-def create_demo(seconds: int = 10) -> JSONResponse:
-    import subprocess
-    import sys
-
+def create_demo(
+    seconds: int = Form(10),
+    detector: str = Form("color"),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
     job_id = uuid.uuid4().hex[:12]
     out_dir = RUNS / job_id
     out_dir.mkdir(parents=True, exist_ok=True)
     sample = out_dir / "input.mp4"
     subprocess.run(
         [sys.executable, str(ROOT / "scripts" / "generate_sample.py"),
-         "--out", str(sample), "--seconds", str(seconds)],
+         "--out", str(sample), "--seconds", str(min(max(seconds, 3), 30))],
         check=True,
     )
-    _start(job_id, sample, "color")
+    _start(job_id, user["id"], sample, detector, "synthetic-demo.mp4")
     return JSONResponse({"job_id": job_id})
 
 
+@app.get("/api/jobs")
+def list_jobs(user: dict = Depends(current_user)) -> JSONResponse:
+    return JSONResponse({"jobs": db.list_jobs_for_user(user["id"])})
+
+
+def _owned_job(job_id: str, user: dict) -> dict:
+    job = db.get_job(job_id)
+    if not job or job["user_id"] != user["id"]:
+        raise HTTPException(404, "job not found")
+    return job
+
+
 @app.get("/api/jobs/{job_id}")
-def job_status(job_id: str) -> JSONResponse:
-    job = JOBS.get(job_id)
-    if not job:
-        return JSONResponse({"error": "not found"}, status_code=404)
-    return JSONResponse(job)
+def job_status(job_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    return JSONResponse(_owned_job(job_id, user))
 
 
 @app.get("/api/files/{job_id}/{path:path}")
-def serve_file(job_id: str, path: str):
+def serve_file(job_id: str, path: str, token: str = ""):
+    # Media tags can't send Authorization headers, so accept ?token=.
+    user = _user_from_token_str(token)
+    if not user:
+        raise HTTPException(401, "invalid token")
+    job = db.get_job(job_id)
+    if not job or job["user_id"] != user["id"]:
+        raise HTTPException(404, "not found")
     target = (RUNS / job_id / path).resolve()
     if not str(target).startswith(str(RUNS.resolve())) or not target.exists():
-        return JSONResponse({"error": "not found"}, status_code=404)
+        raise HTTPException(404, "not found")
     return FileResponse(target)
 
 
