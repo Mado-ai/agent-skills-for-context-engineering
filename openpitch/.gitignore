@@ -11,3 +11,5 @@ venv/
 playmetrics.db
 live_preview.png
 preview.png
+review_preview.png
+*_preview.png
