@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { LogoMark } from "./Logo";
 import { Container } from "./ui";
 
 const cols = [
@@ -36,12 +35,7 @@ export function Footer() {
     <footer className="border-t border-line bg-ink-900">
       <Container className="grid gap-12 py-16 sm:grid-cols-2 md:grid-cols-[1.6fr_1fr_1fr_1fr]">
         <div className="max-w-sm">
-          <div className="flex items-center gap-2.5">
-            <LogoMark size={32} />
-            <span className="font-display text-base font-semibold lowercase tracking-tight">
-              go over<span className="text-blue">seas</span>
-            </span>
-          </div>
+          <img src="/logo-dark.png" alt="go overseas" width={177} height={28} style={{ height: 28, width: 177 }} />
           <p className="mt-4 text-sm leading-relaxed text-mist-dim">
             <span className="font-medium text-blue">Strategy.</span>{" "}
             <span className="font-medium text-purple">Creativity.</span>{" "}

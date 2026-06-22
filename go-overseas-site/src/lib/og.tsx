@@ -1,8 +1,15 @@
 import { ImageResponse } from "next/og";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { siteConfig } from "./seo";
 
 export const OG_SIZE = { width: 1200, height: 630 };
 export const OG_CONTENT_TYPE = "image/png";
+
+// Official brand mark, embedded as a data URI for the OG renderer.
+const MARK_URI = `data:image/png;base64,${readFileSync(
+  join(process.cwd(), "public/mark-dark.png"),
+).toString("base64")}`;
 
 /**
  * Shared Open Graph / Twitter card renderer.
@@ -28,12 +35,9 @@ export function renderOgImage(opts: { title: string; eyebrow?: string }) {
         }}
       >
         {/* Top row: logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <svg width="64" height="64" viewBox="0 0 48 48" fill="none">
-            <path d="M24 6.5A17.5 17.5 0 1 0 41.5 24" stroke="#ffffff" strokeWidth="6.5" strokeLinecap="round" />
-            <path d="M18.5 30 29 19.5" stroke="#32c46a" strokeWidth="4.6" strokeLinecap="round" />
-            <path d="M22.7 19.5H29V25.8" stroke="#32c46a" strokeWidth="4.6" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+        <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={MARK_URI} width={82} height={68} alt="" />
           <div style={{ display: "flex", fontSize: 34, fontWeight: 600, letterSpacing: -0.5 }}>
             <span>go&nbsp;over</span>
             <span style={{ color: "#00aeef" }}>seas</span>

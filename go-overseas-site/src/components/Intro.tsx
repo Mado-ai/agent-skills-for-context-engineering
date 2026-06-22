@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LogoMark } from "./Logo";
 
 /**
  * Branded intro / preloader. Plays once per session on first load, then the
@@ -28,12 +27,14 @@ export function Intro() {
   return (
     <div className="intro" aria-hidden="true">
       <div className="intro__inner">
-        <div className="intro__logo text-white">
-          <LogoMark size={76} />
-        </div>
-        <div className="intro__word font-display">
-          go over<span className="text-blue">seas</span>
-        </div>
+        <img
+          src="/logo-dark.png"
+          alt="go overseas"
+          width={300}
+          height={47}
+          className="intro__logo"
+          style={{ width: 300, height: "auto" }}
+        />
         <div className="intro__line" />
         <div className="intro__tag">
           <span className="text-blue">Strategy</span> ·{" "}

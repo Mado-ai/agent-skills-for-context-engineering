@@ -36,7 +36,7 @@ export function organizationSchema() {
     "@type": "Organization",
     name: siteConfig.legalName,
     url: siteConfig.url,
-    logo: absoluteUrl("/icon.svg"),
+    logo: absoluteUrl("/icon.png"),
     description: siteConfig.description,
     email: siteConfig.email,
     slogan: siteConfig.tagline,
@@ -129,7 +129,7 @@ export function articleSchema(opts: {
     publisher: {
       "@type": "Organization",
       name: siteConfig.legalName,
-      logo: { "@type": "ImageObject", url: absoluteUrl("/icon.svg") },
+      logo: { "@type": "ImageObject", url: absoluteUrl("/icon.png") },
     },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
     url,
