@@ -1,0 +1,169 @@
+@import "tailwindcss";
+
+/*
+  go overseas brand tokens
+  Strategy. Creativity. Growth.
+*/
+@theme {
+  --color-ink: #08090c;
+  --color-ink-900: #0b0d11;
+  --color-ink-800: #0f1218;
+  --color-ink-700: #161a22;
+  --color-ink-600: #1f2530;
+  --color-line: #232a36;
+
+  --color-mist: #aab3c5;
+  --color-mist-dim: #7c869a;
+
+  --color-blue: #2f5bff;
+  --color-blue-deep: #1f3df0;
+  --color-cyan: #16c8ff;
+  --color-green: #1fd17a;
+  --color-green-deep: #0fb866;
+
+  --font-display: var(--font-display), "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-sans), "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 1.25rem;
+}
+
+* {
+  border-color: var(--color-line);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-ink);
+  color: #eef1f7;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-blue);
+  color: white;
+}
+
+/* Brand gradient text */
+.text-gradient {
+  background: linear-gradient(
+    100deg,
+    var(--color-blue) 0%,
+    var(--color-cyan) 55%,
+    var(--color-green) 110%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+.glow {
+  box-shadow: 0 0 0 1px rgba(47, 91, 255, 0.18), 0 24px 70px -24px rgba(22, 200, 255, 0.45);
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) }
+  50% { transform: translateY(-14px) }
+}
+.animate-float-slow {
+  animation: float-slow 9s ease-in-out infinite;
+}
+
+/* Article prose (rendered from markdown) */
+.prose-go {
+  color: #d4dae6;
+  font-size: 1.075rem;
+  line-height: 1.8;
+}
+.prose-go > * + * {
+  margin-top: 1.4em;
+}
+.prose-go h2 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #fff;
+  margin-top: 2.2em;
+}
+.prose-go h3 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #fff;
+  margin-top: 1.8em;
+}
+.prose-go a {
+  color: var(--color-cyan);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prose-go strong {
+  color: #fff;
+  font-weight: 600;
+}
+.prose-go ul,
+.prose-go ol {
+  padding-left: 1.3em;
+}
+.prose-go ul { list-style: none; }
+.prose-go ul li {
+  position: relative;
+  padding-left: 1.2em;
+}
+.prose-go ul li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.7em;
+  height: 0.4rem;
+  width: 0.4rem;
+  border-radius: 9999px;
+  background: var(--color-green);
+}
+.prose-go ol { list-style: decimal; }
+.prose-go li + li { margin-top: 0.5em; }
+.prose-go blockquote {
+  border-left: 3px solid var(--color-blue);
+  padding-left: 1.2em;
+  font-style: italic;
+  color: var(--color-mist);
+}
+.prose-go hr {
+  border: 0;
+  border-top: 1px solid var(--color-line);
+  margin: 2.4em 0;
+}
+.prose-go table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+.prose-go th,
+.prose-go td {
+  border: 1px solid var(--color-line);
+  padding: 0.7em 1em;
+  text-align: left;
+}
+.prose-go th {
+  background: var(--color-ink-800);
+  color: #fff;
+  font-weight: 600;
+}
+.prose-go code {
+  background: var(--color-ink-700);
+  padding: 0.15em 0.4em;
+  border-radius: 0.35rem;
+  font-size: 0.9em;
+}

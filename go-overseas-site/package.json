@@ -1,0 +1,31 @@
+{
+  "name": "go-overseas-site",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Marketing site + Insights blog for go overseas — Strategy. Creativity. Growth.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.9",
+    "gray-matter": "4.0.3",
+    "next": "^16.2.9",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "remark": "15.0.1",
+    "remark-gfm": "4.0.1",
+    "remark-html": "16.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.1.4",
+    "@types/node": "20.17.30",
+    "@types/react": "19.1.2",
+    "@types/react-dom": "19.1.2",
+    "tailwindcss": "4.1.4",
+    "typescript": "5.8.3"
+  }
+}
