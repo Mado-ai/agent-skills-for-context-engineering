@@ -43,6 +43,23 @@ export interface User {
   is_admin: boolean;
 }
 
+// --- organizations / RBAC ---
+
+export interface Org {
+  id: string;
+  name: string;
+  role?: string;
+  player_id?: string | null;
+}
+
+export interface Member {
+  id: string;
+  user_id: number;
+  role: string;
+  player_id: string | null;
+  email: string;
+}
+
 // --- capture sites / devices ---
 
 export interface Site {

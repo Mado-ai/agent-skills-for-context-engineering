@@ -81,9 +81,25 @@ def init_db() -> None:
             CREATE TABLE IF NOT EXISTS teams (
                 id TEXT PRIMARY KEY,
                 user_id INTEGER NOT NULL,
+                org_id TEXT,
                 name TEXT NOT NULL,
                 public_token TEXT,
                 created_at REAL NOT NULL
+            );
+            -- Organizations + role-based memberships (the authz layer).
+            CREATE TABLE IF NOT EXISTS organizations (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                created_at REAL NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS memberships (
+                id TEXT PRIMARY KEY,
+                org_id TEXT NOT NULL,
+                user_id INTEGER NOT NULL,
+                role TEXT NOT NULL,
+                player_id TEXT,
+                created_at REAL NOT NULL,
+                UNIQUE (org_id, user_id)
             );
             CREATE TABLE IF NOT EXISTS players (
                 id TEXT PRIMARY KEY,
@@ -125,6 +141,9 @@ def init_db() -> None:
             c.execute("ALTER TABLE jobs ADD COLUMN source TEXT DEFAULT 'upload'")
         if "site_id" not in cols:
             c.execute("ALTER TABLE jobs ADD COLUMN site_id TEXT")
+        team_cols = {r["name"] for r in c.execute("PRAGMA table_info(teams)")}
+        if "org_id" not in team_cols:
+            c.execute("ALTER TABLE teams ADD COLUMN org_id TEXT")
         c.commit()
 
 
@@ -331,10 +350,71 @@ def _exec(sql: str, params: tuple = ()) -> None:
 
 # --- teams ------------------------------------------------------------------
 
-def create_team(team_id: str, user_id: int, name: str) -> dict:
-    _exec("INSERT INTO teams (id, user_id, name, created_at) VALUES (?,?,?,?)",
-          (team_id, user_id, name, time.time()))
-    return {"id": team_id, "name": name}
+def create_team(team_id: str, user_id: int, name: str, org_id: str | None = None) -> dict:
+    _exec("INSERT INTO teams (id, user_id, org_id, name, created_at) VALUES (?,?,?,?,?)",
+          (team_id, user_id, org_id, name, time.time()))
+    return {"id": team_id, "name": name, "org_id": org_id}
+
+
+# --- organizations & memberships (authz) ------------------------------------
+
+def create_org(org_id: str, name: str) -> dict:
+    _exec("INSERT INTO organizations (id, name, created_at) VALUES (?,?,?)",
+          (org_id, name, time.time()))
+    return {"id": org_id, "name": name}
+
+
+def get_org(org_id: str) -> sqlite3.Row | None:
+    return _connect().execute(
+        "SELECT * FROM organizations WHERE id = ?", (org_id,)
+    ).fetchone()
+
+
+def add_membership(membership_id: str, org_id: str, user_id: int, role: str,
+                   player_id: str | None = None) -> None:
+    _exec(
+        "INSERT OR REPLACE INTO memberships "
+        "(id, org_id, user_id, role, player_id, created_at) VALUES (?,?,?,?,?,?)",
+        (membership_id, org_id, user_id, role, player_id, time.time()),
+    )
+
+
+def get_membership(org_id: str, user_id: int) -> sqlite3.Row | None:
+    return _connect().execute(
+        "SELECT * FROM memberships WHERE org_id = ? AND user_id = ?",
+        (org_id, user_id),
+    ).fetchone()
+
+
+def list_orgs_for_user(user_id: int) -> list[dict]:
+    rows = _connect().execute(
+        "SELECT o.id, o.name, m.role, m.player_id "
+        "FROM organizations o JOIN memberships m ON m.org_id = o.id "
+        "WHERE m.user_id = ? ORDER BY o.created_at DESC",
+        (user_id,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def list_members(org_id: str) -> list[dict]:
+    rows = _connect().execute(
+        "SELECT m.id, m.user_id, m.role, m.player_id, u.email "
+        "FROM memberships m JOIN users u ON u.id = m.user_id "
+        "WHERE m.org_id = ? ORDER BY m.created_at",
+        (org_id,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def list_org_teams(org_id: str) -> list[dict]:
+    rows = _connect().execute(
+        "SELECT t.id, t.name, "
+        "(SELECT COUNT(*) FROM players p WHERE p.team_id = t.id) AS player_count, "
+        "(SELECT COUNT(*) FROM matches mt WHERE mt.team_id = t.id) AS match_count "
+        "FROM teams t WHERE t.org_id = ? ORDER BY t.created_at DESC",
+        (org_id,),
+    ).fetchall()
+    return [dict(r) for r in rows]
 
 
 def get_team(team_id: str) -> sqlite3.Row | None:

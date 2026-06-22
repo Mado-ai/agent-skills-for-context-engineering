@@ -1,4 +1,4 @@
-import type { Device, Job, PlayerProfile, Site, SiteJob, TeamProfile, TeamSummary, User } from "../types";
+import type { Device, Job, Member, Org, PlayerProfile, Site, SiteJob, TeamProfile, TeamSummary, User } from "../types";
 
 const TOKEN_KEY = "pm_token";
 
@@ -101,6 +101,26 @@ export const api = {
   // Media tags can't send headers — token goes in the query string.
   fileUrl(jobId: string, path: string): string {
     return `/api/files/${jobId}/${path}?token=${encodeURIComponent(tokenStore.get() ?? "")}`;
+  },
+
+  // --- organizations / RBAC ---
+  async listOrgs(): Promise<Org[]> {
+    return (await authed("/api/orgs")).orgs as Org[];
+  },
+  async createOrg(name: string): Promise<Org> {
+    return authed("/api/orgs", { method: "POST", body: new URLSearchParams({ name }) });
+  },
+  async orgMembers(id: string): Promise<Member[]> {
+    return (await authed(`/api/orgs/${id}/members`)).members as Member[];
+  },
+  async addMember(id: string, fields: Record<string, string>): Promise<void> {
+    await authed(`/api/orgs/${id}/members`, { method: "POST", body: new URLSearchParams(fields) });
+  },
+  async orgTeams(id: string): Promise<TeamSummary[]> {
+    return (await authed(`/api/orgs/${id}/teams`)).teams as TeamSummary[];
+  },
+  async createOrgTeam(id: string, name: string): Promise<{ id: string }> {
+    return authed(`/api/orgs/${id}/teams`, { method: "POST", body: new URLSearchParams({ name }) });
   },
 
   // --- capture sites / devices ---

@@ -51,14 +51,16 @@ Status: ✅ implemented here · 🟡 stubbed/partial · ⬜ not yet · 🔌 exte
 | Principle | Here | Status |
 |-----------|------|--------|
 | Private by default | per-user job isolation; token-gated media | ✅ |
-| Single authz chokepoint | all access via `api.py` ownership checks | ✅ |
-| Role-based access (coach/parent/player/scout/federation) | only `user` + `admin` today | 🟡 |
+| Single authz chokepoint | all access via `api.py`; org access via `authz.py` role checks | ✅ |
+| Role-based access (coach/parent/player/scout/federation) | orgs + memberships: owner/admin/coach (staff), parent/player (read-only, linked to one player), scout (public-only); federation ⬜ | ✅ |
 | Guardian-gating for minors | — | ⬜ |
 | Audit trail | — (request logging ⬜) | ⬜ |
 | Right to delete (cascade) | job delete removes row + files; full cascade ⬜ | 🟡 |
 
 ## Next backend milestones (in priority order)
-1. **Roles & orgs** — model orgs/teams/players + roles (coach/parent/player/scout); make the Application API enforce role-based authz (the §5.1/§6 chokepoint).
+1. ✅ **Roles & orgs** — organizations + memberships with role-based authz at the
+   Application API chokepoint (owner/admin/coach/parent/player/scout). Next:
+   guardian-consent flow + audit logging; federation aggregate role.
 2. **Real job queue + object storage** — Celery/RQ + S3/GCS; GPU workers for detection.
 3. **Multi-camera + homography per angle**; quality-tier routing (facility vs Solo).
 4. **Learned event models** (passes/shots/tackles) feeding xG/xT.

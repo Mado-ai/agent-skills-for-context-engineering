@@ -38,6 +38,9 @@ export default function Nav() {
             <Link to="/dashboard" className="text-slate-300 hover:text-white">
               Dashboard
             </Link>
+            <Link to="/orgs" className="text-slate-300 hover:text-white">
+              Orgs
+            </Link>
             <Link to="/teams" className="text-slate-300 hover:text-white">
               Teams
             </Link>

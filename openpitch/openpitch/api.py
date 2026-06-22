@@ -27,7 +27,7 @@ from fastapi import Body, Depends, FastAPI, Form, Header, HTTPException, UploadF
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from . import auth, db, hardware, profiles
+from . import auth, authz, db, hardware, profiles
 from .config import Config
 from .pipeline import process_video
 
@@ -376,27 +376,127 @@ async def ingest_match(
     return JSONResponse({"job_id": job_id, "deduplicated": False})
 
 
+# --- organizations & memberships (RBAC) -------------------------------------
+
+@app.post("/api/orgs")
+def create_org(name: str = Form(...), user: dict = Depends(current_user)) -> JSONResponse:
+    org_id = "org_" + uuid.uuid4().hex[:10]
+    org = db.create_org(org_id, name.strip()[:120])
+    db.add_membership("mem_" + uuid.uuid4().hex[:10], org_id, user["id"], authz.OWNER)
+    return JSONResponse(org)
+
+
+@app.get("/api/orgs")
+def list_orgs(user: dict = Depends(current_user)) -> JSONResponse:
+    return JSONResponse({"orgs": db.list_orgs_for_user(user["id"])})
+
+
+def _require_org_role(org_id: str, user: dict, allowed: set[str]):
+    if not db.get_org(org_id):
+        raise HTTPException(404, "org not found")
+    role = _org_role(org_id, user)
+    if role is None:
+        raise HTTPException(404, "org not found")
+    if role not in allowed:
+        raise HTTPException(403, "not permitted")
+    return role
+
+
+@app.get("/api/orgs/{org_id}/members")
+def org_members(org_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _require_org_role(org_id, user, authz.ALL_ROLES)
+    return JSONResponse({"members": db.list_members(org_id)})
+
+
+@app.post("/api/orgs/{org_id}/members")
+def add_member(
+    org_id: str,
+    email: str = Form(...),
+    role: str = Form(...),
+    player_id: str = Form(""),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    _require_org_role(org_id, user, authz.ADMIN_ROLES)
+    if role not in authz.ALL_ROLES:
+        raise HTTPException(400, f"role must be one of {sorted(authz.ALL_ROLES)}")
+    target = db.get_user_by_email(email)
+    if not target:
+        raise HTTPException(404, "no registered user with that email")
+    if role in authz.LINKED_ROLES and not player_id:
+        raise HTTPException(400, "parent/player members must be linked to a player_id")
+    db.add_membership("mem_" + uuid.uuid4().hex[:10], org_id, target["id"], role,
+                      player_id or None)
+    return JSONResponse({"status": "ok"})
+
+
+@app.post("/api/orgs/{org_id}/teams")
+def create_org_team(org_id: str, name: str = Form(...),
+                    user: dict = Depends(current_user)) -> JSONResponse:
+    _require_org_role(org_id, user, authz.STAFF_ROLES)
+    team_id = "team_" + uuid.uuid4().hex[:10]
+    return JSONResponse(db.create_team(team_id, user["id"], name.strip()[:120], org_id))
+
+
+@app.get("/api/orgs/{org_id}/teams")
+def org_teams(org_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _require_org_role(org_id, user, authz.ALL_ROLES)
+    return JSONResponse({"teams": db.list_org_teams(org_id)})
+
+
 # --- teams ------------------------------------------------------------------
 
+def _org_role(org_id: str, user: dict) -> str | None:
+    m = db.get_membership(org_id, user["id"])
+    return m["role"] if m else None
+
+
 def _owned_team(team_id: str, user: dict):
+    """Team access for staff (org coach+) or the owner of a personal team."""
     team = db.get_team(team_id)
-    if not team or team["user_id"] != user["id"]:
+    if not team:
+        raise HTTPException(404, "team not found")
+    if team["org_id"]:
+        if _org_role(team["org_id"], user) not in authz.STAFF_ROLES:
+            raise HTTPException(404, "team not found")
+    elif team["user_id"] != user["id"]:
         raise HTTPException(404, "team not found")
     return team
 
 
-def _owned_player(player_id: str, user: dict):
+def _readable_player(player_id: str, user: dict):
+    """Read access: staff see any; parent/player see only their linked player."""
     player = db.get_player(player_id)
     if not player:
         raise HTTPException(404, "player not found")
-    _owned_team(player["team_id"], user)
+    team = db.get_team(player["team_id"])
+    if team and team["org_id"]:
+        m = db.get_membership(team["org_id"], user["id"])
+        if not m:
+            raise HTTPException(404, "player not found")
+        if m["role"] in authz.STAFF_ROLES:
+            return player
+        if m["role"] in authz.LINKED_ROLES and m["player_id"] == player_id:
+            return player
+        raise HTTPException(403, "not permitted")
+    if not team or team["user_id"] != user["id"]:
+        raise HTTPException(404, "player not found")
+    return player
+
+
+def _owned_player(player_id: str, user: dict):
+    """Manage access (staff / personal owner only)."""
+    player = db.get_player(player_id)
+    if not player:
+        raise HTTPException(404, "player not found")
+    _owned_team(player["team_id"], user)  # raises unless staff/owner
     return player
 
 
 def _owned_match(match_id: str, user: dict):
     match = db.get_match(match_id)
-    if not match or match["user_id"] != user["id"]:
+    if not match:
         raise HTTPException(404, "match not found")
+    _owned_team(match["team_id"], user)  # access governed by the match's team
     return match
 
 
@@ -471,7 +571,7 @@ def create_player(
 
 @app.get("/api/players/{player_id}")
 def player_detail(player_id: str, user: dict = Depends(current_user)) -> JSONResponse:
-    _owned_player(player_id, user)
+    _readable_player(player_id, user)
     profile = profiles.player_profile(player_id)
     player = db.get_player(player_id)
     profile["public_token"] = player["public_token"]
