@@ -75,7 +75,7 @@ class Analytics:
     def _rec(self, pid: int, team: int) -> dict:
         return self._player_paths.setdefault(pid, {
             "team": team, "last": None, "dist_m": 0.0, "top_speed": 0.0,
-            "frames": 0, "in_sprint": False, "sprints": 0, "poss": 0,
+            "frames": 0, "sprint_run": 0, "sprints": 0, "poss": 0,
             "touches": 0, "passes": 0, "completed": 0, "turnovers": 0,
             "zones": {"walk": 0.0, "jog": 0.0, "run": 0.0, "sprint": 0.0},
             "numbers": {},
@@ -106,11 +106,14 @@ class Analytics:
                     rec["dist_m"] += step
                     rec["top_speed"] = max(rec["top_speed"], speed)
                     rec["zones"][_zone(speed)] += step
-                    if speed >= _SPRINT_MS and not rec["in_sprint"]:
-                        rec["sprints"] += 1
-                        rec["in_sprint"] = True
-                    elif speed < _SPRINT_MS:
-                        rec["in_sprint"] = False
+                    # Sprint = speed sustained above threshold for >= ~0.5s, so
+                    # single-frame jitter doesn't inflate the count.
+                    if speed >= _SPRINT_MS:
+                        rec["sprint_run"] += 1
+                        if rec["sprint_run"] == max(2, round(0.5 * self.fps)):
+                            rec["sprints"] += 1
+                    else:
+                        rec["sprint_run"] = 0
             rec["last"] = (X, Y)
 
         # Individual possession + pass/turnover events on possession change.
@@ -194,8 +197,12 @@ class Analytics:
             numbers = rec.get("numbers") or {}
             jersey = max(numbers, key=numbers.get) if numbers else None
             votes = numbers.get(jersey, 0)
-            # Drop barely-seen spurious reads so they don't pollute the roster.
-            key = (rec["team"], jersey) if (jersey and votes >= 3) else ("trk", pid)
+            total = sum(numbers.values())
+            # Accept a jersey only if it's the clear majority of this track's
+            # reads (>=3 votes and >50%), so one-off OCR misreads are dropped.
+            if not (jersey and votes >= 3 and votes >= 0.5 * total):
+                jersey = None
+            key = (rec["team"], jersey) if jersey is not None else ("trk", pid)
             g = groups.setdefault(key, {
                 "team": rec["team"], "jersey": jersey if key[0] != "trk" else None,
                 "dist": 0.0, "top": 0.0, "frames": 0, "sprints": 0, "poss": 0,
@@ -209,8 +216,13 @@ class Analytics:
             for z in g["zones"]:
                 g["zones"][z] += rec["zones"][z]
 
+        have_jersey = any(g["jersey"] is not None for g in groups.values())
         rows = []
         for (k0, k1), g in groups.items():
+            # Once any player is identified, drop unidentified tracker fragments
+            # (noise/duplicates) from the per-player report.
+            if have_jersey and g["jersey"] is None:
+                continue
             name = self.config.teams[g["team"]].name
             pid = f"{name}#{g['jersey']}" if g["jersey"] is not None else f"trk{k1}"
             secs = g["frames"] / self.fps if g["frames"] else 0

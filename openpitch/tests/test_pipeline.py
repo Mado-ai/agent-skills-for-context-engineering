@@ -85,6 +85,30 @@ def test_pipeline_uses_homography(sample, tmp_path):
     assert '"calibration": "homography"' in summary
 
 
+def test_metric_quality_invariants(sample, tmp_path):
+    """Guards the QA findings: bounded sprints, clean roster, valid ranges."""
+    result = process_video(sample, tmp_path, Config())
+    players = result.analytics["players"]
+    team_stats = result.analytics["team_stats"]
+    assert players and team_stats
+
+    # Identified roster only — no unidentified tracker fragments leak in.
+    assert all(p["jersey"] is not None for p in players)
+
+    total_sprints = 0
+    for p in players:
+        assert p["distance_m"] >= 0
+        assert 0 <= p["top_speed_ms"] <= 12.01
+        assert p["sprints"] >= 0
+        assert p["pass_accuracy"] is None or 0 <= p["pass_accuracy"] <= 100
+        total_sprints += p["sprints"]
+    # Sprint debounce: a few-second clip must not report hundreds of sprints.
+    assert total_sprints < 60, f"sprint count looks inflated: {total_sprints}"
+
+    poss = sum(result.analytics["possession"].values())
+    assert abs(poss - 100) < 0.6 or poss == 0
+
+
 def test_yolo_backend_runs_if_available(sample):
     """YOLO is optional; skip cleanly if ultralytics or weights are missing."""
     pytest.importorskip("ultralytics")
