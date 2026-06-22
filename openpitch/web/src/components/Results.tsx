@@ -81,12 +81,27 @@ export default function Results({ job }: { job: Job | null }) {
         <div className="flex flex-col gap-5">
           <div className="grid gap-5 lg:grid-cols-[1.6fr_1fr]">
             <Card title="Auto-produced broadcast" subtitle="Virtual cameraman — no operator" icon="film" pad={false}>
-              <video
-                key={job.id}
-                src={api.fileUrl(job.id, "broadcast.mp4")}
-                controls
-                className="aspect-video w-full rounded-b-2xl bg-black"
-              />
+              {s.broadcast === false ? (
+                <div className="grid aspect-video place-items-center rounded-b-2xl bg-gradient-to-br from-ink-2 to-ink text-center">
+                  <div>
+                    <span className="mx-auto mb-2 grid h-11 w-11 place-items-center rounded-2xl bg-pitch/10 text-pitch">
+                      <Icon name="activity" width={22} height={22} />
+                    </span>
+                    <p className="text-sm font-medium text-slate-300">Tracking-data analysis</p>
+                    <p className="mx-auto mt-1 max-w-xs text-xs text-mute">
+                      This report is built from ground-truth player tracking — no broadcast
+                      feed. Upload match video to generate the auto-produced broadcast.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <video
+                  key={job.id}
+                  src={api.fileUrl(job.id, "broadcast.mp4")}
+                  controls
+                  className="aspect-video w-full rounded-b-2xl bg-black"
+                />
+              )}
             </Card>
 
             <Card title="Possession" icon="target">

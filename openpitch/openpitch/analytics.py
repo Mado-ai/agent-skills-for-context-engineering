@@ -200,6 +200,9 @@ class Analytics:
         pts = self._positions[team]
         hist = np.zeros((bins, bins), np.float32)
         for cx, cy in pts:
+            # Real tracking feeds can carry NaN / off-pitch points; skip them.
+            if not (0.0 <= cx <= 1.0 and 0.0 <= cy <= 1.0):
+                continue
             ix = min(bins - 1, int(cx * bins))
             iy = min(bins - 1, int(cy * bins))
             hist[iy, ix] += 1

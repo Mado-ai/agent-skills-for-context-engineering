@@ -88,22 +88,14 @@ def fnum(v: str) -> float | None:
         return None
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--frames", type=int, default=7500,
-                    help="frame window to analyse (0 = whole match)")
-    ap.add_argument("--cache", type=Path,
-                    default=Path(tempfile.gettempdir()) / "openpitch-metrica",
-                    help="directory to cache the downloaded CSVs")
-    args = ap.parse_args()
+def build_analytics(frames: int, cache: Path) -> tuple[Analytics, int]:
+    """Download + feed the Metrica sample through Analytics. Returns (engine, n).
 
-    home_csv = fetch("Home", args.cache)
-    away_csv = fetch("Away", args.cache)
-
-    hc, hrows, hball = parse(home_csv, args.frames)
-    ac, arows, _ = parse(away_csv, args.frames)
+    Shared by the CLI report and the dashboard seed (scripts/seed_demo.py).
+    """
+    hc, hrows, hball = parse(fetch("Home", cache), frames)
+    ac, arows, _ = parse(fetch("Away", cache), frames)
     n = min(len(hrows), len(arows))
-    print(f"frames analysed: {n} (~{n / FPS / 60:.1f} min at {FPS} fps)")
 
     a = Analytics(Config(), fps=FPS)
     for k in range(n):
@@ -121,6 +113,20 @@ def main() -> int:
             if x is not None and y is not None:
                 ball = (x, y)
         a.update(FrameState(frame=k, players=players, ball=ball))
+    return a, n
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--frames", type=int, default=7500,
+                    help="frame window to analyse (0 = whole match)")
+    ap.add_argument("--cache", type=Path,
+                    default=Path(tempfile.gettempdir()) / "openpitch-metrica",
+                    help="directory to cache the downloaded CSVs")
+    args = ap.parse_args()
+
+    a, n = build_analytics(args.frames, args.cache)
+    print(f"frames analysed: {n} (~{n / FPS / 60:.1f} min at {FPS} fps)")
 
     poss = a.possession_pct()
     ts = a.team_stats()

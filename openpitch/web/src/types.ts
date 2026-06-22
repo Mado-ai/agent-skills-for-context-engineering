@@ -54,6 +54,8 @@ export interface JobSummary {
   heatmaps: Record<string, string>;
   highlights: Highlight[];
   meta: Record<string, string | number>;
+  /** False for tracking-data sources that have no broadcast video. */
+  broadcast?: boolean;
 }
 
 export interface Job {
