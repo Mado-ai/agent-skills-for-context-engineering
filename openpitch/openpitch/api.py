@@ -22,7 +22,7 @@ import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, Form, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, Form, Header, HTTPException, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
@@ -154,8 +154,8 @@ def _run_job(job_id: str, input_path: Path, detector: str) -> None:
 
 
 def _start(job_id: str, user_id: int, input_path: Path, detector: str,
-           input_name: str) -> None:
-    db.create_job(job_id, user_id, input_name, detector)
+           input_name: str, source: str = "upload", site_id: str | None = None) -> None:
+    db.create_job(job_id, user_id, input_name, detector, source=source, site_id=site_id)
     threading.Thread(
         target=_run_job, args=(job_id, input_path, detector), daemon=True
     ).start()
@@ -258,6 +258,112 @@ def serve_file(job_id: str, path: str, token: str = ""):
     if not str(target).startswith(str(RUNS.resolve())) or not target.exists():
         raise HTTPException(404, "not found")
     return FileResponse(target)
+
+
+# --- capture-site registry (Layer 1/2 onboarding) ---------------------------
+
+VALID_PACKAGES = {"starter", "growth", "pro"}
+
+
+@app.post("/api/sites")
+def create_site(
+    name: str = Form(...),
+    package: str = Form(...),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    if package not in VALID_PACKAGES:
+        raise HTTPException(400, "package must be starter, growth or pro")
+    site_id = "site_" + uuid.uuid4().hex[:10]
+    site = db.create_site(site_id, user["id"], name.strip()[:120], package)
+    return JSONResponse(site)
+
+
+@app.get("/api/sites")
+def list_sites(user: dict = Depends(current_user)) -> JSONResponse:
+    return JSONResponse({"sites": db.list_sites(user["id"])})
+
+
+def _owned_site(site_id: str, user: dict):
+    site = db.get_site(site_id)
+    if not site or site["user_id"] != user["id"]:
+        raise HTTPException(404, "site not found")
+    return site
+
+
+@app.get("/api/sites/{site_id}")
+def site_detail(site_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    site = _owned_site(site_id, user)
+    return JSONResponse({**dict(site), "devices": db.list_devices(site_id)})
+
+
+@app.post("/api/sites/{site_id}/devices")
+def pair_device(
+    site_id: str,
+    kind: str = Form(...),
+    name: str = Form(...),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    _owned_site(site_id, user)
+    device_id = "dev_" + uuid.uuid4().hex[:10]
+    api_key = auth.new_api_key()
+    db.create_device(device_id, site_id, kind.strip()[:40], name.strip()[:80],
+                     auth.hash_token(api_key))
+    # The plaintext key is returned exactly once — the gateway stores it.
+    return JSONResponse({"device_id": device_id, "api_key": api_key})
+
+
+# --- cloud ingestion (Layer 2 edge gateway -> Layer 3 cloud) ----------------
+
+def _device_from_key(x_device_key: str | None):
+    if not x_device_key:
+        raise HTTPException(401, "missing X-Device-Key")
+    device = db.get_device_by_key_hash(auth.hash_token(x_device_key))
+    if not device:
+        raise HTTPException(401, "unknown device key")
+    db.touch_device(device["id"])
+    return device
+
+
+@app.post("/api/ingest/heartbeat")
+def ingest_heartbeat(x_device_key: str | None = Header(None)) -> JSONResponse:
+    device = _device_from_key(x_device_key)
+    return JSONResponse({"status": "ok", "device_id": device["id"], "site_id": device["site_id"]})
+
+
+@app.post("/api/ingest/matches")
+async def ingest_match(
+    file: UploadFile,
+    match_label: str = Form("Match"),
+    idempotency_key: str = Form(...),
+    detector: str = Form("color"),
+    x_device_key: str | None = Header(None),
+) -> JSONResponse:
+    """Edge gateway syncs a processed match clip + metadata for analysis."""
+    device = _device_from_key(x_device_key)
+    if detector not in ("color", "yolo"):
+        raise HTTPException(400, "detector must be 'color' or 'yolo'")
+
+    # Idempotent: a retried sync returns the original job, never double-processes.
+    existing = db.get_ingest_job(idempotency_key)
+    if existing:
+        return JSONResponse({"job_id": existing, "deduplicated": True})
+
+    data = await file.read()
+    if not data:
+        raise HTTPException(400, "empty clip")
+    if len(data) > MAX_UPLOAD_BYTES:
+        raise HTTPException(413, "clip too large (max 500 MB)")
+
+    site = db.get_site(device["site_id"])
+    job_id = uuid.uuid4().hex[:12]
+    out_dir = RUNS / job_id
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "input.mp4").write_bytes(data)
+    label = f"{site['name']} · {match_label.strip()[:80]}"
+    _start(job_id, site["user_id"], out_dir / "input.mp4", detector, label,
+           source="ingest", site_id=site["id"])
+    db.record_ingest_job(idempotency_key, job_id)
+    return JSONResponse({"job_id": job_id, "deduplicated": False})
 
 
 @app.get("/{full_path:path}")

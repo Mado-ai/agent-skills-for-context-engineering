@@ -66,6 +66,16 @@ def create_token(user_id: int, email: str) -> str:
     return f"{header}.{payload}.{_b64u(sig)}"
 
 
+def new_api_key() -> str:
+    """A device/gateway API key (shown to the operator once at pairing)."""
+    return "pmk_" + secrets.token_urlsafe(24)
+
+
+def hash_token(token: str) -> str:
+    """Fast hash for high-entropy API keys (not user passwords)."""
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
 def decode_token(token: str) -> dict | None:
     try:
         header, payload, sig = token.split(".")

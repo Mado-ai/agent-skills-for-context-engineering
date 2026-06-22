@@ -13,9 +13,12 @@ targeting. Status legend: ✅ built · 🟡 planned · 🔒 auth-gated.
 ├── /how-it-works      🟡  Capture → produce → analyse, step by step
 ├── /hardware          🟡  Camera/capture offering (pending hardware spec)
 ├── /solutions         🟡  Audience landing hub
-│   ├── /solutions/clubs       🟡
-│   ├── /solutions/academies   🟡
-│   └── /solutions/coaches     🟡
+│   ├── /solutions/coaches     🟡
+│   ├── /solutions/academies   🟡  (clubs + multi-pitch)
+│   ├── /solutions/parents     🟡
+│   └── /solutions/players     🟡  (incl. Solo Mode)
+├── /scouts            🟡  Scout marketplace (gated, consented data)
+├── /p/:slug           🟡  Public player profiles (opt-in, guardian-gated)
 ├── /resources         🟡  Content hub (SEO)
 │   ├── /resources/blog        🟡
 │   └── /resources/guides      🟡
@@ -47,7 +50,7 @@ targeting. Status legend: ✅ built · 🟡 planned · 🔒 auth-gated.
 | `/pricing` | Monetise | Starter / Club / Academy tiers | Choose plan → `/?signup`; Academy → `/about` | ✅ |
 | `/about` | Trust + contact | Mission, 3 proof points, contact form | Send message | ✅ |
 | `/how-it-works` | Reduce uncertainty | Numbered capture→produce→analyse flow, sample media | Try the demo | 🟡 |
-| `/hardware` | Sell the capture rig | Camera spec, install, connectivity, what's in the box | Request a quote | 🟡 (needs hardware spec) |
+| `/hardware` | Sell the capture rig | UniFi 3-package model, install topology, edge rack, what's in the box | Request a quote | 🟡 (spec received) |
 | `/solutions/*` | Audience targeting | Pain points + outcomes per segment | Segment-specific signup | 🟡 |
 | `/resources/*` | SEO + education | Blog posts, how-to guides, glossary | Newsletter / signup | 🟡 |
 | `/demo` | Proof without signup | Read-only sample analysis report | Create account | 🟡 |
@@ -58,13 +61,18 @@ targeting. Status legend: ✅ built · 🟡 planned · 🔒 auth-gated.
 
 | Segment | Need | Landing page | Tier | Messaging hook |
 |---------|------|--------------|------|----------------|
-| **Coach** | Tactical + physical analysis, fast | `/solutions/coaches` | Club | "Every match analysed by Monday morning." |
-| **Club admin** | Broadcast + value for money | `/solutions/clubs` | Club | "One camera. Broadcast + data room." |
-| **Academy / org** | Multi-team, seats, API | `/solutions/academies` | Academy | "Standardised analysis across every age group." |
-| **Scout** | Player metrics, clips | (feature within Club) | Club | "Distance, speed and highlights per player." |
+| **Coach** | Tactical + physical analysis, fast | `/solutions/coaches` | Growth/Pro | "Every match analysed by Monday morning." |
+| **Club / academy admin** | Multi-team, seats, multi-pitch | `/solutions/academies` | Pro | "One brain per site, every pitch covered." |
+| **Parent** | Child progress + highlights | `/solutions/parents` | (incl.) | "Watch them grow — safely, privately." |
+| **Player** | Own profile + Solo Mode | `/solutions/players` | Solo/Starter | "Film on your phone, build your profile." |
+| **Scout** | Player metrics, gated access | scout marketplace | marketplace | "Discover talent — on verified, consented data." |
+| **Federation** | Aggregate dashboards | (contracted) | enterprise | "Standardised analysis across the league." |
 
 Routing of CTAs already deep-links to signup (`/?signup`); per-segment pages
-will carry segment context into onboarding (planned).
+will carry segment context into onboarding (planned). **Child-safety note:** all
+parent/player/scout surfaces are private-by-default and guardian-gated for
+minors — this constrains the public marketing of any player data (see
+`ARCHITECTURE.md` §cross-cutting).
 
 ## SEO targeting
 
@@ -78,14 +86,27 @@ will carry segment context into onboarding (planned).
   `sitemap.xml` + `robots.txt`, JSON-LD `Product`/`FAQPage` (planned with the
   marketing pages).
 
-## How the hardware ties in (pending spec)
+## How the hardware ties in (spec received — v4 reference)
 
-`/hardware` and `/how-it-works` are the marketing surface for the capture rig;
-the backend ingestion layer (device registry, stream ingest, live/batch jobs)
-is the technical counterpart. Both are blocked on the hardware structure:
-camera model, stream protocol/codec, edge compute, connectivity, and scale.
-Once provided, this plan gets a `/hardware` content spec and the sitemap a
-device-pairing/onboarding flow under `/dashboard`.
+The capture rig is a **UniFi-grounded, three-package** model (see
+`ARCHITECTURE.md` for the full four-layer pipeline):
+
+| Package | Pitch | Cameras (UniFi Protect) |
+|---------|-------|--------------------------|
+| **Starter** | 5-a-side | AI Pro 4K + G5 PTZ + G5 Bullet |
+| **Growth** | 7-a-side | + G5 Pro 4K + indoor AP |
+| **Pro** | 11-a-side | + 2× G5 Pro 4K (multi-angle) |
+
+- `/hardware` content = packages table, install topology (PoE/Cat6, elevation,
+  sightlines), edge rack (gateway/NVR/AI Key/UPS), and "what's in the box".
+- `/pricing` tiers map **Starter / Growth / Pro** (+ a phone-only **Solo Mode**
+  on-ramp that needs no facility hardware).
+- Backend counterpart is **built** as a prototype: capture-site registry
+  (`/api/sites`, device pairing), edge→cloud ingest (`/api/ingest/matches`
+  with device-key auth + idempotency), and heartbeat. See `ARCHITECTURE.md`
+  for what's ✅ vs 🟡 vs ⬜.
+- New in-app onboarding flow (planned): create site → pick package → pair
+  devices (show one-time key) → device heartbeat → matches auto-appear.
 
 ## Build order (proposed)
 

@@ -49,11 +49,42 @@ def init_db() -> None:
                 progress REAL DEFAULT 0,
                 message TEXT,
                 summary TEXT,
+                source TEXT DEFAULT 'upload',
+                site_id TEXT,
                 created_at REAL NOT NULL,
                 FOREIGN KEY (user_id) REFERENCES users(id)
             );
+            -- Capture sites (a club/academy pitch deployment) and their devices.
+            CREATE TABLE IF NOT EXISTS sites (
+                id TEXT PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                package TEXT NOT NULL,
+                created_at REAL NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );
+            CREATE TABLE IF NOT EXISTS devices (
+                id TEXT PRIMARY KEY,
+                site_id TEXT NOT NULL,
+                kind TEXT NOT NULL,
+                name TEXT NOT NULL,
+                key_hash TEXT NOT NULL,
+                last_seen REAL,
+                created_at REAL NOT NULL,
+                FOREIGN KEY (site_id) REFERENCES sites(id)
+            );
+            CREATE TABLE IF NOT EXISTS ingest_keys (
+                idempotency_key TEXT PRIMARY KEY,
+                job_id TEXT NOT NULL
+            );
             """
         )
+        # Migrate older DBs that predate the jobs.source / jobs.site_id columns.
+        cols = {r["name"] for r in c.execute("PRAGMA table_info(jobs)")}
+        if "source" not in cols:
+            c.execute("ALTER TABLE jobs ADD COLUMN source TEXT DEFAULT 'upload'")
+        if "site_id" not in cols:
+            c.execute("ALTER TABLE jobs ADD COLUMN site_id TEXT")
         c.commit()
 
 
@@ -93,14 +124,22 @@ def set_password(user_id: int, password_hash: str) -> None:
 
 # --- jobs -------------------------------------------------------------------
 
-def create_job(job_id: str, user_id: int, input_name: str, detector: str) -> None:
+def create_job(
+    job_id: str,
+    user_id: int,
+    input_name: str,
+    detector: str,
+    source: str = "upload",
+    site_id: str | None = None,
+) -> None:
     with _lock:
         c = _connect()
         c.execute(
             "INSERT INTO jobs (id, user_id, input_name, detector, status, "
-            "progress, message, created_at) VALUES (?,?,?,?,?,?,?,?)",
+            "progress, message, source, site_id, created_at) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?)",
             (job_id, user_id, input_name, detector, "queued", 0.0, "queued",
-             time.time()),
+             source, site_id, time.time()),
         )
         c.commit()
 
@@ -148,4 +187,87 @@ def delete_job(job_id: str) -> None:
     with _lock:
         c = _connect()
         c.execute("DELETE FROM jobs WHERE id = ?", (job_id,))
+        c.commit()
+
+
+# --- sites & devices (capture-site registry) --------------------------------
+
+def create_site(site_id: str, user_id: int, name: str, package: str) -> dict:
+    with _lock:
+        c = _connect()
+        c.execute(
+            "INSERT INTO sites (id, user_id, name, package, created_at) "
+            "VALUES (?,?,?,?,?)",
+            (site_id, user_id, name, package, time.time()),
+        )
+        c.commit()
+    return {"id": site_id, "name": name, "package": package}
+
+
+def get_site(site_id: str) -> sqlite3.Row | None:
+    return _connect().execute("SELECT * FROM sites WHERE id = ?", (site_id,)).fetchone()
+
+
+def list_sites(user_id: int) -> list[dict]:
+    rows = _connect().execute(
+        "SELECT s.*, "
+        "(SELECT COUNT(*) FROM devices d WHERE d.site_id = s.id) AS device_count "
+        "FROM sites s WHERE s.user_id = ? ORDER BY s.created_at DESC",
+        (user_id,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def create_device(device_id: str, site_id: str, kind: str, name: str,
+                  key_hash: str) -> None:
+    with _lock:
+        c = _connect()
+        c.execute(
+            "INSERT INTO devices (id, site_id, kind, name, key_hash, created_at) "
+            "VALUES (?,?,?,?,?,?)",
+            (device_id, site_id, kind, name, key_hash, time.time()),
+        )
+        c.commit()
+
+
+def list_devices(site_id: str) -> list[dict]:
+    rows = _connect().execute(
+        "SELECT id, site_id, kind, name, last_seen, created_at "
+        "FROM devices WHERE site_id = ? ORDER BY created_at",
+        (site_id,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_device_by_key_hash(key_hash: str) -> sqlite3.Row | None:
+    return _connect().execute(
+        "SELECT * FROM devices WHERE key_hash = ?", (key_hash,)
+    ).fetchone()
+
+
+def touch_device(device_id: str) -> None:
+    with _lock:
+        c = _connect()
+        c.execute("UPDATE devices SET last_seen = ? WHERE id = ?",
+                  (time.time(), device_id))
+        c.commit()
+
+
+# --- ingest idempotency -----------------------------------------------------
+
+def get_ingest_job(idempotency_key: str) -> str | None:
+    row = _connect().execute(
+        "SELECT job_id FROM ingest_keys WHERE idempotency_key = ?",
+        (idempotency_key,),
+    ).fetchone()
+    return row["job_id"] if row else None
+
+
+def record_ingest_job(idempotency_key: str, job_id: str) -> None:
+    with _lock:
+        c = _connect()
+        c.execute(
+            "INSERT OR IGNORE INTO ingest_keys (idempotency_key, job_id) VALUES (?,?)",
+            (idempotency_key, job_id),
+        )
         c.commit()
