@@ -42,3 +42,66 @@ export interface User {
   email: string;
   is_admin: boolean;
 }
+
+// --- profiles ---
+
+export type FieldBreakdown = Record<"5" | "7" | "11", number>;
+
+export interface TeamSummary {
+  id: string;
+  name: string;
+  player_count: number;
+  match_count: number;
+  public_token: string | null;
+}
+
+export interface Player {
+  id: string;
+  name: string;
+  position: string | null;
+  jersey: number | null;
+}
+
+export interface Match {
+  id: string;
+  field_type: number;
+  opponent: string | null;
+  played_on: string | null;
+  home_score: number | null;
+  away_score: number | null;
+  job_id?: string | null;
+}
+
+export interface TeamProfile {
+  team: { id: string; name: string; public_token: string | null };
+  players: Player[];
+  player_count: number;
+  matches_by_field: FieldBreakdown;
+  record: {
+    played: number;
+    wins: number;
+    draws: number;
+    losses: number;
+    goals_for: number;
+    goals_against: number;
+  };
+  recent_matches: Match[];
+  leaderboard: { player_id: string; name: string; matches: number; distance_m: number; top_speed_ms: number; goals: number }[];
+}
+
+export interface PlayerProfile {
+  player: { id: string; name: string; position: string | null; jersey: number | null };
+  team_id: string;
+  public_token?: string | null;
+  matches_by_field: FieldBreakdown;
+  totals: {
+    matches: number;
+    distance_m: number;
+    avg_distance_m: number;
+    top_speed_ms: number;
+    goals: number;
+    assists: number;
+    minutes: number;
+  };
+  recent: { match_id: string; field_type: number; opponent: string | null; played_on: string | null; distance_m: number; top_speed_ms: number; goals: number; assists: number }[];
+}

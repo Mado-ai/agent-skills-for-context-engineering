@@ -1,4 +1,4 @@
-import type { Job, User } from "../types";
+import type { Job, PlayerProfile, TeamProfile, TeamSummary, User } from "../types";
 
 const TOKEN_KEY = "pm_token";
 
@@ -25,6 +25,13 @@ async function parse(res: Response) {
 function authHeaders(): HeadersInit {
   const t = tokenStore.get();
   return t ? { Authorization: `Bearer ${t}` } : {};
+}
+
+// Authenticated JSON request helper (merges auth header, parses + throws).
+async function authed(path: string, opts: RequestInit = {}) {
+  return parse(
+    await fetch(path, { ...opts, headers: { ...authHeaders(), ...(opts.headers || {}) } }),
+  );
 }
 
 export const api = {
@@ -94,6 +101,53 @@ export const api = {
   // Media tags can't send headers — token goes in the query string.
   fileUrl(jobId: string, path: string): string {
     return `/api/files/${jobId}/${path}?token=${encodeURIComponent(tokenStore.get() ?? "")}`;
+  },
+
+  // --- teams / players / matches ---
+  async listTeams(): Promise<TeamSummary[]> {
+    return (await authed("/api/teams")).teams as TeamSummary[];
+  },
+  async createTeam(name: string): Promise<{ id: string }> {
+    return authed("/api/teams", { method: "POST", body: new URLSearchParams({ name }) });
+  },
+  async getTeam(id: string): Promise<TeamProfile> {
+    return authed(`/api/teams/${id}`);
+  },
+  async deleteTeam(id: string): Promise<void> {
+    await authed(`/api/teams/${id}`, { method: "DELETE" });
+  },
+  async shareTeam(id: string): Promise<{ public: boolean; public_token: string | null }> {
+    return authed(`/api/teams/${id}/share`, { method: "POST" });
+  },
+  async exportTeam(id: string): Promise<unknown> {
+    return authed(`/api/teams/${id}/export`);
+  },
+  async importTeam(bundle: unknown): Promise<{ team_id: string }> {
+    return authed("/api/teams/import", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(bundle),
+    });
+  },
+  async createPlayer(teamId: string, fields: Record<string, string>): Promise<{ id: string }> {
+    return authed(`/api/teams/${teamId}/players`, { method: "POST", body: new URLSearchParams(fields) });
+  },
+  async getPlayer(id: string): Promise<PlayerProfile> {
+    return authed(`/api/players/${id}`);
+  },
+  async sharePlayer(id: string): Promise<{ public: boolean; public_token: string | null }> {
+    return authed(`/api/players/${id}/share`, { method: "POST" });
+  },
+  async createMatch(teamId: string, fields: Record<string, string>): Promise<{ id: string }> {
+    return authed(`/api/teams/${teamId}/matches`, { method: "POST", body: new URLSearchParams(fields) });
+  },
+
+  // public (no auth)
+  async publicTeam(token: string): Promise<TeamProfile> {
+    return parse(await fetch(`/api/public/teams/${token}`));
+  },
+  async publicPlayer(token: string): Promise<PlayerProfile> {
+    return parse(await fetch(`/api/public/players/${token}`));
   },
 };
 

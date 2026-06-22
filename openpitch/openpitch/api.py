@@ -22,11 +22,11 @@ import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, Form, Header, HTTPException, UploadFile
+from fastapi import Body, Depends, FastAPI, Form, Header, HTTPException, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from . import auth, db
+from . import auth, db, profiles
 from .config import Config
 from .pipeline import process_video
 
@@ -364,6 +364,219 @@ async def ingest_match(
            source="ingest", site_id=site["id"])
     db.record_ingest_job(idempotency_key, job_id)
     return JSONResponse({"job_id": job_id, "deduplicated": False})
+
+
+# --- teams ------------------------------------------------------------------
+
+def _owned_team(team_id: str, user: dict):
+    team = db.get_team(team_id)
+    if not team or team["user_id"] != user["id"]:
+        raise HTTPException(404, "team not found")
+    return team
+
+
+def _owned_player(player_id: str, user: dict):
+    player = db.get_player(player_id)
+    if not player:
+        raise HTTPException(404, "player not found")
+    _owned_team(player["team_id"], user)
+    return player
+
+
+def _owned_match(match_id: str, user: dict):
+    match = db.get_match(match_id)
+    if not match or match["user_id"] != user["id"]:
+        raise HTTPException(404, "match not found")
+    return match
+
+
+@app.post("/api/teams")
+def create_team(name: str = Form(...), user: dict = Depends(current_user)) -> JSONResponse:
+    team_id = "team_" + uuid.uuid4().hex[:10]
+    return JSONResponse(db.create_team(team_id, user["id"], name.strip()[:120]))
+
+
+@app.get("/api/teams")
+def list_teams(user: dict = Depends(current_user)) -> JSONResponse:
+    return JSONResponse({"teams": db.list_teams(user["id"])})
+
+
+@app.get("/api/teams/{team_id}")
+def team_detail(team_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_team(team_id, user)
+    return JSONResponse(profiles.team_profile(team_id))
+
+
+@app.patch("/api/teams/{team_id}")
+def update_team(team_id: str, name: str = Form(...), user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_team(team_id, user)
+    db.update_team(team_id, name.strip()[:120])
+    return JSONResponse({"status": "ok"})
+
+
+@app.delete("/api/teams/{team_id}")
+def remove_team(team_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_team(team_id, user)
+    db.delete_team(team_id)
+    return JSONResponse({"status": "ok"})
+
+
+@app.post("/api/teams/{team_id}/share")
+def share_team(team_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    team = _owned_team(team_id, user)
+    token = None if team["public_token"] else uuid.uuid4().hex[:12]
+    db.set_team_public(team_id, token)
+    return JSONResponse({"public": token is not None, "public_token": token})
+
+
+@app.get("/api/teams/{team_id}/export")
+def export_team(team_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_team(team_id, user)
+    return JSONResponse(profiles.export_team(team_id))
+
+
+@app.post("/api/teams/import")
+def import_team(bundle: dict = Body(...), user: dict = Depends(current_user)) -> JSONResponse:
+    if not isinstance(bundle.get("team"), dict):
+        raise HTTPException(400, "invalid bundle")
+    return JSONResponse(profiles.import_team(user["id"], bundle))
+
+
+# --- players ----------------------------------------------------------------
+
+@app.post("/api/teams/{team_id}/players")
+def create_player(
+    team_id: str,
+    name: str = Form(...),
+    position: str = Form(""),
+    jersey: int | None = Form(None),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    _owned_team(team_id, user)
+    player_id = "ply_" + uuid.uuid4().hex[:10]
+    return JSONResponse(
+        db.create_player(player_id, team_id, name.strip()[:80], position.strip()[:40] or None, jersey)
+    )
+
+
+@app.get("/api/players/{player_id}")
+def player_detail(player_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_player(player_id, user)
+    profile = profiles.player_profile(player_id)
+    player = db.get_player(player_id)
+    profile["public_token"] = player["public_token"]
+    return JSONResponse(profile)
+
+
+@app.patch("/api/players/{player_id}")
+def update_player(
+    player_id: str,
+    name: str = Form(...),
+    position: str = Form(""),
+    jersey: int | None = Form(None),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    _owned_player(player_id, user)
+    db.update_player(player_id, name.strip()[:80], position.strip()[:40] or None, jersey)
+    return JSONResponse({"status": "ok"})
+
+
+@app.delete("/api/players/{player_id}")
+def remove_player(player_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_player(player_id, user)
+    db.delete_player(player_id)
+    return JSONResponse({"status": "ok"})
+
+
+@app.post("/api/players/{player_id}/share")
+def share_player(player_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    player = _owned_player(player_id, user)
+    token = None if player["public_token"] else uuid.uuid4().hex[:12]
+    db.set_player_public(player_id, token)
+    return JSONResponse({"public": token is not None, "public_token": token})
+
+
+# --- matches & stats --------------------------------------------------------
+
+@app.post("/api/teams/{team_id}/matches")
+def create_match(
+    team_id: str,
+    field_type: int = Form(...),
+    opponent: str = Form(""),
+    played_on: str = Form(""),
+    job_id: str = Form(""),
+    home_score: int | None = Form(None),
+    away_score: int | None = Form(None),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    _owned_team(team_id, user)
+    if field_type not in (5, 7, 11):
+        raise HTTPException(400, "field_type must be 5, 7 or 11")
+    # Snapshot team metrics from a linked, completed analysis job.
+    summary = None
+    linked_job = None
+    if job_id:
+        job = db.get_job(job_id)
+        if job and job["user_id"] == user["id"] and job.get("summary"):
+            linked_job = job_id
+            summary = json.dumps({"possession": job["summary"].get("possession")})
+    match_id = "match_" + uuid.uuid4().hex[:10]
+    db.create_match(match_id, user["id"], team_id, field_type,
+                    opponent.strip()[:80] or None, played_on.strip()[:20] or None,
+                    linked_job, home_score, away_score, summary)
+    return JSONResponse({"id": match_id})
+
+
+@app.get("/api/matches/{match_id}")
+def match_detail(match_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    match = _owned_match(match_id, user)
+    match["stats"] = db.stats_for_match(match_id)
+    return JSONResponse(match)
+
+
+@app.delete("/api/matches/{match_id}")
+def remove_match(match_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_match(match_id, user)
+    db.delete_match(match_id)
+    return JSONResponse({"status": "ok"})
+
+
+@app.post("/api/matches/{match_id}/stats")
+def add_stat(
+    match_id: str,
+    player_id: str = Form(...),
+    minutes: int = Form(0),
+    distance_m: float = Form(0),
+    top_speed_ms: float = Form(0),
+    goals: int = Form(0),
+    assists: int = Form(0),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    _owned_match(match_id, user)
+    player = _owned_player(player_id, user)  # noqa: F841 (validates ownership)
+    db.add_player_stat("st_" + uuid.uuid4().hex[:10], match_id, player_id,
+                       minutes, distance_m, top_speed_ms, goals, assists)
+    return JSONResponse({"status": "ok"})
+
+
+# --- public (no auth) read-only profiles ------------------------------------
+
+@app.get("/api/public/teams/{token}")
+def public_team(token: str) -> JSONResponse:
+    team = db.get_team_by_token(token)
+    if not team:
+        raise HTTPException(404, "not found")
+    profile = profiles.team_profile(team["id"])
+    profile["team"].pop("public_token", None)
+    return JSONResponse(profile)
+
+
+@app.get("/api/public/players/{token}")
+def public_player(token: str) -> JSONResponse:
+    player = db.get_player_by_token(token)
+    if not player:
+        raise HTTPException(404, "not found")
+    return JSONResponse(profiles.player_profile(player["id"]))
 
 
 @app.get("/{full_path:path}")

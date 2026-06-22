@@ -35,6 +35,9 @@ export default function Nav() {
             <Link to="/dashboard" className="text-slate-300 hover:text-white">
               Dashboard
             </Link>
+            <Link to="/teams" className="text-slate-300 hover:text-white">
+              Teams
+            </Link>
             <button
               onClick={() => setAccountOpen(true)}
               className="hidden text-slate-400 hover:text-white sm:inline"

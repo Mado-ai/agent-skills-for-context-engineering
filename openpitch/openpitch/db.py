@@ -77,6 +77,46 @@ def init_db() -> None:
                 idempotency_key TEXT PRIMARY KEY,
                 job_id TEXT NOT NULL
             );
+            -- Profiles: teams, players, matches (by field type), per-player stats.
+            CREATE TABLE IF NOT EXISTS teams (
+                id TEXT PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                public_token TEXT,
+                created_at REAL NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS players (
+                id TEXT PRIMARY KEY,
+                team_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                position TEXT,
+                jersey INTEGER,
+                public_token TEXT,
+                created_at REAL NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS matches (
+                id TEXT PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                team_id TEXT NOT NULL,
+                job_id TEXT,
+                field_type INTEGER NOT NULL,
+                opponent TEXT,
+                played_on TEXT,
+                home_score INTEGER,
+                away_score INTEGER,
+                summary TEXT,
+                created_at REAL NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS player_match_stats (
+                id TEXT PRIMARY KEY,
+                match_id TEXT NOT NULL,
+                player_id TEXT NOT NULL,
+                minutes INTEGER DEFAULT 0,
+                distance_m REAL DEFAULT 0,
+                top_speed_ms REAL DEFAULT 0,
+                goals INTEGER DEFAULT 0,
+                assists INTEGER DEFAULT 0
+            );
             """
         )
         # Migrate older DBs that predate the jobs.source / jobs.site_id columns.
@@ -271,3 +311,176 @@ def record_ingest_job(idempotency_key: str, job_id: str) -> None:
             (idempotency_key, job_id),
         )
         c.commit()
+
+
+def _exec(sql: str, params: tuple = ()) -> None:
+    with _lock:
+        c = _connect()
+        c.execute(sql, params)
+        c.commit()
+
+
+# --- teams ------------------------------------------------------------------
+
+def create_team(team_id: str, user_id: int, name: str) -> dict:
+    _exec("INSERT INTO teams (id, user_id, name, created_at) VALUES (?,?,?,?)",
+          (team_id, user_id, name, time.time()))
+    return {"id": team_id, "name": name}
+
+
+def get_team(team_id: str) -> sqlite3.Row | None:
+    return _connect().execute("SELECT * FROM teams WHERE id = ?", (team_id,)).fetchone()
+
+
+def get_team_by_token(token: str) -> sqlite3.Row | None:
+    return _connect().execute(
+        "SELECT * FROM teams WHERE public_token = ?", (token,)
+    ).fetchone()
+
+
+def list_teams(user_id: int) -> list[dict]:
+    rows = _connect().execute(
+        "SELECT t.*, "
+        "(SELECT COUNT(*) FROM players p WHERE p.team_id = t.id) AS player_count, "
+        "(SELECT COUNT(*) FROM matches m WHERE m.team_id = t.id) AS match_count "
+        "FROM teams t WHERE t.user_id = ? ORDER BY t.created_at DESC",
+        (user_id,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def update_team(team_id: str, name: str) -> None:
+    _exec("UPDATE teams SET name = ? WHERE id = ?", (name, team_id))
+
+
+def set_team_public(team_id: str, token: str | None) -> None:
+    _exec("UPDATE teams SET public_token = ? WHERE id = ?", (token, team_id))
+
+
+def delete_team(team_id: str) -> None:
+    with _lock:
+        c = _connect()
+        match_ids = [r["id"] for r in c.execute(
+            "SELECT id FROM matches WHERE team_id = ?", (team_id,))]
+        for mid in match_ids:
+            c.execute("DELETE FROM player_match_stats WHERE match_id = ?", (mid,))
+        c.execute("DELETE FROM matches WHERE team_id = ?", (team_id,))
+        c.execute("DELETE FROM players WHERE team_id = ?", (team_id,))
+        c.execute("DELETE FROM teams WHERE id = ?", (team_id,))
+        c.commit()
+
+
+# --- players ----------------------------------------------------------------
+
+def create_player(player_id: str, team_id: str, name: str, position: str | None,
+                  jersey: int | None) -> dict:
+    _exec("INSERT INTO players (id, team_id, name, position, jersey, created_at) "
+          "VALUES (?,?,?,?,?,?)",
+          (player_id, team_id, name, position, jersey, time.time()))
+    return {"id": player_id, "name": name}
+
+
+def get_player(player_id: str) -> sqlite3.Row | None:
+    return _connect().execute(
+        "SELECT * FROM players WHERE id = ?", (player_id,)
+    ).fetchone()
+
+
+def get_player_by_token(token: str) -> sqlite3.Row | None:
+    return _connect().execute(
+        "SELECT * FROM players WHERE public_token = ?", (token,)
+    ).fetchone()
+
+
+def list_players(team_id: str) -> list[dict]:
+    return [dict(r) for r in _connect().execute(
+        "SELECT * FROM players WHERE team_id = ? ORDER BY jersey, name", (team_id,))]
+
+
+def update_player(player_id: str, name: str, position: str | None,
+                  jersey: int | None) -> None:
+    _exec("UPDATE players SET name = ?, position = ?, jersey = ? WHERE id = ?",
+          (name, position, jersey, player_id))
+
+
+def set_player_public(player_id: str, token: str | None) -> None:
+    _exec("UPDATE players SET public_token = ? WHERE id = ?", (token, player_id))
+
+
+def delete_player(player_id: str) -> None:
+    with _lock:
+        c = _connect()
+        c.execute("DELETE FROM player_match_stats WHERE player_id = ?", (player_id,))
+        c.execute("DELETE FROM players WHERE id = ?", (player_id,))
+        c.commit()
+
+
+# --- matches ----------------------------------------------------------------
+
+def create_match(match_id: str, user_id: int, team_id: str, field_type: int,
+                 opponent: str | None, played_on: str | None, job_id: str | None,
+                 home_score: int | None, away_score: int | None,
+                 summary: str | None) -> dict:
+    _exec(
+        "INSERT INTO matches (id, user_id, team_id, job_id, field_type, opponent, "
+        "played_on, home_score, away_score, summary, created_at) "
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+        (match_id, user_id, team_id, job_id, field_type, opponent, played_on,
+         home_score, away_score, summary, time.time()),
+    )
+    return {"id": match_id}
+
+
+def get_match(match_id: str) -> dict | None:
+    row = _connect().execute("SELECT * FROM matches WHERE id = ?", (match_id,)).fetchone()
+    if not row:
+        return None
+    d = dict(row)
+    if d.get("summary"):
+        d["summary"] = json.loads(d["summary"])
+    return d
+
+
+def list_matches(team_id: str) -> list[dict]:
+    rows = _connect().execute(
+        "SELECT id, team_id, job_id, field_type, opponent, played_on, "
+        "home_score, away_score, created_at FROM matches "
+        "WHERE team_id = ? ORDER BY COALESCE(played_on, '') DESC, created_at DESC",
+        (team_id,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def delete_match(match_id: str) -> None:
+    with _lock:
+        c = _connect()
+        c.execute("DELETE FROM player_match_stats WHERE match_id = ?", (match_id,))
+        c.execute("DELETE FROM matches WHERE id = ?", (match_id,))
+        c.commit()
+
+
+# --- player match stats -----------------------------------------------------
+
+def add_player_stat(stat_id: str, match_id: str, player_id: str, minutes: int,
+                    distance_m: float, top_speed_ms: float, goals: int,
+                    assists: int) -> None:
+    _exec(
+        "INSERT INTO player_match_stats (id, match_id, player_id, minutes, "
+        "distance_m, top_speed_ms, goals, assists) VALUES (?,?,?,?,?,?,?,?)",
+        (stat_id, match_id, player_id, minutes, distance_m, top_speed_ms, goals,
+         assists),
+    )
+
+
+def stats_for_match(match_id: str) -> list[dict]:
+    return [dict(r) for r in _connect().execute(
+        "SELECT s.*, p.name AS player_name FROM player_match_stats s "
+        "JOIN players p ON p.id = s.player_id WHERE s.match_id = ?", (match_id,))]
+
+
+def stats_for_player(player_id: str) -> list[dict]:
+    """Player's stat lines joined with each match's field type and metadata."""
+    return [dict(r) for r in _connect().execute(
+        "SELECT s.*, m.field_type, m.opponent, m.played_on, m.id AS match_id "
+        "FROM player_match_stats s JOIN matches m ON m.id = s.match_id "
+        "WHERE s.player_id = ? ORDER BY COALESCE(m.played_on,'') DESC", (player_id,))]
