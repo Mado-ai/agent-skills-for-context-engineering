@@ -64,7 +64,7 @@ export default function RefundPage() {
 
       <h2>6. How to request a refund</h2>
       <p>
-        Email <a href="mailto:billing@gooverseas.example">billing@gooverseas.example</a>{" "}
+        Email <a href="mailto:billing@gooverseas.com">billing@gooverseas.com</a>{" "}
         with your engagement name and the reason for your request. We aim to acknowledge
         within <strong>2 business days</strong> and resolve within{" "}
         <strong>14 business days</strong>.
@@ -86,7 +86,7 @@ export default function RefundPage() {
       <h2>9. Contact</h2>
       <p>
         Questions about refunds? Write to{" "}
-        <a href="mailto:billing@gooverseas.example">billing@gooverseas.example</a>.
+        <a href="mailto:billing@gooverseas.com">billing@gooverseas.com</a>.
       </p>
     </LegalPage>
   );

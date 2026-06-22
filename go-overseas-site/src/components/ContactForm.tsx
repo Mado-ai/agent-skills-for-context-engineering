@@ -5,38 +5,83 @@ import { useState } from "react";
 const field =
   "w-full rounded-xl border border-line bg-ink-900 px-4 py-3 text-sm text-white placeholder:text-mist-dim focus:border-blue focus:outline-none focus:ring-1 focus:ring-blue";
 
-export function ContactForm() {
-  const [sent, setSent] = useState(false);
+type Status = "idle" | "sending" | "sent" | "error";
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+/** URL-encode a flat object for application/x-www-form-urlencoded. */
+function encode(data: Record<string, string>) {
+  return Object.keys(data)
+    .map((k) => encodeURIComponent(k) + "=" + encodeURIComponent(data[k]))
+    .join("&");
+}
+
+export function ContactForm() {
+  const [status, setStatus] = useState<Status>("idle");
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
-    const data = new FormData(form);
-    const name = String(data.get("name") || "");
-    const company = String(data.get("company") || "");
-    const market = String(data.get("market") || "");
-    const message = String(data.get("message") || "");
-    const email = String(data.get("email") || "");
+    const fd = new FormData(form);
 
-    const body = [
-      `Name: ${name}`,
-      `Company: ${company}`,
-      `Email: ${email}`,
-      `Target market(s): ${market}`,
-      "",
-      message,
-    ].join("\n");
+    // Honeypot: if a bot filled the hidden field, silently "succeed".
+    if (String(fd.get("bot-field") || "")) {
+      setStatus("sent");
+      form.reset();
+      return;
+    }
 
-    const href = `mailto:hello@gooverseas.example?subject=${encodeURIComponent(
-      `New enquiry from ${name || "website"}`
-    )}&body=${encodeURIComponent(body)}`;
+    const payload: Record<string, string> = { "form-name": "contact" };
+    fd.forEach((value, key) => {
+      payload[key] = String(value);
+    });
 
-    window.location.href = href;
-    setSent(true);
+    setStatus("sending");
+    try {
+      // POST to the Netlify Forms detection stub (public/__forms.html).
+      const res = await fetch("/__forms.html", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: encode(payload),
+      });
+      if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+      setStatus("sent");
+      form.reset();
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  if (status === "sent") {
+    return (
+      <div className="rounded-xl border border-green/40 bg-green/10 p-6">
+        <p className="font-display text-lg font-semibold text-white">Thank you — message received.</p>
+        <p className="mt-2 text-sm text-mist">
+          We&apos;ll be in touch within one business day. Prefer email? Write to{" "}
+          <a href="mailto:hello@gooverseas.com" className="text-cyan underline">
+            hello@gooverseas.com
+          </a>
+          .
+        </p>
+      </div>
+    );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form
+      name="contact"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      onSubmit={handleSubmit}
+      className="space-y-4"
+    >
+      {/* Netlify Forms plumbing */}
+      <input type="hidden" name="form-name" value="contact" />
+      <p className="hidden">
+        <label>
+          Don&apos;t fill this out if you&apos;re human: <input name="bot-field" />
+        </label>
+      </p>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1.5 block text-xs font-medium text-mist-dim">Name</label>
@@ -71,13 +116,18 @@ export function ContactForm() {
       </div>
       <button
         type="submit"
-        className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue to-cyan px-6 py-3.5 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 sm:w-auto"
+        disabled={status === "sending"}
+        className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue to-cyan px-6 py-3.5 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-60 sm:w-auto"
       >
-        {sent ? "Opening your email…" : "Send enquiry"}
+        {status === "sending" ? "Sending…" : "Send enquiry"}
       </button>
-      {sent && (
-        <p className="text-sm text-green">
-          Your email client should open. If it doesn&apos;t, write to hello@gooverseas.example.
+      {status === "error" && (
+        <p className="text-sm text-red-400">
+          Something went wrong. Please email us directly at{" "}
+          <a href="mailto:hello@gooverseas.com" className="underline">
+            hello@gooverseas.com
+          </a>
+          .
         </p>
       )}
       <p className="text-xs text-mist-dim">

@@ -20,7 +20,7 @@ export default function PrivacyPage() {
         “go overseas” (“we”, “us”, “our”) is an international business-development and
         creative-growth firm. We are the data controller for the personal information
         described in this policy. Questions can be sent to{" "}
-        <a href="mailto:privacy@gooverseas.example">privacy@gooverseas.example</a>.
+        <a href="mailto:privacy@gooverseas.com">privacy@gooverseas.com</a>.
       </p>
 
       <h2>2. Information we collect</h2>
@@ -92,7 +92,7 @@ export default function PrivacyPage() {
         Depending on your location, you may have the right to access, correct, delete, or
         port your data, and to object to or restrict certain processing. To exercise any of
         these, email{" "}
-        <a href="mailto:privacy@gooverseas.example">privacy@gooverseas.example</a>. You may
+        <a href="mailto:privacy@gooverseas.com">privacy@gooverseas.com</a>. You may
         also lodge a complaint with the Office of the Privacy Commissioner of Canada, or with
         your local data-protection authority.
       </p>
@@ -113,7 +113,7 @@ export default function PrivacyPage() {
       <h2>11. Contact</h2>
       <p>
         Questions about this policy? Write to{" "}
-        <a href="mailto:privacy@gooverseas.example">privacy@gooverseas.example</a>.
+        <a href="mailto:privacy@gooverseas.com">privacy@gooverseas.com</a>.
       </p>
     </LegalPage>
   );

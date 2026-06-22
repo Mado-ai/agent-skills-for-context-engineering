@@ -111,7 +111,7 @@ export default function TermsPage() {
       <h2>13. Contact</h2>
       <p>
         Questions about these Terms? Write to{" "}
-        <a href="mailto:hello@gooverseas.example">hello@gooverseas.example</a>.
+        <a href="mailto:hello@gooverseas.com">hello@gooverseas.com</a>.
       </p>
     </LegalPage>
   );
