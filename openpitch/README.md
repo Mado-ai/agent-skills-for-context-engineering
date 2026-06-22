@@ -129,6 +129,21 @@ migration step is needed to get started.
   rq worker -u $REDIS_URL playmetrics
   ```
 
+### On-site sync & automatic player mapping
+
+- **Sync agent** (`scripts/sync_agent.py`) runs on the edge rack: it heartbeats
+  and uploads each finished match to the cloud (idempotent), authenticating with
+  the site's device API key:
+
+  ```bash
+  python scripts/sync_agent.py --server https://app.example.com \
+      --device-key pmk_... --video match.mp4 --label "U15 vs City" --field-type 11
+  ```
+- **Automatic player mapping:** the pipeline OCRs jersey numbers (`jersey.py`),
+  uses them to re-identify fragmented tracks, and `POST /api/matches/{id}/auto-import`
+  maps detections onto the roster by number — no manual assignment. Set
+  `PLAYMETRICS_OCR=easyocr` for a learned recogniser on real footage.
+
 ### Deploying
 
 See **[DEPLOY.md](DEPLOY.md)** for production deployment — a `Dockerfile`,

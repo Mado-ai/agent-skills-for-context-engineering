@@ -805,6 +805,43 @@ def import_match_stats(
     return JSONResponse({"status": "ok", "imported": written})
 
 
+@app.post("/api/matches/{match_id}/auto-import")
+def auto_import_stats(match_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    """Fully automatic: map detected jersey numbers (OCR) -> roster by number."""
+    match = _owned_match(match_id, user)
+    if not match.get("job_id"):
+        raise HTTPException(400, "match has no linked analysis job")
+    job = db.get_job(match["job_id"])
+    detected = (job.get("summary") or {}).get("players", []) if job else []
+    roster_by_jersey = {p["jersey"]: p for p in db.list_players(match["team_id"])
+                        if p.get("jersey") is not None}
+    if not roster_by_jersey:
+        raise HTTPException(400, "roster has no jersey numbers to match")
+
+    # Group detected players by team side; pick the side that best overlaps the roster.
+    sides: dict[str, dict] = {}
+    for d in detected:
+        if d.get("jersey") is not None:
+            sides.setdefault(d["team"], {})[d["jersey"]] = d
+    if not sides:
+        raise HTTPException(400, "no jersey numbers detected in the analysis")
+    best_side = max(sides, key=lambda s: len(set(sides[s]) & set(roster_by_jersey)))
+
+    db.clear_match_stats(match_id)
+    written = 0
+    for jersey, rp in roster_by_jersey.items():
+        d = sides[best_side].get(jersey)
+        if not d:
+            continue
+        db.add_player_stat("st_" + uuid.uuid4().hex[:10], match_id, rp["id"], 0,
+                           float(d.get("distance_m") or 0),
+                           float(d.get("top_speed_ms") or 0), 0, 0)
+        written += 1
+    _audit(user, "match.auto_import", "match", match_id,
+           detail=f"{written} by jersey, side={best_side}")
+    return JSONResponse({"status": "ok", "imported": written, "matched_side": best_side})
+
+
 @app.post("/api/matches/{match_id}/stats")
 def add_stat(
     match_id: str,

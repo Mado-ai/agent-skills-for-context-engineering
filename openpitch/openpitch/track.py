@@ -24,6 +24,7 @@ class PlayerTrack:
     cx: float
     cy: float
     disappeared: int = 0
+    number: int | None = None  # most recent OCR'd jersey number
     path: list[tuple[int, float, float]] = field(default_factory=list)  # frame,x,y
 
 
@@ -43,7 +44,8 @@ class Tracker:
         self._ball_miss = 0
 
     def _new_track(self, det: Detection) -> PlayerTrack:
-        t = PlayerTrack(id=self._next_id, team=det.team or 0, cx=det.cx, cy=det.cy)
+        t = PlayerTrack(id=self._next_id, team=det.team or 0, cx=det.cx, cy=det.cy,
+                        number=det.number)
         self._next_id += 1
         self._tracks[t.id] = t
         return t
@@ -71,6 +73,8 @@ class Tracker:
             else:
                 t = self._tracks[best_id]
                 t.cx, t.cy, t.disappeared = det.cx, det.cy, 0
+                if det.number is not None:
+                    t.number = det.number
                 unmatched.discard(best_id)
 
         # Age / retire unmatched tracks.

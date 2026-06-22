@@ -27,10 +27,10 @@ Status: ✅ implemented here · 🟡 stubbed/partial · ⬜ not yet · 🔌 exte
 |-----------------|------|--------|
 | Ingestion API (auth, validation, dedup) | `POST /api/ingest/matches` — device-key auth, size/type checks, **idempotency keys** | ✅ |
 | Job queue (per-match) | `jobs_queue.py` abstraction: in-process thread (default) or **RQ/Redis** (`PLAYMETRICS_QUEUE=rq`); task in `tasks.py` | ✅ |
-| 1 · Detection (player/ball) | `detect.py` + `track.py` | ✅ |
+| 1 · Detection (player/ball) | `detect.py` + `track.py` + jersey OCR (`jersey.py`) for re-ID | ✅ |
 | 2 · Event detection | highlight heuristics in `highlights.py` (passes/shots/tackles = learned models) | 🟡 |
 | 3 · Tactical metrics (xG/xT, heatmaps, distance) | possession, heatmaps, distance/speed, possession-timeline in `analytics.py` (xG/xT ⬜) | 🟡 |
-| 4 · Individual reports | per-player distance/top-speed; **mapped onto roster players** (`/api/matches/{id}/import-stats`) and surfaced in player profiles | ✅ |
+| 4 · Individual reports | per-player distance/top-speed; **auto-mapped onto roster players by OCR'd jersey** (`/api/matches/{id}/auto-import`) or manual; surfaced in player profiles | ✅ |
 | 5 · Highlight generation | `highlights.py` auto-clips | ✅ |
 | 6 · Profile update | **detection stats flow into team/player profiles** via match→roster mapping; reporting reflects matches by 5/7/11 field type, career totals, leaderboards | ✅ |
 | Relational DB | `db.py` on **SQLAlchemy Core** — SQLite (dev) / **Postgres** (prod) via `DATABASE_URL`; **Alembic** migrations | ✅ |
@@ -69,7 +69,11 @@ Status: ✅ implemented here · 🟡 stubbed/partial · ⬜ not yet · 🔌 exte
 5. ✅ **S3 object storage** — `S3Storage` (boto3): upload on finalize, presigned
    reads; tested with moto. ✅ **Job queue** — `jobs_queue.py` (thread or RQ/Redis).
    GPU workers = run `rq worker` on a GPU node with `detector=yolo`.
-6. **Multi-camera + homography per angle**; quality-tier routing (facility vs Solo).
-7. **Learned event models** (passes/shots/tackles) feeding xG/xT.
-   - Detection→roster mapping is **assisted** today; full auto needs jersey OCR / re-ID.
-8. **On-site sync agent** (the gateway-side counterpart to `/api/ingest/*`).
+6. ✅ **Automatic player mapping** — jersey-number **OCR** (`jersey.py`) re-IDs
+   fragmented tracks by (team, number) and auto-maps detections onto the roster
+   (`POST /api/matches/{id}/auto-import`). Default OCR is dependency-free;
+   `PLAYMETRICS_OCR=easyocr` for real footage.
+7. ✅ **On-site sync agent** — `scripts/sync_agent.py` (gateway-side: heartbeat +
+   idempotent match upload to `/api/ingest/*`, stdlib only).
+8. **Multi-camera + homography per angle**; quality-tier routing (facility vs Solo).
+9. **Learned event models** (passes/shots/tackles) feeding xG/xT.

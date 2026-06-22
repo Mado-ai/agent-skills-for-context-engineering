@@ -60,14 +60,29 @@ export default function MatchStatsImport({
     return <p className="mt-2 text-xs text-slate-400">No detected players on the linked analysis.</p>;
   }
 
+  const autoByJersey = async () => {
+    try {
+      const res = await api.autoImportStats(matchId);
+      setMsg(`Auto-mapped ${res.imported} by jersey number.`);
+      onDone();
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Auto-map failed");
+    }
+  };
+
   return (
     <div className="mt-2 rounded-lg border border-line bg-ink p-3">
-      <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs text-slate-400">Map detected players → roster</span>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <button onClick={autoByJersey}
+          className="rounded bg-pitch px-2 py-1 text-xs font-semibold text-emerald-950"
+          title="Map detected jersey numbers (OCR) onto the roster automatically">
+          ⚡ Auto-map by jersey
+        </button>
         <button onClick={autoAssign} className="rounded bg-line px-2 py-1 text-xs font-semibold">
-          Auto-assign
+          Auto-assign by order
         </button>
       </div>
+      <div className="mb-2 text-xs text-slate-500">…or map manually:</div>
       <div className="flex max-h-48 flex-col gap-1 overflow-auto">
         {detected.slice(0, 12).map((d) => (
           <div key={d.player_id} className="flex items-center gap-2 text-xs">

@@ -213,6 +213,9 @@ export const api = {
       body: JSON.stringify({ mapping, minutes }),
     });
   },
+  async autoImportStats(matchId: string): Promise<{ imported: number; matched_side: string }> {
+    return authed(`/api/matches/${matchId}/auto-import`, { method: "POST" });
+  },
 
   // public (no auth)
   async packages(): Promise<{

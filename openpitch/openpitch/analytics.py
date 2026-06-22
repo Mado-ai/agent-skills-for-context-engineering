@@ -72,8 +72,11 @@ class Analytics:
             X, Y, nx, ny = self._pitch_pos(p.cx, p.cy)
             self._positions[p.team].append((nx, ny))
             rec = self._player_paths.setdefault(
-                p.id, {"team": p.team, "last": None, "dist_m": 0.0, "top_speed": 0.0}
+                p.id, {"team": p.team, "last": None, "dist_m": 0.0, "top_speed": 0.0,
+                       "numbers": {}}
             )
+            if p.number is not None:  # vote jersey numbers across frames
+                rec["numbers"][p.number] = rec["numbers"].get(p.number, 0) + 1
             if rec["last"] is not None:
                 step = float(np.hypot(X - rec["last"][0], Y - rec["last"][1]))
                 speed = step * self.fps  # m/s (one frame elapsed)
@@ -135,16 +138,36 @@ class Analytics:
         cv2.imwrite(str(out_path), img)
 
     def player_stats(self) -> list[dict]:
-        rows = []
+        """Per-player stats, re-identified by jersey number where available.
+
+        The greedy tracker fragments a player into several track IDs; the OCR'd
+        jersey number is a stable identity, so we merge fragments that share a
+        (team, jersey). Fragments with no confident number stay separate.
+        """
+        groups: dict[tuple, dict] = {}
         for pid, rec in self._player_paths.items():
-            rows.append(
-                {
-                    "player_id": pid,
-                    "team": self.config.teams[rec["team"]].name,
-                    "distance_m": round(rec["dist_m"], 1),
-                    "top_speed_ms": round(rec["top_speed"], 2),
-                }
-            )
+            numbers = rec.get("numbers") or {}
+            jersey = max(numbers, key=numbers.get) if numbers else None
+            votes = numbers.get(jersey, 0)
+            # Drop barely-seen spurious reads so they don't pollute the roster.
+            key = (rec["team"], jersey) if (jersey and votes >= 3) else ("trk", pid)
+            g = groups.setdefault(
+                key, {"team": rec["team"], "jersey": jersey if key[0] != "trk" else None,
+                      "dist": 0.0, "top": 0.0})
+            g["dist"] += rec["dist_m"]
+            g["top"] = max(g["top"], rec["top_speed"])
+
+        rows = []
+        for (k0, k1), g in groups.items():
+            name = self.config.teams[g["team"]].name
+            pid = f"{name}#{g['jersey']}" if g["jersey"] is not None else f"trk{k1}"
+            rows.append({
+                "player_id": pid,
+                "team": name,
+                "jersey": g["jersey"],
+                "distance_m": round(g["dist"], 1),
+                "top_speed_ms": round(g["top"], 2),
+            })
         rows.sort(key=lambda r: r["distance_m"], reverse=True)
         return rows
 

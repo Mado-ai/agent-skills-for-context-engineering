@@ -199,6 +199,35 @@ def test_account_deletion_cascades(auth):
                   data={"email": "deleteme@club.com", "password": "secret1"}).status_code == 401
 
 
+def test_auto_import_by_jersey_ocr(auth):
+    import time
+
+    c, h = auth
+    tid = c.post("/api/teams", data={"name": "OCR FC"}, headers=h).json()["id"]
+    # roster with jersey numbers matching the synthetic match (1..11)
+    for n in range(1, 12):
+        c.post(f"/api/teams/{tid}/players",
+               data={"name": f"Player {n}", "jersey": str(n), "is_minor": "false"}, headers=h)
+
+    jid = c.post("/api/demo", data={"seconds": "6"}, headers=h).json()["job_id"]
+    for _ in range(160):
+        if c.get(f"/api/jobs/{jid}", headers=h).json()["status"] in ("done", "error"):
+            break
+        time.sleep(0.5)
+    mid = c.post(f"/api/teams/{tid}/matches",
+                 data={"field_type": 11, "opponent": "OCR United", "job_id": jid},
+                 headers=h).json()["id"]
+
+    # fully automatic: map detected jersey numbers (OCR) onto the roster
+    res = c.post(f"/api/matches/{mid}/auto-import", headers=h).json()
+    assert res["imported"] >= 6, res  # most of the 11 jerseys matched
+
+    # reporting reflects it
+    tp = c.get(f"/api/teams/{tid}", headers=h).json()
+    assert len(tp["leaderboard"]) >= 6
+    assert tp["matches_by_field"]["11"] == 1
+
+
 def test_ownership_isolation(auth):
     c, h = auth
     tid = c.post("/api/teams", data={"name": "Private FC"}, headers=h).json()["id"]

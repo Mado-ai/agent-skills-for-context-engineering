@@ -74,13 +74,19 @@ def main() -> None:
         ball += (target - ball) * 0.18 + rng.normal(0, 1.5, 2)
         ball = np.clip(ball, [45, 45], [w - 45, h - 45])
 
-        # Players drift toward the ball, keeping team shape.
+        # Players drift toward the ball, keeping team shape. Each wears a
+        # jersey number (1..11) so the pipeline's OCR can read it.
         for squad, color in ((home, RED), (away, BLUE)):
             squad += (ball - squad) * 0.02 + rng.normal(0, 1.2, squad.shape)
             squad[:] = np.clip(squad, [45, 45], [w - 45, h - 45])
-            for x, y in squad:
-                cv2.circle(frame, (int(x), int(y)), 11, color, -1)
-                cv2.circle(frame, (int(x), int(y)), 11, (20, 20, 20), 1)
+            for idx, (x, y) in enumerate(squad):
+                cx, cy = int(x), int(y)
+                cv2.circle(frame, (cx, cy), 17, color, -1)
+                cv2.circle(frame, (cx, cy), 17, (20, 20, 20), 1)
+                num = str(idx + 1)
+                (tw, th), _ = cv2.getTextSize(num, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
+                cv2.putText(frame, num, (cx - tw // 2, cy + th // 2),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, WHITE, 2, cv2.LINE_AA)
 
         cv2.circle(frame, (int(ball[0]), int(ball[1])), 6, WHITE, -1)
         writer.write(frame)

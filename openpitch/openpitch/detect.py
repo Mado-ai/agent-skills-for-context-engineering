@@ -23,6 +23,7 @@ from dataclasses import dataclass
 import cv2
 import numpy as np
 
+from . import jersey
 from .config import BALL_HSV, Config
 
 
@@ -35,6 +36,7 @@ class Detection:
     h: float  # normalised height
     conf: float
     team: int | None = None  # index into Config.teams, players only
+    number: int | None = None  # OCR'd jersey number, players only
 
 
 class ColorDetector:
@@ -74,6 +76,8 @@ class ColorDetector:
             for cx, cy, w, h, _ in self._blobs(
                 mask, self.cfg.min_player_area, self.cfg.max_player_area
             ):
+                bbox = (int(cx - w / 2), int(cy - h / 2), int(w), int(h))
+                number = jersey.read_number(frame, bbox) if self.cfg.read_jersey else None
                 dets.append(
                     Detection(
                         cls="player",
@@ -83,6 +87,7 @@ class ColorDetector:
                         h=h / H,
                         conf=0.9,
                         team=team_idx,
+                        number=number,
                     )
                 )
 

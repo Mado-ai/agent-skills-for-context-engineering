@@ -45,6 +45,7 @@ BALL_HSV = ((0, 0, 200), (179, 60, 255))
 class Config:
     # --- detection ---
     detector: str = "color"  # "color" | "yolo"
+    read_jersey: bool = True  # OCR jersey numbers for automatic roster mapping
     min_player_area: int = 60
     max_player_area: int = 6000
     min_ball_area: int = 6
