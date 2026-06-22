@@ -9,6 +9,7 @@ import { Magnetic } from "./Magnetic";
 const nav = [
   { href: "/services", label: "Services" },
   { href: "/work", label: "Work" },
+  { href: "/pricing", label: "Pricing" },
   { href: "/about", label: "About" },
   { href: "/insights", label: "Insights" },
 ];

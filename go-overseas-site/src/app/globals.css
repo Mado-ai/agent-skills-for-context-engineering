@@ -132,6 +132,40 @@ body {
   );
 }
 
+/* Word-by-word text reveal */
+.tr-word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+.tr-inner {
+  display: inline-block;
+  transform: translateY(115%);
+  transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: transform;
+}
+.tr-inner[data-in="true"] {
+  transform: translateY(0);
+}
+
+/* Hide scrollbar on horizontal strips */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tr-inner {
+    transform: none !important;
+    transition: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-spin-slow,
   .animate-spin-slow-rev,

@@ -11,7 +11,11 @@ import { Magnetic } from "@/components/Magnetic";
 import { Tilt } from "@/components/Tilt";
 import { Reveal } from "@/components/Reveal";
 import { Parallax } from "@/components/Parallax";
+import { TextReveal } from "@/components/TextReveal";
+import { PinnedSteps } from "@/components/PinnedSteps";
+import { HorizontalStrip } from "@/components/HorizontalStrip";
 import { services, stats, process, sectors } from "@/lib/site";
+import { everySite } from "@/lib/pricing";
 import { professionalServiceSchema } from "@/lib/seo";
 
 const pillars = [
@@ -81,10 +85,21 @@ export default function HomePage() {
         <Container className="relative grid items-center gap-12 py-24 sm:py-32 lg:grid-cols-[1.15fr_0.85fr]">
           <div>
             <Eyebrow>Creative Management & Growth</Eyebrow>
-            <h1 className="mt-6 font-display text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
-              We build brands and the systems that{" "}
-              <span className="text-gradient">grow them.</span>
-            </h1>
+            <TextReveal
+              as="h1"
+              className="mt-6 font-display text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl"
+              words={[
+                { t: "We" },
+                { t: "build" },
+                { t: "brands" },
+                { t: "and" },
+                { t: "the" },
+                { t: "systems" },
+                { t: "that" },
+                { t: "grow", className: "text-gradient" },
+                { t: "them.", className: "text-gradient" },
+              ]}
+            />
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-mist">
               go overseas is a creative management agency. From brand identity and websites
               to ads, PR, and automation, we handle the strategy, the creative, and the
@@ -215,32 +230,52 @@ export default function HomePage() {
         </Reveal>
       </Section>
 
-      {/* Process — bold colour block */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-purple via-blue-deep to-blue">
-        <Sparkle className="pointer-events-none absolute -left-12 -top-12 h-56 w-56 text-white/10 animate-spin-slow" />
-        <LoopSquiggle className="pointer-events-none absolute right-10 top-12 hidden h-12 w-32 text-white/30 sm:block" />
-        <Container className="relative py-20 sm:py-28">
-          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-white/70">
-            <span className="h-1.5 w-1.5 rounded-full bg-lime" />
-            How we work
-          </span>
-          <h2 className="mt-5 max-w-2xl font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-            From idea to impact — a four-step path.
+      {/* Websites offer teaser — horizontal strip */}
+      <Section>
+        <div className="mx-auto max-w-2xl text-center">
+          <Eyebrow>Websites that sell</Eyebrow>
+          <h2 className="mt-5 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+            A complete website from <span className="text-blue">$999</span>.
           </h2>
-          <Reveal className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {process.map((p) => (
+          <p className="mt-4 text-mist">
+            Every site ships ready to rank and convert — then we keep it that way on a simple
+            monthly care plan. No separate hosting bill, ever.
+          </p>
+        </div>
+        <div className="mt-10">
+          <HorizontalStrip>
+            {everySite.map((item) => (
               <div
-                key={p.step}
-                className="rounded-[var(--radius-card)] border border-white/15 bg-white/10 p-6 backdrop-blur"
+                key={item}
+                className="flex min-w-[230px] snap-start items-start gap-3 rounded-[var(--radius-card)] border border-line bg-ink-800/50 p-6"
               >
-                <span className="font-display text-3xl font-semibold text-white">{p.step}</span>
-                <h3 className="mt-4 font-display text-lg font-semibold text-white">{p.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-white/80">{p.body}</p>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  className="mt-0.5 h-5 w-5 shrink-0 text-green"
+                >
+                  <path d="M5 13l4 4 10-11" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span className="text-sm font-medium text-white">{item}</span>
               </div>
             ))}
-          </Reveal>
-        </Container>
-      </section>
+          </HorizontalStrip>
+        </div>
+        <div className="mt-8 flex justify-center">
+          <Magnetic>
+            <Button href="/pricing">See plans &amp; pricing</Button>
+          </Magnetic>
+        </div>
+      </Section>
+
+      {/* Process — pinned narrative */}
+      <PinnedSteps
+        steps={process}
+        eyebrow="How we work"
+        title="From idea to impact — a four-step path."
+      />
 
       {/* Sectors */}
       <Section>
