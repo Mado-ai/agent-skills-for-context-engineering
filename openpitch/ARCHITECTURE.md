@@ -55,7 +55,7 @@ Status: ✅ implemented here · 🟡 stubbed/partial · ⬜ not yet · 🔌 exte
 | Role-based access (coach/parent/player/scout/federation) | orgs + memberships: owner/admin/coach (staff), parent/player (read-only, linked to one player), scout (public-only); federation ⬜ | ✅ |
 | Guardian-gating for minors | players default to `is_minor`; sharing a minor needs guardian consent (`POST /api/players/{id}/consent` by linked parent/owner); revoking consent withdraws public exposure | ✅ |
 | Audit trail | `audit_log` table; player views/shares + ingest-imports recorded; `GET /api/players/{id}/audit` (staff) to review | ✅ |
-| Hardening | security headers (CSP/HSTS/XFO/nosniff), login rate-limit + lockout, prod requires PLAYMETRICS_SECRET + admin password | ✅ |
+| Hardening | security headers (CSP/HSTS/XFO/nosniff), login rate-limit + lockout, prod requires PLAYMETRICS_SECRET + admin password, signed media tokens (no session JWT in URLs) | ✅ |
 | Right to delete (cascade) | `DELETE /api/account` (user data + files) and `DELETE /api/orgs/{id}` cascade through all stores | ✅ |
 
 ## Next backend milestones (in priority order)
@@ -65,8 +65,9 @@ Status: ✅ implemented here · 🟡 stubbed/partial · ⬜ not yet · 🔌 exte
 3. ✅ **Postgres-ready data layer** — `db.py` on SQLAlchemy Core + Alembic,
    driven by `DATABASE_URL` (SQLite dev / Postgres prod). Next: validate against
    a live Postgres in CI; then S3 storage + a real job queue (Celery/RQ) + GPU workers.
-4. **Signed media URLs** — replace the `?token=` (session JWT) on `/api/files/*`
-   with short-lived, media-scoped signed URLs (small frontend media-token refactor).
+4. ✅ **Signed media URLs** — `/api/files/*` now takes a short-lived, read-only
+   media token (`?mt=`, HMAC, 6h) instead of the session JWT; the SPA fetches it
+   on auth. Next: S3 object storage + a job queue (Celery/RQ) + GPU workers.
 5. **Multi-camera + homography per angle**; quality-tier routing (facility vs Solo).
 6. **Learned event models** (passes/shots/tackles) feeding xG/xT.
    - Detection→roster mapping is **assisted** today (auto-assign + manual confirm);

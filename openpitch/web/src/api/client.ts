@@ -1,6 +1,7 @@
 import type { Device, Job, Member, Org, PlayerProfile, Site, SiteJob, TeamProfile, TeamSummary, User } from "../types";
 
 const TOKEN_KEY = "pm_token";
+let _mediaToken = "";
 
 export const tokenStore = {
   get: () => localStorage.getItem(TOKEN_KEY),
@@ -98,9 +99,17 @@ export const api = {
     return parse(await fetch("/api/demo", { method: "POST", headers: authHeaders(), body: fd }));
   },
 
-  // Media tags can't send headers — token goes in the query string.
+  // Short-lived, read-only token for media URLs (not the session JWT). Fetched
+  // on auth and cached; refreshed lazily.
+  async fetchMediaToken(): Promise<void> {
+    try {
+      _mediaToken = (await authed("/api/auth/media-token")).media_token;
+    } catch {
+      _mediaToken = "";
+    }
+  },
   fileUrl(jobId: string, path: string): string {
-    return `/api/files/${jobId}/${path}?token=${encodeURIComponent(tokenStore.get() ?? "")}`;
+    return `/api/files/${jobId}/${path}?mt=${encodeURIComponent(_mediaToken)}`;
   },
 
   // --- organizations / RBAC ---

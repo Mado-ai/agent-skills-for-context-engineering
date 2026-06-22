@@ -88,8 +88,11 @@ def test_demo_job_runs_and_files_are_guarded(client):
     assert abs(sum(job["summary"]["possession"].values()) - 100) < 0.5
 
     # file needs a valid token
+    # media files need a short-lived media token (not the session JWT)
+    mt = client.get("/api/auth/media-token", headers=h).json()["media_token"]
     assert client.get(f"/api/files/{jid}/broadcast.mp4").status_code == 401
-    assert client.get(f"/api/files/{jid}/broadcast.mp4?token={token}").status_code == 200
+    assert client.get(f"/api/files/{jid}/broadcast.mp4?token={token}").status_code == 401
+    assert client.get(f"/api/files/{jid}/broadcast.mp4?mt={mt}").status_code == 200
 
     # another user cannot see this job
     other = client.post("/api/auth/register",

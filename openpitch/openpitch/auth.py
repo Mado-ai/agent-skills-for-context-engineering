@@ -76,6 +76,33 @@ def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
 
+# --- media tokens -----------------------------------------------------------
+# Short-lived, media-read-only tokens used in <video>/<img> URLs instead of the
+# full session JWT, so a leaked media URL can't drive the account and expires.
+
+_MEDIA_TTL_S = 6 * 3600
+
+
+def create_media_token(user_id: int, ttl: int = _MEDIA_TTL_S) -> str:
+    exp = int(time.time()) + ttl
+    msg = f"{user_id}.{exp}"
+    sig = _b64u(hmac.new(SECRET.encode(), msg.encode(), hashlib.sha256).digest())
+    return f"{msg}.{sig}"
+
+
+def verify_media_token(token: str) -> int | None:
+    try:
+        uid, exp, sig = token.split(".")
+    except (ValueError, AttributeError):
+        return None
+    expected = _b64u(hmac.new(SECRET.encode(), f"{uid}.{exp}".encode(), hashlib.sha256).digest())
+    if not hmac.compare_digest(expected, sig):
+        return None
+    if int(exp) < time.time():
+        return None
+    return int(uid)
+
+
 def decode_token(token: str) -> dict | None:
     try:
         header, payload, sig = token.split(".")

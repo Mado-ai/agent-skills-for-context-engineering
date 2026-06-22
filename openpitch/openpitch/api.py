@@ -144,14 +144,6 @@ def current_user(
     return dict(user)
 
 
-def _user_from_token_str(token: str) -> dict | None:
-    data = auth.decode_token(token)
-    if not data:
-        return None
-    user = db.get_user_by_id(data["sub"])
-    return dict(user) if user else None
-
-
 # --- auth endpoints ---------------------------------------------------------
 
 @app.post("/api/auth/register")
@@ -198,6 +190,13 @@ def me(user: dict = Depends(current_user)) -> JSONResponse:
     return JSONResponse(
         {"email": user["email"], "is_admin": bool(user["is_admin"])}
     )
+
+
+@app.get("/api/auth/media-token")
+def media_token(user: dict = Depends(current_user)) -> JSONResponse:
+    """Short-lived, read-only token for <video>/<img> URLs (not the session JWT)."""
+    return JSONResponse({"media_token": auth.create_media_token(user["id"]),
+                         "expires_in": auth._MEDIA_TTL_S})
 
 
 @app.post("/api/auth/change-password")
@@ -334,13 +333,14 @@ def delete_job(job_id: str, user: dict = Depends(current_user)) -> JSONResponse:
 
 
 @app.get("/api/files/{job_id}/{path:path}")
-def serve_file(job_id: str, path: str, token: str = ""):
-    # Media tags can't send Authorization headers, so accept ?token=.
-    user = _user_from_token_str(token)
-    if not user:
-        raise HTTPException(401, "invalid token")
+def serve_file(job_id: str, path: str, mt: str = ""):
+    # Media tags can't send Authorization headers, so accept a short-lived,
+    # read-only media token (?mt=) — not the full session JWT.
+    uid = auth.verify_media_token(mt)
+    if uid is None:
+        raise HTTPException(401, "invalid or expired media token")
     job = db.get_job(job_id)
-    if not job or job["user_id"] != user["id"]:
+    if not job or job["user_id"] != uid:
         raise HTTPException(404, "not found")
     target = (RUNS / job_id / path).resolve()
     if not str(target).startswith(str(RUNS.resolve())) or not target.exists():

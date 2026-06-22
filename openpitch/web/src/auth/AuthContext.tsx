@@ -22,7 +22,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Async session restore; setState runs in the promise callbacks below.
     api
       .me()
-      .then(setUser)
+      .then((u) => {
+        setUser(u);
+        void api.fetchMediaToken();
+      })
       .catch(() => tokenStore.clear())
       .finally(() => setLoading(false));
   }, []);
@@ -30,6 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const finishAuth = async (token: string) => {
     tokenStore.set(token);
     setUser(await api.me());
+    await api.fetchMediaToken();
   };
 
   const value: AuthState = {
