@@ -9,3 +9,5 @@ venv/
 *.pt
 *.db
 playmetrics.db
+live_preview.png
+preview.png
