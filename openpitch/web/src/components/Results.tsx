@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { api } from "../api/client";
 import type { Job, PlayerStat } from "../types";
-import { DistanceChart, PossessionTimeline, SpeedDistribution, XtLeaders } from "./Charts";
+import { DistanceChart, PossessionTimeline, SpeedDistribution, TouchLeaders, XtLeaders } from "./Charts";
 import { cx } from "../lib/cx";
 import { Avatar, Badge, Card, CellBar, Donut, Icon, StatCard, Tabs, TeamChip, VersusRow } from "./ui";
 
@@ -38,6 +38,7 @@ export default function Results({ job }: { job: Job | null }) {
   const awayPct = s.possession[away] ?? 0;
   const ts = s.team_stats;
   const color = (t: string) => (t === home ? HOME : AWAY);
+  const hasXt = s.players.some((p) => (p.xt_added ?? 0) !== 0);
 
   return (
     <div className="flex flex-col gap-5 fade-up">
@@ -116,9 +117,15 @@ export default function Results({ job }: { job: Job | null }) {
             <Card title="Possession over time" icon="activity">
               <PossessionTimeline summary={s} />
             </Card>
-            <Card title="Expected threat — top creators" subtitle="xT added by progressive passing" icon="route">
-              <XtLeaders summary={s} />
-            </Card>
+            {hasXt ? (
+              <Card title="Expected threat — top creators" subtitle="xT added by progressive passing" icon="route">
+                <XtLeaders summary={s} />
+              </Card>
+            ) : (
+              <Card title="Most involved players" subtitle="On-ball touches (xT shows on match footage)" icon="route">
+                <TouchLeaders summary={s} />
+              </Card>
+            )}
             <Card title="Distance covered" subtitle="Top 8 players" icon="gauge">
               <DistanceChart summary={s} />
             </Card>

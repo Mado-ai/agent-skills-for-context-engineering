@@ -136,15 +136,38 @@ export function XtLeaders({ summary }: { summary: JobSummary }) {
     .sort((a, b) => (b.xt_added ?? 0) - (a.xt_added ?? 0))
     .slice(0, 7)
     .map((p) => ({ name: `#${p.jersey ?? p.player_id}`, xt: +(p.xt_added ?? 0).toFixed(3), team: p.team }));
-  if (data.length === 0) return <Empty hint="No threat-creating passes detected in this clip." />;
+  if (data.length === 0) return <Empty title="No threat-creating passes yet" hint="xT appears once players string passes toward goal — point it at real match footage." />;
+  return <HBars data={data} dataKey="xt" name="xT" home={home} />;
+}
+
+/** Fallback involvement chart: most-touched players (always has data when the
+ *  ball is tracked), so the card never sits empty on quiet clips. */
+export function TouchLeaders({ summary }: { summary: JobSummary }) {
+  const [home] = Object.keys(summary.possession);
+  const data = summary.players
+    .filter((p) => (p.touches ?? 0) > 0)
+    .sort((a, b) => (b.touches ?? 0) - (a.touches ?? 0))
+    .slice(0, 7)
+    .map((p) => ({ name: `#${p.jersey ?? p.player_id}`, touches: p.touches ?? 0, team: p.team }));
+  if (data.length === 0) return <Empty title="No on-ball involvement yet" hint="Touches register once the ball is consistently tracked near players." />;
+  return <HBars data={data} dataKey="touches" name="touches" home={home} />;
+}
+
+/** Shared horizontal-bar renderer for the leader charts. */
+function HBars({ data, dataKey, name, home }: {
+  data: { name: string; team: string }[] & Record<string, unknown>[];
+  dataKey: string;
+  name: string;
+  home: string;
+}) {
   return (
     <ResponsiveContainer width="100%" height={210}>
       <BarChart layout="vertical" data={data} margin={{ top: 4, right: 12, bottom: 0, left: 6 }}>
         <CartesianGrid stroke={GRID} horizontal={false} />
-        <XAxis type="number" {...axis} />
+        <XAxis type="number" allowDecimals={false} {...axis} />
         <YAxis type="category" dataKey="name" width={42} {...axis} />
         <Tooltip content={<Tip />} cursor={{ fill: "#ffffff08" }} />
-        <Bar dataKey="xt" name="xT" radius={[0, 5, 5, 0]} maxBarSize={22}>
+        <Bar dataKey={dataKey} name={name} radius={[0, 5, 5, 0]} maxBarSize={22}>
           {data.map((d, i) => (
             <Cell key={i} fill={d.team === home ? HOME : AWAY} />
           ))}
@@ -154,10 +177,17 @@ export function XtLeaders({ summary }: { summary: JobSummary }) {
   );
 }
 
-function Empty({ hint }: { hint?: string }) {
+function Empty({ title, hint }: { title?: string; hint?: string }) {
   return (
-    <div className="grid h-[210px] place-items-center text-center text-sm text-mute">
-      {hint ?? "Not enough data to chart yet."}
+    <div className="flex h-[210px] flex-col items-center justify-center gap-2 text-center">
+      <span className="grid h-10 w-10 place-items-center rounded-full bg-line/60 text-mute">
+        <svg viewBox="0 0 24 24" width={20} height={20} fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 3v18h18" />
+          <path d="M7 14l3-3 3 3 5-6" />
+        </svg>
+      </span>
+      <p className="text-sm font-medium text-slate-300">{title ?? "Not enough data yet"}</p>
+      {hint && <p className="max-w-[15rem] text-xs text-mute">{hint}</p>}
     </div>
   );
 }
