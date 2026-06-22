@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import json
 import os
-import shutil
 import subprocess
 import sys
 import threading
@@ -30,15 +29,16 @@ from fastapi import (
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from . import auth, authz, db, hardware, profiles
+from . import auth, authz, db, hardware, profiles, storage
 from .config import Config
 from .pipeline import process_video
 
 IS_PRODUCTION = os.environ.get("PLAYMETRICS_ENV", "").lower() == "production"
 
 ROOT = Path(__file__).resolve().parent.parent
-# Output/job directory — point at a mounted volume in production via env.
-RUNS = Path(os.environ.get("PLAYMETRICS_DATA", str(ROOT / "runs")))
+# Object storage (local FS today; S3/GCS-ready). RUNS = its local root.
+STORAGE = storage.get_storage()
+RUNS = STORAGE.root
 # Prefer the built Vite SPA (web/dist); fall back to the no-build frontend.
 WEB_DIST = ROOT / "web" / "dist"
 SPA_DIR = WEB_DIST if (WEB_DIST / "index.html").exists() else ROOT / "frontend"
@@ -183,6 +183,16 @@ def health() -> JSONResponse:
     return JSONResponse({"status": "ok", "version": app.version})
 
 
+@app.delete("/api/account")
+def delete_account(user: dict = Depends(current_user)) -> JSONResponse:
+    """Right-to-delete: remove the account and its personal data + files."""
+    job_ids = db.delete_user_cascade(user["id"])
+    for jid in job_ids:
+        STORAGE.delete_job(jid)
+    _audit(None, "account.delete", "user", str(user["id"]))
+    return JSONResponse({"status": "ok"})
+
+
 @app.get("/api/auth/me")
 def me(user: dict = Depends(current_user)) -> JSONResponse:
     return JSONResponse(
@@ -319,7 +329,7 @@ def rename_job(
 def delete_job(job_id: str, user: dict = Depends(current_user)) -> JSONResponse:
     _owned_job(job_id, user)
     db.delete_job(job_id)
-    shutil.rmtree(RUNS / job_id, ignore_errors=True)
+    STORAGE.delete_job(job_id)
     return JSONResponse({"status": "ok"})
 
 
@@ -520,6 +530,13 @@ def org_teams(org_id: str, user: dict = Depends(current_user)) -> JSONResponse:
     return JSONResponse({"teams": db.list_org_teams(org_id)})
 
 
+@app.delete("/api/orgs/{org_id}")
+def remove_org(org_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _require_org_role(org_id, user, {authz.OWNER})
+    db.delete_org_cascade(org_id)
+    return JSONResponse({"status": "ok"})
+
+
 # --- teams ------------------------------------------------------------------
 
 def _org_role(org_id: str, user: dict) -> str | None:
@@ -637,12 +654,14 @@ def create_player(
     name: str = Form(...),
     position: str = Form(""),
     jersey: int | None = Form(None),
+    is_minor: bool = Form(True),
     user: dict = Depends(current_user),
 ) -> JSONResponse:
     _owned_team(team_id, user)
     player_id = "ply_" + uuid.uuid4().hex[:10]
     return JSONResponse(
-        db.create_player(player_id, team_id, name.strip()[:80], position.strip()[:40] or None, jersey)
+        db.create_player(player_id, team_id, name.strip()[:80],
+                         position.strip()[:40] or None, jersey, is_minor)
     )
 
 
@@ -653,6 +672,8 @@ def player_detail(player_id: str, user: dict = Depends(current_user)) -> JSONRes
     profile = profiles.player_profile(player_id)
     player = db.get_player(player_id)
     profile["public_token"] = player["public_token"]
+    profile["is_minor"] = bool(player["is_minor"])
+    profile["guardian_consent"] = player["guardian_consent_at"] is not None
     return JSONResponse(profile)
 
 
@@ -685,10 +706,38 @@ def remove_player(player_id: str, user: dict = Depends(current_user)) -> JSONRes
 @app.post("/api/players/{player_id}/share")
 def share_player(player_id: str, user: dict = Depends(current_user)) -> JSONResponse:
     player = _owned_player(player_id, user)
-    token = None if player["public_token"] else uuid.uuid4().hex[:12]
+    turning_on = not player["public_token"]
+    # Child-safety: a minor's profile cannot be made public without guardian consent.
+    if turning_on and player["is_minor"] and player["guardian_consent_at"] is None:
+        raise HTTPException(403, "guardian consent required before sharing a minor's profile")
+    token = uuid.uuid4().hex[:12] if turning_on else None
     db.set_player_public(player_id, token)
     _audit(user, "player.share" if token else "player.unshare", "player", player_id)
     return JSONResponse({"public": token is not None, "public_token": token})
+
+
+@app.post("/api/players/{player_id}/consent")
+def grant_consent(
+    player_id: str, granted: bool = Form(True), user: dict = Depends(current_user)
+) -> JSONResponse:
+    """Guardian consent for a minor — by the linked parent, or a personal owner."""
+    player = db.get_player(player_id)
+    if not player:
+        raise HTTPException(404, "player not found")
+    team = db.get_team(player["team_id"])
+    allowed = False
+    if team and team["org_id"]:
+        m = db.get_membership(team["org_id"], user["id"])
+        allowed = bool(m and m["role"] == authz.PARENT and m["player_id"] == player_id)
+    elif team and team["user_id"] == user["id"]:
+        allowed = True  # personal/solo owner acts as guardian
+    if not allowed:
+        raise HTTPException(403, "only the linked guardian can grant consent")
+    db.set_player_consent(player_id, user["id"] if granted else None)
+    if not granted:  # revoking consent also withdraws any public exposure
+        db.set_player_public(player_id, None)
+    _audit(user, "player.consent" if granted else "player.consent_revoked", "player", player_id)
+    return JSONResponse({"consent": granted})
 
 
 # --- matches & stats --------------------------------------------------------

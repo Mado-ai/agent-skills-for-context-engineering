@@ -26,14 +26,23 @@ export default function PlayerProfile() {
   const t = pp.totals;
 
   const share = async () => {
-    const res = await api.sharePlayer(id);
-    if (res.public && res.public_token) {
-      const url = `${location.origin}/share/player/${res.public_token}`;
-      await navigator.clipboard?.writeText(url).catch(() => {});
-      alert(`Public profile link copied:\n${url}`);
-    } else {
-      alert("Sharing turned off.");
+    try {
+      const res = await api.sharePlayer(id);
+      if (res.public && res.public_token) {
+        const url = `${location.origin}/share/player/${res.public_token}`;
+        await navigator.clipboard?.writeText(url).catch(() => {});
+        alert(`Public profile link copied:\n${url}`);
+      } else {
+        alert("Sharing turned off.");
+      }
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Could not share");
     }
+    load();
+  };
+
+  const toggleConsent = async () => {
+    await api.grantConsent(id, !pp.guardian_consent);
     load();
   };
 
@@ -48,10 +57,28 @@ export default function PlayerProfile() {
           </h1>
           {pp.player.position && <p className="text-sm text-slate-400">{pp.player.position}</p>}
         </div>
-        <button onClick={share} className="rounded-lg bg-line px-3 py-2 text-sm font-semibold">
-          {pp.public_token ? "Unshare" : "Share profile"}
-        </button>
+        <div className="flex items-center gap-2">
+          {pp.is_minor && (
+            <button
+              onClick={toggleConsent}
+              className={`rounded-lg px-3 py-2 text-sm font-semibold ${
+                pp.guardian_consent ? "bg-line text-pitch" : "bg-line text-yellow-300"
+              }`}
+              title="Guardian consent is required before a minor's profile can be shared"
+            >
+              {pp.guardian_consent ? "✓ Consent given" : "Grant guardian consent"}
+            </button>
+          )}
+          <button onClick={share} className="rounded-lg bg-line px-3 py-2 text-sm font-semibold">
+            {pp.public_token ? "Unshare" : "Share profile"}
+          </button>
+        </div>
       </div>
+      {pp.is_minor && !pp.guardian_consent && (
+        <p className="-mt-3 mb-4 text-xs text-yellow-300/80">
+          Minor profile — guardian consent required before sharing publicly.
+        </p>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-xl border border-line bg-card p-5">

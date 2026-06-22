@@ -158,6 +158,47 @@ def test_import_stats_from_analysis(auth):
     assert c.get(f"/api/players/{p1['id']}", headers=h).json()["totals"]["matches"] == 1
 
 
+def test_guardian_consent_gates_minor_sharing(auth):
+    c, h = auth
+    tid = c.post("/api/teams", data={"name": "Consent FC"}, headers=h).json()["id"]
+    # minor by default
+    minor = c.post(f"/api/teams/{tid}/players", data={"name": "Young Pat"}, headers=h).json()["id"]
+    adult = c.post(f"/api/teams/{tid}/players",
+                   data={"name": "Senior Sam", "is_minor": "false"}, headers=h).json()["id"]
+
+    # sharing a minor without consent is blocked
+    assert c.post(f"/api/players/{minor}/share", headers=h).status_code == 403
+    # an adult can be shared freely
+    assert c.post(f"/api/players/{adult}/share", headers=h).json()["public"] is True
+
+    # personal-team owner acts as guardian: grant consent, then sharing works
+    assert c.post(f"/api/players/{minor}/consent", data={"granted": "true"}, headers=h).status_code == 200
+    share = c.post(f"/api/players/{minor}/share", headers=h).json()
+    assert share["public"] is True
+    token = share["public_token"]
+    assert c.get(f"/api/public/players/{token}").status_code == 200
+
+    # revoking consent withdraws the public exposure
+    c.post(f"/api/players/{minor}/consent", data={"granted": "false"}, headers=h)
+    assert c.get(f"/api/public/players/{token}").status_code == 404
+    assert c.get(f"/api/players/{minor}", headers=h).json()["guardian_consent"] is False
+
+
+def test_account_deletion_cascades(auth):
+    c, _ = auth
+    tok = c.post("/api/auth/register",
+                 data={"email": "deleteme@club.com", "password": "secret1"}).json()["token"]
+    h2 = {"Authorization": f"Bearer {tok}"}
+    tid = c.post("/api/teams", data={"name": "Temp FC"}, headers=h2).json()["id"]
+    c.post(f"/api/teams/{tid}/players", data={"name": "Tmp"}, headers=h2)
+
+    assert c.delete("/api/account", headers=h2).status_code == 200
+    # token no longer resolves; the team is gone
+    assert c.get("/api/auth/me", headers=h2).status_code == 401
+    assert c.post("/api/auth/login",
+                  data={"email": "deleteme@club.com", "password": "secret1"}).status_code == 401
+
+
 def test_ownership_isolation(auth):
     c, h = auth
     tid = c.post("/api/teams", data={"name": "Private FC"}, headers=h).json()["id"]

@@ -118,6 +118,9 @@ def init_db() -> None:
                 position TEXT,
                 jersey INTEGER,
                 public_token TEXT,
+                is_minor INTEGER DEFAULT 1,
+                guardian_consent_at REAL,
+                guardian_consent_by INTEGER,
                 created_at REAL NOT NULL
             );
             CREATE TABLE IF NOT EXISTS matches (
@@ -154,6 +157,12 @@ def init_db() -> None:
         team_cols = {r["name"] for r in c.execute("PRAGMA table_info(teams)")}
         if "org_id" not in team_cols:
             c.execute("ALTER TABLE teams ADD COLUMN org_id TEXT")
+        player_cols = {r["name"] for r in c.execute("PRAGMA table_info(players)")}
+        for col, ddl in (("is_minor", "is_minor INTEGER DEFAULT 1"),
+                         ("guardian_consent_at", "guardian_consent_at REAL"),
+                         ("guardian_consent_by", "guardian_consent_by INTEGER")):
+            if col not in player_cols:
+                c.execute(f"ALTER TABLE players ADD COLUMN {ddl}")
         c.commit()
 
 
@@ -482,27 +491,68 @@ def set_team_public(team_id: str, token: str | None) -> None:
     _exec("UPDATE teams SET public_token = ? WHERE id = ?", (token, team_id))
 
 
+def _delete_team_rows(c: sqlite3.Connection, team_id: str) -> None:
+    for mid in [r["id"] for r in c.execute("SELECT id FROM matches WHERE team_id = ?", (team_id,))]:
+        c.execute("DELETE FROM player_match_stats WHERE match_id = ?", (mid,))
+    c.execute("DELETE FROM matches WHERE team_id = ?", (team_id,))
+    c.execute("DELETE FROM players WHERE team_id = ?", (team_id,))
+    c.execute("DELETE FROM teams WHERE id = ?", (team_id,))
+
+
 def delete_team(team_id: str) -> None:
     with _lock:
         c = _connect()
-        match_ids = [r["id"] for r in c.execute(
-            "SELECT id FROM matches WHERE team_id = ?", (team_id,))]
-        for mid in match_ids:
-            c.execute("DELETE FROM player_match_stats WHERE match_id = ?", (mid,))
-        c.execute("DELETE FROM matches WHERE team_id = ?", (team_id,))
-        c.execute("DELETE FROM players WHERE team_id = ?", (team_id,))
-        c.execute("DELETE FROM teams WHERE id = ?", (team_id,))
+        _delete_team_rows(c, team_id)
         c.commit()
+
+
+def delete_org_cascade(org_id: str) -> None:
+    with _lock:
+        c = _connect()
+        for tid in [r["id"] for r in c.execute("SELECT id FROM teams WHERE org_id = ?", (org_id,))]:
+            _delete_team_rows(c, tid)
+        c.execute("DELETE FROM memberships WHERE org_id = ?", (org_id,))
+        c.execute("DELETE FROM organizations WHERE id = ?", (org_id,))
+        c.commit()
+
+
+def delete_user_cascade(user_id: int) -> list[str]:
+    """Right-to-delete: remove the user's personal data; return job IDs (files)."""
+    with _lock:
+        c = _connect()
+        job_ids = [r["id"] for r in c.execute("SELECT id FROM jobs WHERE user_id = ?", (user_id,))]
+        # personal (non-org) teams and their data
+        for tid in [r["id"] for r in c.execute(
+                "SELECT id FROM teams WHERE user_id = ? AND org_id IS NULL", (user_id,))]:
+            _delete_team_rows(c, tid)
+        # sites + devices
+        for sid in [r["id"] for r in c.execute("SELECT id FROM sites WHERE user_id = ?", (user_id,))]:
+            c.execute("DELETE FROM devices WHERE site_id = ?", (sid,))
+        c.execute("DELETE FROM sites WHERE user_id = ?", (user_id,))
+        c.execute("DELETE FROM jobs WHERE user_id = ?", (user_id,))
+        c.execute("DELETE FROM memberships WHERE user_id = ?", (user_id,))
+        c.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        c.commit()
+    return job_ids
 
 
 # --- players ----------------------------------------------------------------
 
 def create_player(player_id: str, team_id: str, name: str, position: str | None,
-                  jersey: int | None) -> dict:
-    _exec("INSERT INTO players (id, team_id, name, position, jersey, created_at) "
-          "VALUES (?,?,?,?,?,?)",
-          (player_id, team_id, name, position, jersey, time.time()))
-    return {"id": player_id, "name": name}
+                  jersey: int | None, is_minor: bool = True) -> dict:
+    _exec("INSERT INTO players (id, team_id, name, position, jersey, is_minor, created_at) "
+          "VALUES (?,?,?,?,?,?,?)",
+          (player_id, team_id, name, position, jersey, int(is_minor), time.time()))
+    return {"id": player_id, "name": name, "is_minor": is_minor}
+
+
+def set_player_consent(player_id: str, granted_by: int | None) -> None:
+    if granted_by is None:
+        _exec("UPDATE players SET guardian_consent_at = NULL, "
+              "guardian_consent_by = NULL WHERE id = ?", (player_id,))
+    else:
+        _exec("UPDATE players SET guardian_consent_at = ?, guardian_consent_by = ? "
+              "WHERE id = ?", (time.time(), granted_by, player_id))
 
 
 def get_player(player_id: str) -> sqlite3.Row | None:

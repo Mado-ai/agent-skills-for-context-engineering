@@ -88,6 +88,7 @@ On first launch an **admin account is seeded**. Configure via environment:
 | `PLAYMETRICS_DB` | `playmetrics.db` | SQLite database path |
 | `PLAYMETRICS_DATA` | `runs/` | Job output directory (mount a volume in prod) |
 | `PLAYMETRICS_ENV` | (unset) | Set to `production` to **require** `PLAYMETRICS_SECRET` + admin password (fails fast otherwise) |
+| `PLAYMETRICS_STORAGE` | `local` | Object-storage backend (`local`; `s3` reserved) |
 
 ### Security posture
 

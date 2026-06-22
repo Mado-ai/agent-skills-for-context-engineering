@@ -46,7 +46,8 @@ def test_audit_trail_records_player_access(client):
                         ).json()["token"]
     h = {"Authorization": f"Bearer {token}"}
     tid = client.post("/api/teams", data={"name": "Audit FC"}, headers=h).json()["id"]
-    pid = client.post(f"/api/teams/{tid}/players", data={"name": "Watched Kid"}, headers=h).json()["id"]
+    pid = client.post(f"/api/teams/{tid}/players",
+                      data={"name": "Senior Watcher", "is_minor": "false"}, headers=h).json()["id"]
 
     # view + share generate audit entries
     client.get(f"/api/players/{pid}", headers=h)

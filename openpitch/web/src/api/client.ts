@@ -175,6 +175,15 @@ export const api = {
   async sharePlayer(id: string): Promise<{ public: boolean; public_token: string | null }> {
     return authed(`/api/players/${id}/share`, { method: "POST" });
   },
+  async grantConsent(id: string, granted: boolean): Promise<void> {
+    await authed(`/api/players/${id}/consent`, {
+      method: "POST",
+      body: new URLSearchParams({ granted: String(granted) }),
+    });
+  },
+  async deleteAccount(): Promise<void> {
+    await authed("/api/account", { method: "DELETE" });
+  },
   async createMatch(teamId: string, fields: Record<string, string>): Promise<{ id: string }> {
     return authed(`/api/teams/${teamId}/matches`, { method: "POST", body: new URLSearchParams(fields) });
   },

@@ -28,6 +28,7 @@ export default function TeamProfile() {
   const [mOpp, setMOpp] = useState("");
   const [mHome, setMHome] = useState("");
   const [mAway, setMAway] = useState("");
+  const [pMinor, setPMinor] = useState(true);
   const [importing, setImporting] = useState<string | null>(null);
 
   const load = useCallback(() => api.getTeam(id).then(setTp).catch(() => setTp(null)), [id]);
@@ -40,7 +41,10 @@ export default function TeamProfile() {
 
   const addPlayer = async () => {
     if (!pName.trim()) return;
-    await api.createPlayer(id, { name: pName, position: pPos, ...(pNum ? { jersey: pNum } : {}) });
+    await api.createPlayer(id, {
+      name: pName, position: pPos, is_minor: String(pMinor),
+      ...(pNum ? { jersey: pNum } : {}),
+    });
     setPName(""); setPPos(""); setPNum("");
     load();
   };
@@ -146,6 +150,10 @@ export default function TeamProfile() {
               className="w-16 rounded border border-line bg-ink px-2 py-1.5 text-sm" />
             <input value={pNum} onChange={(e) => setPNum(e.target.value)} placeholder="#" inputMode="numeric"
               className="w-14 rounded border border-line bg-ink px-2 py-1.5 text-sm" />
+            <label className="flex items-center gap-1 text-xs text-slate-400">
+              <input type="checkbox" checked={pMinor} onChange={(e) => setPMinor(e.target.checked)} />
+              minor
+            </label>
             <button onClick={addPlayer} className="rounded bg-pitch px-3 py-1.5 text-sm font-semibold text-emerald-950">Add</button>
           </div>
         </Card>

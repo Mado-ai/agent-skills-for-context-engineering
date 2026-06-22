@@ -134,6 +134,8 @@ export interface PlayerProfile {
   player: { id: string; name: string; position: string | null; jersey: number | null };
   team_id: string;
   public_token?: string | null;
+  is_minor?: boolean;
+  guardian_consent?: boolean;
   matches_by_field: FieldBreakdown;
   totals: {
     matches: number;

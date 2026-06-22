@@ -35,7 +35,7 @@ Status: ✅ implemented here · 🟡 stubbed/partial · ⬜ not yet · 🔌 exte
 | 6 · Profile update | **detection stats flow into team/player profiles** via match→roster mapping; reporting reflects matches by 5/7/11 field type, career totals, leaderboards | ✅ |
 | Relational DB | SQLite (`db.py`) — Postgres in prod | ✅ / 🟡 |
 | Time-series store | folded into job summary JSON (dedicated TSDB ⬜) | 🟡 |
-| Object storage | local volume `runs/` (S3/GCS in prod) | 🟡 |
+| Object storage | `storage.py` abstraction (LocalStorage now; S3/GCS-ready interface, `PLAYMETRICS_STORAGE`) | 🟡 |
 | Application API + authz | `api.py` (JWT, per-user/site ownership) | ✅ |
 
 ## Layer 4 — Experience (apps & surfaces)
@@ -53,19 +53,24 @@ Status: ✅ implemented here · 🟡 stubbed/partial · ⬜ not yet · 🔌 exte
 | Private by default | per-user job isolation; token-gated media | ✅ |
 | Single authz chokepoint | all access via `api.py`; org access via `authz.py` role checks | ✅ |
 | Role-based access (coach/parent/player/scout/federation) | orgs + memberships: owner/admin/coach (staff), parent/player (read-only, linked to one player), scout (public-only); federation ⬜ | ✅ |
-| Guardian-gating for minors | — | ⬜ |
+| Guardian-gating for minors | players default to `is_minor`; sharing a minor needs guardian consent (`POST /api/players/{id}/consent` by linked parent/owner); revoking consent withdraws public exposure | ✅ |
 | Audit trail | `audit_log` table; player views/shares + ingest-imports recorded; `GET /api/players/{id}/audit` (staff) to review | ✅ |
 | Hardening | security headers (CSP/HSTS/XFO/nosniff), login rate-limit + lockout, prod requires PLAYMETRICS_SECRET + admin password | ✅ |
-| Right to delete (cascade) | job delete removes row + files; full cascade ⬜ | 🟡 |
+| Right to delete (cascade) | `DELETE /api/account` (user data + files) and `DELETE /api/orgs/{id}` cascade through all stores | ✅ |
 
 ## Next backend milestones (in priority order)
-1. ✅ **Roles & orgs** — organizations + memberships with role-based authz at the
-   Application API chokepoint (owner/admin/coach/parent/player/scout). Next:
-   guardian-consent flow + audit logging; federation aggregate role.
-2. **Real job queue + object storage** — Celery/RQ + S3/GCS; GPU workers for detection.
-3. **Multi-camera + homography per angle**; quality-tier routing (facility vs Solo).
-4. **Learned event models** (passes/shots/tackles) feeding xG/xT.
+1. ✅ **Roles & orgs** — organizations + memberships with role-based authz.
+2. ✅ **Child-safety hardening** — guardian-consent gate, audit trail, right-to-delete
+   cascade, login rate-limit + security headers.
+3. **Postgres + Alembic + object storage** — `storage.py` abstraction is in; the
+   SQLite→Postgres cutover (SQLAlchemy Core + Alembic, driven by `DATABASE_URL`)
+   is the dedicated next step — it needs a live Postgres to validate, so it is
+   staged separately rather than rushed. Then S3 storage + a real job queue
+   (Celery/RQ) + GPU workers.
+4. **Signed media URLs** — replace the `?token=` (session JWT) on `/api/files/*`
+   with short-lived, media-scoped signed URLs (small frontend media-token refactor).
+5. **Multi-camera + homography per angle**; quality-tier routing (facility vs Solo).
+6. **Learned event models** (passes/shots/tackles) feeding xG/xT.
    - Detection→roster mapping is **assisted** today (auto-assign + manual confirm);
      fully automatic mapping needs jersey-number OCR / player re-ID.
-5. **Audit logging + guardian consent** for any minor data exposure.
-6. **On-site sync agent** (the gateway-side counterpart to `/api/ingest/*`).
+7. **On-site sync agent** (the gateway-side counterpart to `/api/ingest/*`).

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { api } from "../api/client";
+import { api, tokenStore } from "../api/client";
 
 export default function AccountModal({ email, onClose }: { email: string; onClose: () => void }) {
   const [current, setCurrent] = useState("");
@@ -69,6 +69,20 @@ export default function AccountModal({ email, onClose }: { email: string; onClos
             <p className={`text-sm ${status.ok ? "text-pitch" : "text-red-400"}`}>{status.msg}</p>
           )}
         </form>
+
+        <div className="mt-6 border-t border-line pt-4">
+          <button
+            onClick={async () => {
+              if (!confirm("Permanently delete your account and all your data? This cannot be undone.")) return;
+              await api.deleteAccount();
+              tokenStore.clear();
+              location.href = "/";
+            }}
+            className="text-sm font-semibold text-red-400 hover:text-red-300"
+          >
+            Delete my account
+          </button>
+        </div>
       </div>
     </div>
   );
