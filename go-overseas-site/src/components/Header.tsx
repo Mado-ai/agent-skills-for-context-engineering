@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
 import { Container, Button } from "./ui";
 import { Magnetic } from "./Magnetic";
@@ -15,9 +15,21 @@ const nav = [
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-line/70 bg-ink/80 backdrop-blur-xl">
+    <header
+      className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-colors duration-300 ${
+        scrolled ? "border-line bg-ink/90 shadow-lg shadow-black/30" : "border-transparent bg-ink/40"
+      }`}
+    >
       <Container className="flex h-16 items-center justify-between">
         <Logo />
 

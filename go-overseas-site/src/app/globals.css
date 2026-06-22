@@ -103,12 +103,42 @@ body {
 }
 .animate-twinkle { animation: twinkle 4.5s ease-in-out infinite; }
 
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+.animate-bob { animation: bob 1.7s ease-in-out infinite; }
+
+/* Scroll progress bar */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 60;
+  pointer-events: none;
+}
+.scroll-progress__bar {
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: linear-gradient(
+    90deg,
+    var(--color-blue),
+    var(--color-green),
+    var(--color-purple),
+    var(--color-pink)
+  );
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-spin-slow,
   .animate-spin-slow-rev,
   .animate-drift,
   .animate-twinkle,
-  .animate-float-slow {
+  .animate-float-slow,
+  .animate-bob {
     animation: none;
   }
 }

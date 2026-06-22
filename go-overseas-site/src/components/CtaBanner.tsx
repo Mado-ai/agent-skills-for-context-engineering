@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Container, Button } from "./ui";
 import { Magnetic } from "./Magnetic";
+import { Parallax } from "./Parallax";
 import { Sparkle, LoopSquiggle } from "./BrandGraphics";
 
 /** Reusable bold gradient CTA block — shared across pages for a consistent close. */
@@ -19,7 +20,9 @@ export function CtaBanner({
     <section className="border-t border-line">
       <Container className="py-20 sm:py-28">
         <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-blue via-purple to-pink p-10 sm:p-16">
-          <Sparkle className="pointer-events-none absolute -right-12 -top-12 h-60 w-60 text-white/15 animate-spin-slow" />
+          <Parallax speed={0.1} className="pointer-events-none absolute -right-12 -top-12 h-60 w-60">
+            <Sparkle className="h-full w-full text-white/15 animate-spin-slow" />
+          </Parallax>
           <Sparkle className="pointer-events-none absolute right-[26%] bottom-8 h-7 w-7 text-white/80 animate-twinkle" />
           <LoopSquiggle className="pointer-events-none absolute bottom-6 left-6 h-12 w-32 text-white/40" />
           <div className="relative max-w-2xl">

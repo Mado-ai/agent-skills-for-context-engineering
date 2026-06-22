@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { JsonLd } from "@/components/JsonLd";
 import { CustomCursor } from "@/components/CustomCursor";
 import { Intro } from "@/components/Intro";
+import { ScrollProgress } from "@/components/ScrollProgress";
 import { siteConfig, organizationSchema, websiteSchema } from "@/lib/seo";
 
 // Brand typeface — Poppins across the whole site.
@@ -84,6 +85,7 @@ export default function RootLayout({
     <html lang="en-CA" className={poppins.variable}>
       <body className="min-h-screen">
         <Intro />
+        <ScrollProgress />
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <a
           href="#main"

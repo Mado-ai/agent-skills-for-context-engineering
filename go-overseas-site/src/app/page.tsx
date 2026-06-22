@@ -10,6 +10,7 @@ import { HeroCanvas } from "@/components/HeroCanvas";
 import { Magnetic } from "@/components/Magnetic";
 import { Tilt } from "@/components/Tilt";
 import { Reveal } from "@/components/Reveal";
+import { Parallax } from "@/components/Parallax";
 import { services, stats, process, sectors } from "@/lib/site";
 import { professionalServiceSchema } from "@/lib/seo";
 
@@ -108,7 +109,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="relative hidden lg:block">
+          <Parallax speed={0.06} className="relative hidden lg:block">
             {/* Signature blue sparkle framing the mark — straight from the brand cards */}
             <Sparkle className="pointer-events-none absolute inset-0 m-auto h-[32rem] w-[32rem] text-blue animate-spin-slow-rev" />
             <HalfRing className="pointer-events-none absolute right-4 top-2 h-24 w-24 text-pink" />
@@ -122,8 +123,16 @@ export default function HomePage() {
               <p className="text-xs text-mist-dim">Trusted by</p>
               <p className="font-display text-2xl font-semibold">60+ brands</p>
             </div>
-          </div>
+          </Parallax>
         </Container>
+        <div className="pointer-events-none absolute inset-x-0 bottom-6 hidden justify-center lg:flex">
+          <span className="flex flex-col items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.25em] text-mist-dim">
+            Scroll
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-bob">
+              <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+        </div>
       </section>
 
       {/* Stats */}
