@@ -1,0 +1,10 @@
+# Netlify deployment config for the go overseas site.
+# The app lives in the go-overseas-site/ subdirectory of this repo.
+
+[build]
+  base = "go-overseas-site"
+  command = "npm run build"
+
+# Next.js runtime (App Router, SSR, image optimization, OG image routes).
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
