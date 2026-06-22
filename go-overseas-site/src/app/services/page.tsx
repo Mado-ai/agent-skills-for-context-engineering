@@ -4,9 +4,9 @@ import { BrandBackdrop } from "@/components/BrandGraphics";
 import { services, process } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Services — Market Entry, Partnerships & Growth",
+  title: "Services — Brand, Web, Ads, PR & Automation",
   description:
-    "Market entry strategy, partnerships and distribution, brand and creative growth, and go-to-market execution for Canadian businesses expanding into international markets.",
+    "Brand identity, website & app development, paid advertising on Meta, Facebook & TikTok, PR & community, automation, and analytics — full-service creative management.",
   alternates: { canonical: "/services" },
 };
 
@@ -18,11 +18,12 @@ export default function ServicesPage() {
         <Container className="relative py-20 sm:py-28">
           <Eyebrow>Services</Eyebrow>
           <h1 className="mt-6 max-w-3xl font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-            One partner for the whole journey across borders.
+            One team for brand, build, and growth.
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-mist">
-            Most firms hand you a strategy and walk away. We stay — from the first market
-            assessment through to signed partners and a live pipeline.
+            Most agencies do one thing. We cover the whole journey — brand identity,
+            websites and apps, advertising, PR, automation, and the reporting that ties it
+            all together.
           </p>
         </Container>
       </section>
@@ -51,7 +52,7 @@ export default function ServicesPage() {
         <Container className="py-20 sm:py-28">
           <Eyebrow>Engagement model</Eyebrow>
           <h2 className="mt-5 max-w-2xl font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-            Diagnose, design, deploy, scale.
+            Discover, design, deliver, optimize.
           </h2>
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {process.map((p) => (

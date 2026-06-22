@@ -6,14 +6,14 @@ import { BrandBackdrop } from "@/components/BrandGraphics";
 export const metadata: Metadata = {
   title: "Contact — Start a Conversation",
   description:
-    "Tell us where you want to grow. Start a conversation with the go overseas team about your international expansion.",
+    "Tell us about your project. Start a conversation with the go overseas team about brand, web, ads, PR, or automation.",
   alternates: { canonical: "/contact" },
 };
 
 const details = [
   { label: "Email", value: "hello@gooverseas.com" },
   { label: "Response time", value: "Within 1 business day" },
-  { label: "Canadian hubs", value: "Toronto · Vancouver · Montréal" },
+  { label: "Based in", value: "Mississauga · Toronto" },
 ];
 
 export default function ContactPage() {
@@ -27,7 +27,7 @@ export default function ContactPage() {
             Tell us where you want to grow.
           </h1>
           <p className="mt-5 max-w-md text-lg text-mist">
-            Whether you have a fully-formed expansion plan or just a hunch about a market,
+            Whether you have a fully-formed brief or just the seed of an idea,
             we&apos;d like to hear it. No hard sell — just a useful conversation.
           </p>
 

@@ -21,7 +21,7 @@ export function ContactForm() {
       name: String(fd.get("name") || ""),
       email: String(fd.get("email") || ""),
       company: String(fd.get("company") || ""),
-      market: String(fd.get("market") || ""),
+      service: String(fd.get("service") || ""),
       message: String(fd.get("message") || ""),
       "bot-field": String(fd.get("bot-field") || ""),
     };
@@ -101,9 +101,9 @@ export function ContactForm() {
           {errors.company && <p className="mt-1 text-xs text-red-400">{errors.company}</p>}
         </div>
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-mist-dim">Target market(s)</label>
-          <input name="market" placeholder="e.g. Japan, Germany" className={field} />
-          {errors.market && <p className="mt-1 text-xs text-red-400">{errors.market}</p>}
+          <label className="mb-1.5 block text-xs font-medium text-mist-dim">Service of interest</label>
+          <input name="service" placeholder="e.g. Brand, Web app, Ads" className={field} />
+          {errors.service && <p className="mt-1 text-xs text-red-400">{errors.service}</p>}
         </div>
       </div>
       <div>
@@ -114,7 +114,7 @@ export function ContactForm() {
           name="message"
           required
           rows={5}
-          placeholder="Tell us about your expansion goals…"
+          placeholder="Tell us about your project…"
           className={field}
         />
         {errors.message && <p className="mt-1 text-xs text-red-400">{errors.message}</p>}

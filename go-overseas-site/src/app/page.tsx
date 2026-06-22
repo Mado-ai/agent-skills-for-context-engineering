@@ -11,7 +11,7 @@ const pillars = [
   {
     tag: "Strategy",
     word: "Think.",
-    body: "Research. Planning. Positioning. Expansion.",
+    body: "Research. Planning. Positioning. Direction.",
     color: "text-blue",
     chip: "bg-blue/10",
     border: "border-blue/20",
@@ -48,7 +48,7 @@ const pillars = [
   {
     tag: "Growth",
     word: "Grow.",
-    body: "Marketing. Sales. Development. Scale.",
+    body: "Ads. Marketing. Automation. Scale.",
     color: "text-green",
     chip: "bg-green/10",
     border: "border-green/20",
@@ -58,7 +58,7 @@ const pillars = [
 
 export const metadata: Metadata = {
   description:
-    "go overseas helps Canadian businesses and their owners expand into international markets — market entry strategy, partnerships, brand growth, and go-to-market execution. Strategy. Creativity. Growth.",
+    "go overseas is a creative management agency — brand identity, websites & apps, paid ads, PR, automation, and analytics. Strategy. Creativity. Growth.",
   alternates: { canonical: "/" },
 };
 
@@ -72,15 +72,15 @@ export default function HomePage() {
 
         <Container className="relative grid items-center gap-12 py-24 sm:py-32 lg:grid-cols-[1.15fr_0.85fr]">
           <div>
-            <Eyebrow>International Growth for Canadian Business</Eyebrow>
+            <Eyebrow>Creative Management & Growth</Eyebrow>
             <h1 className="mt-6 font-display text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
-              Take your Canadian business{" "}
-              <span className="text-gradient">overseas.</span>
+              We build brands and the systems that{" "}
+              <span className="text-gradient">grow them.</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-mist">
-              go overseas is a Canadian business-development and creative-growth firm. We
-              help owners and founders pair rigorous strategy with bold creativity to cross
-              borders and build real traction in new markets.
+              go overseas is a creative management agency. From brand identity and websites
+              to ads, PR, and automation, we handle the strategy, the creative, and the
+              execution that turn ambitious ideas into real traction.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <Button href="/contact">Start a conversation</Button>
@@ -105,8 +105,8 @@ export default function HomePage() {
                 <LogoMark size={180} />
               </div>
               <div className="absolute bottom-6 left-6 right-6 rounded-2xl border border-line bg-ink-900/80 p-4 backdrop-blur">
-                <p className="text-xs text-mist-dim">Live across</p>
-                <p className="font-display text-2xl font-semibold">24+ markets</p>
+                <p className="text-xs text-mist-dim">Trusted by</p>
+                <p className="font-display text-2xl font-semibold">60+ brands</p>
               </div>
             </div>
           </div>
@@ -137,8 +137,8 @@ export default function HomePage() {
               <span className="text-green">Growth.</span>
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-mist">
-              Three disciplines, one system — how we turn international ambition into
-              measurable market presence.
+              Three disciplines, one system — how we turn ambitious ideas into
+              measurable growth.
             </p>
           </div>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
@@ -167,7 +167,7 @@ export default function HomePage() {
           <div className="max-w-2xl">
             <Eyebrow>What we do</Eyebrow>
             <h2 className="mt-5 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-              Everything between “we should expand” and a market that runs itself.
+              Everything your brand needs, under one roof.
             </h2>
           </div>
           <Button href="/services" variant="ghost">
@@ -198,7 +198,7 @@ export default function HomePage() {
         <Container className="py-20 sm:py-28">
           <Eyebrow>How we work</Eyebrow>
           <h2 className="mt-5 max-w-2xl font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-            A four-phase path from ambition to autonomous growth.
+            From idea to impact — a four-step path.
           </h2>
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {process.map((p) => (
@@ -216,13 +216,13 @@ export default function HomePage() {
       <Section>
         <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
-            <Eyebrow>Where we play</Eyebrow>
+            <Eyebrow>Who we work with</Eyebrow>
             <h2 className="mt-5 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-              Sector depth, global reach.
+              Built for brands across every space.
             </h2>
             <p className="mt-5 max-w-md text-mist">
-              We bring pattern recognition from dozens of cross-border launches — and the
-              humility to learn what makes each market different.
+              We bring pattern recognition from dozens of brands and campaigns — and the
+              curiosity to learn what makes yours different.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -248,11 +248,11 @@ export default function HomePage() {
             <Sparkle className="pointer-events-none absolute right-[20%] top-[24%] h-4 w-4 text-purple animate-twinkle [animation-delay:2s]" />
             <div className="relative max-w-2xl">
               <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-                Ready to go overseas?
+                Ready to grow your brand?
               </h2>
               <p className="mt-4 text-lg text-mist">
-                Tell us where you want to grow. We&apos;ll tell you what it takes — and how
-                we&apos;d get you there.
+                Tell us what you&apos;re building. We&apos;ll show you how we&apos;d bring the
+                strategy, creativity, and growth to make it happen.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Button href="/contact">Start a conversation</Button>

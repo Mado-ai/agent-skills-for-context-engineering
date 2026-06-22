@@ -1,89 +1,114 @@
 export const services = [
   {
-    id: "market-entry",
-    title: "Market Entry Strategy",
+    id: "brand-identity",
+    title: "Brand Identity & Design",
     summary:
-      "Validated, data-led plans for taking your Canadian business into new countries — sizing the opportunity, mapping regulation, and sequencing your first moves.",
+      "We build and sharpen brands — the strategy, identity, and visual systems that make you unmistakable and consistent everywhere you show up.",
     points: [
-      "Opportunity sizing & demand validation",
-      "Regulatory, tax & entity guidance",
-      "Localization & pricing strategy",
-      "Phased rollout roadmap",
+      "Brand identity creation & rebrands",
+      "Visual systems & brand guidelines",
+      "Brand strategy & positioning",
+      "Identity enhancement & refresh",
     ],
   },
   {
-    id: "partnerships",
-    title: "Partnerships & Distribution",
+    id: "web-apps",
+    title: "Website & App Development",
     summary:
-      "We open doors. Identify, vet, and negotiate the distributors, resellers, and strategic partners who carry you into a market.",
+      "Fast, modern websites and apps that look the part and convert — from landing pages to full product builds.",
     points: [
-      "Partner sourcing & due diligence",
-      "Channel & distributor strategy",
-      "Deal structuring & negotiation",
-      "Relationship management playbooks",
+      "Marketing websites & landing pages",
+      "Web & mobile app development",
+      "E-commerce & CMS builds",
+      "Performance, SEO & maintenance",
     ],
   },
   {
-    id: "brand-growth",
-    title: "Brand & Creative Growth",
+    id: "paid-media",
+    title: "Paid Ads & Targeted Marketing",
     summary:
-      "Strategy meets creativity. Positioning, identity, and campaigns that resonate across cultures without losing your edge.",
+      "Full-funnel campaigns on Meta, Facebook & TikTok — the creative, targeting, and optimization that actually move the numbers.",
     points: [
-      "Cross-cultural positioning",
-      "Brand identity & messaging",
-      "Localized campaigns & content",
-      "Creative direction",
+      "Meta, Facebook & TikTok ads",
+      "Audience targeting & retargeting",
+      "Ad creative & A/B testing",
+      "Budget & ROAS optimization",
     ],
   },
   {
-    id: "go-to-market",
-    title: "Go-to-Market Execution",
+    id: "pr-community",
+    title: "PR & Community",
     summary:
-      "From plan to traction. We build and run the demand engine — so your first overseas customers arrive on schedule.",
+      "Reputation and presence — public relations, community events, and partnerships that build trust and word of mouth.",
     points: [
-      "GTM operating model",
-      "Demand generation & sales enablement",
-      "Local team build & onboarding",
-      "Performance tracking & iteration",
+      "Public relations & media outreach",
+      "Community events & activations",
+      "Partnerships & sponsorships",
+      "Reputation management",
+    ],
+  },
+  {
+    id: "automation-ops",
+    title: "Automation & Operations",
+    summary:
+      "Systems that scale with you — SOPs, automation, and client databases that turn day-to-day chaos into a repeatable machine.",
+    points: [
+      "SOP creation & documentation",
+      "Workflow automation solutions",
+      "Client database & CRM design",
+      "Internal tools & integrations",
+    ],
+  },
+  {
+    id: "analytics",
+    title: "Analytics & Reporting",
+    summary:
+      "Clear, honest measurement — dashboards and reporting that show what's working and where to invest next.",
+    points: [
+      "Performance analysis & dashboards",
+      "Campaign & channel reporting",
+      "Marketing & customer insights",
+      "Data-driven recommendations",
     ],
   },
 ] as const;
 
+// NOTE: placeholder figures — replace with real numbers once confirmed.
 export const stats = [
-  { value: "24+", label: "Markets entered" },
-  { value: "CA$180M+", label: "Cross-border revenue unlocked" },
-  { value: "92%", label: "Client retention" },
-  { value: "11", label: "Years going overseas" },
+  { value: "150+", label: "Projects delivered" },
+  { value: "60+", label: "Brands built & grown" },
+  { value: "95%", label: "Client retention" },
+  { value: "12+", label: "Specialists on the team" },
 ] as const;
 
 export const process = [
   {
     step: "01",
-    title: "Diagnose",
-    body: "We pressure-test your ambition against the data — where to play, where to wait, and what it really takes to win.",
+    title: "Discover",
+    body: "We learn your business, audience, and goals — and pinpoint where attention and budget will actually move the needle.",
   },
   {
     step: "02",
     title: "Design",
-    body: "A sharp, sequenced strategy: market priorities, partner map, brand positioning, and the GTM model to deliver it.",
+    body: "Strategy and creative come together: brand, campaigns, the build plan, and the systems to run it all.",
   },
   {
     step: "03",
-    title: "Deploy",
-    body: "We embed alongside your team to execute — partnerships signed, campaigns live, pipeline building.",
+    title: "Deliver",
+    body: "We execute alongside you — designs shipped, sites built, campaigns live, automations running.",
   },
   {
     step: "04",
-    title: "Scale",
-    body: "Once traction is proven, we systematize growth and hand over a market that runs without us.",
+    title: "Optimize",
+    body: "We measure, report, and refine — compounding what works into sustainable, lasting growth.",
   },
 ] as const;
 
 export const sectors = [
-  "SaaS & Technology",
-  "Consumer & Retail",
-  "Fintech",
-  "Healthcare & Life Sciences",
-  "Industrial & Manufacturing",
-  "Climate & Energy",
+  "Retail & E-commerce",
+  "Hospitality & Food",
+  "Health & Wellness",
+  "Real Estate",
+  "Professional Services",
+  "Tech & Startups",
 ] as const;

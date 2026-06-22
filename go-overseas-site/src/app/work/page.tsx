@@ -3,47 +3,47 @@ import { Container, Section, Button, Eyebrow, Card } from "@/components/ui";
 import { BrandBackdrop } from "@/components/BrandGraphics";
 
 export const metadata: Metadata = {
-  title: "Work — Cross-Border Growth Case Studies",
+  title: "Work — Selected Projects & Case Studies",
   description:
-    "Selected cross-border growth engagements — international market entries, partnerships, and brand launches delivered by go overseas.",
+    "Selected projects — brand identity, websites and apps, ad campaigns, PR, and automation delivered by go overseas.",
   alternates: { canonical: "/work" },
 };
 
 const caseStudies = [
   {
-    client: "Toronto-based SaaS scale-up",
-    sector: "B2B SaaS",
-    markets: "Japan & South Korea",
-    headline: "From zero to CA$4.2M ARR in APAC in 14 months",
-    body: "We helped a Canadian founder validate demand, secure two reseller partners, and localize positioning for enterprise buyers — landing the first ten logos ahead of plan.",
+    client: "D2C skincare brand",
+    sector: "Retail & E-commerce",
+    services: "Brand · Web · Ads",
+    headline: "A rebrand that doubled online conversion",
+    body: "A full brand refresh, a new Shopify storefront, and a Meta + TikTok ad engine turned a struggling product line into a repeat-purchase favourite.",
     metrics: [
-      { value: "CA$4.2M", label: "New ARR" },
-      { value: "14 mo", label: "To traction" },
-      { value: "10", label: "Enterprise logos" },
+      { value: "2.1x", label: "Conversion rate" },
+      { value: "+140%", label: "Online revenue" },
+      { value: "3 mo", label: "To payback" },
     ],
   },
   {
-    client: "Montréal D2C brand",
-    sector: "Consumer",
-    markets: "United States",
-    headline: "A US launch that didn't flatten the brand",
-    body: "Cross-cultural repositioning plus a creator-led campaign gave a beloved Canadian brand an authentic American voice — without diluting what made it special.",
+    client: "Restaurant group",
+    sector: "Hospitality & Food",
+    services: "Brand · PR · Events",
+    headline: "From quiet opening to fully booked",
+    body: "Identity, website, launch events, and a local PR plus paid-social push filled tables within weeks — and built a community that keeps coming back.",
     metrics: [
-      { value: "3.1x", label: "Return on ad spend" },
-      { value: "+68%", label: "Aided awareness" },
-      { value: "90 days", label: "To first sales" },
+      { value: "+90%", label: "Covers per week" },
+      { value: "25K", label: "New followers" },
+      { value: "6", label: "Launch events" },
     ],
   },
   {
-    client: "Vancouver fintech firm",
-    sector: "Fintech",
-    markets: "Southeast Asia",
-    headline: "Regulatory-first entry across three SEA markets",
-    body: "We mapped licensing pathways, structured local partnerships, and built the GTM model for a Canadian owner-led simultaneous entry into Singapore, Indonesia, and the Philippines.",
+    client: "B2B services firm",
+    sector: "Professional Services",
+    services: "Automation · CRM · Reporting",
+    headline: "Automation that freed 20 hours a week",
+    body: "We documented SOPs, designed a client database, and automated intake and reporting — cutting busywork and tripling qualified leads.",
     metrics: [
-      { value: "3", label: "Markets at once" },
-      { value: "5", label: "Strategic partners" },
-      { value: "6 mo", label: "To first license" },
+      { value: "20 hrs", label: "Saved per week" },
+      { value: "3x", label: "Qualified leads" },
+      { value: "1", label: "Unified system" },
     ],
   },
 ];
@@ -56,10 +56,10 @@ export default function WorkPage() {
         <Container className="relative py-20 sm:py-28">
           <Eyebrow>Work</Eyebrow>
           <h1 className="mt-6 max-w-3xl font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-            Markets entered. Traction proven.
+            Brands built. Results proven.
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-mist">
-            A selection of cross-border engagements helping Canadian businesses grow abroad.
+            A selection of projects across brand, web, advertising, and operations.
             Names are withheld under NDA — the results are not.
           </p>
         </Container>
@@ -72,7 +72,7 @@ export default function WorkPage() {
               <div>
                 <div className="flex flex-wrap gap-2 text-xs">
                   <span className="rounded-full border border-line px-3 py-1 text-mist-dim">{cs.sector}</span>
-                  <span className="rounded-full border border-line px-3 py-1 text-mist-dim">{cs.markets}</span>
+                  <span className="rounded-full border border-line px-3 py-1 text-mist-dim">{cs.services}</span>
                 </div>
                 <h2 className="mt-5 font-display text-2xl font-semibold leading-snug">{cs.headline}</h2>
                 <p className="mt-3 leading-relaxed text-mist">{cs.body}</p>
@@ -94,7 +94,7 @@ export default function WorkPage() {
       <section className="border-t border-line">
         <Container className="py-20 text-center sm:py-28">
           <h2 className="mx-auto max-w-2xl font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-            Your market could be next.
+            Your brand could be next.
           </h2>
           <div className="mt-8 flex justify-center">
             <Button href="/contact">Start a conversation</Button>

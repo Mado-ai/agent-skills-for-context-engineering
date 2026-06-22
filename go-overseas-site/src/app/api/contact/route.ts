@@ -45,7 +45,7 @@ export async function POST(req: Request) {
     ["Name", data.name],
     ["Email", data.email],
     ["Company", data.company || "—"],
-    ["Target market(s)", data.market || "—"],
+    ["Service of interest", data.service || "—"],
   ];
 
   const html = `

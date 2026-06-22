@@ -3,24 +3,24 @@ import { Container, Section, Button, Eyebrow, Card } from "@/components/ui";
 import { stats } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "About — Operators in Cross-Border Growth",
+  title: "About — A Creative Management Agency",
   description:
-    "go overseas is a cross-border business-development and creative-growth firm built on three principles: strategy, creativity, and growth.",
+    "go overseas is a creative management agency built on three principles: strategy, creativity, and growth — brand, web & apps, ads, PR, and automation under one roof.",
   alternates: { canonical: "/about" },
 };
 
 const values = [
   {
     title: "Strategy",
-    body: "We start with evidence, not optimism. Every recommendation traces back to data, risk, and a clear path to return.",
+    body: "We start with evidence, not guesswork. Every brand, campaign, and build traces back to your goals and your audience.",
   },
   {
     title: "Creativity",
-    body: "Markets reward the memorable. We bring creative firepower so you don't just enter a market — you stand out in it.",
+    body: "Attention is earned. We bring the design and creative firepower to make your brand impossible to ignore.",
   },
   {
     title: "Growth",
-    body: "We measure ourselves on traction. Revenue, partners, and pipeline — not slide decks.",
+    body: "We measure ourselves on outcomes — leads, sales, and systems that keep working long after launch.",
   },
 ];
 
@@ -50,14 +50,14 @@ export default function AboutPage() {
         <Container className="relative py-20 sm:py-28">
           <Eyebrow>About</Eyebrow>
           <h1 className="mt-6 max-w-3xl font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-            We help Canadian businesses cross borders with confidence.
+            We build brands and the systems that grow them.
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-mist">
-            go overseas was founded on a simple frustration: too many great Canadian
-            companies treat international expansion as a side project, handed to a junior
-            team or an absent consultant. We built a firm that works directly with owners
-            and founders, treating expansion as the high-stakes, high-reward bet it
-            actually is.
+            go overseas was founded on a simple frustration: too many businesses juggle a
+            different vendor for design, web, ads, and operations — with no one owning the
+            whole picture. We built one team that handles strategy, creative, and execution
+            together, so the brand, the marketing, and the systems behind it actually pull
+            in the same direction.
           </p>
         </Container>
       </section>
@@ -92,9 +92,9 @@ export default function AboutPage() {
             Operators, not just advisors.
           </h2>
           <p className="mt-5 text-mist">
-            From our Canadian base, our leadership team has launched products, signed
-            distributors, and built local teams across global markets — working directly
-            with owners to make crossing borders feel less like a leap.
+            From our base in the Greater Toronto Area, our leadership team has built
+            brands, shipped websites and apps, and run campaigns across industries —
+            working directly with founders to turn ideas into results.
           </p>
         </div>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -113,7 +113,7 @@ export default function AboutPage() {
       <section className="border-t border-line">
         <Container className="py-20 text-center sm:py-28">
           <h2 className="mx-auto max-w-2xl font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-            Let&apos;s build your next market together.
+            Let&apos;s build something worth remembering.
           </h2>
           <div className="mt-8 flex justify-center">
             <Button href="/contact">Start a conversation</Button>

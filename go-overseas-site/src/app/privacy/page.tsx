@@ -17,8 +17,8 @@ export default function PrivacyPage() {
     >
       <h2>1. Who we are</h2>
       <p>
-        “go overseas” (“we”, “us”, “our”) is an international business-development and
-        creative-growth firm. We are the data controller for the personal information
+        “go overseas” (“we”, “us”, “our”) is a creative management agency. We are the data
+        controller for the personal information
         described in this policy. Questions can be sent to{" "}
         <a href="mailto:privacy@gooverseas.com">privacy@gooverseas.com</a>.
       </p>

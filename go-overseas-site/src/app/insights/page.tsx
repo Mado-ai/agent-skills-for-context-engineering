@@ -6,9 +6,9 @@ import { BrandBackdrop } from "@/components/BrandGraphics";
 import { getAllPosts, formatDate } from "@/lib/posts";
 
 export const metadata: Metadata = {
-  title: "Insights — International Growth Field Notes",
+  title: "Insights — Brand, Marketing & Growth",
   description:
-    "Field notes on international business development, market entry, and cross-border brand growth from the go overseas team.",
+    "Field notes on brand, design, advertising, automation, and growth from the go overseas team.",
   alternates: { canonical: "/insights" },
 };
 
@@ -23,10 +23,10 @@ export default function InsightsPage() {
         <Container className="relative py-20 sm:py-28">
           <Eyebrow>Insights</Eyebrow>
           <h1 className="mt-6 max-w-3xl font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-            Field notes from the front lines of expansion.
+            Field notes on building brands that grow.
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-mist">
-            Practical thinking on market entry, partnerships, and building brands that travel.
+            Practical thinking on brand, design, advertising, and the systems behind growth.
           </p>
         </Container>
       </section>
@@ -86,7 +86,7 @@ export default function InsightsPage() {
               Get new field notes in your inbox.
             </h2>
             <p className="mt-3 text-mist">
-              Cross-border strategy, market entry, and brand growth — no spam, unsubscribe anytime.
+              Brand, marketing, and growth insights — no spam, unsubscribe anytime.
             </p>
             <div className="mx-auto mt-8 max-w-md">
               <NewsletterForm />

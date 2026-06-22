@@ -19,7 +19,7 @@ export type ContactInput = {
   name: string;
   email: string;
   company: string;
-  market: string;
+  service: string;
   message: string;
   /** Honeypot — must be empty for a genuine submission. */
   botField: string;
@@ -34,7 +34,7 @@ export function validateContact(
   const name = str(b.name);
   const email = str(b.email);
   const company = str(b.company);
-  const market = str(b.market);
+  const service = str(b.service);
   const message = str(b.message);
   const botField = str(b["bot-field"] ?? b.botField);
 
@@ -49,10 +49,10 @@ export function validateContact(
   else if (message.length > 5000) errors.message = "Message is too long (5000 char max).";
 
   if (company.length > 200) errors.company = "Company name is too long.";
-  if (market.length > 200) errors.market = "Target market is too long.";
+  if (service.length > 200) errors.service = "This field is too long.";
 
   if (Object.keys(errors).length > 0) return { data: null, errors };
-  return { data: { name, email, company, market, message, botField }, errors: null };
+  return { data: { name, email, company, service, message, botField }, errors: null };
 }
 
 export type SubscribeInput = { email: string; botField: string };

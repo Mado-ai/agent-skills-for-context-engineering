@@ -10,7 +10,7 @@ export const siteConfig = {
   tagline: "Strategy. Creativity. Growth.",
   url: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.gooverseas.com").replace(/\/$/, ""),
   description:
-    "go overseas is a Canadian business-development and creative-growth firm helping Canadian businesses and their owners expand into international markets — market entry, partnerships, brand growth, and go-to-market execution.",
+    "go overseas is a creative management agency — brand identity, website & app development, paid advertising, PR, automation, and analytics that turn ambitious ideas into growth.",
   locale: "en_CA",
   email: "hello@gooverseas.com",
   country: "Canada",
@@ -86,10 +86,12 @@ export function professionalServiceSchema() {
     },
     areaServed: { "@type": "Country", name: siteConfig.country },
     serviceType: [
-      "Market Entry Strategy",
-      "Partnerships & Distribution",
-      "Brand & Creative Growth",
-      "Go-to-Market Execution",
+      "Brand Identity & Design",
+      "Website & App Development",
+      "Paid Advertising & Social Media Marketing",
+      "Public Relations & Community",
+      "Automation & Operations",
+      "Analytics & Reporting",
     ],
   };
 }

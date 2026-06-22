@@ -24,9 +24,9 @@ export default function TermsPage() {
 
       <h2>2. Our services</h2>
       <p>
-        We provide international business-development and creative-growth services,
-        including market-entry strategy, partnerships and distribution, brand and creative
-        growth, and go-to-market execution. The specific scope, deliverables, fees, and
+        We provide creative management and growth services, including brand identity and
+        design, website and app development, paid advertising, public relations, automation,
+        and analytics. The specific scope, deliverables, fees, and
         timelines for any engagement are set out in a separate written proposal or
         statement of work (“SOW”), which prevails over these Terms in the event of a
         conflict.

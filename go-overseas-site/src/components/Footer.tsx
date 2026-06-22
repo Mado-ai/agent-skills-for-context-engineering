@@ -15,10 +15,10 @@ const cols = [
   {
     title: "Services",
     links: [
-      { href: "/services#market-entry", label: "Market Entry" },
-      { href: "/services#partnerships", label: "Partnerships" },
-      { href: "/services#brand-growth", label: "Brand & Growth" },
-      { href: "/services#go-to-market", label: "Go-to-Market" },
+      { href: "/services#brand-identity", label: "Brand & Design" },
+      { href: "/services#web-apps", label: "Web & Apps" },
+      { href: "/services#paid-media", label: "Paid Ads" },
+      { href: "/services#automation-ops", label: "Automation" },
     ],
   },
   {
@@ -45,9 +45,9 @@ export function Footer() {
           <p className="mt-4 text-sm leading-relaxed text-mist-dim">
             <span className="font-medium text-blue">Strategy.</span>{" "}
             <span className="font-medium text-purple">Creativity.</span>{" "}
-            <span className="font-medium text-green">Growth.</span> We help Canadian
-            businesses and their owners cross borders — turning international ambition into
-            market presence.
+            <span className="font-medium text-green">Growth.</span> A creative management
+            agency helping ambitious brands grow — brand, web &amp; apps, ads, PR, and
+            automation under one roof.
           </p>
         </div>
 

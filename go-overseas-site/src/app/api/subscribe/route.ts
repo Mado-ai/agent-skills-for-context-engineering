@@ -58,7 +58,7 @@ export async function POST(req: Request) {
       html: `
         <div style="font-family:Inter,Arial,sans-serif;color:#0f1218;line-height:1.6">
           <p>Thanks for subscribing to <strong>go overseas Insights</strong>.</p>
-          <p>You'll get our perspective on cross-border strategy, market entry, and brand growth — no spam, unsubscribe anytime.</p>
+          <p>You'll get our perspective on brand, marketing, automation, and growth — no spam, unsubscribe anytime.</p>
           <p style="color:#7c869a;font-size:13px">Strategy · Creativity · Growth</p>
         </div>`,
       text: "Thanks for subscribing to go overseas Insights. Strategy · Creativity · Growth",
