@@ -30,9 +30,9 @@ Status: ✅ implemented here · 🟡 stubbed/partial · ⬜ not yet · 🔌 exte
 | 1 · Detection (player/ball) | `detect.py` + `track.py` | ✅ |
 | 2 · Event detection | highlight heuristics in `highlights.py` (passes/shots/tackles = learned models) | 🟡 |
 | 3 · Tactical metrics (xG/xT, heatmaps, distance) | possession, heatmaps, distance/speed, possession-timeline in `analytics.py` (xG/xT ⬜) | 🟡 |
-| 4 · Individual reports | per-player distance/top-speed table | 🟡 |
+| 4 · Individual reports | per-player distance/top-speed; **mapped onto roster players** (`/api/matches/{id}/import-stats`) and surfaced in player profiles | ✅ |
 | 5 · Highlight generation | `highlights.py` auto-clips | ✅ |
-| 6 · Profile update | jobs persisted per user/site (player profiles ⬜) | 🟡 |
+| 6 · Profile update | **detection stats flow into team/player profiles** via match→roster mapping; reporting reflects matches by 5/7/11 field type, career totals, leaderboards | ✅ |
 | Relational DB | SQLite (`db.py`) — Postgres in prod | ✅ / 🟡 |
 | Time-series store | folded into job summary JSON (dedicated TSDB ⬜) | 🟡 |
 | Object storage | local volume `runs/` (S3/GCS in prod) | 🟡 |
@@ -62,5 +62,7 @@ Status: ✅ implemented here · 🟡 stubbed/partial · ⬜ not yet · 🔌 exte
 2. **Real job queue + object storage** — Celery/RQ + S3/GCS; GPU workers for detection.
 3. **Multi-camera + homography per angle**; quality-tier routing (facility vs Solo).
 4. **Learned event models** (passes/shots/tackles) feeding xG/xT.
+   - Detection→roster mapping is **assisted** today (auto-assign + manual confirm);
+     fully automatic mapping needs jersey-number OCR / player re-ID.
 5. **Audit logging + guardian consent** for any minor data exposure.
 6. **On-site sync agent** (the gateway-side counterpart to `/api/ingest/*`).

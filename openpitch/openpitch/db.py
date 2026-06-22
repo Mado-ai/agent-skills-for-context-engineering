@@ -472,6 +472,10 @@ def add_player_stat(stat_id: str, match_id: str, player_id: str, minutes: int,
     )
 
 
+def clear_match_stats(match_id: str) -> None:
+    _exec("DELETE FROM player_match_stats WHERE match_id = ?", (match_id,))
+
+
 def stats_for_match(match_id: str) -> list[dict]:
     return [dict(r) for r in _connect().execute(
         "SELECT s.*, p.name AS player_name FROM player_match_stats s "

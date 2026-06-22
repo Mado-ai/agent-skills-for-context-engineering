@@ -141,6 +141,23 @@ export const api = {
   async createMatch(teamId: string, fields: Record<string, string>): Promise<{ id: string }> {
     return authed(`/api/teams/${teamId}/matches`, { method: "POST", body: new URLSearchParams(fields) });
   },
+  async matchDetected(matchId: string): Promise<{
+    detected: { player_id: number; team: string; distance_m: number; top_speed_ms: number }[];
+    roster: { id: string; name: string; jersey: number | null }[];
+  }> {
+    return authed(`/api/matches/${matchId}/detected`);
+  },
+  async importMatchStats(
+    matchId: string,
+    mapping: { detected_id: number; player_id: string }[],
+    minutes: number,
+  ): Promise<{ imported: number }> {
+    return authed(`/api/matches/${matchId}/import-stats`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mapping, minutes }),
+    });
+  },
 
   // public (no auth)
   async publicTeam(token: string): Promise<TeamProfile> {

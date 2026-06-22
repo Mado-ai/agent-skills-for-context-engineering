@@ -13,6 +13,7 @@ PLAYMETRICS_ADMIN_PASSWORD (sensible dev defaults if unset).
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import subprocess
@@ -539,6 +540,51 @@ def remove_match(match_id: str, user: dict = Depends(current_user)) -> JSONRespo
     _owned_match(match_id, user)
     db.delete_match(match_id)
     return JSONResponse({"status": "ok"})
+
+
+@app.get("/api/matches/{match_id}/detected")
+def match_detected(match_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    """Detected players from the linked analysis job + the team roster, for mapping."""
+    match = _owned_match(match_id, user)
+    roster = db.list_players(match["team_id"])
+    detected: list[dict] = []
+    if match.get("job_id"):
+        job = db.get_job(match["job_id"])
+        if job and job.get("summary"):
+            detected = job["summary"].get("players", [])
+    return JSONResponse({"detected": detected, "roster": [dict(p) for p in roster]})
+
+
+@app.post("/api/matches/{match_id}/import-stats")
+def import_match_stats(
+    match_id: str,
+    mapping: list[dict] = Body(..., embed=True),
+    minutes: int = Body(0, embed=True),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    """Map detected track IDs -> roster players and write their stats to the match.
+
+    `mapping` = [{"detected_id": <job player_id>, "player_id": <roster id>}].
+    Re-importing replaces the match's prior auto-imported stats (idempotent).
+    """
+    match = _owned_match(match_id, user)
+    if not match.get("job_id"):
+        raise HTTPException(400, "match has no linked analysis job")
+    job = db.get_job(match["job_id"])
+    detected = {str(p["player_id"]): p for p in (job["summary"].get("players", []) if job and job.get("summary") else [])}
+    roster_ids = {p["id"] for p in db.list_players(match["team_id"])}
+
+    db.clear_match_stats(match_id)
+    written = 0
+    for m in mapping:
+        det = detected.get(str(m.get("detected_id")))
+        if not det or m.get("player_id") not in roster_ids:
+            continue
+        db.add_player_stat("st_" + uuid.uuid4().hex[:10], match_id, m["player_id"],
+                           int(minutes), float(det.get("distance_m") or 0),
+                           float(det.get("top_speed_ms") or 0), 0, 0)
+        written += 1
+    return JSONResponse({"status": "ok", "imported": written})
 
 
 @app.post("/api/matches/{match_id}/stats")

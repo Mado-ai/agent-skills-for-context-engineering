@@ -112,6 +112,52 @@ def test_export_import_roundtrip(auth):
     assert prof["leaderboard"][0]["goals"] == 1
 
 
+def test_import_stats_from_analysis(auth):
+    import time
+
+    c, h = auth
+    tid = c.post("/api/teams", data={"name": "Analytics FC"}, headers=h).json()["id"]
+    p1 = c.post(f"/api/teams/{tid}/players", data={"name": "Robin Vale"}, headers=h).json()
+    p2 = c.post(f"/api/teams/{tid}/players", data={"name": "Noa Diaz"}, headers=h).json()
+
+    # run a real analysis job, then link it to a match
+    jid = c.post("/api/demo", data={"seconds": "4"}, headers=h).json()["job_id"]
+    for _ in range(120):
+        if c.get(f"/api/jobs/{jid}", headers=h).json()["status"] in ("done", "error"):
+            break
+        time.sleep(0.5)
+    mid = c.post(f"/api/teams/{tid}/matches",
+                 data={"field_type": 11, "opponent": "AI United", "job_id": jid},
+                 headers=h).json()["id"]
+
+    # detected players from the analysis + roster come back for mapping
+    det = c.get(f"/api/matches/{mid}/detected", headers=h).json()
+    assert len(det["roster"]) == 2
+    assert len(det["detected"]) >= 2
+
+    # map the two highest-distance detections onto the roster, import
+    detected_sorted = sorted(det["detected"], key=lambda d: d["distance_m"], reverse=True)
+    mapping = [
+        {"detected_id": detected_sorted[0]["player_id"], "player_id": p1["id"]},
+        {"detected_id": detected_sorted[1]["player_id"], "player_id": p2["id"]},
+    ]
+    res = c.post(f"/api/matches/{mid}/import-stats",
+                 json={"mapping": mapping, "minutes": 90}, headers=h)
+    assert res.status_code == 200 and res.json()["imported"] == 2
+
+    # reporting reflects it: player profile + team leaderboard now populated
+    pp = c.get(f"/api/players/{p1['id']}", headers=h).json()
+    assert pp["totals"]["matches"] == 1 and pp["totals"]["distance_m"] > 0
+    assert pp["matches_by_field"]["11"] == 1
+    tp = c.get(f"/api/teams/{tid}", headers=h).json()
+    assert len(tp["leaderboard"]) == 2
+
+    # re-import is idempotent (replaces, not appends)
+    c.post(f"/api/matches/{mid}/import-stats",
+           json={"mapping": mapping, "minutes": 90}, headers=h)
+    assert c.get(f"/api/players/{p1['id']}", headers=h).json()["totals"]["matches"] == 1
+
+
 def test_ownership_isolation(auth):
     c, h = auth
     tid = c.post("/api/teams", data={"name": "Private FC"}, headers=h).json()["id"]

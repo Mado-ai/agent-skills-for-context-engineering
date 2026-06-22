@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api/client";
 import FieldBreakdown from "../components/FieldBreakdown";
+import MatchStatsImport from "../components/MatchStatsImport";
 import type { TeamProfile as TP } from "../types";
 
 function Card({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
@@ -27,6 +28,7 @@ export default function TeamProfile() {
   const [mOpp, setMOpp] = useState("");
   const [mHome, setMHome] = useState("");
   const [mAway, setMAway] = useState("");
+  const [importing, setImporting] = useState<string | null>(null);
 
   const load = useCallback(() => api.getTeam(id).then(setTp).catch(() => setTp(null)), [id]);
   useEffect(() => {
@@ -151,11 +153,31 @@ export default function TeamProfile() {
         <Card title="Matches">
           <ul className="mb-3 flex flex-col gap-1">
             {tp.recent_matches.map((m) => (
-              <li key={m.id} className="flex justify-between rounded px-2 py-1.5 text-sm">
-                <span><b className="mr-2 text-slate-500">{m.field_type}v{m.field_type}</b>{m.opponent || "—"}</span>
-                <span className="text-slate-400">
-                  {m.home_score != null ? `${m.home_score}–${m.away_score}` : ""} {m.played_on || ""}
-                </span>
+              <li key={m.id} className="rounded px-2 py-1.5 text-sm">
+                <div className="flex items-center justify-between">
+                  <span><b className="mr-2 text-slate-500">{m.field_type}v{m.field_type}</b>{m.opponent || "—"}</span>
+                  <span className="flex items-center gap-2 text-slate-400">
+                    {m.home_score != null ? `${m.home_score}–${m.away_score}` : ""} {m.played_on || ""}
+                    {m.job_id && (
+                      <button
+                        onClick={() => setImporting(importing === m.id ? null : m.id)}
+                        className="rounded bg-line px-2 py-0.5 text-xs text-pitch"
+                        title="Import player stats from the linked analysis"
+                      >
+                        ↳ analysis
+                      </button>
+                    )}
+                  </span>
+                </div>
+                {importing === m.id && (
+                  <MatchStatsImport
+                    matchId={m.id}
+                    onDone={() => {
+                      setImporting(null);
+                      load();
+                    }}
+                  />
+                )}
               </li>
             ))}
             {tp.recent_matches.length === 0 && <li className="text-sm text-slate-400">No matches yet.</li>}
