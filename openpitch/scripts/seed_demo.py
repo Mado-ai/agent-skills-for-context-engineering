@@ -22,6 +22,7 @@ import argparse
 import os
 import sys
 import tempfile
+import uuid
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -32,6 +33,65 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from analyze_metrica import FPS, build_analytics  # noqa: E402
 
 JOB_ID = "metrica-demo"
+TEAM_NAME = "Metrica FC"
+
+# Deterministic name pool so jersey N always maps to the same real player name
+# (the tracking data is anonymous — players are numbers — so we give the demo
+# squad proper names and profiles).
+_FIRST = ["James", "Liam", "Noah", "Oliver", "Lucas", "Mason", "Ethan", "Leo",
+          "Marco", "Diego", "Kai", "Omar", "Yusuf", "Andre", "Mateo", "Felix",
+          "Hugo", "Ivan", "Samir", "Theo", "Niko", "Adam", "Elias", "Raul"]
+_LAST = ["Walker", "Reyes", "Bennett", "Costa", "Silva", "Moreno", "Haas",
+         "Novak", "Larsen", "Okafor", "Bauer", "Rossi", "Nguyen", "Khan",
+         "Mendez", "Carter", "Lindqvist", "Petrov", "Tahir", "Fontaine",
+         "Vidal", "Park", "Romano", "Sauer"]
+
+
+def name_for(jersey: int) -> str:
+    return f"{_FIRST[(jersey * 7) % len(_FIRST)]} {_LAST[(jersey * 13) % len(_LAST)]}"
+
+
+def position_for(jersey: int) -> str:
+    if jersey == 1:
+        return "GK"
+    if jersey <= 5:
+        return "DF"
+    if jersey <= 8:
+        return "MF"
+    return "FW"
+
+
+def build_team(user_id: int, players: list[dict], minutes: int) -> tuple[str, int]:
+    """Create a fully-named demo squad with one match's worth of real stats.
+
+    Replicates the dashboard's auto-import: the Home side's detected players
+    (keyed by jersey) become named roster players with per-match metrics.
+    Idempotent — drops any existing demo team first.
+    """
+    for t in db.list_teams(user_id):
+        if t["name"] == TEAM_NAME:
+            db.delete_team(t["id"])
+
+    home = sorted(
+        (p for p in players if p["team"] == "Home" and p.get("jersey") is not None),
+        key=lambda p: p["jersey"],
+    )[:14]
+
+    team_id = "team_" + uuid.uuid4().hex[:10]
+    db.create_team(team_id, user_id, TEAM_NAME)
+    match_id = "match_" + uuid.uuid4().hex[:10]
+    db.create_match(match_id, user_id, team_id, 11, "Away XI (5-min sample)",
+                    "2026-06-21", JOB_ID, 2, 1, None)
+
+    for p in home:
+        j = p["jersey"]
+        pid = "ply_" + uuid.uuid4().hex[:10]
+        db.create_player(pid, team_id, name_for(j), position_for(j), j, is_minor=False)
+        db.add_player_stat(
+            "st_" + uuid.uuid4().hex[:10], match_id, pid, minutes,
+            float(p.get("distance_m") or 0), float(p.get("top_speed_ms") or 0),
+            0, 0, int(p.get("sprints") or 0), int(p.get("passes") or 0))
+    return team_id, len(home)
 
 
 def main() -> int:
@@ -42,6 +102,8 @@ def main() -> int:
                     default=Path(tempfile.gettempdir()) / "openpitch-metrica")
     ap.add_argument("--email", default=os.environ.get(
         "PLAYMETRICS_ADMIN_EMAIL", "yazanalshuibe14@gmail.com"))
+    ap.add_argument("--no-team", action="store_true",
+                    help="seed only the dashboard job, not the named demo squad")
     args = ap.parse_args()
 
     db.init_db()
@@ -85,8 +147,15 @@ def main() -> int:
           f"{n} frames · possession {summary['possession']} · "
           f"shots {sum(t['shots'] for t in ts.values())} · "
           f"xG {round(sum(t['xg'] for t in ts.values()), 2)}")
+
+    if not args.no_team:
+        minutes = max(1, round(n / FPS / 60))
+        team_id, roster = build_team(user["id"], summary["players"], minutes)
+        print(f"seeded named team {TEAM_NAME!r} ({roster} players) with "
+              f"one imported match — id {team_id}")
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
