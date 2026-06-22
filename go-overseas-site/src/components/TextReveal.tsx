@@ -37,8 +37,10 @@ export function TextReveal({
     return () => io.disconnect();
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const Comp = Tag as any;
   return (
-    <Tag ref={ref as React.Ref<HTMLElement>} className={className}>
+    <Comp ref={ref as React.Ref<HTMLElement>} className={className}>
       {words.map((w, i) => (
         <span key={i} className="tr-word">
           <span
@@ -51,6 +53,6 @@ export function TextReveal({
           {i < words.length - 1 ? " " : ""}
         </span>
       ))}
-    </Tag>
+    </Comp>
   );
 }

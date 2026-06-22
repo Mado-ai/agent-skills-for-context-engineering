@@ -3,7 +3,7 @@ import { Container, Section, Button, Eyebrow } from "@/components/ui";
 import { Counter } from "@/components/Counter";
 import { CtaBanner } from "@/components/CtaBanner";
 import { ServiceCard } from "@/components/ServiceCard";
-import { LogoMark } from "@/components/Logo";
+import { Hero3D } from "@/components/Hero3D";
 import { JsonLd } from "@/components/JsonLd";
 import { BrandBackdrop, Sparkle, GrowthArrow, LoopSquiggle, HalfRing } from "@/components/BrandGraphics";
 import { HeroCanvas } from "@/components/HeroCanvas";
@@ -130,9 +130,7 @@ export default function HomePage() {
             <HalfRing className="pointer-events-none absolute right-4 top-2 h-24 w-24 text-pink" />
             <LoopSquiggle className="pointer-events-none absolute -bottom-1 left-2 h-12 w-32 text-lime" />
             <div className="relative mx-auto flex aspect-square max-w-[17rem] items-center justify-center rounded-full bg-ink-900 ring-1 ring-line">
-              <div className="animate-float-slow text-white">
-                <LogoMark size={148} />
-              </div>
+              <Hero3D />
             </div>
             <div className="absolute bottom-0 right-0 rounded-2xl border border-line bg-ink-900/90 px-5 py-4 backdrop-blur">
               <p className="text-xs text-mist-dim">Trusted by</p>

@@ -42,13 +42,15 @@ export function Reveal({
     return () => io.disconnect();
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const Comp = Tag as any;
   return (
-    <Tag
+    <Comp
       ref={ref as React.Ref<HTMLElement>}
       style={{ transitionDelay: `${delay}ms` }}
       className={`reveal ${shown ? "is-in" : ""} ${className}`}
     >
       {children}
-    </Tag>
+    </Comp>
   );
 }

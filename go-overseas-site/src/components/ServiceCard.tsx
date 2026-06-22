@@ -79,7 +79,8 @@ export function ServiceCard({
   headingAs?: ElementType;
 }) {
   const a = ACCENTS[service.id] ?? ACCENTS["web-apps"];
-  const Heading = headingAs;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const Heading = headingAs as any;
   return (
     <Card className={`h-full ${a.hover}`}>
       <span id={service.id} className="block scroll-mt-24" />
