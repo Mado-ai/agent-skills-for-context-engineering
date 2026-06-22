@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { Container, Button } from "./ui";
+import { Magnetic } from "./Magnetic";
 
 const nav = [
   { href: "/services", label: "Services" },
@@ -33,7 +34,9 @@ export function Header() {
         </nav>
 
         <div className="hidden md:block">
-          <Button href="/contact">Start a conversation</Button>
+          <Magnetic>
+            <Button href="/contact">Start a conversation</Button>
+          </Magnetic>
         </div>
 
         <button

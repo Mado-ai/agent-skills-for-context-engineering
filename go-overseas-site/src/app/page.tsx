@@ -4,6 +4,10 @@ import { Container, Section, Button, Eyebrow, Card } from "@/components/ui";
 import { LogoMark } from "@/components/Logo";
 import { JsonLd } from "@/components/JsonLd";
 import { BrandBackdrop, DynamicRings, Sparkle, GrowthArrow } from "@/components/BrandGraphics";
+import { HeroCanvas } from "@/components/HeroCanvas";
+import { Magnetic } from "@/components/Magnetic";
+import { Tilt } from "@/components/Tilt";
+import { Reveal } from "@/components/Reveal";
 import { services, stats, process, sectors } from "@/lib/site";
 import { professionalServiceSchema } from "@/lib/seo";
 
@@ -69,6 +73,7 @@ export default function HomePage() {
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-line">
         <BrandBackdrop />
+        <HeroCanvas className="pointer-events-none absolute inset-0 h-full w-full opacity-70" />
 
         <Container className="relative grid items-center gap-12 py-24 sm:py-32 lg:grid-cols-[1.15fr_0.85fr]">
           <div>
@@ -83,10 +88,14 @@ export default function HomePage() {
               execution that turn ambitious ideas into real traction.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
-              <Button href="/contact">Start a conversation</Button>
-              <Button href="/services" variant="ghost">
-                Explore services
-              </Button>
+              <Magnetic>
+                <Button href="/contact">Start a conversation</Button>
+              </Magnetic>
+              <Magnetic>
+                <Button href="/services" variant="ghost">
+                  Explore services
+                </Button>
+              </Magnetic>
             </div>
             <p className="mt-10 text-xs font-semibold uppercase tracking-[0.2em]">
               <span className="text-blue">Strategy</span>{" "}
@@ -141,23 +150,24 @@ export default function HomePage() {
               measurable growth.
             </p>
           </div>
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <Reveal className="mt-12 grid gap-6 md:grid-cols-3">
             {pillars.map((p) => (
-              <div
-                key={p.tag}
-                className={`relative overflow-hidden rounded-[var(--radius-card)] border ${p.border} bg-ink-800/40 p-8`}
-              >
-                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${p.chip} ${p.color}`}>
-                  {p.icon}
+              <Tilt key={p.tag}>
+                <div
+                  className={`relative h-full overflow-hidden rounded-[var(--radius-card)] border ${p.border} bg-ink-800/40 p-8`}
+                >
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${p.chip} ${p.color}`}>
+                    {p.icon}
+                  </div>
+                  <p className={`mt-6 font-display text-3xl font-semibold ${p.color}`}>{p.word}</p>
+                  <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-mist-dim">
+                    {p.tag}
+                  </p>
+                  <p className="mt-3 text-sm leading-relaxed text-mist">{p.body}</p>
                 </div>
-                <p className={`mt-6 font-display text-3xl font-semibold ${p.color}`}>{p.word}</p>
-                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-mist-dim">
-                  {p.tag}
-                </p>
-                <p className="mt-3 text-sm leading-relaxed text-mist">{p.body}</p>
-              </div>
+              </Tilt>
             ))}
-          </div>
+          </Reveal>
         </Container>
       </section>
 
@@ -175,22 +185,24 @@ export default function HomePage() {
           </Button>
         </div>
 
-        <div className="mt-12 grid gap-6 md:grid-cols-2">
+        <Reveal className="mt-12 grid gap-6 md:grid-cols-2">
           {services.map((service) => (
-            <Card key={service.id}>
-              <h3 className="font-display text-xl font-semibold">{service.title}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-mist">{service.summary}</p>
-              <ul className="mt-5 space-y-2">
-                {service.points.map((p) => (
-                  <li key={p} className="flex items-start gap-2.5 text-sm text-mist">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-green" />
-                    {p}
-                  </li>
-                ))}
-              </ul>
-            </Card>
+            <Tilt key={service.id}>
+              <Card className="h-full">
+                <h3 className="font-display text-xl font-semibold">{service.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-mist">{service.summary}</p>
+                <ul className="mt-5 space-y-2">
+                  {service.points.map((p) => (
+                    <li key={p} className="flex items-start gap-2.5 text-sm text-mist">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-green" />
+                      {p}
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            </Tilt>
           ))}
-        </div>
+        </Reveal>
       </Section>
 
       {/* Process */}
@@ -200,7 +212,7 @@ export default function HomePage() {
           <h2 className="mt-5 max-w-2xl font-display text-3xl font-semibold tracking-tight sm:text-4xl">
             From idea to impact — a four-step path.
           </h2>
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <Reveal className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {process.map((p) => (
               <div key={p.step} className="rounded-[var(--radius-card)] border border-line bg-ink-800/50 p-6">
                 <span className="font-display text-3xl font-semibold text-gradient">{p.step}</span>
@@ -208,7 +220,7 @@ export default function HomePage() {
                 <p className="mt-2 text-sm leading-relaxed text-mist-dim">{p.body}</p>
               </div>
             ))}
-          </div>
+          </Reveal>
         </Container>
       </section>
 
@@ -255,7 +267,9 @@ export default function HomePage() {
                 strategy, creativity, and growth to make it happen.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Button href="/contact">Start a conversation</Button>
+                <Magnetic>
+                  <Button href="/contact">Start a conversation</Button>
+                </Magnetic>
                 <Link
                   href="/work"
                   className="inline-flex items-center px-2 py-3 text-sm font-semibold text-mist hover:text-white"

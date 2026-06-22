@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { JsonLd } from "@/components/JsonLd";
+import { CustomCursor } from "@/components/CustomCursor";
 import { siteConfig, organizationSchema, websiteSchema } from "@/lib/seo";
 
 // Brand typeface — Poppins across the whole site.
@@ -91,6 +92,7 @@ export default function RootLayout({
         <Header />
         <main id="main">{children}</main>
         <Footer />
+        <CustomCursor />
       </body>
     </html>
   );
