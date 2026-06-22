@@ -22,7 +22,7 @@ export function renderOgImage(opts: { title: string; eyebrow?: string }) {
           justifyContent: "space-between",
           padding: "72px 80px",
           background:
-            "radial-gradient(1100px 500px at 85% -10%, rgba(47,91,255,0.45), transparent), radial-gradient(900px 500px at 0% 120%, rgba(31,209,122,0.30), transparent), #08090c",
+            "radial-gradient(1100px 500px at 85% -10%, rgba(0,174,239,0.45), transparent), radial-gradient(900px 500px at 0% 120%, rgba(50,196,106,0.28), transparent), #08090c",
           fontFamily: "sans-serif",
           color: "#ffffff",
         }}
@@ -30,20 +30,13 @@ export function renderOgImage(opts: { title: string; eyebrow?: string }) {
         {/* Top row: logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <svg width="64" height="64" viewBox="0 0 48 48" fill="none">
-            <defs>
-              <linearGradient id="og" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#2f5bff" />
-                <stop offset="0.55" stopColor="#16c8ff" />
-                <stop offset="1" stopColor="#1fd17a" />
-              </linearGradient>
-            </defs>
-            <path d="M24 6.5A17.5 17.5 0 1 0 41.5 24" stroke="url(#og)" strokeWidth="6.5" strokeLinecap="round" />
-            <path d="M41.5 24H30" stroke="url(#og)" strokeWidth="6.5" strokeLinecap="round" />
-            <circle cx="30" cy="24" r="3.4" fill="#1fd17a" />
+            <path d="M24 6.5A17.5 17.5 0 1 0 41.5 24" stroke="#ffffff" strokeWidth="6.5" strokeLinecap="round" />
+            <path d="M18.5 30 29 19.5" stroke="#32c46a" strokeWidth="4.6" strokeLinecap="round" />
+            <path d="M22.7 19.5H29V25.8" stroke="#32c46a" strokeWidth="4.6" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <div style={{ display: "flex", fontSize: 34, fontWeight: 600, letterSpacing: -0.5 }}>
-            <span>go&nbsp;</span>
-            <span style={{ color: "#aab3c5" }}>overseas</span>
+            <span>go&nbsp;over</span>
+            <span style={{ color: "#00aeef" }}>seas</span>
           </div>
         </div>
 
@@ -56,7 +49,7 @@ export function renderOgImage(opts: { title: string; eyebrow?: string }) {
               fontWeight: 600,
               letterSpacing: 4,
               textTransform: "uppercase",
-              color: "#1fd17a",
+              color: "#00aeef",
               marginBottom: 24,
             }}
           >

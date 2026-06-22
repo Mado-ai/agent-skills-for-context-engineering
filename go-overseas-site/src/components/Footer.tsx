@@ -38,13 +38,16 @@ export function Footer() {
         <div className="max-w-sm">
           <div className="flex items-center gap-2.5">
             <LogoMark size={32} />
-            <span className="font-display text-base font-semibold tracking-tight">
-              go <span className="text-mist">overseas</span>
+            <span className="font-display text-base font-semibold lowercase tracking-tight">
+              go over<span className="text-blue">seas</span>
             </span>
           </div>
           <p className="mt-4 text-sm leading-relaxed text-mist-dim">
-            Strategy. Creativity. Growth. We help Canadian businesses and their owners
-            cross borders — turning international ambition into market presence.
+            <span className="font-medium text-blue">Strategy.</span>{" "}
+            <span className="font-medium text-purple">Creativity.</span>{" "}
+            <span className="font-medium text-green">Growth.</span> We help Canadian
+            businesses and their owners cross borders — turning international ambition into
+            market presence.
           </p>
         </div>
 
@@ -72,7 +75,11 @@ export function Footer() {
       <div className="border-t border-line">
         <Container className="flex flex-col items-center justify-between gap-3 py-6 text-xs text-mist-dim sm:flex-row">
           <p>© {new Date().getFullYear()} go overseas. All rights reserved.</p>
-          <p>Strategy · Creativity · Growth</p>
+          <p>
+            <span className="text-blue">Strategy</span> ·{" "}
+            <span className="text-purple">Creativity</span> ·{" "}
+            <span className="text-green">Growth</span>
+          </p>
         </Container>
       </div>
     </footer>

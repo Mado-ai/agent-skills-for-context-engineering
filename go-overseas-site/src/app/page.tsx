@@ -40,8 +40,12 @@ export default function HomePage() {
                 Explore services
               </Button>
             </div>
-            <p className="mt-10 text-xs font-semibold uppercase tracking-[0.2em] text-mist-dim">
-              Strategy · Creativity · Growth
+            <p className="mt-10 text-xs font-semibold uppercase tracking-[0.2em]">
+              <span className="text-blue">Strategy</span>{" "}
+              <span className="text-mist-dim">·</span>{" "}
+              <span className="text-purple">Creativity</span>{" "}
+              <span className="text-mist-dim">·</span>{" "}
+              <span className="text-green">Growth</span>
             </p>
           </div>
 

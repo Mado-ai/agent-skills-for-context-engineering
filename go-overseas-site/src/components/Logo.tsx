@@ -1,11 +1,11 @@
 import Link from "next/link";
 
 /**
- * go overseas mark — a segmented globe/"G" ring in the brand gradient.
- * The open ring evokes both a globe (overseas) and the letter G (go / growth).
+ * go overseas brand mark — an open ring ("G" / dynamic circle) with a green
+ * growth arrow inside. The ring is monochrome (currentColor) so it sits on
+ * dark or light; the growth mark is brand Emerald Green.
  */
 export function LogoMark({ size = 36 }: { size?: number }) {
-  const id = "go-grad";
   return (
     <svg
       width={size}
@@ -15,29 +15,22 @@ export function LogoMark({ size = 36 }: { size?: number }) {
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
-      <defs>
-        <linearGradient id={id} x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#2f5bff" />
-          <stop offset="0.55" stopColor="#16c8ff" />
-          <stop offset="1" stopColor="#1fd17a" />
-        </linearGradient>
-      </defs>
-      {/* Outer open ring (the "G" gap on the right) */}
+      {/* Open ring — the "G" / dynamic circle */}
       <path
         d="M24 6.5A17.5 17.5 0 1 0 41.5 24"
-        stroke={`url(#${id})`}
+        stroke="currentColor"
         strokeWidth="6.5"
         strokeLinecap="round"
       />
-      {/* Inner bar of the G */}
+      {/* Green growth mark — upward arrow (progress / positive change) */}
+      <path d="M18.5 30 29 19.5" stroke="#32c46a" strokeWidth="4.6" strokeLinecap="round" />
       <path
-        d="M41.5 24H30"
-        stroke={`url(#${id})`}
-        strokeWidth="6.5"
+        d="M22.7 19.5H29V25.8"
+        stroke="#32c46a"
+        strokeWidth="4.6"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
-      {/* Growth dot */}
-      <circle cx="30" cy="24" r="3.4" fill="#1fd17a" />
     </svg>
   );
 }
@@ -46,8 +39,8 @@ export function Logo({ size = 36 }: { size?: number }) {
   return (
     <Link href="/" className="group flex items-center gap-2.5" aria-label="go overseas — home">
       <LogoMark size={size} />
-      <span className="font-display text-[1.05rem] font-semibold leading-none tracking-tight">
-        go <span className="text-mist">overseas</span>
+      <span className="font-display text-[1.1rem] font-semibold lowercase leading-none tracking-tight">
+        go over<span className="text-blue">seas</span>
       </span>
     </Link>
   );

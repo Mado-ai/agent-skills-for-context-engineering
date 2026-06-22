@@ -1,20 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { JsonLd } from "@/components/JsonLd";
 import { siteConfig, organizationSchema, websiteSchema } from "@/lib/seo";
 
-const inter = Inter({
+// Brand typeface — Poppins across the whole site.
+const poppins = Poppins({
   subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-display",
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-poppins",
   display: "swap",
 });
 
@@ -81,7 +77,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en-CA" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+    <html lang="en-CA" className={poppins.variable}>
       <body className="min-h-screen">
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <a

@@ -15,14 +15,17 @@
   --color-mist: #aab3c5;
   --color-mist-dim: #7c869a;
 
-  --color-blue: #2f5bff;
-  --color-blue-deep: #1f3df0;
-  --color-cyan: #16c8ff;
-  --color-green: #1fd17a;
-  --color-green-deep: #0fb866;
+  /* Brand palette — Electric Blue primary, Emerald Green + Purple accents */
+  --color-blue: #00aeef;
+  --color-blue-deep: #008cc9;
+  --color-cyan: #4fd0f7;
+  --color-green: #32c46a;
+  --color-green-deep: #28a85a;
+  --color-purple: #6c3ef4;
+  --color-purple-deep: #5a2fd6;
 
-  --font-display: var(--font-display), "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-sans), "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-poppins), "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-poppins), "Poppins", ui-sans-serif, system-ui, sans-serif;
 
   --radius-card: 1.25rem;
 }
