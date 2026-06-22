@@ -66,6 +66,14 @@ On first launch an **admin account is seeded**. Configure via environment:
 | `PLAYMETRICS_ADMIN_PASSWORD` | `playmetrics-dev` | Seeded admin password — **change in production** |
 | `PLAYMETRICS_SECRET` | random per process | Token signing key — **set a fixed value in production** |
 | `PLAYMETRICS_DB` | `playmetrics.db` | SQLite database path |
+| `PLAYMETRICS_DATA` | `runs/` | Job output directory (mount a volume in prod) |
+
+### Deploying
+
+See **[DEPLOY.md](DEPLOY.md)** for production deployment — a `Dockerfile`,
+`docker-compose.yml`, `fly.toml` (recommended) and `render.yaml` are included.
+Play Metrics is a stateful, compute-heavy service, so it needs a container host
+with a persistent volume (not a static/serverless host).
 
 ## Architecture
 

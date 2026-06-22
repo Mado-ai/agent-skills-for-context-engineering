@@ -31,9 +31,10 @@ from .config import Config
 from .pipeline import process_video
 
 ROOT = Path(__file__).resolve().parent.parent
-RUNS = ROOT / "runs"
+# Output/job directory — point at a mounted volume in production via env.
+RUNS = Path(os.environ.get("PLAYMETRICS_DATA", str(ROOT / "runs")))
 FRONTEND = ROOT / "frontend"
-RUNS.mkdir(exist_ok=True)
+RUNS.mkdir(parents=True, exist_ok=True)
 
 
 @asynccontextmanager
@@ -95,6 +96,11 @@ def login(email: str = Form(...), password: str = Form(...)) -> JSONResponse:
         raise HTTPException(401, "invalid credentials")
     token = auth.create_token(user["id"], user["email"])
     return JSONResponse({"token": token, "email": user["email"]})
+
+
+@app.get("/api/health")
+def health() -> JSONResponse:
+    return JSONResponse({"status": "ok", "version": app.version})
 
 
 @app.get("/api/auth/me")
