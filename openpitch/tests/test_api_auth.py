@@ -187,6 +187,10 @@ def test_site_device_and_ingest_flow(client):
     assert job["source"] == "ingest" and job["site_id"] == site["id"]
     assert "North Pitch" in job["input_name"]
 
+    # the match auto-appears under the site
+    site_jobs = client.get(f"/api/sites/{site['id']}/matches", headers=h).json()["jobs"]
+    assert any(j["id"] == jid and j["source"] == "ingest" for j in site_jobs)
+
 
 def test_change_password(client):
     reg = client.post("/api/auth/register",

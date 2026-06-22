@@ -300,6 +300,12 @@ def site_detail(site_id: str, user: dict = Depends(current_user)) -> JSONRespons
     return JSONResponse({**dict(site), "devices": db.list_devices(site_id)})
 
 
+@app.get("/api/sites/{site_id}/matches")
+def site_matches(site_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_site(site_id, user)
+    return JSONResponse({"jobs": db.list_jobs_for_site(site_id)})
+
+
 @app.post("/api/sites/{site_id}/devices")
 def pair_device(
     site_id: str,

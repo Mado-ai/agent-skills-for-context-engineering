@@ -43,6 +43,30 @@ export interface User {
   is_admin: boolean;
 }
 
+// --- capture sites / devices ---
+
+export interface Site {
+  id: string;
+  name: string;
+  package: string;
+  device_count?: number;
+}
+
+export interface Device {
+  id: string;
+  kind: string;
+  name: string;
+  last_seen: number | null;
+}
+
+export interface SiteJob {
+  id: string;
+  input_name: string;
+  status: string;
+  source: string;
+  created_at: number;
+}
+
 // --- profiles ---
 
 export type FieldBreakdown = Record<"5" | "7" | "11", number>;

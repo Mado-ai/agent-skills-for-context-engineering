@@ -1,4 +1,4 @@
-import type { Job, PlayerProfile, TeamProfile, TeamSummary, User } from "../types";
+import type { Device, Job, PlayerProfile, Site, SiteJob, TeamProfile, TeamSummary, User } from "../types";
 
 const TOKEN_KEY = "pm_token";
 
@@ -103,6 +103,23 @@ export const api = {
     return `/api/files/${jobId}/${path}?token=${encodeURIComponent(tokenStore.get() ?? "")}`;
   },
 
+  // --- capture sites / devices ---
+  async listSites(): Promise<Site[]> {
+    return (await authed("/api/sites")).sites as Site[];
+  },
+  async createSite(name: string, pkg: string): Promise<Site> {
+    return authed("/api/sites", { method: "POST", body: new URLSearchParams({ name, package: pkg }) });
+  },
+  async getSite(id: string): Promise<Site & { devices: Device[] }> {
+    return authed(`/api/sites/${id}`);
+  },
+  async pairDevice(siteId: string, kind: string, name: string): Promise<{ device_id: string; api_key: string }> {
+    return authed(`/api/sites/${siteId}/devices`, { method: "POST", body: new URLSearchParams({ kind, name }) });
+  },
+  async siteMatches(siteId: string): Promise<SiteJob[]> {
+    return (await authed(`/api/sites/${siteId}/matches`)).jobs as SiteJob[];
+  },
+
   // --- teams / players / matches ---
   async listTeams(): Promise<TeamSummary[]> {
     return (await authed("/api/teams")).teams as TeamSummary[];
@@ -165,6 +182,7 @@ export const api = {
       capture: { name: string; model: string; qty: number; role: string }[] }[];
     edge: { device: string; model: string; role: string }[];
     vlans: { vlan: number; name: string; note: string }[];
+    device_kinds: string[];
   }> {
     return parse(await fetch("/api/packages"));
   },

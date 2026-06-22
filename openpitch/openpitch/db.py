@@ -285,6 +285,15 @@ def get_device_by_key_hash(key_hash: str) -> sqlite3.Row | None:
     ).fetchone()
 
 
+def list_jobs_for_site(site_id: str) -> list[dict]:
+    rows = _connect().execute(
+        "SELECT id, input_name, detector, status, progress, source, created_at "
+        "FROM jobs WHERE site_id = ? ORDER BY created_at DESC",
+        (site_id,),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
 def touch_device(device_id: str) -> None:
     with _lock:
         c = _connect()

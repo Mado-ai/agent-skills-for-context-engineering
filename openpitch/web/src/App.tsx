@@ -13,6 +13,8 @@ const Features = lazy(() => import("./pages/Features"));
 const Hardware = lazy(() => import("./pages/Hardware"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const About = lazy(() => import("./pages/About"));
+const Sites = lazy(() => import("./pages/Sites"));
+const SiteDetail = lazy(() => import("./pages/SiteDetail"));
 const Teams = lazy(() => import("./pages/Teams"));
 const TeamProfile = lazy(() => import("./pages/TeamProfile"));
 const PlayerProfile = lazy(() => import("./pages/PlayerProfile"));
@@ -46,6 +48,8 @@ export default function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route path="/sites" element={<ProtectedRoute><Sites /></ProtectedRoute>} />
+                <Route path="/sites/:id" element={<ProtectedRoute><SiteDetail /></ProtectedRoute>} />
                 <Route path="/teams" element={<ProtectedRoute><Teams /></ProtectedRoute>} />
                 <Route path="/teams/:id" element={<ProtectedRoute><TeamProfile /></ProtectedRoute>} />
                 <Route path="/players/:id" element={<ProtectedRoute><PlayerProfile /></ProtectedRoute>} />
