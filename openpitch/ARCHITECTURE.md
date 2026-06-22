@@ -26,7 +26,7 @@ Status: ✅ implemented here · 🟡 stubbed/partial · ⬜ not yet · 🔌 exte
 | Reference stage | Here | Status |
 |-----------------|------|--------|
 | Ingestion API (auth, validation, dedup) | `POST /api/ingest/matches` — device-key auth, size/type checks, **idempotency keys** | ✅ |
-| Job queue (per-match) | background thread per job + SQLite job rows (swap for Celery/RQ) | 🟡 |
+| Job queue (per-match) | `jobs_queue.py` abstraction: in-process thread (default) or **RQ/Redis** (`PLAYMETRICS_QUEUE=rq`); task in `tasks.py` | ✅ |
 | 1 · Detection (player/ball) | `detect.py` + `track.py` | ✅ |
 | 2 · Event detection | highlight heuristics in `highlights.py` (passes/shots/tackles = learned models) | 🟡 |
 | 3 · Tactical metrics (xG/xT, heatmaps, distance) | possession, heatmaps, distance/speed, possession-timeline in `analytics.py` (xG/xT ⬜) | 🟡 |
@@ -35,7 +35,7 @@ Status: ✅ implemented here · 🟡 stubbed/partial · ⬜ not yet · 🔌 exte
 | 6 · Profile update | **detection stats flow into team/player profiles** via match→roster mapping; reporting reflects matches by 5/7/11 field type, career totals, leaderboards | ✅ |
 | Relational DB | `db.py` on **SQLAlchemy Core** — SQLite (dev) / **Postgres** (prod) via `DATABASE_URL`; **Alembic** migrations | ✅ |
 | Time-series store | folded into job summary JSON (dedicated TSDB ⬜) | 🟡 |
-| Object storage | `storage.py` abstraction (LocalStorage now; S3/GCS-ready interface, `PLAYMETRICS_STORAGE`) | 🟡 |
+| Object storage | `storage.py`: LocalStorage or **S3Storage** (boto3) — upload on finalize, presigned-URL reads (`PLAYMETRICS_STORAGE=s3`) | ✅ |
 | Application API + authz | `api.py` (JWT, per-user/site ownership) | ✅ |
 
 ## Layer 4 — Experience (apps & surfaces)
@@ -62,14 +62,14 @@ Status: ✅ implemented here · 🟡 stubbed/partial · ⬜ not yet · 🔌 exte
 1. ✅ **Roles & orgs** — organizations + memberships with role-based authz.
 2. ✅ **Child-safety hardening** — guardian-consent gate, audit trail, right-to-delete
    cascade, login rate-limit + security headers.
-3. ✅ **Postgres-ready data layer** — `db.py` on SQLAlchemy Core + Alembic,
-   driven by `DATABASE_URL` (SQLite dev / Postgres prod). Next: validate against
-   a live Postgres in CI; then S3 storage + a real job queue (Celery/RQ) + GPU workers.
-4. ✅ **Signed media URLs** — `/api/files/*` now takes a short-lived, read-only
-   media token (`?mt=`, HMAC, 6h) instead of the session JWT; the SPA fetches it
-   on auth. Next: S3 object storage + a job queue (Celery/RQ) + GPU workers.
-5. **Multi-camera + homography per angle**; quality-tier routing (facility vs Solo).
-6. **Learned event models** (passes/shots/tackles) feeding xG/xT.
-   - Detection→roster mapping is **assisted** today (auto-assign + manual confirm);
-     fully automatic mapping needs jersey-number OCR / player re-ID.
-7. **On-site sync agent** (the gateway-side counterpart to `/api/ingest/*`).
+3. ✅ **Postgres-ready data layer** — SQLAlchemy Core + Alembic, `DATABASE_URL`.
+   Schema is dialect-checked for Postgres in tests; live-server check in CI/deploy.
+4. ✅ **Signed media URLs** — `/api/files/*` takes a short-lived read-only media
+   token (`?mt=`, HMAC, 6h), not the session JWT.
+5. ✅ **S3 object storage** — `S3Storage` (boto3): upload on finalize, presigned
+   reads; tested with moto. ✅ **Job queue** — `jobs_queue.py` (thread or RQ/Redis).
+   GPU workers = run `rq worker` on a GPU node with `detector=yolo`.
+6. **Multi-camera + homography per angle**; quality-tier routing (facility vs Solo).
+7. **Learned event models** (passes/shots/tackles) feeding xG/xT.
+   - Detection→roster mapping is **assisted** today; full auto needs jersey OCR / re-ID.
+8. **On-site sync agent** (the gateway-side counterpart to `/api/ingest/*`).

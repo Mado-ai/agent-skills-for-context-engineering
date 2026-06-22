@@ -89,7 +89,8 @@ On first launch an **admin account is seeded**. Configure via environment:
 | `PLAYMETRICS_DB` | `playmetrics.db` | SQLite file path (used when `DATABASE_URL` is unset) |
 | `PLAYMETRICS_DATA` | `runs/` | Job output directory (mount a volume in prod) |
 | `PLAYMETRICS_ENV` | (unset) | Set to `production` to **require** `PLAYMETRICS_SECRET` + admin password (fails fast otherwise) |
-| `PLAYMETRICS_STORAGE` | `local` | Object-storage backend (`local`; `s3` reserved) |
+| `PLAYMETRICS_STORAGE` | `local` | Object storage: `local` or `s3` (`PLAYMETRICS_S3_BUCKET`, `PLAYMETRICS_S3_PREFIX`) |
+| `PLAYMETRICS_QUEUE` | `thread` | Job queue: `thread` (in-process) or `rq` (needs `REDIS_URL`) |
 
 ### Security posture
 
@@ -114,6 +115,19 @@ Schema changes: edit the `Table` definitions in `db.py`, then
 `alembic revision --autogenerate -m "describe change"` and commit the new file
 under `migrations/versions/`. In dev, `init_db()` create-alls the schema so no
 migration step is needed to get started.
+
+### Scaling: storage & workers
+
+- **S3 object storage:** `PLAYMETRICS_STORAGE=s3` + `PLAYMETRICS_S3_BUCKET=…`
+  (`pip install boto3`). Job artifacts upload on completion; media is served via
+  presigned URLs.
+- **Distributed job queue:** `PLAYMETRICS_QUEUE=rq` + `REDIS_URL=…`
+  (`pip install rq redis`), then run workers — on GPU nodes with `detector=yolo`
+  for accelerated analysis:
+
+  ```bash
+  rq worker -u $REDIS_URL playmetrics
+  ```
 
 ### Deploying
 

@@ -26,12 +26,10 @@ from pathlib import Path
 from fastapi import (
     Body, Depends, FastAPI, Form, Header, HTTPException, Request, UploadFile,
 )
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from . import auth, authz, db, hardware, profiles, storage
-from .config import Config
-from .pipeline import process_video
+from . import auth, authz, db, hardware, jobs_queue, profiles, storage
 
 IS_PRODUCTION = os.environ.get("PLAYMETRICS_ENV", "").lower() == "production"
 
@@ -215,37 +213,10 @@ def change_password(
 
 # --- job execution ----------------------------------------------------------
 
-def _run_job(job_id: str, input_path: Path, detector: str) -> None:
-    out_dir = RUNS / job_id
-    try:
-        def progress(p: float, msg: str) -> None:
-            db.update_job(job_id, progress=p, message=msg, status="running")
-
-        result = process_video(input_path, out_dir, Config(detector=detector), progress)
-        db.update_job(
-            job_id,
-            status="done",
-            progress=1.0,
-            message="done",
-            summary={
-                "possession": result.analytics["possession"],
-                "possession_timeline": result.analytics["possession_timeline"],
-                "players": result.analytics["players"][:14],
-                "heatmaps": result.analytics["heatmaps"],
-                "highlights": result.highlights,
-                "meta": result.meta,
-            },
-        )
-    except Exception as exc:  # surface failures to the client
-        db.update_job(job_id, status="error", message=str(exc))
-
-
 def _start(job_id: str, user_id: int, input_path: Path, detector: str,
            input_name: str, source: str = "upload", site_id: str | None = None) -> None:
     db.create_job(job_id, user_id, input_name, detector, source=source, site_id=site_id)
-    threading.Thread(
-        target=_run_job, args=(job_id, input_path, detector), daemon=True
-    ).start()
+    jobs_queue.enqueue(job_id, str(input_path), detector)
 
 
 # --- job endpoints ----------------------------------------------------------
@@ -269,8 +240,7 @@ async def create_job(
     if len(data) > MAX_UPLOAD_BYTES:
         raise HTTPException(413, "file too large (max 500 MB)")
     job_id = uuid.uuid4().hex[:12]
-    out_dir = RUNS / job_id
-    out_dir.mkdir(parents=True, exist_ok=True)
+    out_dir = STORAGE.job_dir(job_id)
     (out_dir / "input.mp4").write_bytes(data)
     _start(job_id, user["id"], out_dir / "input.mp4", detector, file.filename or "upload.mp4")
     return JSONResponse({"job_id": job_id})
@@ -283,8 +253,7 @@ def create_demo(
     user: dict = Depends(current_user),
 ) -> JSONResponse:
     job_id = uuid.uuid4().hex[:12]
-    out_dir = RUNS / job_id
-    out_dir.mkdir(parents=True, exist_ok=True)
+    out_dir = STORAGE.job_dir(job_id)
     sample = out_dir / "input.mp4"
     subprocess.run(
         [sys.executable, str(ROOT / "scripts" / "generate_sample.py"),
@@ -342,10 +311,16 @@ def serve_file(job_id: str, path: str, mt: str = ""):
     job = db.get_job(job_id)
     if not job or job["user_id"] != uid:
         raise HTTPException(404, "not found")
-    target = (RUNS / job_id / path).resolve()
-    if not str(target).startswith(str(RUNS.resolve())) or not target.exists():
+    try:
+        local = STORAGE.local_path(job_id, path)
+        if local is not None:
+            return FileResponse(local)
+        url = STORAGE.presigned_url(job_id, path)
+    except ValueError:
         raise HTTPException(404, "not found")
-    return FileResponse(target)
+    if url:
+        return RedirectResponse(url)  # S3 presigned GET
+    raise HTTPException(404, "not found")
 
 
 # --- capture-site registry (Layer 1/2 onboarding) ---------------------------
@@ -453,8 +428,7 @@ async def ingest_match(
 
     site = db.get_site(device["site_id"])
     job_id = uuid.uuid4().hex[:12]
-    out_dir = RUNS / job_id
-    out_dir.mkdir(parents=True, exist_ok=True)
+    out_dir = STORAGE.job_dir(job_id)
     (out_dir / "input.mp4").write_bytes(data)
     label = f"{site['name']} · {match_label.strip()[:80]}"
     _start(job_id, site["user_id"], out_dir / "input.mp4", detector, label,
