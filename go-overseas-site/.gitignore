@@ -29,3 +29,9 @@ next-env.d.ts
 
 # vercel
 .vercel
+
+# The repo-root .gitignore ignores `lib/` globally (intended for build
+# artifacts), which would otherwise swallow this Next.js app's source.
+# Re-include it so the API routes, SEO config, and content loader ship.
+!src/lib/
+!src/lib/**

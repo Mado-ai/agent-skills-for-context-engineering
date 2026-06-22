@@ -6,46 +6,53 @@ const field =
   "w-full rounded-xl border border-line bg-ink-900 px-4 py-3 text-sm text-white placeholder:text-mist-dim focus:border-blue focus:outline-none focus:ring-1 focus:ring-blue";
 
 type Status = "idle" | "sending" | "sent" | "error";
-
-/** URL-encode a flat object for application/x-www-form-urlencoded. */
-function encode(data: Record<string, string>) {
-  return Object.keys(data)
-    .map((k) => encodeURIComponent(k) + "=" + encodeURIComponent(data[k]))
-    .join("&");
-}
+type FieldErrors = Record<string, string>;
 
 export function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [errorMsg, setErrorMsg] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
     const fd = new FormData(form);
-
-    // Honeypot: if a bot filled the hidden field, silently "succeed".
-    if (String(fd.get("bot-field") || "")) {
-      setStatus("sent");
-      form.reset();
-      return;
-    }
-
-    const payload: Record<string, string> = { "form-name": "contact" };
-    fd.forEach((value, key) => {
-      payload[key] = String(value);
-    });
+    const payload = {
+      name: String(fd.get("name") || ""),
+      email: String(fd.get("email") || ""),
+      company: String(fd.get("company") || ""),
+      market: String(fd.get("market") || ""),
+      message: String(fd.get("message") || ""),
+      "bot-field": String(fd.get("bot-field") || ""),
+    };
 
     setStatus("sending");
+    setErrors({});
+    setErrorMsg("");
+
     try {
-      // POST to the Netlify Forms detection stub (public/__forms.html).
-      const res = await fetch("/__forms.html", {
+      const res = await fetch("/api/contact", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: encode(payload),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error(`Request failed: ${res.status}`);
-      setStatus("sent");
-      form.reset();
+      const json = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        errors?: FieldErrors;
+      };
+
+      if (res.ok && json.ok) {
+        setStatus("sent");
+        form.reset();
+        return;
+      }
+
+      if (json.errors) setErrors(json.errors);
+      setErrorMsg(json.error || "Please check the highlighted fields and try again.");
+      setStatus("error");
     } catch {
+      setErrorMsg("Network error. Please try again or email hello@gooverseas.com.");
       setStatus("error");
     }
   }
@@ -66,40 +73,37 @@ export function ContactForm() {
   }
 
   return (
-    <form
-      name="contact"
-      method="POST"
-      data-netlify="true"
-      netlify-honeypot="bot-field"
-      onSubmit={handleSubmit}
-      className="space-y-4"
-    >
-      {/* Netlify Forms plumbing */}
-      <input type="hidden" name="form-name" value="contact" />
-      <p className="hidden">
+    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+      {/* Honeypot: hidden from humans, attractive to bots. */}
+      <div className="hidden" aria-hidden="true">
         <label>
-          Don&apos;t fill this out if you&apos;re human: <input name="bot-field" />
+          Leave this field empty
+          <input name="bot-field" tabIndex={-1} autoComplete="off" />
         </label>
-      </p>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1.5 block text-xs font-medium text-mist-dim">Name</label>
           <input name="name" required placeholder="Jane Doe" className={field} />
+          {errors.name && <p className="mt-1 text-xs text-red-400">{errors.name}</p>}
         </div>
         <div>
           <label className="mb-1.5 block text-xs font-medium text-mist-dim">Work email</label>
           <input name="email" type="email" required placeholder="jane@company.com" className={field} />
+          {errors.email && <p className="mt-1 text-xs text-red-400">{errors.email}</p>}
         </div>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1.5 block text-xs font-medium text-mist-dim">Company</label>
           <input name="company" placeholder="Company Inc." className={field} />
+          {errors.company && <p className="mt-1 text-xs text-red-400">{errors.company}</p>}
         </div>
         <div>
           <label className="mb-1.5 block text-xs font-medium text-mist-dim">Target market(s)</label>
           <input name="market" placeholder="e.g. Japan, Germany" className={field} />
+          {errors.market && <p className="mt-1 text-xs text-red-400">{errors.market}</p>}
         </div>
       </div>
       <div>
@@ -113,6 +117,7 @@ export function ContactForm() {
           placeholder="Tell us about your expansion goals…"
           className={field}
         />
+        {errors.message && <p className="mt-1 text-xs text-red-400">{errors.message}</p>}
       </div>
       <button
         type="submit"
@@ -121,14 +126,8 @@ export function ContactForm() {
       >
         {status === "sending" ? "Sending…" : "Send enquiry"}
       </button>
-      {status === "error" && (
-        <p className="text-sm text-red-400">
-          Something went wrong. Please email us directly at{" "}
-          <a href="mailto:hello@gooverseas.com" className="underline">
-            hello@gooverseas.com
-          </a>
-          .
-        </p>
+      {status === "error" && errorMsg && (
+        <p className="text-sm text-red-400">{errorMsg}</p>
       )}
       <p className="text-xs text-mist-dim">
         By submitting, you agree to our{" "}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container, Eyebrow } from "@/components/ui";
+import { NewsletterForm } from "@/components/NewsletterForm";
 import { getAllPosts, formatDate } from "@/lib/posts";
 
 export const metadata: Metadata = {
@@ -75,6 +76,23 @@ export default function InsightsPage() {
           </>
         )}
       </Container>
+
+      <section className="border-t border-line bg-ink-900">
+        <Container className="py-16 sm:py-20">
+          <div className="mx-auto max-w-2xl text-center">
+            <Eyebrow>Newsletter</Eyebrow>
+            <h2 className="mt-5 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+              Get new field notes in your inbox.
+            </h2>
+            <p className="mt-3 text-mist">
+              Cross-border strategy, market entry, and brand growth — no spam, unsubscribe anytime.
+            </p>
+            <div className="mx-auto mt-8 max-w-md">
+              <NewsletterForm />
+            </div>
+          </div>
+        </Container>
+      </section>
     </>
   );
 }
