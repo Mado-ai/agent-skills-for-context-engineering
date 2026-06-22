@@ -9,6 +9,9 @@ export default function Footer() {
           <Link to="/features" className="hover:text-slate-300">
             Features
           </Link>
+          <Link to="/hardware" className="hover:text-slate-300">
+            Hardware
+          </Link>
           <Link to="/pricing" className="hover:text-slate-300">
             Pricing
           </Link>

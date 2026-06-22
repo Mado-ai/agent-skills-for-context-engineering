@@ -160,6 +160,14 @@ export const api = {
   },
 
   // public (no auth)
+  async packages(): Promise<{
+    packages: { id: string; name: string; pitch: string; camera_count: number;
+      capture: { name: string; model: string; qty: number; role: string }[] }[];
+    edge: { device: string; model: string; role: string }[];
+    vlans: { vlan: number; name: string; note: string }[];
+  }> {
+    return parse(await fetch("/api/packages"));
+  },
   async publicTeam(token: string): Promise<TeamProfile> {
     return parse(await fetch(`/api/public/teams/${token}`));
   },

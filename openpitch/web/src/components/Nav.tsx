@@ -22,6 +22,9 @@ export default function Nav() {
             <Link to="/features" className="hidden text-slate-300 hover:text-white sm:block">
               Features
             </Link>
+            <Link to="/hardware" className="hidden text-slate-300 hover:text-white sm:block">
+              Hardware
+            </Link>
             <Link to="/pricing" className="hidden text-slate-300 hover:text-white sm:block">
               Pricing
             </Link>

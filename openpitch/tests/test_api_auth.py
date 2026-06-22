@@ -51,6 +51,21 @@ def test_seeded_admin_can_login(client):
     ).json()["is_admin"] is True
 
 
+def test_packages_manifest_is_public_and_correct(client):
+    m = client.get("/api/packages")  # public, no auth
+    assert m.status_code == 200
+    data = m.json()
+    pkgs = {p["id"]: p for p in data["packages"]}
+    assert set(pkgs) == {"starter", "growth", "pro"}
+    assert pkgs["pro"]["pitch"] == "11-a-side"
+    # Pro has two sideline G5 Pro 4K cameras
+    g5pro = next(c for c in pkgs["pro"]["capture"] if c["model"] == "UVC-G5-Pro")
+    assert g5pro["qty"] == 2
+    # The edge rack includes the AI Key (first-pass detection)
+    assert any(d["device"] == "AI Key" for d in data["edge"])
+    assert "ai-key" in data["device_kinds"]
+
+
 def test_jobs_require_auth(client):
     assert client.get("/api/jobs").status_code == 401
     assert client.post("/api/demo", data={"seconds": "3"}).status_code == 401

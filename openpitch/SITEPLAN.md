@@ -11,7 +11,7 @@ targeting. Status legend: ✅ built · 🟡 planned · 🔒 auth-gated.
 ├── /pricing           ✅  Plans & tiers
 ├── /about             ✅  Mission + contact form
 ├── /how-it-works      🟡  Capture → produce → analyse, step by step
-├── /hardware          🟡  Camera/capture offering (pending hardware spec)
+├── /hardware          ✅  UniFi 3-package model (renders /api/packages)
 ├── /solutions         🟡  Audience landing hub
 │   ├── /solutions/coaches     🟡
 │   ├── /solutions/academies   🟡  (clubs + multi-pitch)
@@ -50,7 +50,7 @@ targeting. Status legend: ✅ built · 🟡 planned · 🔒 auth-gated.
 | `/pricing` | Monetise | Starter / Club / Academy tiers | Choose plan → `/?signup`; Academy → `/about` | ✅ |
 | `/about` | Trust + contact | Mission, 3 proof points, contact form | Send message | ✅ |
 | `/how-it-works` | Reduce uncertainty | Numbered capture→produce→analyse flow, sample media | Try the demo | 🟡 |
-| `/hardware` | Sell the capture rig | UniFi 3-package model, install topology, edge rack, what's in the box | Request a quote | 🟡 (spec received) |
+| `/hardware` | Sell the capture rig | UniFi 3-package model, edge rack, AI Key, edge-first note (live from `/api/packages`) | Request a quote | ✅ |
 | `/solutions/*` | Audience targeting | Pain points + outcomes per segment | Segment-specific signup | 🟡 |
 | `/resources/*` | SEO + education | Blog posts, how-to guides, glossary | Newsletter / signup | 🟡 |
 | `/demo` | Proof without signup | Read-only sample analysis report | Create account | 🟡 |

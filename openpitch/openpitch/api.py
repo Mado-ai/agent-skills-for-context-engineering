@@ -27,7 +27,7 @@ from fastapi import Body, Depends, FastAPI, Form, Header, HTTPException, UploadF
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from . import auth, db, profiles
+from . import auth, db, hardware, profiles
 from .config import Config
 from .pipeline import process_video
 
@@ -263,7 +263,10 @@ def serve_file(job_id: str, path: str, token: str = ""):
 
 # --- capture-site registry (Layer 1/2 onboarding) ---------------------------
 
-VALID_PACKAGES = {"starter", "growth", "pro"}
+@app.get("/api/packages")
+def packages() -> JSONResponse:
+    """Public hardware infrastructure manifest (UniFi 3-package model)."""
+    return JSONResponse(hardware.manifest())
 
 
 @app.post("/api/sites")
@@ -272,7 +275,7 @@ def create_site(
     package: str = Form(...),
     user: dict = Depends(current_user),
 ) -> JSONResponse:
-    if package not in VALID_PACKAGES:
+    if package not in hardware.PACKAGES:
         raise HTTPException(400, "package must be starter, growth or pro")
     site_id = "site_" + uuid.uuid4().hex[:10]
     site = db.create_site(site_id, user["id"], name.strip()[:120], package)

@@ -10,6 +10,7 @@ import Landing from "./pages/Landing";
 // The Dashboard pulls in Recharts, so it gets its own chunk.
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Features = lazy(() => import("./pages/Features"));
+const Hardware = lazy(() => import("./pages/Hardware"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const About = lazy(() => import("./pages/About"));
 const Teams = lazy(() => import("./pages/Teams"));
@@ -32,6 +33,7 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/features" element={<Features />} />
+                <Route path="/hardware" element={<Hardware />} />
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/share/team/:token" element={<PublicProfile kind="team" />} />
