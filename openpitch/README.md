@@ -31,6 +31,10 @@ cd openpitch
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
+# Recommended: install ffmpeg so outputs are encoded as H.264 and play in the
+# browser dashboard (macOS: brew install ffmpeg · Debian/Ubuntu: apt install ffmpeg).
+# Without it, videos still render but may need VLC to view.
+
 # 1) CLI: generate a synthetic clip and process it end-to-end
 python -m openpitch.cli demo --out runs/demo
 

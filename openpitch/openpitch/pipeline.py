@@ -18,11 +18,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-import cv2
-
 from .analytics import Analytics
 from .config import Config
 from .detect import build_detector
+from .encode import finalize, open_writer
 from .highlights import HighlightDetector, export_clips
 from .homography import calibrate
 from .ingest import VideoSource
@@ -66,10 +65,8 @@ def process_video(
     highlighter = HighlightDetector(cfg, fps=meta.fps)
 
     broadcast_path = out_dir / "broadcast.mp4"
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    writer = cv2.VideoWriter(
-        str(broadcast_path), fourcc, meta.fps,
-        (cfg.output_width, cfg.output_height),
+    writer, broadcast_fourcc = open_writer(
+        broadcast_path, meta.fps, (cfg.output_width, cfg.output_height)
     )
 
     total = max(meta.frame_count, 1)
@@ -95,6 +92,8 @@ def process_video(
 
     writer.release()
     src.close()
+    report(0.86, "encoding (H.264)")
+    finalize(broadcast_path, broadcast_fourcc)  # browser-friendly playback
 
     report(0.88, "computing analytics")
     summary = analytics.summary(out_dir)

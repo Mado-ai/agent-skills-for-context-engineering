@@ -18,6 +18,7 @@ import cv2
 import numpy as np
 
 from .config import Config
+from .encode import finalize, open_writer
 
 
 @dataclass
@@ -104,12 +105,11 @@ def export_clips(
     out_dir.mkdir(parents=True, exist_ok=True)
     cap = cv2.VideoCapture(str(broadcast_path))
     fps = cap.get(cv2.CAP_PROP_FPS) or 25.0
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     for i, h in enumerate(highlights):
         name = f"highlight_{i + 1:02d}.mp4"
-        writer = cv2.VideoWriter(
-            str(out_dir / name), fourcc, fps,
-            (config.output_width, config.output_height),
+        clip_path = out_dir / name
+        writer, fourcc_used = open_writer(
+            clip_path, fps, (config.output_width, config.output_height)
         )
         cap.set(cv2.CAP_PROP_POS_FRAMES, int(h.start_s * fps))
         end_frame = int(h.end_s * fps)
@@ -119,6 +119,7 @@ def export_clips(
                 break
             writer.write(frame)
         writer.release()
+        finalize(clip_path, fourcc_used)  # browser-friendly playback
         h.clip = name
     cap.release()
     return highlights
