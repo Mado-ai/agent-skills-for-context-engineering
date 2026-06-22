@@ -83,6 +83,14 @@ def get_user_by_id(user_id: int) -> sqlite3.Row | None:
     ).fetchone()
 
 
+def set_password(user_id: int, password_hash: str) -> None:
+    with _lock:
+        c = _connect()
+        c.execute("UPDATE users SET password_hash = ? WHERE id = ?",
+                  (password_hash, user_id))
+        c.commit()
+
+
 # --- jobs -------------------------------------------------------------------
 
 def create_job(job_id: str, user_id: int, input_name: str, detector: str) -> None:
@@ -127,3 +135,17 @@ def list_jobs_for_user(user_id: int) -> list[dict]:
         (user_id,),
     ).fetchall()
     return [dict(r) for r in rows]
+
+
+def rename_job(job_id: str, name: str) -> None:
+    with _lock:
+        c = _connect()
+        c.execute("UPDATE jobs SET input_name = ? WHERE id = ?", (name, job_id))
+        c.commit()
+
+
+def delete_job(job_id: str) -> None:
+    with _lock:
+        c = _connect()
+        c.execute("DELETE FROM jobs WHERE id = ?", (job_id,))
+        c.commit()

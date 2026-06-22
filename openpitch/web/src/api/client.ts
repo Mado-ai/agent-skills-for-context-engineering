@@ -53,6 +53,30 @@ export const api = {
     return parse(await fetch(`/api/jobs/${id}`, { headers: authHeaders() }));
   },
 
+  async renameJob(id: string, name: string): Promise<void> {
+    await parse(
+      await fetch(`/api/jobs/${id}`, {
+        method: "PATCH",
+        headers: authHeaders(),
+        body: new URLSearchParams({ name }),
+      }),
+    );
+  },
+
+  async deleteJob(id: string): Promise<void> {
+    await parse(await fetch(`/api/jobs/${id}`, { method: "DELETE", headers: authHeaders() }));
+  },
+
+  async changePassword(current_password: string, new_password: string): Promise<void> {
+    await parse(
+      await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: authHeaders(),
+        body: new URLSearchParams({ current_password, new_password }),
+      }),
+    );
+  },
+
   async createJob(file: File, detector: string): Promise<{ job_id: string }> {
     const fd = new FormData();
     fd.append("file", file);

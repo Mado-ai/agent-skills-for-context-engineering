@@ -60,6 +60,23 @@ export function useJobs() {
     [track],
   );
 
+  const rename = useCallback(
+    async (jobId: string, name: string) => {
+      await api.renameJob(jobId, name);
+      await refresh();
+    },
+    [refresh],
+  );
+
+  const remove = useCallback(
+    async (jobId: string) => {
+      await api.deleteJob(jobId);
+      setActive((cur) => (cur?.id === jobId ? null : cur));
+      await refresh();
+    },
+    [refresh],
+  );
+
   useEffect(() => {
     // Async list fetch on mount; setState happens inside the promise.
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -67,5 +84,5 @@ export function useJobs() {
     return stopPolling;
   }, [refresh, stopPolling]);
 
-  return { jobs, active, busy, progress, refresh, track, open };
+  return { jobs, active, busy, progress, refresh, track, open, rename, remove };
 }

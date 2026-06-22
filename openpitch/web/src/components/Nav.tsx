@@ -1,12 +1,18 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import AccountModal from "./AccountModal";
 
 export default function Nav() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [accountOpen, setAccountOpen] = useState(false);
 
   return (
     <nav className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-ink-2 px-6 py-3.5">
+      {accountOpen && user && (
+        <AccountModal email={user.email} onClose={() => setAccountOpen(false)} />
+      )}
       <Link to="/" className="text-lg font-bold">
         ⚽ Play<span className="text-pitch">Metrics</span>
       </Link>
@@ -29,10 +35,13 @@ export default function Nav() {
             <Link to="/dashboard" className="text-slate-300 hover:text-white">
               Dashboard
             </Link>
-            <span className="hidden text-slate-400 sm:inline">
+            <button
+              onClick={() => setAccountOpen(true)}
+              className="hidden text-slate-400 hover:text-white sm:inline"
+            >
               {user.email}
               {user.is_admin && " · admin"}
-            </span>
+            </button>
             <button
               onClick={() => {
                 logout();

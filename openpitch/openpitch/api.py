@@ -14,6 +14,7 @@ PLAYMETRICS_ADMIN_PASSWORD (sensible dev defaults if unset).
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 import sys
 import threading
@@ -111,6 +112,20 @@ def me(user: dict = Depends(current_user)) -> JSONResponse:
     )
 
 
+@app.post("/api/auth/change-password")
+def change_password(
+    current_password: str = Form(...),
+    new_password: str = Form(...),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    if not auth.verify_password(current_password, user["password_hash"]):
+        raise HTTPException(401, "current password is incorrect")
+    if len(new_password) < 6:
+        raise HTTPException(400, "new password must be at least 6 characters")
+    db.set_password(user["id"], auth.hash_password(new_password))
+    return JSONResponse({"status": "ok"})
+
+
 # --- job execution ----------------------------------------------------------
 
 def _run_job(job_id: str, input_path: Path, detector: str) -> None:
@@ -148,6 +163,9 @@ def _start(job_id: str, user_id: int, input_path: Path, detector: str,
 
 # --- job endpoints ----------------------------------------------------------
 
+MAX_UPLOAD_BYTES = 500 * 1024 * 1024  # 500 MB
+
+
 @app.post("/api/jobs")
 async def create_job(
     file: UploadFile,
@@ -156,12 +174,18 @@ async def create_job(
 ) -> JSONResponse:
     if detector not in ("color", "yolo"):
         raise HTTPException(400, "detector must be 'color' or 'yolo'")
+    if file.content_type and not file.content_type.startswith("video/"):
+        raise HTTPException(400, "please upload a video file")
+    data = await file.read()
+    if not data:
+        raise HTTPException(400, "uploaded file is empty")
+    if len(data) > MAX_UPLOAD_BYTES:
+        raise HTTPException(413, "file too large (max 500 MB)")
     job_id = uuid.uuid4().hex[:12]
     out_dir = RUNS / job_id
     out_dir.mkdir(parents=True, exist_ok=True)
-    input_path = out_dir / "input.mp4"
-    input_path.write_bytes(await file.read())
-    _start(job_id, user["id"], input_path, detector, file.filename or "upload.mp4")
+    (out_dir / "input.mp4").write_bytes(data)
+    _start(job_id, user["id"], out_dir / "input.mp4", detector, file.filename or "upload.mp4")
     return JSONResponse({"job_id": job_id})
 
 
@@ -199,6 +223,26 @@ def _owned_job(job_id: str, user: dict) -> dict:
 @app.get("/api/jobs/{job_id}")
 def job_status(job_id: str, user: dict = Depends(current_user)) -> JSONResponse:
     return JSONResponse(_owned_job(job_id, user))
+
+
+@app.patch("/api/jobs/{job_id}")
+def rename_job(
+    job_id: str, name: str = Form(...), user: dict = Depends(current_user)
+) -> JSONResponse:
+    _owned_job(job_id, user)
+    name = name.strip()[:120]
+    if not name:
+        raise HTTPException(400, "name cannot be empty")
+    db.rename_job(job_id, name)
+    return JSONResponse({"status": "ok", "name": name})
+
+
+@app.delete("/api/jobs/{job_id}")
+def delete_job(job_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_job(job_id, user)
+    db.delete_job(job_id)
+    shutil.rmtree(RUNS / job_id, ignore_errors=True)
+    return JSONResponse({"status": "ok"})
 
 
 @app.get("/api/files/{job_id}/{path:path}")

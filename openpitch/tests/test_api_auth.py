@@ -83,3 +83,44 @@ def test_demo_job_runs_and_files_are_guarded(client):
     assert client.get(
         f"/api/jobs/{jid}", headers={"Authorization": f"Bearer {other}"}
     ).status_code == 404
+
+    # rename + delete (owner only)
+    assert client.patch(f"/api/jobs/{jid}", data={"name": "My Match"}, headers=h).status_code == 200
+    assert client.get(f"/api/jobs/{jid}", headers=h).json()["input_name"] == "My Match"
+    assert client.delete(
+        f"/api/jobs/{jid}", headers={"Authorization": f"Bearer {other}"}
+    ).status_code == 404  # not owner
+    assert client.delete(f"/api/jobs/{jid}", headers=h).status_code == 200
+    assert client.get(f"/api/jobs/{jid}", headers=h).status_code == 404
+
+
+def test_upload_rejects_non_video(client):
+    token = client.post("/api/auth/register",
+                        data={"email": "scout@club.com", "password": "secret1"}
+                        ).json()["token"]
+    h = {"Authorization": f"Bearer {token}"}
+    r = client.post(
+        "/api/jobs",
+        files={"file": ("notes.txt", b"hello", "text/plain")},
+        headers=h,
+    )
+    assert r.status_code == 400
+
+
+def test_change_password(client):
+    reg = client.post("/api/auth/register",
+                      data={"email": "gk@club.com", "password": "secret1"})
+    h = {"Authorization": f"Bearer {reg.json()['token']}"}
+    # wrong current password rejected
+    assert client.post("/api/auth/change-password",
+                       data={"current_password": "nope", "new_password": "brandnew1"},
+                       headers=h).status_code == 401
+    # successful change
+    assert client.post("/api/auth/change-password",
+                       data={"current_password": "secret1", "new_password": "brandnew1"},
+                       headers=h).status_code == 200
+    # old password no longer works, new one does
+    assert client.post("/api/auth/login",
+                       data={"email": "gk@club.com", "password": "secret1"}).status_code == 401
+    assert client.post("/api/auth/login",
+                       data={"email": "gk@club.com", "password": "brandnew1"}).status_code == 200

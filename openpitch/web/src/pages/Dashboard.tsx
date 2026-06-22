@@ -13,14 +13,20 @@ const TOOLS = [
 ];
 
 export default function Dashboard() {
-  const { jobs, active, busy, progress, track, open } = useJobs();
+  const { jobs, active, busy, progress, track, open, rename, remove } = useJobs();
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
       <div className="grid items-start gap-5 lg:grid-cols-[340px_1fr]">
         <div className="flex flex-col gap-5">
           <NewAnalysis busy={busy} progress={progress} onStarted={track} />
-          <JobList jobs={jobs} activeId={active?.id} onSelect={open} />
+          <JobList
+            jobs={jobs}
+            activeId={active?.id}
+            onSelect={open}
+            onRename={rename}
+            onDelete={remove}
+          />
           <div className="rounded-xl border border-line bg-card p-5">
             <h2 className="mb-3 font-semibold">Pipeline tools</h2>
             <div className="grid grid-cols-2 gap-2.5">
