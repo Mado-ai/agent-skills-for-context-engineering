@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Container, Section, Button, Eyebrow, Card } from "@/components/ui";
+import { Container, Section, Button, Eyebrow } from "@/components/ui";
+import { ServiceCard } from "@/components/ServiceCard";
 import { LogoMark } from "@/components/Logo";
 import { JsonLd } from "@/components/JsonLd";
 import { BrandBackdrop, Sparkle, GrowthArrow, LoopSquiggle, HalfRing } from "@/components/BrandGraphics";
@@ -127,9 +128,15 @@ export default function HomePage() {
       {/* Stats */}
       <section className="border-b border-line bg-ink-900">
         <Container className="grid grid-cols-2 gap-px overflow-hidden md:grid-cols-4">
-          {stats.map((s) => (
+          {stats.map((s, i) => (
             <div key={s.label} className="px-2 py-10 text-center">
-              <div className="font-display text-4xl font-semibold text-gradient">{s.value}</div>
+              <div
+                className={`font-display text-4xl font-semibold ${
+                  ["text-blue", "text-green", "text-purple", "text-pink"][i % 4]
+                }`}
+              >
+                {s.value}
+              </div>
               <div className="mt-2 text-sm text-mist-dim">{s.label}</div>
             </div>
           ))}
@@ -192,36 +199,33 @@ export default function HomePage() {
         <Reveal className="mt-12 grid gap-6 md:grid-cols-2">
           {services.map((service) => (
             <Tilt key={service.id}>
-              <Card className="h-full">
-                <h3 className="font-display text-xl font-semibold">{service.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-mist">{service.summary}</p>
-                <ul className="mt-5 space-y-2">
-                  {service.points.map((p) => (
-                    <li key={p} className="flex items-start gap-2.5 text-sm text-mist">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-green" />
-                      {p}
-                    </li>
-                  ))}
-                </ul>
-              </Card>
+              <ServiceCard service={service} />
             </Tilt>
           ))}
         </Reveal>
       </Section>
 
-      {/* Process */}
-      <section className="border-y border-line bg-ink-900">
-        <Container className="py-20 sm:py-28">
-          <Eyebrow>How we work</Eyebrow>
-          <h2 className="mt-5 max-w-2xl font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+      {/* Process — bold colour block */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-purple via-blue-deep to-blue">
+        <Sparkle className="pointer-events-none absolute -left-12 -top-12 h-56 w-56 text-white/10 animate-spin-slow" />
+        <LoopSquiggle className="pointer-events-none absolute right-10 top-12 hidden h-12 w-32 text-white/30 sm:block" />
+        <Container className="relative py-20 sm:py-28">
+          <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-white/70">
+            <span className="h-1.5 w-1.5 rounded-full bg-lime" />
+            How we work
+          </span>
+          <h2 className="mt-5 max-w-2xl font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
             From idea to impact — a four-step path.
           </h2>
           <Reveal className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {process.map((p) => (
-              <div key={p.step} className="rounded-[var(--radius-card)] border border-line bg-ink-800/50 p-6">
-                <span className="font-display text-3xl font-semibold text-gradient">{p.step}</span>
-                <h3 className="mt-4 font-display text-lg font-semibold">{p.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-mist-dim">{p.body}</p>
+              <div
+                key={p.step}
+                className="rounded-[var(--radius-card)] border border-white/15 bg-white/10 p-6 backdrop-blur"
+              >
+                <span className="font-display text-3xl font-semibold text-white">{p.step}</span>
+                <h3 className="mt-4 font-display text-lg font-semibold text-white">{p.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-white/80">{p.body}</p>
               </div>
             ))}
           </Reveal>

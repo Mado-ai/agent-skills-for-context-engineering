@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { Container, Section, Button, Eyebrow, Card } from "@/components/ui";
+import { Container, Section, Button, Eyebrow } from "@/components/ui";
 import { BrandBackdrop } from "@/components/BrandGraphics";
+import { ServiceCard } from "@/components/ServiceCard";
 import { JsonLd } from "@/components/JsonLd";
 import { services, process } from "@/lib/site";
 import { faqSchema } from "@/lib/seo";
@@ -57,19 +58,7 @@ export default function ServicesPage() {
       <Section>
         <div className="grid gap-6 lg:grid-cols-2">
           {services.map((service) => (
-            <Card key={service.id} className="scroll-mt-24">
-              <div id={service.id} />
-              <h2 className="font-display text-2xl font-semibold">{service.title}</h2>
-              <p className="mt-3 leading-relaxed text-mist">{service.summary}</p>
-              <ul className="mt-6 grid gap-2.5 sm:grid-cols-2">
-                {service.points.map((p) => (
-                  <li key={p} className="flex items-start gap-2.5 text-sm text-mist">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-green" />
-                    {p}
-                  </li>
-                ))}
-              </ul>
-            </Card>
+            <ServiceCard key={service.id} service={service} headingAs="h2" />
           ))}
         </div>
       </Section>
