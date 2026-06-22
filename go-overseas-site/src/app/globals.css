@@ -23,6 +23,9 @@
   --color-green-deep: #28a85a;
   --color-purple: #6c3ef4;
   --color-purple-deep: #5a2fd6;
+  --color-pink: #fd38ae;
+  --color-pink-deep: #e01e92;
+  --color-lime: #6ed439;
 
   --font-display: var(--font-poppins), "Poppins", ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-poppins), "Poppins", ui-sans-serif, system-ui, sans-serif;

@@ -62,6 +62,34 @@ export function GrowthArrow({ className = "" }: { className?: string }) {
   );
 }
 
+/** Hand-drawn loop squiggle — the brand's playful "growth loop" line. */
+export function LoopSquiggle({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 130 50" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M5 34C28 40 44 33 52 22c6-8-3-15-9-9-7 7 4 19 22 19 22 0 38-9 56-21"
+        stroke="currentColor"
+        strokeWidth="5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+/** Thick open half-ring — the brand's bold swoosh accent. */
+export function HalfRing({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 100 100" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M50 8a42 42 0 1 1-30 13"
+        stroke="currentColor"
+        strokeWidth="14"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 /**
  * Composed hero backdrop used across page heroes for a consistent brand feel.
  * Sits behind content; never intercepts pointer events.
@@ -74,18 +102,19 @@ export function BrandBackdrop({ className = "" }: { className?: string }) {
       {/* Color blooms */}
       <div className="absolute -right-40 -top-40 h-[34rem] w-[34rem] rounded-full bg-blue/15 blur-[120px]" />
       <div className="absolute -bottom-52 -left-40 h-[30rem] w-[30rem] rounded-full bg-green/10 blur-[120px]" />
-      <div className="absolute right-1/3 top-1/2 h-72 w-72 rounded-full bg-purple/10 blur-[120px]" />
+      <div className="absolute -right-24 top-1/3 h-72 w-72 rounded-full bg-pink/10 blur-[120px]" />
 
       {/* Flow lines */}
       <FlowLines className="absolute -left-10 top-1/3 h-64 w-[120%] text-blue/30 animate-drift" />
 
-      {/* Dynamic circles */}
-      <DynamicRings className="absolute -right-20 -top-16 h-80 w-80 text-blue/30 animate-spin-slow" />
+      {/* Signature bold sparkle + swoosh */}
+      <Sparkle className="absolute -bottom-12 left-[10%] h-44 w-44 text-blue/10" />
+      <HalfRing className="absolute right-[8%] top-[16%] h-20 w-20 text-pink/40" />
 
-      {/* Sparkles */}
-      <Sparkle className="absolute right-[14%] top-[20%] h-6 w-6 text-blue animate-twinkle" />
-      <Sparkle className="absolute left-[7%] bottom-[18%] h-4 w-4 text-green animate-twinkle [animation-delay:1.5s]" />
-      <Sparkle className="absolute right-[30%] bottom-[24%] h-5 w-5 text-purple animate-twinkle [animation-delay:3s]" />
+      {/* Twinkling sparkles */}
+      <Sparkle className="absolute right-[16%] top-[24%] h-6 w-6 text-blue animate-twinkle" />
+      <Sparkle className="absolute left-[7%] top-[26%] h-4 w-4 text-lime animate-twinkle [animation-delay:1.5s]" />
+      <Sparkle className="absolute right-[32%] bottom-[22%] h-5 w-5 text-pink animate-twinkle [animation-delay:3s]" />
     </div>
   );
 }

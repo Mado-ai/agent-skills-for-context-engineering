@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Container, Section, Button, Eyebrow, Card } from "@/components/ui";
 import { LogoMark } from "@/components/Logo";
 import { JsonLd } from "@/components/JsonLd";
-import { BrandBackdrop, DynamicRings, Sparkle, GrowthArrow } from "@/components/BrandGraphics";
+import { BrandBackdrop, Sparkle, GrowthArrow, LoopSquiggle, HalfRing } from "@/components/BrandGraphics";
 import { HeroCanvas } from "@/components/HeroCanvas";
 import { Magnetic } from "@/components/Magnetic";
 import { Tilt } from "@/components/Tilt";
@@ -107,16 +107,18 @@ export default function HomePage() {
           </div>
 
           <div className="relative hidden lg:block">
-            <DynamicRings className="pointer-events-none absolute inset-0 m-auto h-[27rem] w-[27rem] text-blue/25 animate-spin-slow-rev" />
-            <div className="relative mx-auto flex aspect-square max-w-sm items-center justify-center rounded-[2rem] border border-line bg-ink-800/50 glow">
-              <Sparkle className="pointer-events-none absolute right-6 top-6 h-5 w-5 text-purple animate-twinkle" />
+            {/* Signature blue sparkle framing the mark — straight from the brand cards */}
+            <Sparkle className="pointer-events-none absolute inset-0 m-auto h-[32rem] w-[32rem] text-blue animate-spin-slow-rev" />
+            <HalfRing className="pointer-events-none absolute right-4 top-2 h-24 w-24 text-pink" />
+            <LoopSquiggle className="pointer-events-none absolute -bottom-1 left-2 h-12 w-32 text-lime" />
+            <div className="relative mx-auto flex aspect-square max-w-[17rem] items-center justify-center rounded-full bg-ink-900 ring-1 ring-line">
               <div className="animate-float-slow text-white">
-                <LogoMark size={180} />
+                <LogoMark size={148} />
               </div>
-              <div className="absolute bottom-6 left-6 right-6 rounded-2xl border border-line bg-ink-900/80 p-4 backdrop-blur">
-                <p className="text-xs text-mist-dim">Trusted by</p>
-                <p className="font-display text-2xl font-semibold">60+ brands</p>
-              </div>
+            </div>
+            <div className="absolute bottom-0 right-0 rounded-2xl border border-line bg-ink-900/90 px-5 py-4 backdrop-blur">
+              <p className="text-xs text-mist-dim">Trusted by</p>
+              <p className="font-display text-2xl font-semibold">60+ brands</p>
             </div>
           </div>
         </Container>
@@ -137,6 +139,7 @@ export default function HomePage() {
       {/* Pillars — Think · Create · Grow */}
       <section className="relative overflow-hidden border-b border-line">
         <GrowthArrow className="pointer-events-none absolute -right-6 top-10 h-40 w-40 text-green/10" />
+        <Sparkle className="pointer-events-none absolute -left-10 bottom-4 h-32 w-32 text-pink/10" />
         <Container className="relative py-20 sm:py-28">
           <div className="text-center">
             <Eyebrow>Our pillars</Eyebrow>
@@ -179,6 +182,7 @@ export default function HomePage() {
             <h2 className="mt-5 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
               Everything your brand needs, under one roof.
             </h2>
+            <LoopSquiggle className="mt-3 h-7 w-28 text-lime" />
           </div>
           <Button href="/services" variant="ghost">
             All services →
@@ -253,16 +257,15 @@ export default function HomePage() {
       {/* CTA */}
       <section className="border-t border-line">
         <Container className="py-20 sm:py-28">
-          <div className="relative overflow-hidden rounded-[2rem] border border-line bg-gradient-to-br from-blue/15 via-ink-800 to-purple/10 p-10 sm:p-16">
-            <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-blue/20 blur-[100px]" />
-            <DynamicRings className="pointer-events-none absolute -bottom-16 -right-10 h-64 w-64 text-blue/20 animate-spin-slow" />
-            <Sparkle className="pointer-events-none absolute left-[6%] top-[18%] h-5 w-5 text-green animate-twinkle" />
-            <Sparkle className="pointer-events-none absolute right-[20%] top-[24%] h-4 w-4 text-purple animate-twinkle [animation-delay:2s]" />
+          <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-blue via-purple to-pink p-10 sm:p-16">
+            <Sparkle className="pointer-events-none absolute -right-12 -top-12 h-60 w-60 text-white/15 animate-spin-slow" />
+            <Sparkle className="pointer-events-none absolute right-[26%] bottom-8 h-7 w-7 text-white/80 animate-twinkle" />
+            <LoopSquiggle className="pointer-events-none absolute bottom-6 left-6 h-12 w-32 text-white/40" />
             <div className="relative max-w-2xl">
-              <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+              <h2 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
                 Ready to grow your brand?
               </h2>
-              <p className="mt-4 text-lg text-mist">
+              <p className="mt-4 text-lg text-white/90">
                 Tell us what you&apos;re building. We&apos;ll show you how we&apos;d bring the
                 strategy, creativity, and growth to make it happen.
               </p>
@@ -272,7 +275,7 @@ export default function HomePage() {
                 </Magnetic>
                 <Link
                   href="/work"
-                  className="inline-flex items-center px-2 py-3 text-sm font-semibold text-mist hover:text-white"
+                  className="inline-flex items-center px-2 py-3 text-sm font-semibold text-white/85 hover:text-white"
                 >
                   See our work →
                 </Link>
