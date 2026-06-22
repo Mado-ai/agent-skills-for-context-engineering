@@ -1,11 +1,13 @@
 import { useState } from "react";
 import type { Job } from "../types";
+import { cx } from "../lib/cx";
+import { Card } from "./ui";
 
 const badge: Record<Job["status"], string> = {
-  done: "bg-emerald-900 text-pitch",
-  running: "bg-yellow-900/60 text-yellow-300",
-  queued: "bg-yellow-900/60 text-yellow-300",
-  error: "bg-red-900/60 text-red-300",
+  done: "bg-pitch/15 text-pitch",
+  running: "bg-amber/15 text-amber",
+  queued: "bg-amber/15 text-amber",
+  error: "bg-home/15 text-home",
 };
 
 interface Props {
@@ -32,18 +34,18 @@ export default function JobList({ jobs, activeId, onSelect, onRename, onDelete }
   };
 
   return (
-    <div className="rounded-xl border border-line bg-card p-5">
-      <h2 className="mb-3 font-semibold">Your analyses</h2>
+    <Card title="Your analyses" subtitle={jobs.length ? `${jobs.length} report${jobs.length === 1 ? "" : "s"}` : undefined} icon="chart">
       {jobs.length === 0 ? (
-        <p className="text-sm text-slate-400">No jobs yet.</p>
+        <p className="text-sm text-mute">No matches analysed yet — run the demo to see a full report.</p>
       ) : (
         <ul className="flex max-h-96 flex-col gap-2 overflow-auto">
           {jobs.map((j) => (
             <li
               key={j.id}
-              className={`group rounded-lg border bg-ink px-3 py-2.5 ${
-                j.id === activeId ? "border-pitch" : "border-line"
-              }`}
+              className={cx(
+                "lift group rounded-xl border bg-ink-2 px-3 py-2.5",
+                j.id === activeId ? "border-pitch/70 ring-1 ring-pitch/20" : "border-line hover:border-line-2",
+              )}
             >
               {editing === j.id ? (
                 <input
@@ -55,22 +57,22 @@ export default function JobList({ jobs, activeId, onSelect, onRename, onDelete }
                     if (e.key === "Enter") commit(j.id);
                     if (e.key === "Escape") setEditing(null);
                   }}
-                  className="w-full rounded border border-line bg-card px-2 py-1 text-sm"
+                  className="w-full rounded-lg border border-line bg-card px-2 py-1 text-sm outline-none focus:border-pitch/60"
                 />
               ) : (
                 <div className="flex items-center justify-between gap-2">
                   <button onClick={() => onSelect(j.id)} className="min-w-0 flex-1 text-left">
-                    <span className="block truncate text-sm">{j.input_name}</span>
-                    <span className="text-xs text-slate-500">{j.detector}</span>
+                    <span className="block truncate text-sm font-medium">{j.input_name}</span>
+                    <span className="text-xs text-mute">{j.detector}</span>
                   </button>
                   <div className="flex items-center gap-1">
-                    <span className={`rounded-full px-2 py-0.5 text-[0.65rem] ${badge[j.status]}`}>
+                    <span className={cx("rounded-full px-2 py-0.5 text-[0.65rem] font-medium", badge[j.status])}>
                       {j.status}
                     </span>
                     <button
                       title="Rename"
                       onClick={() => startEdit(j)}
-                      className="rounded p-1 text-slate-500 opacity-0 hover:bg-line hover:text-white group-hover:opacity-100"
+                      className="rounded-md p-1 text-mute opacity-0 transition hover:bg-line hover:text-white group-hover:opacity-100"
                     >
                       ✎
                     </button>
@@ -79,7 +81,7 @@ export default function JobList({ jobs, activeId, onSelect, onRename, onDelete }
                       onClick={() => {
                         if (confirm(`Delete "${j.input_name}"? This cannot be undone.`)) onDelete(j.id);
                       }}
-                      className="rounded p-1 text-slate-500 opacity-0 hover:bg-line hover:text-red-400 group-hover:opacity-100"
+                      className="rounded-md p-1 text-mute opacity-0 transition hover:bg-line hover:text-home group-hover:opacity-100"
                     >
                       🗑
                     </button>
@@ -90,6 +92,6 @@ export default function JobList({ jobs, activeId, onSelect, onRename, onDelete }
           ))}
         </ul>
       )}
-    </div>
+    </Card>
   );
 }

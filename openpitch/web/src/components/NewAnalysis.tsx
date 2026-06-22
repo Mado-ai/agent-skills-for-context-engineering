@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { api } from "../api/client";
+import { Card, Icon } from "./ui";
 
 interface Props {
   busy: boolean;
@@ -22,22 +23,29 @@ export default function NewAnalysis({ busy, progress, onStarted }: Props) {
   };
 
   return (
-    <div className="rounded-xl border border-line bg-card p-5">
-      <h2 className="mb-3 font-semibold">New analysis</h2>
+    <Card title="New analysis" subtitle="Upload a match or run the demo" icon="upload">
+      <label className="mb-1.5 block text-xs font-medium text-mute">Match video (panoramic / wide)</label>
+      <label className="mb-3 flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-line-2 bg-ink-2 px-3 py-3 text-sm transition hover:border-pitch/50">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-pitch/10 text-pitch">
+          <Icon name="film" width={17} height={17} />
+        </span>
+        <span className="min-w-0">
+          <span className="block truncate font-medium">{file ? file.name : "Choose a video file"}</span>
+          <span className="text-xs text-mute">{file ? `${(file.size / 1e6).toFixed(1)} MB` : "MP4 / MOV / panoramic feed"}</span>
+        </span>
+        <input
+          type="file"
+          accept="video/*"
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          className="hidden"
+        />
+      </label>
 
-      <label className="mb-1 block text-xs text-slate-400">Match video (panoramic / wide)</label>
-      <input
-        type="file"
-        accept="video/*"
-        onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-        className="mb-3 w-full rounded-lg border border-line bg-ink p-2 text-sm"
-      />
-
-      <label className="mb-1 block text-xs text-slate-400">Detector</label>
+      <label className="mb-1.5 block text-xs font-medium text-mute">Detector</label>
       <select
         value={detector}
         onChange={(e) => setDetector(e.target.value)}
-        className="mb-4 w-full rounded-lg border border-line bg-ink p-2 text-sm"
+        className="mb-4 w-full rounded-xl border border-line bg-ink-2 p-2.5 text-sm outline-none focus:border-pitch/60"
       >
         <option value="color">Color segmentation (no download)</option>
         <option value="yolo">YOLO (real footage · needs weights)</option>
@@ -47,28 +55,31 @@ export default function NewAnalysis({ busy, progress, onStarted }: Props) {
         <button
           disabled={busy || !file}
           onClick={wrap(() => api.createJob(file!, detector))}
-          className="rounded-lg bg-pitch px-4 py-2 text-sm font-semibold text-emerald-950 hover:bg-pitch-dark disabled:opacity-50"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-pitch px-4 py-2.5 text-sm font-semibold text-emerald-950 transition hover:bg-pitch-dark disabled:opacity-50"
         >
-          Process upload
+          <Icon name="play" width={16} height={16} /> Process upload
         </button>
         <button
           disabled={busy}
           onClick={wrap(() => api.createDemo(10, detector))}
-          className="rounded-lg bg-line px-4 py-2 text-sm font-semibold hover:bg-slate-700 disabled:opacity-50"
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-line bg-ink-2 px-4 py-2.5 text-sm font-semibold transition hover:border-line-2 disabled:opacity-50"
         >
-          Run demo clip
+          <Icon name="zap" width={16} height={16} /> Demo
         </button>
       </div>
 
       {busy && (
         <div className="mt-4">
-          <div className="h-2.5 overflow-hidden rounded bg-ink">
-            <div className="h-full bg-pitch transition-all" style={{ width: `${progress.pct}%` }} />
+          <div className="h-2 overflow-hidden rounded-full bg-ink">
+            <div className="h-full rounded-full bg-gradient-to-r from-pitch-dark to-pitch transition-all" style={{ width: `${progress.pct}%` }} />
           </div>
-          <p className="mt-1 text-xs text-slate-400">{progress.message}</p>
+          <p className="mt-1.5 flex items-center gap-1.5 text-xs text-mute">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-pitch" />
+            {progress.message}
+          </p>
         </div>
       )}
-      {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
-    </div>
+      {error && <p className="mt-2 text-sm text-home">{error}</p>}
+    </Card>
   );
 }

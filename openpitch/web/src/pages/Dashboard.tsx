@@ -1,24 +1,33 @@
+import { useAuth } from "../auth/AuthContext";
 import JobList from "../components/JobList";
 import NewAnalysis from "../components/NewAnalysis";
 import Results from "../components/Results";
+import { Card, Icon } from "../components/ui";
 import { useJobs } from "../hooks/useJobs";
 
-const TOOLS = [
-  ["🎥 Virtual camera", "Auto pan/zoom follow"],
-  ["🏷️ Overlay", "Scoreboard + possession"],
-  ["📐 Homography", "Pixels → metres"],
-  ["🧠 Detection", "Color / YOLO"],
-  ["📊 Analytics", "Heatmaps + physical"],
-  ["✂️ Highlights", "Auto clip export"],
+const TOOLS: [Parameters<typeof Icon>[0]["name"], string, string][] = [
+  ["film", "Virtual camera", "Auto pan/zoom follow"],
+  ["shield", "Overlay", "Scoreboard + possession"],
+  ["target", "Homography", "Pixels → metres"],
+  ["crosshair", "Detection", "Color / YOLO"],
+  ["chart", "Analytics", "Heatmaps + xT / xG"],
+  ["zap", "Highlights", "Auto clip export"],
 ];
 
 export default function Dashboard() {
   const { jobs, active, busy, progress, track, open, rename, remove } = useJobs();
+  const { user } = useAuth();
+  const name = user?.email?.split("@")[0] ?? "coach";
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6">
+    <div className="mx-auto max-w-7xl px-4 py-6">
+      <header className="mb-6">
+        <p className="text-sm text-mute">Welcome back, <span className="capitalize text-slate-300">{name}</span></p>
+        <h1 className="text-2xl font-bold tracking-tight">Match analytics</h1>
+      </header>
+
       <div className="grid items-start gap-5 lg:grid-cols-[340px_1fr]">
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-5 lg:sticky lg:top-20">
           <NewAnalysis busy={busy} progress={progress} onStarted={track} />
           <JobList
             jobs={jobs}
@@ -27,17 +36,19 @@ export default function Dashboard() {
             onRename={rename}
             onDelete={remove}
           />
-          <div className="rounded-xl border border-line bg-card p-5">
-            <h2 className="mb-3 font-semibold">Pipeline tools</h2>
+          <Card title="Pipeline tools" icon="activity">
             <div className="grid grid-cols-2 gap-2.5">
-              {TOOLS.map(([name, desc]) => (
-                <div key={name} className="rounded-lg border border-line bg-ink p-2.5">
-                  <b className="text-sm">{name}</b>
-                  <p className="mt-0.5 text-xs text-slate-400">{desc}</p>
+              {TOOLS.map(([icon, name, desc]) => (
+                <div key={name} className="rounded-xl border border-line bg-ink-2 p-2.5">
+                  <div className="flex items-center gap-1.5 text-pitch">
+                    <Icon name={icon} width={14} height={14} />
+                    <b className="text-xs text-slate-200">{name}</b>
+                  </div>
+                  <p className="mt-0.5 text-[0.7rem] text-mute">{desc}</p>
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
         </div>
 
         <Results job={active} />
