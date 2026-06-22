@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container, Button } from "@/components/ui";
+import { JsonLd } from "@/components/JsonLd";
 import { getPost, getPostSlugs, formatDate } from "@/lib/posts";
+import { articleSchema, breadcrumbSchema } from "@/lib/seo";
 
 export function generateStaticParams() {
   return getPostSlugs().map((slug) => ({ slug }));
@@ -16,10 +18,25 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = await getPost(slug);
   if (!post) return { title: "Not found" };
+  const url = `/insights/${slug}`;
   return {
     title: post.title,
     description: post.excerpt,
-    openGraph: { title: post.title, description: post.excerpt, type: "article" },
+    alternates: { canonical: url },
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      type: "article",
+      url,
+      publishedTime: post.date || undefined,
+      authors: [post.author],
+      tags: [post.category],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+    },
   };
 }
 
@@ -34,6 +51,22 @@ export default async function PostPage({
 
   return (
     <article>
+      <JsonLd
+        data={[
+          articleSchema({
+            title: post.title,
+            description: post.excerpt,
+            slug: post.slug,
+            date: post.date,
+            author: post.author,
+          }),
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Insights", path: "/insights" },
+            { name: post.title, path: `/insights/${post.slug}` },
+          ]),
+        ]}
+      />
       <section className="relative overflow-hidden border-b border-line">
         <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-blue/15 blur-[120px]" />
         <Container className="relative max-w-3xl py-16 sm:py-20">

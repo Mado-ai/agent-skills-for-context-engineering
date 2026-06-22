@@ -1,11 +1,21 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Container, Section, Button, Eyebrow, Card } from "@/components/ui";
 import { LogoMark } from "@/components/Logo";
+import { JsonLd } from "@/components/JsonLd";
 import { services, stats, process, sectors } from "@/lib/site";
+import { professionalServiceSchema } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  description:
+    "go overseas helps ambitious companies expand into international markets — market entry strategy, partnerships, brand growth, and go-to-market execution. Strategy. Creativity. Growth.",
+  alternates: { canonical: "/" },
+};
 
 export default function HomePage() {
   return (
     <>
+      <JsonLd data={professionalServiceSchema()} />
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-line">
         <div className="absolute inset-0 bg-grid opacity-70" />

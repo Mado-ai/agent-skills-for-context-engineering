@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { Container, Section, Button, Eyebrow, Card } from "@/components/ui";
 
 export const metadata: Metadata = {
-  title: "Work",
+  title: "Work — Cross-Border Growth Case Studies",
   description:
-    "Selected cross-border growth engagements — market entries, partnerships, and brand launches by go overseas.",
+    "Selected cross-border growth engagements — international market entries, partnerships, and brand launches delivered by go overseas.",
+  alternates: { canonical: "/work" },
 };
 
 const caseStudies = [

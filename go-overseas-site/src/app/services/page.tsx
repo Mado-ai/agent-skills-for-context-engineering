@@ -3,9 +3,10 @@ import { Container, Section, Button, Eyebrow, Card } from "@/components/ui";
 import { services, process } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Services",
+  title: "Services — Market Entry, Partnerships & Growth",
   description:
-    "Market entry, partnerships, brand & creative growth, and go-to-market execution for companies expanding overseas.",
+    "Market entry strategy, partnerships and distribution, brand and creative growth, and go-to-market execution for companies expanding into international markets.",
+  alternates: { canonical: "/services" },
 };
 
 export default function ServicesPage() {

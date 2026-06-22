@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "Terms & Conditions",
   description:
     "The terms governing your use of the go overseas website and services.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {

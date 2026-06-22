@@ -60,6 +60,27 @@ Your content in **markdown**. Tables, lists, and blockquotes are supported.
 
 The post is picked up automatically — sorted by date, with reading time computed.
 
+## SEO
+
+The site follows current SEO best practices out of the box:
+
+- **Per-page metadata** — unique titles (with a brand template), descriptions, and
+  keywords via the Next.js Metadata API.
+- **Canonical URLs** on every page (set per-page to avoid duplicate-content issues).
+- **`sitemap.xml`** (`src/app/sitemap.ts`) — auto-includes all pages and blog posts.
+- **`robots.txt`** (`src/app/robots.ts`) — points crawlers to the sitemap.
+- **Structured data (JSON-LD)** — `Organization` + `WebSite` site-wide,
+  `ProfessionalService` on the home page, and `BlogPosting` + `BreadcrumbList`
+  on each insight. See `src/lib/seo.ts`.
+- **Open Graph & Twitter cards** — including auto-generated 1200×630 social images
+  (`opengraph-image`/`twitter-image` via `next/og`), with a custom image per blog post.
+- **PWA manifest** (`src/app/manifest.ts`) and an SVG **favicon** (`src/app/icon.svg`).
+- **Accessibility** — skip-to-content link, semantic landmarks, `lang` attribute.
+
+> **Important:** set `NEXT_PUBLIC_SITE_URL` to your real domain in production (see
+> `.env.example`). Canonicals, the sitemap, robots, and Open Graph URLs are all derived
+> from it. Central SEO config (name, description, social handles) lives in `src/lib/seo.ts`.
+
 ## Brand
 
 Defined as CSS custom properties in `src/app/globals.css` under `@theme`:

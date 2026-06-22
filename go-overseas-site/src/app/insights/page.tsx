@@ -4,9 +4,10 @@ import { Container, Eyebrow } from "@/components/ui";
 import { getAllPosts, formatDate } from "@/lib/posts";
 
 export const metadata: Metadata = {
-  title: "Insights",
+  title: "Insights — International Growth Field Notes",
   description:
     "Field notes on international business development, market entry, and cross-border brand growth from the go overseas team.",
+  alternates: { canonical: "/insights" },
 };
 
 export default function InsightsPage() {

@@ -3,9 +3,10 @@ import { Container, Eyebrow } from "@/components/ui";
 import { ContactForm } from "@/components/ContactForm";
 
 export const metadata: Metadata = {
-  title: "Contact",
+  title: "Contact — Start a Conversation",
   description:
-    "Tell us where you want to grow. Start a conversation with the go overseas team.",
+    "Tell us where you want to grow. Start a conversation with the go overseas team about your international expansion.",
+  alternates: { canonical: "/contact" },
 };
 
 const details = [

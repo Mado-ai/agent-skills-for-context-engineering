@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "Money-Back Policy",
   description:
     "Our satisfaction guarantee and refund policy for go overseas engagements.",
+  alternates: { canonical: "/refund" },
 };
 
 export default function RefundPage() {

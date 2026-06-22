@@ -3,9 +3,10 @@ import { Container, Section, Button, Eyebrow, Card } from "@/components/ui";
 import { stats } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "About",
+  title: "About — Operators in Cross-Border Growth",
   description:
-    "go overseas is a cross-border growth firm built on three principles: strategy, creativity, and growth.",
+    "go overseas is a cross-border business-development and creative-growth firm built on three principles: strategy, creativity, and growth.",
+  alternates: { canonical: "/about" },
 };
 
 const values = [
