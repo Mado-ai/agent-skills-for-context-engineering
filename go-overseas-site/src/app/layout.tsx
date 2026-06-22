@@ -27,9 +27,11 @@ export const metadata: Metadata = {
   description: siteConfig.description,
   applicationName: siteConfig.name,
   keywords: [
-    "international business development",
+    "Canadian business expansion",
+    "help Canadian businesses go global",
+    "international business development Canada",
     "market entry strategy",
-    "global expansion consultancy",
+    "export consulting Canada",
     "go-to-market strategy",
     "cross-border growth",
     "international partnerships",
@@ -79,7 +81,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+    <html lang="en-CA" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <body className="min-h-screen">
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <a

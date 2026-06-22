@@ -97,9 +97,9 @@ export default function TermsPage() {
 
       <h2>11. Governing law</h2>
       <p>
-        These Terms are governed by the laws of the jurisdiction stated in your SOW, or
-        where none is stated, the jurisdiction of our principal place of business. Disputes
-        will be resolved in the courts of that jurisdiction.
+        These Terms are governed by the laws of the Province of Ontario and the federal laws
+        of Canada applicable therein, unless a different jurisdiction is stated in your SOW.
+        Disputes will be resolved in the courts of that jurisdiction.
       </p>
 
       <h2>12. Changes</h2>

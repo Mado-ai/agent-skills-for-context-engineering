@@ -52,12 +52,20 @@ export default function PrivacyPage() {
         We do <strong>not</strong> sell your personal information.
       </p>
 
-      <h2>4. Legal bases (GDPR)</h2>
+      <h2>4. Our legal bases</h2>
       <p>
-        Where the GDPR applies, we rely on your <strong>consent</strong> (e.g. analytics
-        cookies), the <strong>performance of a contract</strong> (delivering services you
-        engage us for), our <strong>legitimate interests</strong> (running and securing our
-        business), and <strong>legal obligations</strong>.
+        As a Canadian business, we handle personal information in accordance with Canada&apos;s
+        <strong> Personal Information Protection and Electronic Documents Act (PIPEDA)</strong>{" "}
+        and applicable provincial privacy laws — which means we collect, use, and disclose
+        personal information only for purposes a reasonable person would consider appropriate,
+        and with your knowledge and consent.
+      </p>
+      <p>
+        Where the EU/UK <strong>GDPR</strong> applies to international clients, we additionally
+        rely on your <strong>consent</strong> (e.g. analytics cookies), the{" "}
+        <strong>performance of a contract</strong> (delivering services you engage us for), our{" "}
+        <strong>legitimate interests</strong> (running and securing our business), and{" "}
+        <strong>legal obligations</strong>.
       </p>
 
       <h2>5. Sharing your information</h2>
@@ -85,7 +93,8 @@ export default function PrivacyPage() {
         port your data, and to object to or restrict certain processing. To exercise any of
         these, email{" "}
         <a href="mailto:privacy@gooverseas.example">privacy@gooverseas.example</a>. You may
-        also lodge a complaint with your local data-protection authority.
+        also lodge a complaint with the Office of the Privacy Commissioner of Canada, or with
+        your local data-protection authority.
       </p>
 
       <h2>9. Security</h2>

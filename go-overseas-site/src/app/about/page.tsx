@@ -38,12 +38,14 @@ export default function AboutPage() {
         <Container className="relative py-20 sm:py-28">
           <Eyebrow>About</Eyebrow>
           <h1 className="mt-6 max-w-3xl font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-            We exist to make crossing borders feel less like a leap.
+            We help Canadian businesses cross borders with confidence.
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-mist">
-            go overseas was founded on a simple frustration: international expansion is
-            treated as a side project, handed to a junior team or an absent consultant.
-            We built a firm that treats it as the high-stakes, high-reward bet it actually is.
+            go overseas was founded on a simple frustration: too many great Canadian
+            companies treat international expansion as a side project, handed to a junior
+            team or an absent consultant. We built a firm that works directly with owners
+            and founders, treating expansion as the high-stakes, high-reward bet it
+            actually is.
           </p>
         </Container>
       </section>
@@ -79,9 +81,10 @@ export default function AboutPage() {
               Operators, not just advisors.
             </h2>
             <p className="mt-5 max-w-md text-mist">
-              Our team has launched products, signed distributors, and built local teams in
-              markets across Asia, Europe, and the Americas. We&apos;ve made the mistakes so
-              you don&apos;t have to.
+              From our Canadian base in Toronto, Vancouver, and Montréal, our team has
+              launched products, signed distributors, and built local teams in markets
+              across Asia, Europe, and the Americas. We&apos;ve made the mistakes so you
+              don&apos;t have to.
             </p>
           </div>
           <div className="grid gap-4">

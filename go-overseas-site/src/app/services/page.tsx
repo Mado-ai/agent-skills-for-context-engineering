@@ -5,7 +5,7 @@ import { services, process } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Services — Market Entry, Partnerships & Growth",
   description:
-    "Market entry strategy, partnerships and distribution, brand and creative growth, and go-to-market execution for companies expanding into international markets.",
+    "Market entry strategy, partnerships and distribution, brand and creative growth, and go-to-market execution for Canadian businesses expanding into international markets.",
   alternates: { canonical: "/services" },
 };
 

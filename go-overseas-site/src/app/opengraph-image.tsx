@@ -7,6 +7,7 @@ export const contentType = OG_CONTENT_TYPE;
 
 export default function Image() {
   return renderOgImage({
-    title: "Turn international ambition into market presence.",
+    eyebrow: "International Growth for Canadian Business",
+    title: "Take your Canadian business overseas.",
   });
 }

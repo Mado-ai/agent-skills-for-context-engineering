@@ -8,7 +8,7 @@ import { professionalServiceSchema } from "@/lib/seo";
 
 export const metadata: Metadata = {
   description:
-    "go overseas helps ambitious companies expand into international markets — market entry strategy, partnerships, brand growth, and go-to-market execution. Strategy. Creativity. Growth.",
+    "go overseas helps Canadian businesses and their owners expand into international markets — market entry strategy, partnerships, brand growth, and go-to-market execution. Strategy. Creativity. Growth.",
   alternates: { canonical: "/" },
 };
 
@@ -24,15 +24,15 @@ export default function HomePage() {
 
         <Container className="relative grid items-center gap-12 py-24 sm:py-32 lg:grid-cols-[1.15fr_0.85fr]">
           <div>
-            <Eyebrow>International Business Development</Eyebrow>
+            <Eyebrow>International Growth for Canadian Business</Eyebrow>
             <h1 className="mt-6 font-display text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
-              Turn international ambition into{" "}
-              <span className="text-gradient">market presence.</span>
+              Take your Canadian business{" "}
+              <span className="text-gradient">overseas.</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-mist">
-              go overseas is a business-development and creative-growth firm. We pair
-              rigorous strategy with bold creativity to help companies cross borders and
-              build real traction in new markets.
+              go overseas is a Canadian business-development and creative-growth firm. We
+              help owners and founders pair rigorous strategy with bold creativity to cross
+              borders and build real traction in new markets.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <Button href="/contact">Start a conversation</Button>

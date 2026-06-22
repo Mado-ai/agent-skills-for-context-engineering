@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 const details = [
   { label: "Email", value: "hello@gooverseas.example" },
   { label: "Response time", value: "Within 1 business day" },
-  { label: "Hubs", value: "London · Singapore · Toronto" },
+  { label: "Canadian hubs", value: "Toronto · Vancouver · Montréal" },
 ];
 
 export default function ContactPage() {

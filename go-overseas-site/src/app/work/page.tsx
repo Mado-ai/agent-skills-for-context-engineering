@@ -10,23 +10,23 @@ export const metadata: Metadata = {
 
 const caseStudies = [
   {
-    client: "Nordic SaaS scale-up",
+    client: "Toronto-based SaaS scale-up",
     sector: "B2B SaaS",
     markets: "Japan & South Korea",
-    headline: "From zero to $4.2M ARR in APAC in 14 months",
-    body: "We validated demand, secured two reseller partners, and localized positioning for enterprise buyers — landing the first ten logos ahead of plan.",
+    headline: "From zero to CA$4.2M ARR in APAC in 14 months",
+    body: "We helped a Canadian founder validate demand, secure two reseller partners, and localize positioning for enterprise buyers — landing the first ten logos ahead of plan.",
     metrics: [
-      { value: "$4.2M", label: "New ARR" },
+      { value: "CA$4.2M", label: "New ARR" },
       { value: "14 mo", label: "To traction" },
       { value: "10", label: "Enterprise logos" },
     ],
   },
   {
-    client: "European D2C brand",
+    client: "Montréal D2C brand",
     sector: "Consumer",
     markets: "United States",
     headline: "A US launch that didn't flatten the brand",
-    body: "Cross-cultural repositioning plus a creator-led campaign gave a beloved EU brand an authentic American voice — without diluting what made it special.",
+    body: "Cross-cultural repositioning plus a creator-led campaign gave a beloved Canadian brand an authentic American voice — without diluting what made it special.",
     metrics: [
       { value: "3.1x", label: "Return on ad spend" },
       { value: "+68%", label: "Aided awareness" },
@@ -34,11 +34,11 @@ const caseStudies = [
     ],
   },
   {
-    client: "Fintech infrastructure firm",
+    client: "Vancouver fintech firm",
     sector: "Fintech",
     markets: "Southeast Asia",
     headline: "Regulatory-first entry across three SEA markets",
-    body: "We mapped licensing pathways, structured local partnerships, and built the GTM model for a simultaneous entry into Singapore, Indonesia, and the Philippines.",
+    body: "We mapped licensing pathways, structured local partnerships, and built the GTM model for a Canadian owner-led simultaneous entry into Singapore, Indonesia, and the Philippines.",
     metrics: [
       { value: "3", label: "Markets at once" },
       { value: "5", label: "Strategic partners" },
@@ -58,8 +58,8 @@ export default function WorkPage() {
             Markets entered. Traction proven.
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-mist">
-            A selection of cross-border engagements. Names are withheld under NDA — the
-            results are not.
+            A selection of cross-border engagements helping Canadian businesses grow abroad.
+            Names are withheld under NDA — the results are not.
           </p>
         </Container>
       </section>

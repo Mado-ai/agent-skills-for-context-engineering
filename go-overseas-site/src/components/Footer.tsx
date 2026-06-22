@@ -43,8 +43,8 @@ export function Footer() {
             </span>
           </div>
           <p className="mt-4 text-sm leading-relaxed text-mist-dim">
-            Strategy. Creativity. Growth. We help ambitious companies cross borders —
-            turning international ambition into market presence.
+            Strategy. Creativity. Growth. We help Canadian businesses and their owners
+            cross borders — turning international ambition into market presence.
           </p>
         </div>
 
