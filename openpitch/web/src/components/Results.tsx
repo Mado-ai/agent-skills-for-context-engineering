@@ -1,6 +1,6 @@
 import { api } from "../api/client";
 import type { Job } from "../types";
-import { DistanceChart, PossessionTimeline } from "./Charts";
+import { DistanceChart, PossessionTimeline, SpeedDistribution } from "./Charts";
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -74,6 +74,9 @@ export default function Results({ job }: { job: Job | null }) {
         </Card>
         <Card title="Distance covered (top 8)">
           <DistanceChart summary={s} />
+        </Card>
+        <Card title="Top-speed distribution">
+          <SpeedDistribution summary={s} />
         </Card>
       </div>
 

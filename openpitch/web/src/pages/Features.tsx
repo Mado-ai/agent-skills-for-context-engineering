@@ -51,7 +51,7 @@ export default function Features() {
         ))}
       </div>
       <div className="mt-10 text-center">
-        <Link to="/" className="rounded-lg bg-pitch px-5 py-2.5 font-semibold text-emerald-950">
+        <Link to="/?signup" className="rounded-lg bg-pitch px-5 py-2.5 font-semibold text-emerald-950">
           Get started free
         </Link>
       </div>

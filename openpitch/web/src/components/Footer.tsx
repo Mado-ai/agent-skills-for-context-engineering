@@ -12,6 +12,9 @@ export default function Footer() {
           <Link to="/pricing" className="hover:text-slate-300">
             Pricing
           </Link>
+          <Link to="/about" className="hover:text-slate-300">
+            About
+          </Link>
           <Link to="/" className="hover:text-slate-300">
             Sign in
           </Link>

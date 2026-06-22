@@ -19,6 +19,9 @@ export default function Nav() {
             <Link to="/pricing" className="hidden text-slate-300 hover:text-white sm:block">
               Pricing
             </Link>
+            <Link to="/about" className="hidden text-slate-300 hover:text-white sm:block">
+              About
+            </Link>
           </>
         )}
         {user ? (

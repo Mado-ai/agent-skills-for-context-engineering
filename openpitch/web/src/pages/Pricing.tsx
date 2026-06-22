@@ -7,6 +7,7 @@ const TIERS = [
     note: "For trying it out",
     features: ["Synthetic demo clips", "Colour detector", "Possession + heatmaps", "1 saved analysis"],
     cta: "Start free",
+    to: "/?signup",
     highlight: false,
   },
   {
@@ -22,6 +23,7 @@ const TIERS = [
       "Player physical reports",
     ],
     cta: "Choose Club",
+    to: "/?signup",
     highlight: true,
   },
   {
@@ -30,6 +32,7 @@ const TIERS = [
     note: "For multi-team organisations",
     features: ["Everything in Club", "Multiple teams & seats", "Priority GPU processing", "API access", "SSO & support"],
     cta: "Contact sales",
+    to: "/about",
     highlight: false,
   },
 ];
@@ -67,7 +70,7 @@ export default function Pricing() {
               ))}
             </ul>
             <Link
-              to="/"
+              to={t.to}
               className={`mt-6 rounded-lg py-2.5 text-center font-semibold ${
                 t.highlight ? "bg-pitch text-emerald-950" : "bg-line text-white"
               }`}

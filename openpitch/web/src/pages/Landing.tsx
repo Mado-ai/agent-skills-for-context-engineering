@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
 const FEATURES = [
@@ -13,7 +13,11 @@ const PILLS = ["🎥 Auto-production", "📊 Possession & heatmaps", "🏃 Dista
 export default function Landing() {
   const { user, login, register } = useAuth();
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const [params] = useSearchParams();
+  // CTAs link here with ?signup to open the create-account tab directly.
+  const [mode, setMode] = useState<"login" | "register">(
+    params.has("signup") ? "register" : "login",
+  );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
