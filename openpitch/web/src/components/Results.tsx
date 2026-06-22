@@ -1,5 +1,6 @@
 import { api } from "../api/client";
 import type { Job } from "../types";
+import { DistanceChart, PossessionTimeline } from "./Charts";
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -64,6 +65,15 @@ export default function Results({ job }: { job: Job | null }) {
               </li>
             ))}
           </ul>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card title="Possession over time">
+          <PossessionTimeline summary={s} />
+        </Card>
+        <Card title="Distance covered (top 8)">
+          <DistanceChart summary={s} />
         </Card>
       </div>
 

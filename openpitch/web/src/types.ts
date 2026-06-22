@@ -12,8 +12,15 @@ export interface Highlight {
   clip: string | null;
 }
 
+export interface PossessionPoint {
+  t: number;
+  home: number;
+  away: number;
+}
+
 export interface JobSummary {
   possession: Record<string, number>;
+  possession_timeline: PossessionPoint[];
   players: PlayerStat[];
   heatmaps: Record<string, string>;
   highlights: Highlight[];

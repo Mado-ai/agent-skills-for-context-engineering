@@ -11,12 +11,25 @@ export default function Nav() {
         ⚽ Play<span className="text-pitch">Metrics</span>
       </Link>
       <div className="flex items-center gap-4 text-sm">
+        {!user && (
+          <>
+            <Link to="/features" className="hidden text-slate-300 hover:text-white sm:block">
+              Features
+            </Link>
+            <Link to="/pricing" className="hidden text-slate-300 hover:text-white sm:block">
+              Pricing
+            </Link>
+          </>
+        )}
         {user ? (
           <>
             <Link to="/dashboard" className="text-slate-300 hover:text-white">
               Dashboard
             </Link>
-            <span className="text-slate-400">{user.email}{user.is_admin && " · admin"}</span>
+            <span className="hidden text-slate-400 sm:inline">
+              {user.email}
+              {user.is_admin && " · admin"}
+            </span>
             <button
               onClick={() => {
                 logout();

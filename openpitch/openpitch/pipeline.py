@@ -115,7 +115,10 @@ def process_video(
 
     return PipelineResult(
         broadcast=str(broadcast_path),
-        analytics={k: summary[k] for k in ("possession", "players", "heatmaps")},
+        analytics={
+            k: summary[k]
+            for k in ("possession", "players", "heatmaps", "possession_timeline")
+        },
         highlights=summary["highlights"],
         meta=summary["meta"],
     )

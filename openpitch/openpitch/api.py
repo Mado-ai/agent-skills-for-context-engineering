@@ -127,6 +127,7 @@ def _run_job(job_id: str, input_path: Path, detector: str) -> None:
             message="done",
             summary={
                 "possession": result.analytics["possession"],
+                "possession_timeline": result.analytics["possession_timeline"],
                 "players": result.analytics["players"][:14],
                 "heatmaps": result.analytics["heatmaps"],
                 "highlights": result.highlights,

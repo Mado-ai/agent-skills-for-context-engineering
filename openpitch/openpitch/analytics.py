@@ -42,6 +42,8 @@ class Analytics:
     )
     _player_paths: dict[int, dict] = field(default_factory=dict)
     ball_path: list[tuple[float, float]] = field(default_factory=list)
+    # (frame, cumulative home frames, cumulative away frames) per processed frame.
+    _timeline: list[tuple[int, int, int]] = field(default_factory=list)
 
     def _pitch_pos(self, cx: float, cy: float) -> tuple[float, float, float, float]:
         """Return (X_m, Y_m, norm_x, norm_y) for a normalised image point."""
@@ -80,7 +82,29 @@ class Analytics:
                     rec["top_speed"] = max(rec["top_speed"], speed)
             rec["last"] = (X, Y)
 
+        self._timeline.append(
+            (state.frame, self.possession_frames[0], self.possession_frames[1])
+        )
         return tuple(self.possession_frames)  # type: ignore[return-value]
+
+    def possession_timeline(self, points: int = 60) -> list[dict]:
+        """Downsampled cumulative possession % over time, for charting."""
+        if not self._timeline:
+            return []
+        n = len(self._timeline)
+        step = max(1, n // points)
+        out = []
+        for i in range(0, n, step):
+            frame, home, away = self._timeline[i]
+            total = home + away or 1
+            out.append(
+                {
+                    "t": round(frame / self.fps, 1),
+                    "home": round(100 * home / total, 1),
+                    "away": round(100 * away / total, 1),
+                }
+            )
+        return out
 
     # --- outputs ---
 
@@ -139,6 +163,7 @@ class Analytics:
                 self.config.teams[1].name: "heatmap_away.png",
             },
             "players": self.player_stats(),
+            "possession_timeline": self.possession_timeline(),
             "ball_path_points": len(self.ball_path),
             "calibration": "homography" if self.homography is not None else "proxy",
         }
