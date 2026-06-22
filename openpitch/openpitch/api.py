@@ -24,7 +24,6 @@ from pathlib import Path
 from fastapi import Depends, FastAPI, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from fastapi.staticfiles import StaticFiles
 
 from . import auth, db
 from .config import Config
@@ -33,7 +32,9 @@ from .pipeline import process_video
 ROOT = Path(__file__).resolve().parent.parent
 # Output/job directory — point at a mounted volume in production via env.
 RUNS = Path(os.environ.get("PLAYMETRICS_DATA", str(ROOT / "runs")))
-FRONTEND = ROOT / "frontend"
+# Prefer the built Vite SPA (web/dist); fall back to the no-build frontend.
+WEB_DIST = ROOT / "web" / "dist"
+SPA_DIR = WEB_DIST if (WEB_DIST / "index.html").exists() else ROOT / "frontend"
 RUNS.mkdir(parents=True, exist_ok=True)
 
 
@@ -214,5 +215,20 @@ def serve_file(job_id: str, path: str, token: str = ""):
     return FileResponse(target)
 
 
-if FRONTEND.exists():
-    app.mount("/", StaticFiles(directory=str(FRONTEND), html=True), name="frontend")
+@app.get("/{full_path:path}")
+def serve_spa(full_path: str):
+    """Serve built static assets; fall back to index.html for SPA routes.
+
+    Registered last, so all /api/* routes take precedence.
+    """
+    candidate = (SPA_DIR / full_path).resolve()
+    if (
+        full_path
+        and str(candidate).startswith(str(SPA_DIR.resolve()))
+        and candidate.is_file()
+    ):
+        return FileResponse(candidate)
+    index = SPA_DIR / "index.html"
+    if index.exists():
+        return FileResponse(index)
+    raise HTTPException(404, "frontend not built — run `npm run build` in web/")

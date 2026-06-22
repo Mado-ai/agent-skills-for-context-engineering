@@ -50,13 +50,29 @@ Outputs land in `runs/<name>/`: `broadcast.mp4`, `analytics`+`summary.json`,
 
 ## Web app & accounts
 
-The FastAPI backend (`openpitch/api.py`) serves a multi-page site:
+The frontend is a **Vite + React + TypeScript** SPA (in `web/`, styled with
+Tailwind) talking to the FastAPI backend (`openpitch/api.py`):
 
 * **Landing + auth** (`/`) — sign in or create an account.
-* **Dashboard** (`/dashboard.html`) — every pipeline tool in one place: upload a
+* **Dashboard** (`/dashboard`) — every pipeline tool in one place: upload a
   match, pick the detector, run the synthetic demo, browse your job history, and
   view the auto-produced broadcast, possession, heatmaps, player metrics and
   highlights.
+
+### Frontend dev / build
+
+```bash
+cd web
+npm install
+npm run dev        # Vite dev server on :5173, proxies /api -> :8000
+npm run build      # emits web/dist, which the backend serves at /
+npm run lint
+```
+
+In production the backend serves the built SPA from `web/dist` (with SPA
+deep-link fallback). If `web/dist` is absent, it falls back to the no-build
+`frontend/` directory, so the app still runs without Node. The `Dockerfile`
+builds the SPA in a Node stage automatically.
 
 Auth is stdlib-only (PBKDF2 password hashing + HMAC-signed tokens); accounts and
 job history persist in SQLite. Jobs are isolated per user, and result files are

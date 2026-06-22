@@ -13,3 +13,5 @@ live_preview.png
 preview.png
 review_preview.png
 *_preview.png
+web/node_modules/
+web/dist/

@@ -1,4 +1,14 @@
 # Play Metrics — production container.
+
+# Stage 1: build the Vite + React SPA.
+FROM node:22-slim AS web
+WORKDIR /web
+COPY web/package.json web/package-lock.json ./
+RUN npm ci
+COPY web/ ./
+RUN npm run build
+
+# Stage 2: Python runtime.
 FROM python:3.11-slim
 
 # System libs: OpenCV (headless) runtime + ffmpeg for robust video I/O.
@@ -18,6 +28,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
+# Bring in the built SPA from the web stage.
+COPY --from=web /web/dist ./web/dist
 
 # Persistent data (job outputs + SQLite) lives on a mounted volume.
 RUN mkdir -p /data/runs && useradd -m app && chown -R app /app /data
