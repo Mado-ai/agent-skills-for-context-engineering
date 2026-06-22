@@ -3,19 +3,9 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api/client";
 import FieldBreakdown from "../components/FieldBreakdown";
 import MatchStatsImport from "../components/MatchStatsImport";
+import { Avatar, Badge, Card, CellBar, StatCard } from "../components/ui";
+import { brandColor, initials } from "../lib/brand";
 import type { TeamProfile as TP } from "../types";
-
-function Card({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <div className="rounded-xl border border-line bg-card p-5">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="font-semibold">{title}</h2>
-        {action}
-      </div>
-      {children}
-    </div>
-  );
-}
 
 export default function TeamProfile() {
   const { id = "" } = useParams();
@@ -36,8 +26,10 @@ export default function TeamProfile() {
     void load();
   }, [load]);
 
-  if (!tp) return <div className="p-10 text-center text-slate-400">Loading…</div>;
+  if (!tp) return <div className="p-10 text-center text-mute">Loading…</div>;
   const r = tp.record;
+  const brand = brandColor(tp.team.id);
+  const maxDist = Math.max(...tp.leaderboard.map((l) => l.distance_m), 1);
 
   const addPlayer = async () => {
     if (!pName.trim()) return;
@@ -82,48 +74,63 @@ export default function TeamProfile() {
     }
   };
 
+  const btn = "rounded-xl border border-line bg-card px-3 py-2 text-sm font-semibold transition hover:border-line-2";
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <Link to="/teams" className="text-sm text-slate-400 hover:text-white">← Teams</Link>
-          <h1 className="text-2xl font-bold">{tp.team.name}</h1>
-        </div>
-        <div className="flex gap-2 text-sm">
-          <button onClick={share} className="rounded-lg bg-line px-3 py-2 font-semibold">
-            {tp.team.public_token ? "Unshare" : "Share"}
-          </button>
-          <button onClick={exportTeam} className="rounded-lg bg-line px-3 py-2 font-semibold">Export</button>
-          <button onClick={remove} className="rounded-lg bg-line px-3 py-2 font-semibold text-red-400">Delete</button>
+      <Link to="/teams" className="text-sm text-mute hover:text-white">← Teams</Link>
+
+      {/* branded header */}
+      <div className="relative mt-2 mb-6 overflow-hidden rounded-2xl border border-line bg-card shadow-card">
+        <div className="absolute inset-0 opacity-20" style={{ background: `radial-gradient(600px 200px at 0% 0%, ${brand}, transparent 70%)` }} />
+        <div className="relative flex flex-wrap items-center justify-between gap-4 p-5">
+          <div className="flex items-center gap-4">
+            <Avatar label={initials(tp.team.name)} color={brand} size={56} />
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">{tp.team.name}</h1>
+              <div className="mt-1 flex items-center gap-2 text-sm text-mute">
+                <span>{tp.player_count} players · {r.played} matches</span>
+                {tp.team.public_token && <Badge color="green">shared</Badge>}
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={share} className={btn}>{tp.team.public_token ? "Unshare" : "Share"}</button>
+            <button onClick={exportTeam} className={btn}>Export</button>
+            <button onClick={remove} className={`${btn} text-home`}>Delete</button>
+          </div>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card title="Matches by field">
+      {/* record KPI strip */}
+      <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <StatCard label="Played" value={r.played} icon="shield" accent="violet" />
+        <StatCard label="Wins" value={r.wins} icon="trophy" accent="pitch" />
+        <StatCard label="Draws" value={r.draws} icon="activity" accent="amber" />
+        <StatCard label="Losses" value={r.losses} icon="activity" accent="home" />
+        <StatCard label="Goals for" value={r.goals_for} icon="target" accent="pitch" />
+        <StatCard label="Goals against" value={r.goals_against} icon="crosshair" accent="away" />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card title="Matches by field" icon="chart">
           <FieldBreakdown data={tp.matches_by_field} />
         </Card>
-        <Card title="Record">
-          <div className="grid grid-cols-3 gap-2 text-center">
-            {[["W", r.wins], ["D", r.draws], ["L", r.losses]].map(([k, v]) => (
-              <div key={k} className="rounded-lg border border-line bg-ink p-3">
-                <div className="text-2xl font-bold">{v}</div>
-                <div className="text-xs text-slate-400">{k}</div>
-              </div>
-            ))}
-          </div>
-          <p className="mt-3 text-center text-sm text-slate-400">
-            {r.played} played · {r.goals_for}–{r.goals_against} goals
-          </p>
-        </Card>
-        <Card title="Distance leaders">
+        <Card title="Distance leaders" icon="gauge">
           {tp.leaderboard.length === 0 ? (
-            <p className="text-sm text-slate-400">No player stats yet.</p>
+            <p className="text-sm text-mute">No player stats yet.</p>
           ) : (
-            <ul className="text-sm">
+            <ul className="flex flex-col gap-2.5">
               {tp.leaderboard.slice(0, 5).map((l) => (
-                <li key={l.player_id} className="flex justify-between border-b border-line py-1">
-                  <span>{l.name}</span>
-                  <b>{(l.distance_m / 1000).toFixed(1)} km</b>
+                <li key={l.player_id} className="flex items-center gap-3">
+                  <Avatar label={initials(l.name)} color={brand} size={28} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex justify-between text-sm">
+                      <Link to={`/players/${l.player_id}`} className="truncate hover:text-white">{l.name}</Link>
+                      <b className="tnum">{(l.distance_m / 1000).toFixed(1)} km</b>
+                    </div>
+                    <div className="mt-1"><CellBar value={l.distance_m} max={maxDist} color={brand} /></div>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -132,44 +139,46 @@ export default function TeamProfile() {
       </div>
 
       <div className="mt-4 grid gap-4 md:grid-cols-2">
-        <Card title={`Roster (${tp.player_count})`}>
+        <Card title={`Roster · ${tp.player_count}`} icon="users">
           <ul className="mb-3 flex flex-col gap-1">
             {tp.players.map((p) => (
               <li key={p.id}>
-                <Link to={`/players/${p.id}`} className="flex justify-between rounded px-2 py-1.5 text-sm hover:bg-ink">
-                  <span>{p.jersey != null && <b className="mr-2 text-slate-500">#{p.jersey}</b>}{p.name}</span>
-                  <span className="text-slate-500">{p.position}</span>
+                <Link to={`/players/${p.id}`} className="flex items-center gap-3 rounded-lg px-2 py-1.5 text-sm transition hover:bg-white/[0.03]">
+                  <Avatar label={p.jersey != null ? String(p.jersey) : initials(p.name)} color={brand} size={28} />
+                  <span className="flex-1 truncate">{p.name}</span>
+                  <span className="text-xs text-mute">{p.position}</span>
                 </Link>
               </li>
             ))}
+            {tp.players.length === 0 && <li className="px-2 text-sm text-mute">No players yet.</li>}
           </ul>
           <div className="flex flex-wrap gap-2 border-t border-line pt-3">
             <input value={pName} onChange={(e) => setPName(e.target.value)} placeholder="Player name"
-              className="min-w-0 flex-1 rounded border border-line bg-ink px-2 py-1.5 text-sm" />
+              className="min-w-0 flex-1 rounded-lg border border-line bg-ink-2 px-2 py-1.5 text-sm outline-none focus:border-pitch/60" />
             <input value={pPos} onChange={(e) => setPPos(e.target.value)} placeholder="Pos"
-              className="w-16 rounded border border-line bg-ink px-2 py-1.5 text-sm" />
+              className="w-16 rounded-lg border border-line bg-ink-2 px-2 py-1.5 text-sm outline-none focus:border-pitch/60" />
             <input value={pNum} onChange={(e) => setPNum(e.target.value)} placeholder="#" inputMode="numeric"
-              className="w-14 rounded border border-line bg-ink px-2 py-1.5 text-sm" />
-            <label className="flex items-center gap-1 text-xs text-slate-400">
+              className="w-14 rounded-lg border border-line bg-ink-2 px-2 py-1.5 text-sm outline-none focus:border-pitch/60" />
+            <label className="flex items-center gap-1 text-xs text-mute">
               <input type="checkbox" checked={pMinor} onChange={(e) => setPMinor(e.target.checked)} />
               minor
             </label>
-            <button onClick={addPlayer} className="rounded bg-pitch px-3 py-1.5 text-sm font-semibold text-emerald-950">Add</button>
+            <button onClick={addPlayer} className="rounded-lg bg-pitch px-3 py-1.5 text-sm font-semibold text-emerald-950 hover:bg-pitch-dark">Add</button>
           </div>
         </Card>
 
-        <Card title="Matches">
+        <Card title="Matches" icon="film">
           <ul className="mb-3 flex flex-col gap-1">
             {tp.recent_matches.map((m) => (
-              <li key={m.id} className="rounded px-2 py-1.5 text-sm">
+              <li key={m.id} className="rounded-lg px-2 py-1.5 text-sm">
                 <div className="flex items-center justify-between">
-                  <span><b className="mr-2 text-slate-500">{m.field_type}v{m.field_type}</b>{m.opponent || "—"}</span>
-                  <span className="flex items-center gap-2 text-slate-400">
-                    {m.home_score != null ? `${m.home_score}–${m.away_score}` : ""} {m.played_on || ""}
+                  <span><b className="mr-2 text-mute">{m.field_type}v{m.field_type}</b>{m.opponent || "—"}</span>
+                  <span className="flex items-center gap-2 text-mute">
+                    {m.home_score != null ? <b className="tnum text-slate-200">{m.home_score}–{m.away_score}</b> : null} {m.played_on || ""}
                     {m.job_id && (
                       <button
                         onClick={() => setImporting(importing === m.id ? null : m.id)}
-                        className="rounded bg-line px-2 py-0.5 text-xs text-pitch"
+                        className="rounded-md bg-line px-2 py-0.5 text-xs text-pitch hover:bg-line-2"
                         title="Import player stats from the linked analysis"
                       >
                         ↳ analysis
@@ -188,22 +197,22 @@ export default function TeamProfile() {
                 )}
               </li>
             ))}
-            {tp.recent_matches.length === 0 && <li className="text-sm text-slate-400">No matches yet.</li>}
+            {tp.recent_matches.length === 0 && <li className="px-2 text-sm text-mute">No matches yet.</li>}
           </ul>
           <div className="flex flex-wrap items-center gap-2 border-t border-line pt-3">
             <select value={mField} onChange={(e) => setMField(e.target.value)}
-              className="rounded border border-line bg-ink px-2 py-1.5 text-sm">
+              className="rounded-lg border border-line bg-ink-2 px-2 py-1.5 text-sm outline-none focus:border-pitch/60">
               <option value="5">5-a-side</option>
               <option value="7">7-a-side</option>
               <option value="11">11-a-side</option>
             </select>
             <input value={mOpp} onChange={(e) => setMOpp(e.target.value)} placeholder="Opponent"
-              className="min-w-0 flex-1 rounded border border-line bg-ink px-2 py-1.5 text-sm" />
+              className="min-w-0 flex-1 rounded-lg border border-line bg-ink-2 px-2 py-1.5 text-sm outline-none focus:border-pitch/60" />
             <input value={mHome} onChange={(e) => setMHome(e.target.value)} placeholder="GF" inputMode="numeric"
-              className="w-12 rounded border border-line bg-ink px-2 py-1.5 text-sm" />
+              className="w-12 rounded-lg border border-line bg-ink-2 px-2 py-1.5 text-sm outline-none focus:border-pitch/60" />
             <input value={mAway} onChange={(e) => setMAway(e.target.value)} placeholder="GA" inputMode="numeric"
-              className="w-12 rounded border border-line bg-ink px-2 py-1.5 text-sm" />
-            <button onClick={addMatch} className="rounded bg-pitch px-3 py-1.5 text-sm font-semibold text-emerald-950">Add</button>
+              className="w-12 rounded-lg border border-line bg-ink-2 px-2 py-1.5 text-sm outline-none focus:border-pitch/60" />
+            <button onClick={addMatch} className="rounded-lg bg-pitch px-3 py-1.5 text-sm font-semibold text-emerald-950 hover:bg-pitch-dark">Add</button>
           </div>
         </Card>
       </div>
