@@ -29,16 +29,20 @@ def player_profile(player_id: str) -> dict | None:
     if not p:
         return None
     stats = db.stats_for_player(player_id)
+    completed = sum(s.get("passes_completed") or 0 for s in stats)
     totals = {
         "matches": len(stats),
         "distance_m": round(sum(s["distance_m"] or 0 for s in stats), 1),
         "top_speed_ms": round(max((s["top_speed_ms"] or 0 for s in stats), default=0), 2),
         "sprints": sum(s["sprints"] or 0 for s in stats),
         "passes": sum(s["passes"] or 0 for s in stats),
+        "passes_completed": completed,
         "goals": sum(s["goals"] or 0 for s in stats),
         "assists": sum(s["assists"] or 0 for s in stats),
         "minutes": sum(s["minutes"] or 0 for s in stats),
     }
+    totals["pass_accuracy"] = (
+        round(100 * completed / totals["passes"], 1) if totals["passes"] else None)
     totals["avg_distance_m"] = round(totals["distance_m"] / totals["matches"], 1) if stats else 0
     return {
         "player": {k: p[k] for k in ("id", "name", "position", "jersey")},
@@ -75,14 +79,20 @@ def team_profile(team_id: str) -> dict | None:
                 s["player_id"],
                 {"player_id": s["player_id"], "name": s["player_name"],
                  "matches": 0, "distance_m": 0.0, "top_speed_ms": 0.0,
-                 "sprints": 0, "passes": 0, "goals": 0},
+                 "sprints": 0, "passes": 0, "passes_completed": 0,
+                 "goals": 0, "assists": 0},
             )
             a["matches"] += 1
             a["distance_m"] = round(a["distance_m"] + (s["distance_m"] or 0), 1)
             a["top_speed_ms"] = round(max(a["top_speed_ms"], s["top_speed_ms"] or 0), 2)
             a["sprints"] += s["sprints"] or 0
             a["passes"] += s["passes"] or 0
+            a["passes_completed"] += s.get("passes_completed") or 0
             a["goals"] += s["goals"] or 0
+            a["assists"] += s["assists"] or 0
+    for a in agg.values():
+        a["pass_accuracy"] = (
+            round(100 * a["passes_completed"] / a["passes"], 1) if a["passes"] else None)
     leaderboard = sorted(agg.values(), key=lambda a: a["distance_m"], reverse=True)
 
     return {
@@ -117,6 +127,8 @@ def export_team(team_id: str) -> dict:
                      "away_score": m["away_score"], "summary": m.get("summary"),
                      "stats": [{"player_id": s["player_id"], "minutes": s["minutes"],
                                 "distance_m": s["distance_m"], "top_speed_ms": s["top_speed_ms"],
+                                "sprints": s.get("sprints") or 0, "passes": s.get("passes") or 0,
+                                "passes_completed": s.get("passes_completed") or 0,
                                 "goals": s["goals"], "assists": s["assists"]}
                                for s in m["stats"]]}
                     for m in full_matches],
@@ -152,5 +164,6 @@ def import_team(user_id: int, bundle: dict) -> dict:
             db.add_player_stat("st_" + uuid.uuid4().hex[:10], mid, id_map[old],
                                int(s.get("minutes") or 0), float(s.get("distance_m") or 0),
                                float(s.get("top_speed_ms") or 0), int(s.get("goals") or 0),
-                               int(s.get("assists") or 0))
+                               int(s.get("assists") or 0), int(s.get("sprints") or 0),
+                               int(s.get("passes") or 0), int(s.get("passes_completed") or 0))
     return {"team_id": team_id, "name": name}

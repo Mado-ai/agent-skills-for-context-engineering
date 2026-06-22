@@ -797,10 +797,12 @@ def import_match_stats(
         det = detected.get(str(m.get("detected_id")))
         if not det or m.get("player_id") not in roster_ids:
             continue
+        passes = int(det.get("passes") or 0)
+        completed = round(passes * (det.get("pass_accuracy") or 0) / 100)
         db.add_player_stat("st_" + uuid.uuid4().hex[:10], match_id, m["player_id"],
                            int(minutes), float(det.get("distance_m") or 0),
                            float(det.get("top_speed_ms") or 0), 0, 0,
-                           int(det.get("sprints") or 0), int(det.get("passes") or 0))
+                           int(det.get("sprints") or 0), passes, completed)
         written += 1
     _audit(user, "match.import_stats", "match", match_id, detail=f"{written} players")
     return JSONResponse({"status": "ok", "imported": written})
@@ -834,10 +836,12 @@ def auto_import_stats(match_id: str, user: dict = Depends(current_user)) -> JSON
         d = sides[best_side].get(jersey)
         if not d:
             continue
+        passes = int(d.get("passes") or 0)
+        completed = round(passes * (d.get("pass_accuracy") or 0) / 100)
         db.add_player_stat("st_" + uuid.uuid4().hex[:10], match_id, rp["id"], 0,
                            float(d.get("distance_m") or 0),
                            float(d.get("top_speed_ms") or 0), 0, 0,
-                           int(d.get("sprints") or 0), int(d.get("passes") or 0))
+                           int(d.get("sprints") or 0), passes, completed)
         written += 1
     _audit(user, "match.auto_import", "match", match_id,
            detail=f"{written} by jersey, side={best_side}")

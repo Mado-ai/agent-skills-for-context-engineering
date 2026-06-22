@@ -110,7 +110,7 @@ function PlayerView({ data }: { data: PlayerProfile }) {
         <StatCard label="Goals" value={t.goals} icon="target" accent="pitch" />
         <StatCard label="Assists" value={t.assists} icon="route" accent="away" />
         <StatCard label="Distance" value={(t.distance_m / 1000).toFixed(1)} unit="km" icon="gauge" accent="pitch" />
-        <StatCard label="Sprints" value={t.sprints} icon="zap" accent="amber" />
+        <StatCard label="Pass acc." value={t.pass_accuracy != null ? `${t.pass_accuracy}` : "—"} unit={t.pass_accuracy != null ? "%" : undefined} icon="route" accent="amber" />
         <StatCard label="Top speed" value={t.top_speed_ms} unit="m/s" icon="activity" accent="home" />
       </div>
 

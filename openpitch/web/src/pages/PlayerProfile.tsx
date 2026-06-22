@@ -99,12 +99,12 @@ export default function PlayerProfile() {
         <Card title="Matches by field" icon="chart">
           <FieldBreakdown data={pp.matches_by_field} />
         </Card>
-        <Card title="Per-match averages" icon="gauge">
+        <Card title="Passing & workload" icon="route">
           <div className="grid grid-cols-2 gap-3">
-            <Mini label="Avg distance" value={`${(t.avg_distance_m / 1000).toFixed(1)} km`} />
+            <Mini label="Pass accuracy" value={t.pass_accuracy != null ? `${t.pass_accuracy}%` : "—"} />
             <Mini label="Passes" value={t.passes} />
+            <Mini label="Avg distance" value={`${(t.avg_distance_m / 1000).toFixed(1)} km`} />
             <Mini label="Minutes" value={t.minutes} />
-            <Mini label="Top speed" value={`${t.top_speed_ms} m/s`} />
           </div>
         </Card>
       </div>
@@ -124,12 +124,15 @@ export default function PlayerProfile() {
                   <th className="text-right font-medium">Top</th>
                   <th className="text-right font-medium">Spr</th>
                   <th className="text-right font-medium">Pass</th>
+                  <th className="text-right font-medium">Acc</th>
                   <th className="text-right font-medium">G</th>
                   <th className="text-right font-medium">A</th>
                 </tr>
               </thead>
               <tbody>
-                {pp.recent.map((m) => (
+                {pp.recent.map((m) => {
+                  const acc = m.passes ? Math.round(100 * (m.passes_completed ?? 0) / m.passes) : null;
+                  return (
                   <tr key={m.match_id} className="border-b border-line/50">
                     <td className="py-2">{m.field_type}v{m.field_type}</td>
                     <td>{m.opponent || "—"}</td>
@@ -138,10 +141,12 @@ export default function PlayerProfile() {
                     <td className="tnum text-right">{m.top_speed_ms || 0}</td>
                     <td className="tnum text-right">{m.sprints ?? 0}</td>
                     <td className="tnum text-right">{m.passes ?? 0}</td>
+                    <td className="tnum text-right">{acc != null ? `${acc}%` : "—"}</td>
                     <td className="tnum text-right">{m.goals || 0}</td>
                     <td className="tnum text-right">{m.assists || 0}</td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

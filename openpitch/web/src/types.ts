@@ -158,7 +158,7 @@ export interface TeamProfile {
     goals_against: number;
   };
   recent_matches: Match[];
-  leaderboard: { player_id: string; name: string; matches: number; distance_m: number; top_speed_ms: number; sprints: number; passes: number; goals: number }[];
+  leaderboard: { player_id: string; name: string; matches: number; distance_m: number; top_speed_ms: number; sprints: number; passes: number; passes_completed?: number; pass_accuracy?: number | null; goals: number; assists?: number }[];
 }
 
 export interface PlayerProfile {
@@ -175,9 +175,11 @@ export interface PlayerProfile {
     top_speed_ms: number;
     sprints: number;
     passes: number;
+    passes_completed?: number;
+    pass_accuracy?: number | null;
     goals: number;
     assists: number;
     minutes: number;
   };
-  recent: { match_id: string; field_type: number; opponent: string | null; played_on: string | null; distance_m: number; top_speed_ms: number; sprints?: number; passes?: number; goals: number; assists: number }[];
+  recent: { match_id: string; field_type: number; opponent: string | null; played_on: string | null; distance_m: number; top_speed_ms: number; sprints?: number; passes?: number; passes_completed?: number; goals: number; assists: number }[];
 }
