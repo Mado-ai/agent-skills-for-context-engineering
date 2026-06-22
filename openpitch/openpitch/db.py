@@ -77,6 +77,16 @@ def init_db() -> None:
                 idempotency_key TEXT PRIMARY KEY,
                 job_id TEXT NOT NULL
             );
+            -- Audit trail: every access to player/minor data (child-safety §6).
+            CREATE TABLE IF NOT EXISTS audit_log (
+                id TEXT PRIMARY KEY,
+                user_id INTEGER,
+                action TEXT NOT NULL,
+                target_type TEXT,
+                target_id TEXT,
+                detail TEXT,
+                created_at REAL NOT NULL
+            );
             -- Profiles: teams, players, matches (by field type), per-player stats.
             CREATE TABLE IF NOT EXISTS teams (
                 id TEXT PRIMARY KEY,
@@ -339,6 +349,32 @@ def record_ingest_job(idempotency_key: str, job_id: str) -> None:
             (idempotency_key, job_id),
         )
         c.commit()
+
+
+# --- audit log --------------------------------------------------------------
+
+def add_audit(audit_id: str, user_id: int | None, action: str,
+              target_type: str | None, target_id: str | None,
+              detail: str | None = None) -> None:
+    with _lock:
+        c = _connect()
+        c.execute(
+            "INSERT INTO audit_log (id, user_id, action, target_type, target_id, "
+            "detail, created_at) VALUES (?,?,?,?,?,?,?)",
+            (audit_id, user_id, action, target_type, target_id, detail, time.time()),
+        )
+        c.commit()
+
+
+def list_audit_for_target(target_type: str, target_id: str, limit: int = 100) -> list[dict]:
+    rows = _connect().execute(
+        "SELECT a.action, a.detail, a.created_at, u.email AS actor "
+        "FROM audit_log a LEFT JOIN users u ON u.id = a.user_id "
+        "WHERE a.target_type = ? AND a.target_id = ? "
+        "ORDER BY a.created_at DESC LIMIT ?",
+        (target_type, target_id, limit),
+    ).fetchall()
+    return [dict(r) for r in rows]
 
 
 def _exec(sql: str, params: tuple = ()) -> None:

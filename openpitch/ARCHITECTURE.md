@@ -54,7 +54,8 @@ Status: ✅ implemented here · 🟡 stubbed/partial · ⬜ not yet · 🔌 exte
 | Single authz chokepoint | all access via `api.py`; org access via `authz.py` role checks | ✅ |
 | Role-based access (coach/parent/player/scout/federation) | orgs + memberships: owner/admin/coach (staff), parent/player (read-only, linked to one player), scout (public-only); federation ⬜ | ✅ |
 | Guardian-gating for minors | — | ⬜ |
-| Audit trail | — (request logging ⬜) | ⬜ |
+| Audit trail | `audit_log` table; player views/shares + ingest-imports recorded; `GET /api/players/{id}/audit` (staff) to review | ✅ |
+| Hardening | security headers (CSP/HSTS/XFO/nosniff), login rate-limit + lockout, prod requires PLAYMETRICS_SECRET + admin password | ✅ |
 | Right to delete (cascade) | job delete removes row + files; full cascade ⬜ | 🟡 |
 
 ## Next backend milestones (in priority order)

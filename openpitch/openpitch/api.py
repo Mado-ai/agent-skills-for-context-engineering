@@ -19,17 +19,22 @@ import shutil
 import subprocess
 import sys
 import threading
+import time
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import Body, Depends, FastAPI, Form, Header, HTTPException, UploadFile
+from fastapi import (
+    Body, Depends, FastAPI, Form, Header, HTTPException, Request, UploadFile,
+)
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from . import auth, authz, db, hardware, profiles
 from .config import Config
 from .pipeline import process_video
+
+IS_PRODUCTION = os.environ.get("PLAYMETRICS_ENV", "").lower() == "production"
 
 ROOT = Path(__file__).resolve().parent.parent
 # Output/job directory — point at a mounted volume in production via env.
@@ -42,6 +47,15 @@ RUNS.mkdir(parents=True, exist_ok=True)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Production must not run on insecure defaults.
+    if IS_PRODUCTION:
+        if not os.environ.get("PLAYMETRICS_SECRET"):
+            raise RuntimeError("PLAYMETRICS_SECRET is required in production")
+        if not os.environ.get("PLAYMETRICS_ADMIN_PASSWORD"):
+            raise RuntimeError("PLAYMETRICS_ADMIN_PASSWORD is required in production")
+    elif not os.environ.get("PLAYMETRICS_SECRET"):
+        print("[warn] PLAYMETRICS_SECRET unset — tokens reset on restart (dev only)")
+
     db.init_db()
     email = os.environ.get("PLAYMETRICS_ADMIN_EMAIL", "yazanalshuibe14@gmail.com")
     password = os.environ.get("PLAYMETRICS_ADMIN_PASSWORD", "playmetrics-dev")
@@ -53,6 +67,65 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Play Metrics", version="0.2.0", lifespan=lifespan)
 _bearer = HTTPBearer(auto_error=False)
+
+# Content-Security-Policy: SPA serves its own assets; inline styles come from
+# React style props + Tailwind, so style-src allows 'unsafe-inline'.
+_CSP = (
+    "default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; "
+    "script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; "
+    "base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+)
+
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    resp = await call_next(request)
+    resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+    resp.headers.setdefault("X-Frame-Options", "DENY")
+    resp.headers.setdefault("Referrer-Policy", "no-referrer")
+    resp.headers.setdefault("Content-Security-Policy", _CSP)
+    resp.headers.setdefault(
+        "Strict-Transport-Security", "max-age=63072000; includeSubDomains"
+    )
+    return resp
+
+
+# --- login rate limiting (in-memory; per process — use Redis at scale) -------
+
+_LOGIN_MAX_FAILS = 5
+_LOGIN_WINDOW_S = 300
+_login_fails: dict[str, list[float]] = {}
+_login_lock = threading.Lock()
+
+
+def _login_key(email: str, request: Request) -> str:
+    ip = request.client.host if request.client else "?"
+    return f"{email.lower()}|{ip}"
+
+
+def _login_guard(key: str) -> None:
+    now = time.time()
+    with _login_lock:
+        fails = [t for t in _login_fails.get(key, []) if now - t < _LOGIN_WINDOW_S]
+        _login_fails[key] = fails
+        if len(fails) >= _LOGIN_MAX_FAILS:
+            raise HTTPException(429, "too many attempts — try again later")
+
+
+def _login_record_fail(key: str) -> None:
+    with _login_lock:
+        _login_fails.setdefault(key, []).append(time.time())
+
+
+def _login_reset(key: str) -> None:
+    with _login_lock:
+        _login_fails.pop(key, None)
+
+
+def _audit(user: dict | None, action: str, target_type: str | None,
+           target_id: str | None, detail: str | None = None) -> None:
+    db.add_audit("aud_" + uuid.uuid4().hex[:12],
+                 user["id"] if user else None, action, target_type, target_id, detail)
 
 
 # --- auth helpers -----------------------------------------------------------
@@ -93,10 +166,14 @@ def register(email: str = Form(...), password: str = Form(...)) -> JSONResponse:
 
 
 @app.post("/api/auth/login")
-def login(email: str = Form(...), password: str = Form(...)) -> JSONResponse:
+def login(request: Request, email: str = Form(...), password: str = Form(...)) -> JSONResponse:
+    key = _login_key(email, request)
+    _login_guard(key)  # 429 if too many recent failures
     user = db.get_user_by_email(email)
     if not user or not auth.verify_password(password, user["password_hash"]):
+        _login_record_fail(key)
         raise HTTPException(401, "invalid credentials")
+    _login_reset(key)
     token = auth.create_token(user["id"], user["email"])
     return JSONResponse({"token": token, "email": user["email"]})
 
@@ -572,10 +649,17 @@ def create_player(
 @app.get("/api/players/{player_id}")
 def player_detail(player_id: str, user: dict = Depends(current_user)) -> JSONResponse:
     _readable_player(player_id, user)
+    _audit(user, "player.view", "player", player_id)
     profile = profiles.player_profile(player_id)
     player = db.get_player(player_id)
     profile["public_token"] = player["public_token"]
     return JSONResponse(profile)
+
+
+@app.get("/api/players/{player_id}/audit")
+def player_audit(player_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_player(player_id, user)  # staff/owner only
+    return JSONResponse({"audit": db.list_audit_for_target("player", player_id)})
 
 
 @app.patch("/api/players/{player_id}")
@@ -603,6 +687,7 @@ def share_player(player_id: str, user: dict = Depends(current_user)) -> JSONResp
     player = _owned_player(player_id, user)
     token = None if player["public_token"] else uuid.uuid4().hex[:12]
     db.set_player_public(player_id, token)
+    _audit(user, "player.share" if token else "player.unshare", "player", player_id)
     return JSONResponse({"public": token is not None, "public_token": token})
 
 
@@ -693,6 +778,7 @@ def import_match_stats(
                            int(minutes), float(det.get("distance_m") or 0),
                            float(det.get("top_speed_ms") or 0), 0, 0)
         written += 1
+    _audit(user, "match.import_stats", "match", match_id, detail=f"{written} players")
     return JSONResponse({"status": "ok", "imported": written})
 
 
@@ -731,6 +817,7 @@ def public_player(token: str) -> JSONResponse:
     player = db.get_player_by_token(token)
     if not player:
         raise HTTPException(404, "not found")
+    _audit(None, "player.view_public", "player", player["id"])
     return JSONResponse(profiles.player_profile(player["id"]))
 
 

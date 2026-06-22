@@ -87,6 +87,15 @@ On first launch an **admin account is seeded**. Configure via environment:
 | `PLAYMETRICS_SECRET` | random per process | Token signing key — **set a fixed value in production** |
 | `PLAYMETRICS_DB` | `playmetrics.db` | SQLite database path |
 | `PLAYMETRICS_DATA` | `runs/` | Job output directory (mount a volume in prod) |
+| `PLAYMETRICS_ENV` | (unset) | Set to `production` to **require** `PLAYMETRICS_SECRET` + admin password (fails fast otherwise) |
+
+### Security posture
+
+- **Auth:** PBKDF2-HMAC-SHA256 passwords; HMAC-signed tokens; device API keys stored hashed.
+- **Authorization:** role-based (orgs/memberships) enforced at a single API chokepoint; private-by-default sharing; parent/player restricted to a linked player.
+- **Hardening:** security headers (CSP, HSTS, X-Frame-Options, nosniff) on every response; login **rate-limiting + lockout**; production refuses to boot on insecure defaults.
+- **Audit trail:** access to player data (views/shares) and stat imports are logged to `audit_log`; staff can review per player via `GET /api/players/{id}/audit`.
+- **Known gaps (see ARCHITECTURE.md):** guardian-consent gating, full delete-cascade, and Postgres + object storage for production scale.
 
 ### Deploying
 
