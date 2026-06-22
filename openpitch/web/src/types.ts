@@ -1,7 +1,25 @@
 export interface PlayerStat {
-  player_id: number;
+  player_id: string | number;
   team: string;
+  jersey?: number | null;
   distance_m: number;
+  top_speed_ms: number;
+  avg_speed_ms?: number;
+  sprints?: number;
+  touches?: number;
+  passes?: number;
+  pass_accuracy?: number | null;
+  turnovers?: number;
+  possession_s?: number;
+  zones_m?: Record<"walk" | "jog" | "run" | "sprint", number>;
+}
+
+export interface TeamStat {
+  distance_km: number;
+  sprints: number;
+  passes: number;
+  pass_accuracy: number | null;
+  turnovers: number;
   top_speed_ms: number;
 }
 
@@ -22,6 +40,7 @@ export interface JobSummary {
   possession: Record<string, number>;
   possession_timeline: PossessionPoint[];
   players: PlayerStat[];
+  team_stats?: Record<string, TeamStat>;
   heatmaps: Record<string, string>;
   highlights: Highlight[];
   meta: Record<string, string | number>;
@@ -127,7 +146,7 @@ export interface TeamProfile {
     goals_against: number;
   };
   recent_matches: Match[];
-  leaderboard: { player_id: string; name: string; matches: number; distance_m: number; top_speed_ms: number; goals: number }[];
+  leaderboard: { player_id: string; name: string; matches: number; distance_m: number; top_speed_ms: number; sprints: number; passes: number; goals: number }[];
 }
 
 export interface PlayerProfile {
@@ -142,9 +161,11 @@ export interface PlayerProfile {
     distance_m: number;
     avg_distance_m: number;
     top_speed_ms: number;
+    sprints: number;
+    passes: number;
     goals: number;
     assists: number;
     minutes: number;
   };
-  recent: { match_id: string; field_type: number; opponent: string | null; played_on: string | null; distance_m: number; top_speed_ms: number; goals: number; assists: number }[];
+  recent: { match_id: string; field_type: number; opponent: string | null; played_on: string | null; distance_m: number; top_speed_ms: number; sprints?: number; passes?: number; goals: number; assists: number }[];
 }

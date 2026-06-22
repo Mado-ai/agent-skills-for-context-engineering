@@ -147,6 +147,8 @@ player_match_stats = Table(
     Column("minutes", Integer, default=0),
     Column("distance_m", Float, default=0),
     Column("top_speed_ms", Float, default=0),
+    Column("sprints", Integer, default=0),
+    Column("passes", Integer, default=0),
     Column("goals", Integer, default=0),
     Column("assists", Integer, default=0),
 )
@@ -575,12 +577,12 @@ def delete_match(match_id: str) -> None:
 
 def add_player_stat(stat_id: str, match_id: str, player_id: str, minutes: int,
                     distance_m: float, top_speed_ms: float, goals: int,
-                    assists: int) -> None:
+                    assists: int, sprints: int = 0, passes: int = 0) -> None:
     with _engine.begin() as c:
         c.execute(player_match_stats.insert().values(
             id=stat_id, match_id=match_id, player_id=player_id, minutes=minutes,
-            distance_m=distance_m, top_speed_ms=top_speed_ms, goals=goals,
-            assists=assists))
+            distance_m=distance_m, top_speed_ms=top_speed_ms, sprints=sprints,
+            passes=passes, goals=goals, assists=assists))
 
 
 def clear_match_stats(match_id: str) -> None:

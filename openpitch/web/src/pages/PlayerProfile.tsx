@@ -92,8 +92,11 @@ export default function PlayerProfile() {
             <Stat label="Goals" value={t.goals} />
             <Stat label="Assists" value={t.assists} />
             <Stat label="Distance" value={`${(t.distance_m / 1000).toFixed(1)} km`} />
+            <Stat label="Sprints" value={t.sprints} />
+            <Stat label="Passes" value={t.passes} />
             <Stat label="Avg/match" value={`${(t.avg_distance_m / 1000).toFixed(1)} km`} />
             <Stat label="Top speed" value={`${t.top_speed_ms} m/s`} />
+            <Stat label="Minutes" value={t.minutes} />
           </div>
         </div>
       </div>
@@ -107,7 +110,7 @@ export default function PlayerProfile() {
             <thead>
               <tr className="text-left text-slate-400">
                 <th className="py-1">Field</th><th>Opponent</th><th>Date</th>
-                <th>Dist</th><th>Top</th><th>G</th><th>A</th>
+                <th>Dist</th><th>Top</th><th>Spr</th><th>Pass</th><th>G</th><th>A</th>
               </tr>
             </thead>
             <tbody>
@@ -118,6 +121,8 @@ export default function PlayerProfile() {
                   <td>{m.played_on || "—"}</td>
                   <td>{((m.distance_m || 0) / 1000).toFixed(1)} km</td>
                   <td>{m.top_speed_ms || 0}</td>
+                  <td>{m.sprints ?? 0}</td>
+                  <td>{m.passes ?? 0}</td>
                   <td>{m.goals || 0}</td>
                   <td>{m.assists || 0}</td>
                 </tr>

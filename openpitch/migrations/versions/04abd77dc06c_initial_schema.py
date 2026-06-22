@@ -1,8 +1,8 @@
 """initial schema
 
-Revision ID: 2474c1e0db92
+Revision ID: 04abd77dc06c
 Revises: 
-Create Date: 2026-06-22 04:01:10.557289
+Create Date: 2026-06-22 13:33:42.359759
 """
 from typing import Sequence, Union
 
@@ -10,7 +10,7 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision: str = '2474c1e0db92'
+revision: str = '04abd77dc06c'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -94,6 +94,8 @@ def upgrade() -> None:
     sa.Column('minutes', sa.Integer(), nullable=True),
     sa.Column('distance_m', sa.Float(), nullable=True),
     sa.Column('top_speed_ms', sa.Float(), nullable=True),
+    sa.Column('sprints', sa.Integer(), nullable=True),
+    sa.Column('passes', sa.Integer(), nullable=True),
     sa.Column('goals', sa.Integer(), nullable=True),
     sa.Column('assists', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id')

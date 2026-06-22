@@ -91,30 +91,71 @@ export default function Results({ job }: { job: Job | null }) {
         </div>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card title="Player physical metrics">
+      {s.team_stats && (
+        <Card title="Team comparison">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-slate-400">
-                <th className="py-1">#</th>
-                <th>Team</th>
-                <th>Dist (m)</th>
-                <th>Top (m/s)</th>
+                <th className="py-1">Metric</th>
+                {teams.map((t) => <th key={t} className="text-right">{t}</th>)}
               </tr>
             </thead>
             <tbody>
-              {s.players.map((p) => (
-                <tr key={p.player_id} className="border-b border-line">
-                  <td className="py-1">{p.player_id}</td>
-                  <td>{p.team}</td>
-                  <td>{p.distance_m}</td>
-                  <td>{p.top_speed_ms}</td>
+              {([
+                ["Possession", (t: string) => `${s.possession[t]}%`],
+                ["Distance", (t: string) => `${s.team_stats![t]?.distance_km} km`],
+                ["Sprints", (t: string) => s.team_stats![t]?.sprints],
+                ["Passes", (t: string) => s.team_stats![t]?.passes],
+                ["Pass acc.", (t: string) => s.team_stats![t]?.pass_accuracy != null ? `${s.team_stats![t]!.pass_accuracy}%` : "—"],
+                ["Turnovers", (t: string) => s.team_stats![t]?.turnovers],
+                ["Top speed", (t: string) => `${s.team_stats![t]?.top_speed_ms} m/s`],
+              ] as const).map(([label, fn]) => (
+                <tr key={label} className="border-b border-line">
+                  <td className="py-1 text-slate-400">{label}</td>
+                  {teams.map((t) => <td key={t} className="text-right font-medium">{fn(t)}</td>)}
                 </tr>
               ))}
             </tbody>
           </table>
         </Card>
+      )}
 
+      <Card title="Player metrics">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px] text-sm">
+            <thead>
+              <tr className="text-left text-slate-400">
+                <th className="py-1">#</th>
+                <th>Team</th>
+                <th>Dist (km)</th>
+                <th>Top</th>
+                <th>Avg</th>
+                <th>Sprints</th>
+                <th>Touches</th>
+                <th>Passes</th>
+                <th>Acc.</th>
+              </tr>
+            </thead>
+            <tbody>
+              {s.players.map((p) => (
+                <tr key={String(p.player_id)} className="border-b border-line">
+                  <td className="py-1">{p.jersey ?? p.player_id}</td>
+                  <td>{p.team}</td>
+                  <td>{(p.distance_m / 1000).toFixed(2)}</td>
+                  <td>{p.top_speed_ms}</td>
+                  <td>{p.avg_speed_ms ?? "—"}</td>
+                  <td>{p.sprints ?? "—"}</td>
+                  <td>{p.touches ?? "—"}</td>
+                  <td>{p.passes ?? "—"}</td>
+                  <td>{p.pass_accuracy != null ? `${p.pass_accuracy}%` : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+
+      <div className="grid gap-4 md:grid-cols-1">
         <Card title="Auto highlights">
           {s.highlights.length === 0 ? (
             <p className="text-sm text-slate-400">No highlights detected.</p>

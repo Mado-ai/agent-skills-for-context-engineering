@@ -30,7 +30,8 @@ def run_job(job_id: str, input_path: str, detector: str) -> None:
             summary={
                 "possession": result.analytics["possession"],
                 "possession_timeline": result.analytics["possession_timeline"],
-                "players": result.analytics["players"][:14],
+                "players": result.analytics["players"][:28],
+                "team_stats": result.analytics["team_stats"],
                 "heatmaps": result.analytics["heatmaps"],
                 "highlights": result.highlights,
                 "meta": result.meta,

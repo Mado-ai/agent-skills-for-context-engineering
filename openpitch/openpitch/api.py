@@ -799,7 +799,8 @@ def import_match_stats(
             continue
         db.add_player_stat("st_" + uuid.uuid4().hex[:10], match_id, m["player_id"],
                            int(minutes), float(det.get("distance_m") or 0),
-                           float(det.get("top_speed_ms") or 0), 0, 0)
+                           float(det.get("top_speed_ms") or 0), 0, 0,
+                           int(det.get("sprints") or 0), int(det.get("passes") or 0))
         written += 1
     _audit(user, "match.import_stats", "match", match_id, detail=f"{written} players")
     return JSONResponse({"status": "ok", "imported": written})
@@ -835,7 +836,8 @@ def auto_import_stats(match_id: str, user: dict = Depends(current_user)) -> JSON
             continue
         db.add_player_stat("st_" + uuid.uuid4().hex[:10], match_id, rp["id"], 0,
                            float(d.get("distance_m") or 0),
-                           float(d.get("top_speed_ms") or 0), 0, 0)
+                           float(d.get("top_speed_ms") or 0), 0, 0,
+                           int(d.get("sprints") or 0), int(d.get("passes") or 0))
         written += 1
     _audit(user, "match.auto_import", "match", match_id,
            detail=f"{written} by jersey, side={best_side}")

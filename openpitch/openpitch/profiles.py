@@ -33,6 +33,8 @@ def player_profile(player_id: str) -> dict | None:
         "matches": len(stats),
         "distance_m": round(sum(s["distance_m"] or 0 for s in stats), 1),
         "top_speed_ms": round(max((s["top_speed_ms"] or 0 for s in stats), default=0), 2),
+        "sprints": sum(s["sprints"] or 0 for s in stats),
+        "passes": sum(s["passes"] or 0 for s in stats),
         "goals": sum(s["goals"] or 0 for s in stats),
         "assists": sum(s["assists"] or 0 for s in stats),
         "minutes": sum(s["minutes"] or 0 for s in stats),
@@ -72,11 +74,14 @@ def team_profile(team_id: str) -> dict | None:
             a = agg.setdefault(
                 s["player_id"],
                 {"player_id": s["player_id"], "name": s["player_name"],
-                 "matches": 0, "distance_m": 0.0, "top_speed_ms": 0.0, "goals": 0},
+                 "matches": 0, "distance_m": 0.0, "top_speed_ms": 0.0,
+                 "sprints": 0, "passes": 0, "goals": 0},
             )
             a["matches"] += 1
             a["distance_m"] = round(a["distance_m"] + (s["distance_m"] or 0), 1)
             a["top_speed_ms"] = round(max(a["top_speed_ms"], s["top_speed_ms"] or 0), 2)
+            a["sprints"] += s["sprints"] or 0
+            a["passes"] += s["passes"] or 0
             a["goals"] += s["goals"] or 0
     leaderboard = sorted(agg.values(), key=lambda a: a["distance_m"], reverse=True)
 

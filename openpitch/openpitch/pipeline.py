@@ -117,7 +117,8 @@ def process_video(
         broadcast=str(broadcast_path),
         analytics={
             k: summary[k]
-            for k in ("possession", "players", "heatmaps", "possession_timeline")
+            for k in ("possession", "players", "heatmaps", "possession_timeline",
+                      "team_stats")
         },
         highlights=summary["highlights"],
         meta=summary["meta"],
