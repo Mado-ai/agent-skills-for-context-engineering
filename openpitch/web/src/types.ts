@@ -12,6 +12,11 @@ export interface PlayerStat {
   turnovers?: number;
   possession_s?: number;
   zones_m?: Record<"walk" | "jog" | "run" | "sprint", number>;
+  xt_added?: number;
+  progressive_passes?: number;
+  final_third_passes?: number;
+  shots?: number;
+  xg?: number;
 }
 
 export interface TeamStat {
@@ -21,6 +26,11 @@ export interface TeamStat {
   pass_accuracy: number | null;
   turnovers: number;
   top_speed_ms: number;
+  xt_added: number;
+  progressive_passes: number;
+  final_third_passes: number;
+  shots: number;
+  xg: number;
 }
 
 export interface Highlight {

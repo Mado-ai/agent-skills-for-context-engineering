@@ -108,6 +108,11 @@ export default function Results({ job }: { job: Job | null }) {
                 ["Passes", (t: string) => s.team_stats![t]?.passes],
                 ["Pass acc.", (t: string) => s.team_stats![t]?.pass_accuracy != null ? `${s.team_stats![t]!.pass_accuracy}%` : "—"],
                 ["Turnovers", (t: string) => s.team_stats![t]?.turnovers],
+                ["Progressive", (t: string) => s.team_stats![t]?.progressive_passes ?? "—"],
+                ["Final-third", (t: string) => s.team_stats![t]?.final_third_passes ?? "—"],
+                ["xT added", (t: string) => s.team_stats![t]?.xt_added ?? "—"],
+                ["Shots", (t: string) => s.team_stats![t]?.shots ?? "—"],
+                ["xG", (t: string) => s.team_stats![t]?.xg ?? "—"],
                 ["Top speed", (t: string) => `${s.team_stats![t]?.top_speed_ms} m/s`],
               ] as const).map(([label, fn]) => (
                 <tr key={label} className="border-b border-line">
@@ -134,6 +139,10 @@ export default function Results({ job }: { job: Job | null }) {
                 <th>Touches</th>
                 <th>Passes</th>
                 <th>Acc.</th>
+                <th>Prog.</th>
+                <th>xT</th>
+                <th>Shots</th>
+                <th>xG</th>
               </tr>
             </thead>
             <tbody>
@@ -148,6 +157,10 @@ export default function Results({ job }: { job: Job | null }) {
                   <td>{p.touches ?? "—"}</td>
                   <td>{p.passes ?? "—"}</td>
                   <td>{p.pass_accuracy != null ? `${p.pass_accuracy}%` : "—"}</td>
+                  <td>{p.progressive_passes ?? "—"}</td>
+                  <td>{p.xt_added != null ? p.xt_added.toFixed(2) : "—"}</td>
+                  <td>{p.shots ?? "—"}</td>
+                  <td>{p.xg != null ? p.xg.toFixed(2) : "—"}</td>
                 </tr>
               ))}
             </tbody>

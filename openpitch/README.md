@@ -10,8 +10,11 @@ Upload a wide-angle / panoramic match clip and OpenPitch produces:
 1. **An auto-produced broadcast** — a *virtual cameraman* crops the panoramic
    feed to follow the action (no operator), with a live scoreboard and
    possession bar burned in.
-2. **Performance analytics** — possession %, positional heatmaps, and per-player
-   physical metrics (distance, top speed in m/s).
+2. **Performance analytics** — possession %, positional heatmaps, per-player
+   physical metrics (distance, top speed, sprints, work-rate zones), passing
+   (attempts / accuracy / turnovers), and an **event model**: passes valued by
+   an xT-style threat surface (progressive / final-third / xT-added) and shots
+   valued by **xG**.
 3. **Automatic highlights** — exciting moments (fast ball into an attacking
    third) cut into standalone clips.
 
@@ -160,7 +163,8 @@ with a persistent volume (not a static/serverless host).
 | Track | `track.py` | SORT / ByteTrack multi-object tracking + team ID |
 | Virtual camera | `virtual_camera.py` | Pixellot "robot cameraman" auto-production |
 | Overlay | `overlay.py` | Broadcast graphics layer |
-| Analytics | `analytics.py` | BePro tracking data (possession, heatmaps, physical) |
+| Analytics | `analytics.py` | BePro tracking data (possession, heatmaps, physical, passing) |
+| Event model | `events.py` | Passes → xT (progressive/final-third), shots → xG |
 | Highlights | `highlights.py` | Event detection + auto-clipping |
 | Pipeline/API | `pipeline.py`, `api.py` | Job orchestration + serving |
 
@@ -219,6 +223,13 @@ pass/turnover is the transition between two *confirmed* spells) moved this to
 proximity ≠ true possession, so credible pass stats ultimately need kick-event
 detection (a learned action model), not geometry alone.
 
+The same Metrica run drives the **event model** (`events.py`): on the 5-min
+window it surfaces per-player expected-threat added, progressive and
+final-third passes, and shots → xG, with the values differentiating players
+(e.g. one ball-progressor leads xT-added while another team registers the only
+shots and xG). These confirm the pipeline produces tactical metrics, not just
+movement — see the script's "Top creators" output.
+
 ## What this prototype is — and isn't
 
 It demonstrates the **complete data flow** of a capture-to-analytics product
@@ -241,7 +252,12 @@ with explainable, model-free defaults. It is **not** production-grade:
    top-down model (this prototype). Next: learned pitch-keypoint detection.
 2. ✅ **YOLO detection backend** (this prototype). Next: fine-tuned ball model +
    ByteTrack + ReID for stable IDs through crossings.
-3. **Capture hardware** — fixed 4K panoramic rig, on-prem encoder, RTMP/SRT push.
-4. **Live, low-latency** — stream the virtual-camera output (LL-HLS/WebRTC).
-5. **Event model** — learned shot/goal/foul classifier + audio crowd-energy.
+3. ✅ **Event model** (`events.py`) — possession spells → passes valued by an
+   xT-style threat surface (progressive / final-third / xT-added), and
+   goal-mouth ball arrivals → shots valued by a distance/angle **xG** logistic.
+   The segmentation is rule-based on ball kinematics; the xG coefficients and
+   threat surface are documented literature priors (no labelled corpus here).
+   Next: a shot/goal/foul classifier trained on event-labelled footage.
+4. **Capture hardware** — fixed 4K panoramic rig, on-prem encoder, RTMP/SRT push.
+5. **Live, low-latency** — stream the virtual-camera output (LL-HLS/WebRTC).
 6. **Scale** — job queue, GPU autoscaling, per-club tenancy, storage/CDN.

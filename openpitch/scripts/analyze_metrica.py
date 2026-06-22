@@ -132,6 +132,11 @@ def main() -> int:
         print(f"  {name:5} dist {t['distance_km']:5} km  sprints {t['sprints']:3}  "
               f"passes {t['passes']:3}  acc {t['pass_accuracy']}%  "
               f"turnovers {t['turnovers']:3}  top {t['top_speed_ms']} m/s")
+    print("\nTeam event model (xT / progression / shots → xG):")
+    for name, t in ts.items():
+        print(f"  {name:5} xT {t['xt_added']:5}  progressive {t['progressive_passes']:3}  "
+              f"final-third {t['final_third_passes']:3}  shots {t['shots']:2}  "
+              f"xG {t['xg']}")
 
     print("\nTop movers (real players):")
     for p in players[:10]:
@@ -139,6 +144,13 @@ def main() -> int:
               f"{p['distance_m'] / 1000:.2f} km  top {p['top_speed_ms']} m/s  "
               f"avg {p['avg_speed_ms']}  sprints {p['sprints']}  "
               f"passes {p['passes']} ({p['pass_accuracy']}%)")
+
+    print("\nTop creators (by expected threat added):")
+    for p in sorted(players, key=lambda r: r["xt_added"], reverse=True)[:8]:
+        print(f"  {p['team'][:4]:4} #{str(p['jersey']):<3} "
+              f"xT {p['xt_added']:+.3f}  progressive {p['progressive_passes']}  "
+              f"final-third {p['final_third_passes']}  shots {p['shots']}  "
+              f"xG {p['xg']}")
     return 0
 
 

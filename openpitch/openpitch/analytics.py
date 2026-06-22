@@ -19,6 +19,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from . import events
 from .config import PITCH_LENGTH_M, PITCH_WIDTH_M, Config
 from .track import FrameState
 
@@ -64,6 +65,11 @@ class Analytics:
     _cand: tuple | None = None
     _cand_n: int = 0
     _confirmed: tuple | None = None
+    # Event-model inputs: ball positions in metres and confirmed possession
+    # spells (see events.py). Filled during update(), consumed lazily.
+    _ball_m: list[tuple[int, float, float]] = field(default_factory=list)
+    _spells: list[dict] = field(default_factory=list)
+    _event_cache: tuple | None = None
 
     def _pitch_pos(self, cx: float, cy: float) -> tuple[float, float, float, float]:
         """Return (X_m, Y_m, norm_x, norm_y) for a normalised image point."""
@@ -81,12 +87,13 @@ class Analytics:
             "frames": 0, "sprint_run": 0, "sprints": 0, "poss": 0,
             "touches": 0, "passes": 0, "completed": 0, "turnovers": 0,
             "zones": {"walk": 0.0, "jog": 0.0, "run": 0.0, "sprint": 0.0},
-            "numbers": {},
+            "numbers": {}, "sum_x": 0.0,
         })
 
     def update(self, state: FrameState) -> tuple[float, float]:
         """Ingest one frame; return cumulative possession (home, away) frames."""
         possessor = None
+        ball_m: tuple[float, float] | None = None
         if state.ball is not None and state.players:
             bx, by = state.ball
             nearest = min(state.players, key=lambda p: np.hypot(p.cx - bx, p.cy - by))
@@ -94,12 +101,16 @@ class Analytics:
                 possessor = nearest
                 self.possession_frames[nearest.team] += 1
             self.ball_path.append((bx, by))
+            bX, bY, _, _ = self._pitch_pos(bx, by)
+            ball_m = (bX, bY)
+            self._ball_m.append((state.frame, bX, bY))
 
         for p in state.players:
             X, Y, nx, ny = self._pitch_pos(p.cx, p.cy)
             self._positions[p.team].append((nx, ny))
             rec = self._rec(p.id, p.team)
             rec["frames"] += 1
+            rec["sum_x"] += X  # mean X drives attack-direction inference
             if p.number is not None:  # vote jersey numbers across frames
                 rec["numbers"][p.number] = rec["numbers"].get(p.number, 0) + 1
             if rec["last"] is not None:
@@ -143,6 +154,13 @@ class Analytics:
                         else:
                             prev["turnovers"] += 1
                 self._confirmed = (pid, team)
+                # Open a new spell for the event model: the ball's metric
+                # position when this player gained possession (fall back to the
+                # player's own position if the ball wasn't located this frame).
+                pos = ball_m or self._pitch_pos(possessor.cx, possessor.cy)[:2]
+                self._spells.append({
+                    "pid": pid, "team": team, "frame": state.frame, "start": pos,
+                })
 
         self._timeline.append(
             (state.frame, self.possession_frames[0], self.possession_frames[1])
@@ -196,6 +214,18 @@ class Analytics:
         cv2.circle(img, (262, 170), 40, (255, 255, 255), 1)
         cv2.imwrite(str(out_path), img)
 
+    def _events(self) -> tuple[dict, dict]:
+        """Per-track and per-team event aggregates (xT, shots, xG). Cached."""
+        if self._event_cache is None:
+            means: dict[int, dict[int, tuple[float, int]]] = {0: {}, 1: {}}
+            for pid, rec in self._player_paths.items():
+                f = rec["frames"]
+                if f:
+                    means[rec["team"]][pid] = (rec["sum_x"] / f, f)
+            self._event_cache = events.compute(
+                self._spells, self._ball_m, means, self.fps)
+        return self._event_cache
+
     def player_stats(self) -> list[dict]:
         """Per-player stats, re-identified by jersey number where available.
 
@@ -203,6 +233,7 @@ class Analytics:
         jersey number is a stable identity, so we merge fragments that share a
         (team, jersey). Fragments with no confident number stay separate.
         """
+        ev_by_pid, _ = self._events()
         groups: dict[tuple, dict] = {}
         for pid, rec in self._player_paths.items():
             numbers = rec.get("numbers") or {}
@@ -218,7 +249,9 @@ class Analytics:
                 "team": rec["team"], "jersey": jersey if key[0] != "trk" else None,
                 "dist": 0.0, "top": 0.0, "frames": 0, "sprints": 0, "poss": 0,
                 "touches": 0, "passes": 0, "completed": 0, "turnovers": 0,
-                "zones": {"walk": 0.0, "jog": 0.0, "run": 0.0, "sprint": 0.0}})
+                "zones": {"walk": 0.0, "jog": 0.0, "run": 0.0, "sprint": 0.0},
+                "xt_added": 0.0, "progressive": 0, "final_third": 0,
+                "shots": 0, "xg": 0.0})
             g["dist"] += rec["dist_m"]
             g["top"] = max(g["top"], rec["top_speed"])
             for k in ("frames", "sprints", "poss", "touches", "passes",
@@ -226,6 +259,12 @@ class Analytics:
                 g[k] += rec.get(k, 0)
             for z in g["zones"]:
                 g["zones"][z] += rec["zones"][z]
+            ev = ev_by_pid.get(pid)
+            if ev:
+                g["xt_added"] += ev["xt_added"]
+                g["xg"] += ev["xg"]
+                for k in ("progressive", "final_third", "shots"):
+                    g[k] += ev[k]
 
         have_jersey = any(g["jersey"] is not None for g in groups.values())
         rows = []
@@ -252,6 +291,11 @@ class Analytics:
                 "turnovers": g["turnovers"],
                 "possession_s": round(g["poss"] / self.fps, 1),
                 "zones_m": {z: round(v, 1) for z, v in g["zones"].items()},
+                "xt_added": round(g["xt_added"], 3),
+                "progressive_passes": g["progressive"],
+                "final_third_passes": g["final_third"],
+                "shots": g["shots"],
+                "xg": round(g["xg"], 3),
             })
         rows.sort(key=lambda r: r["distance_m"], reverse=True)
         return rows
@@ -271,6 +315,11 @@ class Analytics:
                 "pass_accuracy": round(100 * completed / attempts, 1) if attempts else None,
                 "turnovers": sum(r["turnovers"] for r in tr),
                 "top_speed_ms": round(max((r["top_speed_ms"] for r in tr), default=0), 2),
+                "xt_added": round(sum(r["xt_added"] for r in tr), 2),
+                "progressive_passes": sum(r["progressive_passes"] for r in tr),
+                "final_third_passes": sum(r["final_third_passes"] for r in tr),
+                "shots": sum(r["shots"] for r in tr),
+                "xg": round(sum(r["xg"] for r in tr), 2),
             }
         return out
 
