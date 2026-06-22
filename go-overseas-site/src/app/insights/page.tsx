@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Container, Eyebrow } from "@/components/ui";
 import { NewsletterForm } from "@/components/NewsletterForm";
+import { BrandBackdrop } from "@/components/BrandGraphics";
 import { getAllPosts, formatDate } from "@/lib/posts";
 
 export const metadata: Metadata = {
@@ -18,7 +19,7 @@ export default function InsightsPage() {
   return (
     <>
       <section className="relative overflow-hidden border-b border-line">
-        <div className="absolute inset-0 bg-grid opacity-60" />
+        <BrandBackdrop />
         <Container className="relative py-20 sm:py-28">
           <Eyebrow>Insights</Eyebrow>
           <h1 className="mt-6 max-w-3xl font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">

@@ -83,6 +83,33 @@ body {
   animation: float-slow 9s ease-in-out infinite;
 }
 
+/* Brand graphic-language motion: dynamic circles, flow lines, sparkles */
+@keyframes spin-slow { to { transform: rotate(360deg) } }
+.animate-spin-slow { animation: spin-slow 44s linear infinite; }
+.animate-spin-slow-rev { animation: spin-slow 60s linear infinite reverse; }
+
+@keyframes drift {
+  0%, 100% { transform: translateX(0) }
+  50% { transform: translateX(22px) }
+}
+.animate-drift { animation: drift 16s ease-in-out infinite; }
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.85) }
+  50% { opacity: 1; transform: scale(1.1) }
+}
+.animate-twinkle { animation: twinkle 4.5s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin-slow,
+  .animate-spin-slow-rev,
+  .animate-drift,
+  .animate-twinkle,
+  .animate-float-slow {
+    animation: none;
+  }
+}
+
 /* Article prose (rendered from markdown) */
 .prose-go {
   color: #d4dae6;

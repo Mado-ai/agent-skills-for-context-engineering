@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Container, Section, Button, Eyebrow, Card } from "@/components/ui";
+import { BrandBackdrop } from "@/components/BrandGraphics";
 
 export const metadata: Metadata = {
   title: "Work — Cross-Border Growth Case Studies",
@@ -51,7 +52,7 @@ export default function WorkPage() {
   return (
     <>
       <section className="relative overflow-hidden border-b border-line">
-        <div className="absolute inset-0 bg-grid opacity-60" />
+        <BrandBackdrop />
         <Container className="relative py-20 sm:py-28">
           <Eyebrow>Work</Eyebrow>
           <h1 className="mt-6 max-w-3xl font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">

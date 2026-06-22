@@ -3,8 +3,58 @@ import Link from "next/link";
 import { Container, Section, Button, Eyebrow, Card } from "@/components/ui";
 import { LogoMark } from "@/components/Logo";
 import { JsonLd } from "@/components/JsonLd";
+import { BrandBackdrop, DynamicRings, Sparkle, GrowthArrow } from "@/components/BrandGraphics";
 import { services, stats, process, sectors } from "@/lib/site";
 import { professionalServiceSchema } from "@/lib/seo";
+
+const pillars = [
+  {
+    tag: "Strategy",
+    word: "Think.",
+    body: "Research. Planning. Positioning. Expansion.",
+    color: "text-blue",
+    chip: "bg-blue/10",
+    border: "border-blue/20",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-6 w-6">
+        <circle cx="12" cy="12" r="9" />
+        <circle cx="12" cy="12" r="5" />
+        <circle cx="12" cy="12" r="1.6" fill="currentColor" />
+      </svg>
+    ),
+  },
+  {
+    tag: "Creativity",
+    word: "Create.",
+    body: "Branding. Design. Content. Experiences.",
+    color: "text-purple",
+    chip: "bg-purple/10",
+    border: "border-purple/20",
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-6 w-6"
+      >
+        <path d="M12 19l7-7-4-4-7 7v4h4z" />
+        <path d="M14 6l4 4" />
+      </svg>
+    ),
+  },
+  {
+    tag: "Growth",
+    word: "Grow.",
+    body: "Marketing. Sales. Development. Scale.",
+    color: "text-green",
+    chip: "bg-green/10",
+    border: "border-green/20",
+    icon: <GrowthArrow className="h-6 w-6" />,
+  },
+];
 
 export const metadata: Metadata = {
   description:
@@ -18,9 +68,7 @@ export default function HomePage() {
       <JsonLd data={professionalServiceSchema()} />
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-line">
-        <div className="absolute inset-0 bg-grid opacity-70" />
-        <div className="pointer-events-none absolute -right-40 -top-40 h-[34rem] w-[34rem] rounded-full bg-blue/20 blur-[120px]" />
-        <div className="pointer-events-none absolute -bottom-52 -left-40 h-[30rem] w-[30rem] rounded-full bg-green/15 blur-[120px]" />
+        <BrandBackdrop />
 
         <Container className="relative grid items-center gap-12 py-24 sm:py-32 lg:grid-cols-[1.15fr_0.85fr]">
           <div>
@@ -50,8 +98,10 @@ export default function HomePage() {
           </div>
 
           <div className="relative hidden lg:block">
+            <DynamicRings className="pointer-events-none absolute inset-0 m-auto h-[27rem] w-[27rem] text-blue/25 animate-spin-slow-rev" />
             <div className="relative mx-auto flex aspect-square max-w-sm items-center justify-center rounded-[2rem] border border-line bg-ink-800/50 glow">
-              <div className="animate-float-slow">
+              <Sparkle className="pointer-events-none absolute right-6 top-6 h-5 w-5 text-purple animate-twinkle" />
+              <div className="animate-float-slow text-white">
                 <LogoMark size={180} />
               </div>
               <div className="absolute bottom-6 left-6 right-6 rounded-2xl border border-line bg-ink-900/80 p-4 backdrop-blur">
@@ -72,6 +122,42 @@ export default function HomePage() {
               <div className="mt-2 text-sm text-mist-dim">{s.label}</div>
             </div>
           ))}
+        </Container>
+      </section>
+
+      {/* Pillars — Think · Create · Grow */}
+      <section className="relative overflow-hidden border-b border-line">
+        <GrowthArrow className="pointer-events-none absolute -right-6 top-10 h-40 w-40 text-green/10" />
+        <Container className="relative py-20 sm:py-28">
+          <div className="text-center">
+            <Eyebrow>Our pillars</Eyebrow>
+            <h2 className="mx-auto mt-5 max-w-2xl font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+              <span className="text-blue">Strategy.</span>{" "}
+              <span className="text-purple">Creativity.</span>{" "}
+              <span className="text-green">Growth.</span>
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-mist">
+              Three disciplines, one system — how we turn international ambition into
+              measurable market presence.
+            </p>
+          </div>
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {pillars.map((p) => (
+              <div
+                key={p.tag}
+                className={`relative overflow-hidden rounded-[var(--radius-card)] border ${p.border} bg-ink-800/40 p-8`}
+              >
+                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${p.chip} ${p.color}`}>
+                  {p.icon}
+                </div>
+                <p className={`mt-6 font-display text-3xl font-semibold ${p.color}`}>{p.word}</p>
+                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-mist-dim">
+                  {p.tag}
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-mist">{p.body}</p>
+              </div>
+            ))}
+          </div>
         </Container>
       </section>
 
@@ -155,8 +241,11 @@ export default function HomePage() {
       {/* CTA */}
       <section className="border-t border-line">
         <Container className="py-20 sm:py-28">
-          <div className="relative overflow-hidden rounded-[2rem] border border-line bg-gradient-to-br from-blue/15 via-ink-800 to-green/10 p-10 sm:p-16">
-            <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-cyan/20 blur-[100px]" />
+          <div className="relative overflow-hidden rounded-[2rem] border border-line bg-gradient-to-br from-blue/15 via-ink-800 to-purple/10 p-10 sm:p-16">
+            <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-blue/20 blur-[100px]" />
+            <DynamicRings className="pointer-events-none absolute -bottom-16 -right-10 h-64 w-64 text-blue/20 animate-spin-slow" />
+            <Sparkle className="pointer-events-none absolute left-[6%] top-[18%] h-5 w-5 text-green animate-twinkle" />
+            <Sparkle className="pointer-events-none absolute right-[20%] top-[24%] h-4 w-4 text-purple animate-twinkle [animation-delay:2s]" />
             <div className="relative max-w-2xl">
               <h2 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
                 Ready to go overseas?

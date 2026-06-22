@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Container, Eyebrow } from "@/components/ui";
 import { ContactForm } from "@/components/ContactForm";
+import { BrandBackdrop } from "@/components/BrandGraphics";
 
 export const metadata: Metadata = {
   title: "Contact — Start a Conversation",
@@ -18,7 +19,7 @@ const details = [
 export default function ContactPage() {
   return (
     <section className="relative overflow-hidden">
-      <div className="pointer-events-none absolute -left-32 top-0 h-96 w-96 rounded-full bg-blue/15 blur-[120px]" />
+      <BrandBackdrop />
       <Container className="relative grid gap-14 py-20 sm:py-28 lg:grid-cols-[0.9fr_1.1fr]">
         <div>
           <Eyebrow>Contact</Eyebrow>
