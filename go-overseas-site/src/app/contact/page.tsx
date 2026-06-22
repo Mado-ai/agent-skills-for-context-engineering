@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Container, Eyebrow } from "@/components/ui";
 import { ContactForm } from "@/components/ContactForm";
-import { BrandBackdrop } from "@/components/BrandGraphics";
+import { BrandBackdrop, LoopSquiggle, Sparkle } from "@/components/BrandGraphics";
 
 export const metadata: Metadata = {
   title: "Contact — Start a Conversation",
@@ -11,9 +11,9 @@ export const metadata: Metadata = {
 };
 
 const details = [
-  { label: "Email", value: "hello@gooverseas.com" },
-  { label: "Response time", value: "Within 1 business day" },
-  { label: "Based in", value: "Mississauga · Toronto" },
+  { label: "Email", value: "hello@gooverseas.com", dot: "bg-blue" },
+  { label: "Response time", value: "Within 1 business day", dot: "bg-purple" },
+  { label: "Based in", value: "Mississauga · Toronto", dot: "bg-green" },
 ];
 
 export default function ContactPage() {
@@ -26,6 +26,7 @@ export default function ContactPage() {
           <h1 className="mt-6 font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
             Tell us where you want to grow.
           </h1>
+          <LoopSquiggle className="mt-4 h-7 w-28 text-lime" />
           <p className="mt-5 max-w-md text-lg text-mist">
             Whether you have a fully-formed brief or just the seed of an idea,
             we&apos;d like to hear it. No hard sell — just a useful conversation.
@@ -34,7 +35,8 @@ export default function ContactPage() {
           <dl className="mt-10 space-y-5">
             {details.map((d) => (
               <div key={d.label}>
-                <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-mist-dim">
+                <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-mist-dim">
+                  <span className={`h-1.5 w-1.5 rounded-full ${d.dot}`} />
                   {d.label}
                 </dt>
                 <dd className="mt-1 text-base text-white">{d.value}</dd>
@@ -43,7 +45,8 @@ export default function ContactPage() {
           </dl>
         </div>
 
-        <div className="rounded-[var(--radius-card)] border border-line bg-ink-800/50 p-7 sm:p-9">
+        <div className="relative rounded-[var(--radius-card)] border border-line bg-ink-800/50 p-7 sm:p-9">
+          <Sparkle className="pointer-events-none absolute -right-3 -top-3 h-6 w-6 text-pink animate-twinkle" />
           <ContactForm />
         </div>
       </Container>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Container, Section, Button, Eyebrow } from "@/components/ui";
+import { Counter } from "@/components/Counter";
+import { CtaBanner } from "@/components/CtaBanner";
 import { ServiceCard } from "@/components/ServiceCard";
 import { LogoMark } from "@/components/Logo";
 import { JsonLd } from "@/components/JsonLd";
@@ -135,7 +136,7 @@ export default function HomePage() {
                   ["text-blue", "text-green", "text-purple", "text-pink"][i % 4]
                 }`}
               >
-                {s.value}
+                <Counter value={s.value} />
               </div>
               <div className="mt-2 text-sm text-mist-dim">{s.label}</div>
             </div>
@@ -246,48 +247,35 @@ export default function HomePage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            {sectors.map((sector) => (
-              <span
-                key={sector}
-                className="rounded-full border border-line bg-ink-800/60 px-5 py-2.5 text-sm text-mist"
-              >
-                {sector}
-              </span>
-            ))}
+            {sectors.map((sector, i) => {
+              const c = [
+                { border: "border-blue/40", dot: "bg-blue" },
+                { border: "border-green/40", dot: "bg-green" },
+                { border: "border-purple/40", dot: "bg-purple" },
+                { border: "border-pink/40", dot: "bg-pink" },
+                { border: "border-cyan/40", dot: "bg-cyan" },
+                { border: "border-lime/40", dot: "bg-lime" },
+              ][i % 6];
+              return (
+                <span
+                  key={sector}
+                  className={`inline-flex items-center gap-2.5 rounded-full border ${c.border} bg-ink-800/60 px-5 py-2.5 text-sm text-mist transition-colors hover:bg-ink-800`}
+                >
+                  <span className={`h-1.5 w-1.5 rounded-full ${c.dot}`} />
+                  {sector}
+                </span>
+              );
+            })}
           </div>
         </div>
       </Section>
 
-      {/* CTA */}
-      <section className="border-t border-line">
-        <Container className="py-20 sm:py-28">
-          <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-blue via-purple to-pink p-10 sm:p-16">
-            <Sparkle className="pointer-events-none absolute -right-12 -top-12 h-60 w-60 text-white/15 animate-spin-slow" />
-            <Sparkle className="pointer-events-none absolute right-[26%] bottom-8 h-7 w-7 text-white/80 animate-twinkle" />
-            <LoopSquiggle className="pointer-events-none absolute bottom-6 left-6 h-12 w-32 text-white/40" />
-            <div className="relative max-w-2xl">
-              <h2 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                Ready to grow your brand?
-              </h2>
-              <p className="mt-4 text-lg text-white/90">
-                Tell us what you&apos;re building. We&apos;ll show you how we&apos;d bring the
-                strategy, creativity, and growth to make it happen.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Magnetic>
-                  <Button href="/contact">Start a conversation</Button>
-                </Magnetic>
-                <Link
-                  href="/work"
-                  className="inline-flex items-center px-2 py-3 text-sm font-semibold text-white/85 hover:text-white"
-                >
-                  See our work →
-                </Link>
-              </div>
-            </div>
-          </div>
-        </Container>
-      </section>
+      <CtaBanner
+        title="Ready to grow your brand?"
+        body="Tell us what you're building. We'll show you how we'd bring the strategy, creativity, and growth to make it happen."
+        secondaryHref="/work"
+        secondaryLabel="See our work"
+      />
     </>
   );
 }

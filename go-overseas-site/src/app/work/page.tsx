@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
-import { Container, Section, Button, Eyebrow, Card } from "@/components/ui";
+import { Container, Section, Eyebrow, Card } from "@/components/ui";
 import { BrandBackdrop } from "@/components/BrandGraphics";
+import { Counter } from "@/components/Counter";
+import { CtaBanner } from "@/components/CtaBanner";
 
 export const metadata: Metadata = {
   title: "Work — Selected Projects & Case Studies",
@@ -12,6 +14,8 @@ export const metadata: Metadata = {
 const caseStudies = [
   {
     client: "D2C skincare brand",
+    accent: "text-blue",
+    bar: "bg-blue",
     sector: "Retail & E-commerce",
     services: "Brand · Web · Ads",
     headline: "A rebrand that doubled online conversion",
@@ -24,6 +28,8 @@ const caseStudies = [
   },
   {
     client: "Restaurant group",
+    accent: "text-pink",
+    bar: "bg-pink",
     sector: "Hospitality & Food",
     services: "Brand · PR · Events",
     headline: "From quiet opening to fully booked",
@@ -36,6 +42,8 @@ const caseStudies = [
   },
   {
     client: "B2B services firm",
+    accent: "text-purple",
+    bar: "bg-purple",
     sector: "Professional Services",
     services: "Automation · CRM · Reporting",
     headline: "Automation that freed 20 hours a week",
@@ -68,6 +76,7 @@ export default function WorkPage() {
       <Section className="space-y-6">
         {caseStudies.map((cs) => (
           <Card key={cs.client} className="overflow-hidden p-0">
+            <span className={`block h-1 w-full ${cs.bar}`} />
             <div className="grid gap-8 p-8 lg:grid-cols-[1.3fr_1fr] lg:p-10">
               <div>
                 <div className="flex flex-wrap gap-2 text-xs">
@@ -81,7 +90,10 @@ export default function WorkPage() {
               <div className="grid grid-cols-3 gap-px self-center overflow-hidden rounded-2xl border border-line lg:grid-cols-1">
                 {cs.metrics.map((m) => (
                   <div key={m.label} className="bg-ink-900 p-5 text-center lg:text-left">
-                    <div className="font-display text-2xl font-semibold text-gradient">{m.value}</div>
+                    <Counter
+                      value={m.value}
+                      className={`font-display text-2xl font-semibold ${cs.accent}`}
+                    />
                     <div className="mt-1 text-xs text-mist-dim">{m.label}</div>
                   </div>
                 ))}
@@ -91,16 +103,12 @@ export default function WorkPage() {
         ))}
       </Section>
 
-      <section className="border-t border-line">
-        <Container className="py-20 text-center sm:py-28">
-          <h2 className="mx-auto max-w-2xl font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-            Your brand could be next.
-          </h2>
-          <div className="mt-8 flex justify-center">
-            <Button href="/contact">Start a conversation</Button>
-          </div>
-        </Container>
-      </section>
+      <CtaBanner
+        title="Your brand could be next."
+        body="Tell us where you want to grow. We'll show you how we'd get you there — brand, web, ads, and automation."
+        secondaryHref="/services"
+        secondaryLabel="Explore services"
+      />
     </>
   );
 }
