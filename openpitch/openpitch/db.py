@@ -1,363 +1,197 @@
-"""SQLite persistence for users and analysis jobs.
+"""Persistence layer — SQLAlchemy Core, portable across SQLite and Postgres.
 
-Replaces the original in-memory job registry so accounts and job history
-survive restarts. Single-file SQLite with a process-wide lock — adequate for
-a self-hosted prototype; move to Postgres + object storage to scale.
+The engine is driven by ``DATABASE_URL``:
+
+* unset  -> ``sqlite:///<PLAYMETRICS_DB>`` (default, dev)
+* prod   -> ``postgresql+psycopg://user:pass@host/db``
+
+Schema is defined as SQLAlchemy ``Table`` metadata (dialect-correct DDL).
+``init_db()`` create-alls for dev; Alembic owns migrations in production
+(``alembic upgrade head``). Every function returns plain dicts / ids so the
+API and profile layers are storage-agnostic.
 """
 
 from __future__ import annotations
 
 import json
-import sqlite3
-import threading
+import os
 import time
 from pathlib import Path
 
+from sqlalchemy import (
+    Column, Float, Integer, MetaData, Table, Text, UniqueConstraint,
+    create_engine, delete, select, text,
+)
+
 ROOT = Path(__file__).resolve().parent.parent
-DB_PATH = Path(__import__("os").environ.get("PLAYMETRICS_DB", ROOT / "playmetrics.db"))
+_DEFAULT_SQLITE = f"sqlite:///{os.environ.get('PLAYMETRICS_DB', ROOT / 'playmetrics.db')}"
+DATABASE_URL = os.environ.get("DATABASE_URL", _DEFAULT_SQLITE)
 
-_lock = threading.Lock()
-_conn: sqlite3.Connection | None = None
+_connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+_engine = create_engine(DATABASE_URL, future=True, connect_args=_connect_args)
 
+metadata = MetaData()
 
-def _connect() -> sqlite3.Connection:
-    global _conn
-    if _conn is None:
-        _conn = sqlite3.connect(str(DB_PATH), check_same_thread=False)
-        _conn.row_factory = sqlite3.Row
-    return _conn
+users = Table(
+    "users", metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("email", Text, unique=True, nullable=False),
+    Column("password_hash", Text, nullable=False),
+    Column("is_admin", Integer, default=0),
+    Column("created_at", Float, nullable=False),
+)
+jobs = Table(
+    "jobs", metadata,
+    Column("id", Text, primary_key=True),
+    Column("user_id", Integer, nullable=False),
+    Column("input_name", Text),
+    Column("detector", Text),
+    Column("status", Text, nullable=False),
+    Column("progress", Float, default=0),
+    Column("message", Text),
+    Column("summary", Text),
+    Column("source", Text, default="upload"),
+    Column("site_id", Text),
+    Column("created_at", Float, nullable=False),
+)
+sites = Table(
+    "sites", metadata,
+    Column("id", Text, primary_key=True),
+    Column("user_id", Integer, nullable=False),
+    Column("name", Text, nullable=False),
+    Column("package", Text, nullable=False),
+    Column("created_at", Float, nullable=False),
+)
+devices = Table(
+    "devices", metadata,
+    Column("id", Text, primary_key=True),
+    Column("site_id", Text, nullable=False),
+    Column("kind", Text, nullable=False),
+    Column("name", Text, nullable=False),
+    Column("key_hash", Text, nullable=False),
+    Column("last_seen", Float),
+    Column("created_at", Float, nullable=False),
+)
+ingest_keys = Table(
+    "ingest_keys", metadata,
+    Column("idempotency_key", Text, primary_key=True),
+    Column("job_id", Text, nullable=False),
+)
+audit_log = Table(
+    "audit_log", metadata,
+    Column("id", Text, primary_key=True),
+    Column("user_id", Integer),
+    Column("action", Text, nullable=False),
+    Column("target_type", Text),
+    Column("target_id", Text),
+    Column("detail", Text),
+    Column("created_at", Float, nullable=False),
+)
+teams = Table(
+    "teams", metadata,
+    Column("id", Text, primary_key=True),
+    Column("user_id", Integer, nullable=False),
+    Column("org_id", Text),
+    Column("name", Text, nullable=False),
+    Column("public_token", Text),
+    Column("created_at", Float, nullable=False),
+)
+organizations = Table(
+    "organizations", metadata,
+    Column("id", Text, primary_key=True),
+    Column("name", Text, nullable=False),
+    Column("created_at", Float, nullable=False),
+)
+memberships = Table(
+    "memberships", metadata,
+    Column("id", Text, primary_key=True),
+    Column("org_id", Text, nullable=False),
+    Column("user_id", Integer, nullable=False),
+    Column("role", Text, nullable=False),
+    Column("player_id", Text),
+    Column("created_at", Float, nullable=False),
+    UniqueConstraint("org_id", "user_id", name="uq_member_org_user"),
+)
+players = Table(
+    "players", metadata,
+    Column("id", Text, primary_key=True),
+    Column("team_id", Text, nullable=False),
+    Column("name", Text, nullable=False),
+    Column("position", Text),
+    Column("jersey", Integer),
+    Column("public_token", Text),
+    Column("is_minor", Integer, default=1),
+    Column("guardian_consent_at", Float),
+    Column("guardian_consent_by", Integer),
+    Column("created_at", Float, nullable=False),
+)
+matches = Table(
+    "matches", metadata,
+    Column("id", Text, primary_key=True),
+    Column("user_id", Integer, nullable=False),
+    Column("team_id", Text, nullable=False),
+    Column("job_id", Text),
+    Column("field_type", Integer, nullable=False),
+    Column("opponent", Text),
+    Column("played_on", Text),
+    Column("home_score", Integer),
+    Column("away_score", Integer),
+    Column("summary", Text),
+    Column("created_at", Float, nullable=False),
+)
+player_match_stats = Table(
+    "player_match_stats", metadata,
+    Column("id", Text, primary_key=True),
+    Column("match_id", Text, nullable=False),
+    Column("player_id", Text, nullable=False),
+    Column("minutes", Integer, default=0),
+    Column("distance_m", Float, default=0),
+    Column("top_speed_ms", Float, default=0),
+    Column("goals", Integer, default=0),
+    Column("assists", Integer, default=0),
+)
 
 
 def init_db() -> None:
-    with _lock:
-        c = _connect()
-        c.executescript(
-            """
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                is_admin INTEGER DEFAULT 0,
-                created_at REAL NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS jobs (
-                id TEXT PRIMARY KEY,
-                user_id INTEGER NOT NULL,
-                input_name TEXT,
-                detector TEXT,
-                status TEXT NOT NULL,
-                progress REAL DEFAULT 0,
-                message TEXT,
-                summary TEXT,
-                source TEXT DEFAULT 'upload',
-                site_id TEXT,
-                created_at REAL NOT NULL,
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            );
-            -- Capture sites (a club/academy pitch deployment) and their devices.
-            CREATE TABLE IF NOT EXISTS sites (
-                id TEXT PRIMARY KEY,
-                user_id INTEGER NOT NULL,
-                name TEXT NOT NULL,
-                package TEXT NOT NULL,
-                created_at REAL NOT NULL,
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            );
-            CREATE TABLE IF NOT EXISTS devices (
-                id TEXT PRIMARY KEY,
-                site_id TEXT NOT NULL,
-                kind TEXT NOT NULL,
-                name TEXT NOT NULL,
-                key_hash TEXT NOT NULL,
-                last_seen REAL,
-                created_at REAL NOT NULL,
-                FOREIGN KEY (site_id) REFERENCES sites(id)
-            );
-            CREATE TABLE IF NOT EXISTS ingest_keys (
-                idempotency_key TEXT PRIMARY KEY,
-                job_id TEXT NOT NULL
-            );
-            -- Audit trail: every access to player/minor data (child-safety §6).
-            CREATE TABLE IF NOT EXISTS audit_log (
-                id TEXT PRIMARY KEY,
-                user_id INTEGER,
-                action TEXT NOT NULL,
-                target_type TEXT,
-                target_id TEXT,
-                detail TEXT,
-                created_at REAL NOT NULL
-            );
-            -- Profiles: teams, players, matches (by field type), per-player stats.
-            CREATE TABLE IF NOT EXISTS teams (
-                id TEXT PRIMARY KEY,
-                user_id INTEGER NOT NULL,
-                org_id TEXT,
-                name TEXT NOT NULL,
-                public_token TEXT,
-                created_at REAL NOT NULL
-            );
-            -- Organizations + role-based memberships (the authz layer).
-            CREATE TABLE IF NOT EXISTS organizations (
-                id TEXT PRIMARY KEY,
-                name TEXT NOT NULL,
-                created_at REAL NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS memberships (
-                id TEXT PRIMARY KEY,
-                org_id TEXT NOT NULL,
-                user_id INTEGER NOT NULL,
-                role TEXT NOT NULL,
-                player_id TEXT,
-                created_at REAL NOT NULL,
-                UNIQUE (org_id, user_id)
-            );
-            CREATE TABLE IF NOT EXISTS players (
-                id TEXT PRIMARY KEY,
-                team_id TEXT NOT NULL,
-                name TEXT NOT NULL,
-                position TEXT,
-                jersey INTEGER,
-                public_token TEXT,
-                is_minor INTEGER DEFAULT 1,
-                guardian_consent_at REAL,
-                guardian_consent_by INTEGER,
-                created_at REAL NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS matches (
-                id TEXT PRIMARY KEY,
-                user_id INTEGER NOT NULL,
-                team_id TEXT NOT NULL,
-                job_id TEXT,
-                field_type INTEGER NOT NULL,
-                opponent TEXT,
-                played_on TEXT,
-                home_score INTEGER,
-                away_score INTEGER,
-                summary TEXT,
-                created_at REAL NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS player_match_stats (
-                id TEXT PRIMARY KEY,
-                match_id TEXT NOT NULL,
-                player_id TEXT NOT NULL,
-                minutes INTEGER DEFAULT 0,
-                distance_m REAL DEFAULT 0,
-                top_speed_ms REAL DEFAULT 0,
-                goals INTEGER DEFAULT 0,
-                assists INTEGER DEFAULT 0
-            );
-            """
-        )
-        # Migrate older DBs that predate the jobs.source / jobs.site_id columns.
-        cols = {r["name"] for r in c.execute("PRAGMA table_info(jobs)")}
-        if "source" not in cols:
-            c.execute("ALTER TABLE jobs ADD COLUMN source TEXT DEFAULT 'upload'")
-        if "site_id" not in cols:
-            c.execute("ALTER TABLE jobs ADD COLUMN site_id TEXT")
-        team_cols = {r["name"] for r in c.execute("PRAGMA table_info(teams)")}
-        if "org_id" not in team_cols:
-            c.execute("ALTER TABLE teams ADD COLUMN org_id TEXT")
-        player_cols = {r["name"] for r in c.execute("PRAGMA table_info(players)")}
-        for col, ddl in (("is_minor", "is_minor INTEGER DEFAULT 1"),
-                         ("guardian_consent_at", "guardian_consent_at REAL"),
-                         ("guardian_consent_by", "guardian_consent_by INTEGER")):
-            if col not in player_cols:
-                c.execute(f"ALTER TABLE players ADD COLUMN {ddl}")
-        c.commit()
+    metadata.create_all(_engine)
+
+
+# --- helpers ----------------------------------------------------------------
+
+def _rows(conn, stmt, params=None) -> list[dict]:
+    return [dict(r) for r in conn.execute(stmt, params or {}).mappings().all()]
+
+
+def _row(conn, stmt, params=None) -> dict | None:
+    r = conn.execute(stmt, params or {}).mappings().first()
+    return dict(r) if r else None
 
 
 # --- users ------------------------------------------------------------------
 
 def create_user(email: str, password_hash: str, is_admin: bool = False) -> dict:
-    with _lock:
-        c = _connect()
-        cur = c.execute(
-            "INSERT INTO users (email, password_hash, is_admin, created_at) "
-            "VALUES (?,?,?,?)",
-            (email.lower(), password_hash, int(is_admin), time.time()),
-        )
-        c.commit()
-        return {"id": cur.lastrowid, "email": email.lower(), "is_admin": is_admin}
+    with _engine.begin() as c:
+        res = c.execute(users.insert().values(
+            email=email.lower(), password_hash=password_hash,
+            is_admin=int(is_admin), created_at=time.time()))
+        return {"id": res.inserted_primary_key[0], "email": email.lower(),
+                "is_admin": is_admin}
 
 
-def get_user_by_email(email: str) -> sqlite3.Row | None:
-    return _connect().execute(
-        "SELECT * FROM users WHERE email = ?", (email.lower(),)
-    ).fetchone()
+def get_user_by_email(email: str) -> dict | None:
+    with _engine.connect() as c:
+        return _row(c, select(users).where(users.c.email == email.lower()))
 
 
-def get_user_by_id(user_id: int) -> sqlite3.Row | None:
-    return _connect().execute(
-        "SELECT * FROM users WHERE id = ?", (user_id,)
-    ).fetchone()
+def get_user_by_id(user_id: int) -> dict | None:
+    with _engine.connect() as c:
+        return _row(c, select(users).where(users.c.id == user_id))
 
 
 def set_password(user_id: int, password_hash: str) -> None:
-    with _lock:
-        c = _connect()
-        c.execute("UPDATE users SET password_hash = ? WHERE id = ?",
-                  (password_hash, user_id))
-        c.commit()
-
-
-# --- jobs -------------------------------------------------------------------
-
-def create_job(
-    job_id: str,
-    user_id: int,
-    input_name: str,
-    detector: str,
-    source: str = "upload",
-    site_id: str | None = None,
-) -> None:
-    with _lock:
-        c = _connect()
-        c.execute(
-            "INSERT INTO jobs (id, user_id, input_name, detector, status, "
-            "progress, message, source, site_id, created_at) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?)",
-            (job_id, user_id, input_name, detector, "queued", 0.0, "queued",
-             source, site_id, time.time()),
-        )
-        c.commit()
-
-
-def update_job(job_id: str, **fields) -> None:
-    if "summary" in fields and not isinstance(fields["summary"], str):
-        fields["summary"] = json.dumps(fields["summary"])
-    cols = ", ".join(f"{k} = ?" for k in fields)
-    with _lock:
-        c = _connect()
-        c.execute(f"UPDATE jobs SET {cols} WHERE id = ?",
-                  (*fields.values(), job_id))
-        c.commit()
-
-
-def _job_to_dict(row: sqlite3.Row) -> dict:
-    d = dict(row)
-    if d.get("summary"):
-        d["summary"] = json.loads(d["summary"])
-    return d
-
-
-def get_job(job_id: str) -> dict | None:
-    row = _connect().execute("SELECT * FROM jobs WHERE id = ?", (job_id,)).fetchone()
-    return _job_to_dict(row) if row else None
-
-
-def list_jobs_for_user(user_id: int) -> list[dict]:
-    rows = _connect().execute(
-        "SELECT id, input_name, detector, status, progress, message, created_at "
-        "FROM jobs WHERE user_id = ? ORDER BY created_at DESC",
-        (user_id,),
-    ).fetchall()
-    return [dict(r) for r in rows]
-
-
-def rename_job(job_id: str, name: str) -> None:
-    with _lock:
-        c = _connect()
-        c.execute("UPDATE jobs SET input_name = ? WHERE id = ?", (name, job_id))
-        c.commit()
-
-
-def delete_job(job_id: str) -> None:
-    with _lock:
-        c = _connect()
-        c.execute("DELETE FROM jobs WHERE id = ?", (job_id,))
-        c.commit()
-
-
-# --- sites & devices (capture-site registry) --------------------------------
-
-def create_site(site_id: str, user_id: int, name: str, package: str) -> dict:
-    with _lock:
-        c = _connect()
-        c.execute(
-            "INSERT INTO sites (id, user_id, name, package, created_at) "
-            "VALUES (?,?,?,?,?)",
-            (site_id, user_id, name, package, time.time()),
-        )
-        c.commit()
-    return {"id": site_id, "name": name, "package": package}
-
-
-def get_site(site_id: str) -> sqlite3.Row | None:
-    return _connect().execute("SELECT * FROM sites WHERE id = ?", (site_id,)).fetchone()
-
-
-def list_sites(user_id: int) -> list[dict]:
-    rows = _connect().execute(
-        "SELECT s.*, "
-        "(SELECT COUNT(*) FROM devices d WHERE d.site_id = s.id) AS device_count "
-        "FROM sites s WHERE s.user_id = ? ORDER BY s.created_at DESC",
-        (user_id,),
-    ).fetchall()
-    return [dict(r) for r in rows]
-
-
-def create_device(device_id: str, site_id: str, kind: str, name: str,
-                  key_hash: str) -> None:
-    with _lock:
-        c = _connect()
-        c.execute(
-            "INSERT INTO devices (id, site_id, kind, name, key_hash, created_at) "
-            "VALUES (?,?,?,?,?,?)",
-            (device_id, site_id, kind, name, key_hash, time.time()),
-        )
-        c.commit()
-
-
-def list_devices(site_id: str) -> list[dict]:
-    rows = _connect().execute(
-        "SELECT id, site_id, kind, name, last_seen, created_at "
-        "FROM devices WHERE site_id = ? ORDER BY created_at",
-        (site_id,),
-    ).fetchall()
-    return [dict(r) for r in rows]
-
-
-def get_device_by_key_hash(key_hash: str) -> sqlite3.Row | None:
-    return _connect().execute(
-        "SELECT * FROM devices WHERE key_hash = ?", (key_hash,)
-    ).fetchone()
-
-
-def list_jobs_for_site(site_id: str) -> list[dict]:
-    rows = _connect().execute(
-        "SELECT id, input_name, detector, status, progress, source, created_at "
-        "FROM jobs WHERE site_id = ? ORDER BY created_at DESC",
-        (site_id,),
-    ).fetchall()
-    return [dict(r) for r in rows]
-
-
-def touch_device(device_id: str) -> None:
-    with _lock:
-        c = _connect()
-        c.execute("UPDATE devices SET last_seen = ? WHERE id = ?",
-                  (time.time(), device_id))
-        c.commit()
-
-
-# --- ingest idempotency -----------------------------------------------------
-
-def get_ingest_job(idempotency_key: str) -> str | None:
-    row = _connect().execute(
-        "SELECT job_id FROM ingest_keys WHERE idempotency_key = ?",
-        (idempotency_key,),
-    ).fetchone()
-    return row["job_id"] if row else None
-
-
-def record_ingest_job(idempotency_key: str, job_id: str) -> None:
-    with _lock:
-        c = _connect()
-        c.execute(
-            "INSERT OR IGNORE INTO ingest_keys (idempotency_key, job_id) VALUES (?,?)",
-            (idempotency_key, job_id),
-        )
-        c.commit()
+    with _engine.begin() as c:
+        c.execute(users.update().where(users.c.id == user_id)
+                  .values(password_hash=password_hash))
 
 
 # --- audit log --------------------------------------------------------------
@@ -365,229 +199,338 @@ def record_ingest_job(idempotency_key: str, job_id: str) -> None:
 def add_audit(audit_id: str, user_id: int | None, action: str,
               target_type: str | None, target_id: str | None,
               detail: str | None = None) -> None:
-    with _lock:
-        c = _connect()
-        c.execute(
-            "INSERT INTO audit_log (id, user_id, action, target_type, target_id, "
-            "detail, created_at) VALUES (?,?,?,?,?,?,?)",
-            (audit_id, user_id, action, target_type, target_id, detail, time.time()),
-        )
-        c.commit()
+    with _engine.begin() as c:
+        c.execute(audit_log.insert().values(
+            id=audit_id, user_id=user_id, action=action, target_type=target_type,
+            target_id=target_id, detail=detail, created_at=time.time()))
 
 
 def list_audit_for_target(target_type: str, target_id: str, limit: int = 100) -> list[dict]:
-    rows = _connect().execute(
+    sql = text(
         "SELECT a.action, a.detail, a.created_at, u.email AS actor "
         "FROM audit_log a LEFT JOIN users u ON u.id = a.user_id "
-        "WHERE a.target_type = ? AND a.target_id = ? "
-        "ORDER BY a.created_at DESC LIMIT ?",
-        (target_type, target_id, limit),
-    ).fetchall()
-    return [dict(r) for r in rows]
+        "WHERE a.target_type = :tt AND a.target_id = :ti "
+        "ORDER BY a.created_at DESC LIMIT :lim")
+    with _engine.connect() as c:
+        return _rows(c, sql, {"tt": target_type, "ti": target_id, "lim": limit})
 
 
-def _exec(sql: str, params: tuple = ()) -> None:
-    with _lock:
-        c = _connect()
-        c.execute(sql, params)
-        c.commit()
+# --- jobs -------------------------------------------------------------------
+
+def create_job(job_id: str, user_id: int, input_name: str, detector: str,
+               source: str = "upload", site_id: str | None = None) -> None:
+    with _engine.begin() as c:
+        c.execute(jobs.insert().values(
+            id=job_id, user_id=user_id, input_name=input_name, detector=detector,
+            status="queued", progress=0.0, message="queued", source=source,
+            site_id=site_id, created_at=time.time()))
+
+
+def update_job(job_id: str, **fields) -> None:
+    if "summary" in fields and not isinstance(fields["summary"], str):
+        fields["summary"] = json.dumps(fields["summary"])
+    with _engine.begin() as c:
+        c.execute(jobs.update().where(jobs.c.id == job_id).values(**fields))
+
+
+def get_job(job_id: str) -> dict | None:
+    with _engine.connect() as c:
+        d = _row(c, select(jobs).where(jobs.c.id == job_id))
+    if d and d.get("summary"):
+        d["summary"] = json.loads(d["summary"])
+    return d
+
+
+def list_jobs_for_user(user_id: int) -> list[dict]:
+    cols = (jobs.c.id, jobs.c.input_name, jobs.c.detector, jobs.c.status,
+            jobs.c.progress, jobs.c.message, jobs.c.created_at)
+    with _engine.connect() as c:
+        return _rows(c, select(*cols).where(jobs.c.user_id == user_id)
+                     .order_by(jobs.c.created_at.desc()))
+
+
+def list_jobs_for_site(site_id: str) -> list[dict]:
+    cols = (jobs.c.id, jobs.c.input_name, jobs.c.detector, jobs.c.status,
+            jobs.c.progress, jobs.c.source, jobs.c.created_at)
+    with _engine.connect() as c:
+        return _rows(c, select(*cols).where(jobs.c.site_id == site_id)
+                     .order_by(jobs.c.created_at.desc()))
+
+
+def rename_job(job_id: str, name: str) -> None:
+    with _engine.begin() as c:
+        c.execute(jobs.update().where(jobs.c.id == job_id).values(input_name=name))
+
+
+def delete_job(job_id: str) -> None:
+    with _engine.begin() as c:
+        c.execute(jobs.delete().where(jobs.c.id == job_id))
+
+
+# --- sites & devices --------------------------------------------------------
+
+def create_site(site_id: str, user_id: int, name: str, package: str) -> dict:
+    with _engine.begin() as c:
+        c.execute(sites.insert().values(
+            id=site_id, user_id=user_id, name=name, package=package,
+            created_at=time.time()))
+    return {"id": site_id, "name": name, "package": package}
+
+
+def get_site(site_id: str) -> dict | None:
+    with _engine.connect() as c:
+        return _row(c, select(sites).where(sites.c.id == site_id))
+
+
+def list_sites(user_id: int) -> list[dict]:
+    sql = text(
+        "SELECT s.*, (SELECT COUNT(*) FROM devices d WHERE d.site_id = s.id) "
+        "AS device_count FROM sites s WHERE s.user_id = :uid "
+        "ORDER BY s.created_at DESC")
+    with _engine.connect() as c:
+        return _rows(c, sql, {"uid": user_id})
+
+
+def create_device(device_id: str, site_id: str, kind: str, name: str,
+                  key_hash: str) -> None:
+    with _engine.begin() as c:
+        c.execute(devices.insert().values(
+            id=device_id, site_id=site_id, kind=kind, name=name,
+            key_hash=key_hash, created_at=time.time()))
+
+
+def list_devices(site_id: str) -> list[dict]:
+    cols = (devices.c.id, devices.c.site_id, devices.c.kind, devices.c.name,
+            devices.c.last_seen, devices.c.created_at)
+    with _engine.connect() as c:
+        return _rows(c, select(*cols).where(devices.c.site_id == site_id)
+                     .order_by(devices.c.created_at))
+
+
+def get_device_by_key_hash(key_hash: str) -> dict | None:
+    with _engine.connect() as c:
+        return _row(c, select(devices).where(devices.c.key_hash == key_hash))
+
+
+def touch_device(device_id: str) -> None:
+    with _engine.begin() as c:
+        c.execute(devices.update().where(devices.c.id == device_id)
+                  .values(last_seen=time.time()))
+
+
+# --- ingest idempotency -----------------------------------------------------
+
+def get_ingest_job(idempotency_key: str) -> str | None:
+    with _engine.connect() as c:
+        row = _row(c, select(ingest_keys.c.job_id)
+                   .where(ingest_keys.c.idempotency_key == idempotency_key))
+    return row["job_id"] if row else None
+
+
+def record_ingest_job(idempotency_key: str, job_id: str) -> None:
+    with _engine.begin() as c:  # insert-or-ignore, portable
+        exists = c.execute(select(ingest_keys.c.idempotency_key)
+                           .where(ingest_keys.c.idempotency_key == idempotency_key)
+                           ).first()
+        if not exists:
+            c.execute(ingest_keys.insert().values(
+                idempotency_key=idempotency_key, job_id=job_id))
 
 
 # --- teams ------------------------------------------------------------------
 
 def create_team(team_id: str, user_id: int, name: str, org_id: str | None = None) -> dict:
-    _exec("INSERT INTO teams (id, user_id, org_id, name, created_at) VALUES (?,?,?,?,?)",
-          (team_id, user_id, org_id, name, time.time()))
+    with _engine.begin() as c:
+        c.execute(teams.insert().values(
+            id=team_id, user_id=user_id, org_id=org_id, name=name,
+            created_at=time.time()))
     return {"id": team_id, "name": name, "org_id": org_id}
 
 
-# --- organizations & memberships (authz) ------------------------------------
-
-def create_org(org_id: str, name: str) -> dict:
-    _exec("INSERT INTO organizations (id, name, created_at) VALUES (?,?,?)",
-          (org_id, name, time.time()))
-    return {"id": org_id, "name": name}
+def get_team(team_id: str) -> dict | None:
+    with _engine.connect() as c:
+        return _row(c, select(teams).where(teams.c.id == team_id))
 
 
-def get_org(org_id: str) -> sqlite3.Row | None:
-    return _connect().execute(
-        "SELECT * FROM organizations WHERE id = ?", (org_id,)
-    ).fetchone()
-
-
-def add_membership(membership_id: str, org_id: str, user_id: int, role: str,
-                   player_id: str | None = None) -> None:
-    _exec(
-        "INSERT OR REPLACE INTO memberships "
-        "(id, org_id, user_id, role, player_id, created_at) VALUES (?,?,?,?,?,?)",
-        (membership_id, org_id, user_id, role, player_id, time.time()),
-    )
-
-
-def get_membership(org_id: str, user_id: int) -> sqlite3.Row | None:
-    return _connect().execute(
-        "SELECT * FROM memberships WHERE org_id = ? AND user_id = ?",
-        (org_id, user_id),
-    ).fetchone()
-
-
-def list_orgs_for_user(user_id: int) -> list[dict]:
-    rows = _connect().execute(
-        "SELECT o.id, o.name, m.role, m.player_id "
-        "FROM organizations o JOIN memberships m ON m.org_id = o.id "
-        "WHERE m.user_id = ? ORDER BY o.created_at DESC",
-        (user_id,),
-    ).fetchall()
-    return [dict(r) for r in rows]
-
-
-def list_members(org_id: str) -> list[dict]:
-    rows = _connect().execute(
-        "SELECT m.id, m.user_id, m.role, m.player_id, u.email "
-        "FROM memberships m JOIN users u ON u.id = m.user_id "
-        "WHERE m.org_id = ? ORDER BY m.created_at",
-        (org_id,),
-    ).fetchall()
-    return [dict(r) for r in rows]
-
-
-def list_org_teams(org_id: str) -> list[dict]:
-    rows = _connect().execute(
-        "SELECT t.id, t.name, "
-        "(SELECT COUNT(*) FROM players p WHERE p.team_id = t.id) AS player_count, "
-        "(SELECT COUNT(*) FROM matches mt WHERE mt.team_id = t.id) AS match_count "
-        "FROM teams t WHERE t.org_id = ? ORDER BY t.created_at DESC",
-        (org_id,),
-    ).fetchall()
-    return [dict(r) for r in rows]
-
-
-def get_team(team_id: str) -> sqlite3.Row | None:
-    return _connect().execute("SELECT * FROM teams WHERE id = ?", (team_id,)).fetchone()
-
-
-def get_team_by_token(token: str) -> sqlite3.Row | None:
-    return _connect().execute(
-        "SELECT * FROM teams WHERE public_token = ?", (token,)
-    ).fetchone()
+def get_team_by_token(token: str) -> dict | None:
+    with _engine.connect() as c:
+        return _row(c, select(teams).where(teams.c.public_token == token))
 
 
 def list_teams(user_id: int) -> list[dict]:
-    rows = _connect().execute(
+    sql = text(
         "SELECT t.*, "
         "(SELECT COUNT(*) FROM players p WHERE p.team_id = t.id) AS player_count, "
         "(SELECT COUNT(*) FROM matches m WHERE m.team_id = t.id) AS match_count "
-        "FROM teams t WHERE t.user_id = ? ORDER BY t.created_at DESC",
-        (user_id,),
-    ).fetchall()
-    return [dict(r) for r in rows]
+        "FROM teams t WHERE t.user_id = :uid ORDER BY t.created_at DESC")
+    with _engine.connect() as c:
+        return _rows(c, sql, {"uid": user_id})
 
 
 def update_team(team_id: str, name: str) -> None:
-    _exec("UPDATE teams SET name = ? WHERE id = ?", (name, team_id))
+    with _engine.begin() as c:
+        c.execute(teams.update().where(teams.c.id == team_id).values(name=name))
 
 
 def set_team_public(team_id: str, token: str | None) -> None:
-    _exec("UPDATE teams SET public_token = ? WHERE id = ?", (token, team_id))
+    with _engine.begin() as c:
+        c.execute(teams.update().where(teams.c.id == team_id)
+                  .values(public_token=token))
 
 
-def _delete_team_rows(c: sqlite3.Connection, team_id: str) -> None:
-    for mid in [r["id"] for r in c.execute("SELECT id FROM matches WHERE team_id = ?", (team_id,))]:
-        c.execute("DELETE FROM player_match_stats WHERE match_id = ?", (mid,))
-    c.execute("DELETE FROM matches WHERE team_id = ?", (team_id,))
-    c.execute("DELETE FROM players WHERE team_id = ?", (team_id,))
-    c.execute("DELETE FROM teams WHERE id = ?", (team_id,))
+def _delete_team_rows(c, team_id: str) -> None:
+    mids = [r[0] for r in c.execute(select(matches.c.id)
+                                    .where(matches.c.team_id == team_id))]
+    for mid in mids:
+        c.execute(delete(player_match_stats).where(player_match_stats.c.match_id == mid))
+    c.execute(delete(matches).where(matches.c.team_id == team_id))
+    c.execute(delete(players).where(players.c.team_id == team_id))
+    c.execute(delete(teams).where(teams.c.id == team_id))
 
 
 def delete_team(team_id: str) -> None:
-    with _lock:
-        c = _connect()
+    with _engine.begin() as c:
         _delete_team_rows(c, team_id)
-        c.commit()
 
 
 def delete_org_cascade(org_id: str) -> None:
-    with _lock:
-        c = _connect()
-        for tid in [r["id"] for r in c.execute("SELECT id FROM teams WHERE org_id = ?", (org_id,))]:
+    with _engine.begin() as c:
+        for tid in [r[0] for r in c.execute(select(teams.c.id)
+                                            .where(teams.c.org_id == org_id))]:
             _delete_team_rows(c, tid)
-        c.execute("DELETE FROM memberships WHERE org_id = ?", (org_id,))
-        c.execute("DELETE FROM organizations WHERE id = ?", (org_id,))
-        c.commit()
+        c.execute(delete(memberships).where(memberships.c.org_id == org_id))
+        c.execute(delete(organizations).where(organizations.c.id == org_id))
 
 
 def delete_user_cascade(user_id: int) -> list[str]:
     """Right-to-delete: remove the user's personal data; return job IDs (files)."""
-    with _lock:
-        c = _connect()
-        job_ids = [r["id"] for r in c.execute("SELECT id FROM jobs WHERE user_id = ?", (user_id,))]
-        # personal (non-org) teams and their data
-        for tid in [r["id"] for r in c.execute(
-                "SELECT id FROM teams WHERE user_id = ? AND org_id IS NULL", (user_id,))]:
+    with _engine.begin() as c:
+        job_ids = [r[0] for r in c.execute(select(jobs.c.id)
+                                           .where(jobs.c.user_id == user_id))]
+        personal = [r[0] for r in c.execute(
+            select(teams.c.id).where(teams.c.user_id == user_id, teams.c.org_id.is_(None)))]
+        for tid in personal:
             _delete_team_rows(c, tid)
-        # sites + devices
-        for sid in [r["id"] for r in c.execute("SELECT id FROM sites WHERE user_id = ?", (user_id,))]:
-            c.execute("DELETE FROM devices WHERE site_id = ?", (sid,))
-        c.execute("DELETE FROM sites WHERE user_id = ?", (user_id,))
-        c.execute("DELETE FROM jobs WHERE user_id = ?", (user_id,))
-        c.execute("DELETE FROM memberships WHERE user_id = ?", (user_id,))
-        c.execute("DELETE FROM users WHERE id = ?", (user_id,))
-        c.commit()
+        for sid in [r[0] for r in c.execute(select(sites.c.id)
+                                            .where(sites.c.user_id == user_id))]:
+            c.execute(delete(devices).where(devices.c.site_id == sid))
+        c.execute(delete(sites).where(sites.c.user_id == user_id))
+        c.execute(delete(jobs).where(jobs.c.user_id == user_id))
+        c.execute(delete(memberships).where(memberships.c.user_id == user_id))
+        c.execute(delete(users).where(users.c.id == user_id))
     return job_ids
+
+
+# --- organizations & memberships --------------------------------------------
+
+def create_org(org_id: str, name: str) -> dict:
+    with _engine.begin() as c:
+        c.execute(organizations.insert().values(
+            id=org_id, name=name, created_at=time.time()))
+    return {"id": org_id, "name": name}
+
+
+def get_org(org_id: str) -> dict | None:
+    with _engine.connect() as c:
+        return _row(c, select(organizations).where(organizations.c.id == org_id))
+
+
+def add_membership(membership_id: str, org_id: str, user_id: int, role: str,
+                   player_id: str | None = None) -> None:
+    with _engine.begin() as c:  # replace any existing membership for this pair
+        c.execute(delete(memberships).where(
+            memberships.c.org_id == org_id, memberships.c.user_id == user_id))
+        c.execute(memberships.insert().values(
+            id=membership_id, org_id=org_id, user_id=user_id, role=role,
+            player_id=player_id, created_at=time.time()))
+
+
+def get_membership(org_id: str, user_id: int) -> dict | None:
+    with _engine.connect() as c:
+        return _row(c, select(memberships).where(
+            memberships.c.org_id == org_id, memberships.c.user_id == user_id))
+
+
+def list_orgs_for_user(user_id: int) -> list[dict]:
+    sql = text(
+        "SELECT o.id, o.name, m.role, m.player_id "
+        "FROM organizations o JOIN memberships m ON m.org_id = o.id "
+        "WHERE m.user_id = :uid ORDER BY o.created_at DESC")
+    with _engine.connect() as c:
+        return _rows(c, sql, {"uid": user_id})
+
+
+def list_members(org_id: str) -> list[dict]:
+    sql = text(
+        "SELECT m.id, m.user_id, m.role, m.player_id, u.email "
+        "FROM memberships m JOIN users u ON u.id = m.user_id "
+        "WHERE m.org_id = :oid ORDER BY m.created_at")
+    with _engine.connect() as c:
+        return _rows(c, sql, {"oid": org_id})
+
+
+def list_org_teams(org_id: str) -> list[dict]:
+    sql = text(
+        "SELECT t.id, t.name, "
+        "(SELECT COUNT(*) FROM players p WHERE p.team_id = t.id) AS player_count, "
+        "(SELECT COUNT(*) FROM matches mt WHERE mt.team_id = t.id) AS match_count "
+        "FROM teams t WHERE t.org_id = :oid ORDER BY t.created_at DESC")
+    with _engine.connect() as c:
+        return _rows(c, sql, {"oid": org_id})
 
 
 # --- players ----------------------------------------------------------------
 
 def create_player(player_id: str, team_id: str, name: str, position: str | None,
                   jersey: int | None, is_minor: bool = True) -> dict:
-    _exec("INSERT INTO players (id, team_id, name, position, jersey, is_minor, created_at) "
-          "VALUES (?,?,?,?,?,?,?)",
-          (player_id, team_id, name, position, jersey, int(is_minor), time.time()))
+    with _engine.begin() as c:
+        c.execute(players.insert().values(
+            id=player_id, team_id=team_id, name=name, position=position,
+            jersey=jersey, is_minor=int(is_minor), created_at=time.time()))
     return {"id": player_id, "name": name, "is_minor": is_minor}
 
 
 def set_player_consent(player_id: str, granted_by: int | None) -> None:
-    if granted_by is None:
-        _exec("UPDATE players SET guardian_consent_at = NULL, "
-              "guardian_consent_by = NULL WHERE id = ?", (player_id,))
-    else:
-        _exec("UPDATE players SET guardian_consent_at = ?, guardian_consent_by = ? "
-              "WHERE id = ?", (time.time(), granted_by, player_id))
+    vals = ({"guardian_consent_at": None, "guardian_consent_by": None}
+            if granted_by is None
+            else {"guardian_consent_at": time.time(), "guardian_consent_by": granted_by})
+    with _engine.begin() as c:
+        c.execute(players.update().where(players.c.id == player_id).values(**vals))
 
 
-def get_player(player_id: str) -> sqlite3.Row | None:
-    return _connect().execute(
-        "SELECT * FROM players WHERE id = ?", (player_id,)
-    ).fetchone()
+def get_player(player_id: str) -> dict | None:
+    with _engine.connect() as c:
+        return _row(c, select(players).where(players.c.id == player_id))
 
 
-def get_player_by_token(token: str) -> sqlite3.Row | None:
-    return _connect().execute(
-        "SELECT * FROM players WHERE public_token = ?", (token,)
-    ).fetchone()
+def get_player_by_token(token: str) -> dict | None:
+    with _engine.connect() as c:
+        return _row(c, select(players).where(players.c.public_token == token))
 
 
 def list_players(team_id: str) -> list[dict]:
-    return [dict(r) for r in _connect().execute(
-        "SELECT * FROM players WHERE team_id = ? ORDER BY jersey, name", (team_id,))]
+    with _engine.connect() as c:
+        return _rows(c, select(players).where(players.c.team_id == team_id)
+                     .order_by(players.c.jersey, players.c.name))
 
 
 def update_player(player_id: str, name: str, position: str | None,
                   jersey: int | None) -> None:
-    _exec("UPDATE players SET name = ?, position = ?, jersey = ? WHERE id = ?",
-          (name, position, jersey, player_id))
+    with _engine.begin() as c:
+        c.execute(players.update().where(players.c.id == player_id)
+                  .values(name=name, position=position, jersey=jersey))
 
 
 def set_player_public(player_id: str, token: str | None) -> None:
-    _exec("UPDATE players SET public_token = ? WHERE id = ?", (token, player_id))
+    with _engine.begin() as c:
+        c.execute(players.update().where(players.c.id == player_id)
+                  .values(public_token=token))
 
 
 def delete_player(player_id: str) -> None:
-    with _lock:
-        c = _connect()
-        c.execute("DELETE FROM player_match_stats WHERE player_id = ?", (player_id,))
-        c.execute("DELETE FROM players WHERE id = ?", (player_id,))
-        c.commit()
+    with _engine.begin() as c:
+        c.execute(delete(player_match_stats).where(player_match_stats.c.player_id == player_id))
+        c.execute(delete(players).where(players.c.id == player_id))
 
 
 # --- matches ----------------------------------------------------------------
@@ -596,42 +539,36 @@ def create_match(match_id: str, user_id: int, team_id: str, field_type: int,
                  opponent: str | None, played_on: str | None, job_id: str | None,
                  home_score: int | None, away_score: int | None,
                  summary: str | None) -> dict:
-    _exec(
-        "INSERT INTO matches (id, user_id, team_id, job_id, field_type, opponent, "
-        "played_on, home_score, away_score, summary, created_at) "
-        "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-        (match_id, user_id, team_id, job_id, field_type, opponent, played_on,
-         home_score, away_score, summary, time.time()),
-    )
+    with _engine.begin() as c:
+        c.execute(matches.insert().values(
+            id=match_id, user_id=user_id, team_id=team_id, job_id=job_id,
+            field_type=field_type, opponent=opponent, played_on=played_on,
+            home_score=home_score, away_score=away_score, summary=summary,
+            created_at=time.time()))
     return {"id": match_id}
 
 
 def get_match(match_id: str) -> dict | None:
-    row = _connect().execute("SELECT * FROM matches WHERE id = ?", (match_id,)).fetchone()
-    if not row:
-        return None
-    d = dict(row)
-    if d.get("summary"):
+    with _engine.connect() as c:
+        d = _row(c, select(matches).where(matches.c.id == match_id))
+    if d and d.get("summary"):
         d["summary"] = json.loads(d["summary"])
     return d
 
 
 def list_matches(team_id: str) -> list[dict]:
-    rows = _connect().execute(
+    sql = text(
         "SELECT id, team_id, job_id, field_type, opponent, played_on, "
-        "home_score, away_score, created_at FROM matches "
-        "WHERE team_id = ? ORDER BY COALESCE(played_on, '') DESC, created_at DESC",
-        (team_id,),
-    ).fetchall()
-    return [dict(r) for r in rows]
+        "home_score, away_score, created_at FROM matches WHERE team_id = :tid "
+        "ORDER BY COALESCE(played_on, '') DESC, created_at DESC")
+    with _engine.connect() as c:
+        return _rows(c, sql, {"tid": team_id})
 
 
 def delete_match(match_id: str) -> None:
-    with _lock:
-        c = _connect()
-        c.execute("DELETE FROM player_match_stats WHERE match_id = ?", (match_id,))
-        c.execute("DELETE FROM matches WHERE id = ?", (match_id,))
-        c.commit()
+    with _engine.begin() as c:
+        c.execute(delete(player_match_stats).where(player_match_stats.c.match_id == match_id))
+        c.execute(delete(matches).where(matches.c.id == match_id))
 
 
 # --- player match stats -----------------------------------------------------
@@ -639,27 +576,30 @@ def delete_match(match_id: str) -> None:
 def add_player_stat(stat_id: str, match_id: str, player_id: str, minutes: int,
                     distance_m: float, top_speed_ms: float, goals: int,
                     assists: int) -> None:
-    _exec(
-        "INSERT INTO player_match_stats (id, match_id, player_id, minutes, "
-        "distance_m, top_speed_ms, goals, assists) VALUES (?,?,?,?,?,?,?,?)",
-        (stat_id, match_id, player_id, minutes, distance_m, top_speed_ms, goals,
-         assists),
-    )
+    with _engine.begin() as c:
+        c.execute(player_match_stats.insert().values(
+            id=stat_id, match_id=match_id, player_id=player_id, minutes=minutes,
+            distance_m=distance_m, top_speed_ms=top_speed_ms, goals=goals,
+            assists=assists))
 
 
 def clear_match_stats(match_id: str) -> None:
-    _exec("DELETE FROM player_match_stats WHERE match_id = ?", (match_id,))
+    with _engine.begin() as c:
+        c.execute(delete(player_match_stats).where(player_match_stats.c.match_id == match_id))
 
 
 def stats_for_match(match_id: str) -> list[dict]:
-    return [dict(r) for r in _connect().execute(
+    sql = text(
         "SELECT s.*, p.name AS player_name FROM player_match_stats s "
-        "JOIN players p ON p.id = s.player_id WHERE s.match_id = ?", (match_id,))]
+        "JOIN players p ON p.id = s.player_id WHERE s.match_id = :mid")
+    with _engine.connect() as c:
+        return _rows(c, sql, {"mid": match_id})
 
 
 def stats_for_player(player_id: str) -> list[dict]:
-    """Player's stat lines joined with each match's field type and metadata."""
-    return [dict(r) for r in _connect().execute(
+    sql = text(
         "SELECT s.*, m.field_type, m.opponent, m.played_on, m.id AS match_id "
         "FROM player_match_stats s JOIN matches m ON m.id = s.match_id "
-        "WHERE s.player_id = ? ORDER BY COALESCE(m.played_on,'') DESC", (player_id,))]
+        "WHERE s.player_id = :pid ORDER BY COALESCE(m.played_on, '') DESC")
+    with _engine.connect() as c:
+        return _rows(c, sql, {"pid": player_id})

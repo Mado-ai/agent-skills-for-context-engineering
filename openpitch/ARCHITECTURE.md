@@ -33,7 +33,7 @@ Status: ✅ implemented here · 🟡 stubbed/partial · ⬜ not yet · 🔌 exte
 | 4 · Individual reports | per-player distance/top-speed; **mapped onto roster players** (`/api/matches/{id}/import-stats`) and surfaced in player profiles | ✅ |
 | 5 · Highlight generation | `highlights.py` auto-clips | ✅ |
 | 6 · Profile update | **detection stats flow into team/player profiles** via match→roster mapping; reporting reflects matches by 5/7/11 field type, career totals, leaderboards | ✅ |
-| Relational DB | SQLite (`db.py`) — Postgres in prod | ✅ / 🟡 |
+| Relational DB | `db.py` on **SQLAlchemy Core** — SQLite (dev) / **Postgres** (prod) via `DATABASE_URL`; **Alembic** migrations | ✅ |
 | Time-series store | folded into job summary JSON (dedicated TSDB ⬜) | 🟡 |
 | Object storage | `storage.py` abstraction (LocalStorage now; S3/GCS-ready interface, `PLAYMETRICS_STORAGE`) | 🟡 |
 | Application API + authz | `api.py` (JWT, per-user/site ownership) | ✅ |
@@ -62,11 +62,9 @@ Status: ✅ implemented here · 🟡 stubbed/partial · ⬜ not yet · 🔌 exte
 1. ✅ **Roles & orgs** — organizations + memberships with role-based authz.
 2. ✅ **Child-safety hardening** — guardian-consent gate, audit trail, right-to-delete
    cascade, login rate-limit + security headers.
-3. **Postgres + Alembic + object storage** — `storage.py` abstraction is in; the
-   SQLite→Postgres cutover (SQLAlchemy Core + Alembic, driven by `DATABASE_URL`)
-   is the dedicated next step — it needs a live Postgres to validate, so it is
-   staged separately rather than rushed. Then S3 storage + a real job queue
-   (Celery/RQ) + GPU workers.
+3. ✅ **Postgres-ready data layer** — `db.py` on SQLAlchemy Core + Alembic,
+   driven by `DATABASE_URL` (SQLite dev / Postgres prod). Next: validate against
+   a live Postgres in CI; then S3 storage + a real job queue (Celery/RQ) + GPU workers.
 4. **Signed media URLs** — replace the `?token=` (session JWT) on `/api/files/*`
    with short-lived, media-scoped signed URLs (small frontend media-token refactor).
 5. **Multi-camera + homography per angle**; quality-tier routing (facility vs Solo).

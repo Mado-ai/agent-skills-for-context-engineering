@@ -85,7 +85,8 @@ On first launch an **admin account is seeded**. Configure via environment:
 | `PLAYMETRICS_ADMIN_EMAIL` | `yazanalshuibe14@gmail.com` | Seeded admin login |
 | `PLAYMETRICS_ADMIN_PASSWORD` | `playmetrics-dev` | Seeded admin password — **change in production** |
 | `PLAYMETRICS_SECRET` | random per process | Token signing key — **set a fixed value in production** |
-| `PLAYMETRICS_DB` | `playmetrics.db` | SQLite database path |
+| `DATABASE_URL` | `sqlite:///<PLAYMETRICS_DB>` | DB connection; set `postgresql+psycopg://…` for Postgres |
+| `PLAYMETRICS_DB` | `playmetrics.db` | SQLite file path (used when `DATABASE_URL` is unset) |
 | `PLAYMETRICS_DATA` | `runs/` | Job output directory (mount a volume in prod) |
 | `PLAYMETRICS_ENV` | (unset) | Set to `production` to **require** `PLAYMETRICS_SECRET` + admin password (fails fast otherwise) |
 | `PLAYMETRICS_STORAGE` | `local` | Object-storage backend (`local`; `s3` reserved) |
@@ -96,7 +97,23 @@ On first launch an **admin account is seeded**. Configure via environment:
 - **Authorization:** role-based (orgs/memberships) enforced at a single API chokepoint; private-by-default sharing; parent/player restricted to a linked player.
 - **Hardening:** security headers (CSP, HSTS, X-Frame-Options, nosniff) on every response; login **rate-limiting + lockout**; production refuses to boot on insecure defaults.
 - **Audit trail:** access to player data (views/shares) and stat imports are logged to `audit_log`; staff can review per player via `GET /api/players/{id}/audit`.
-- **Known gaps (see ARCHITECTURE.md):** guardian-consent gating, full delete-cascade, and Postgres + object storage for production scale.
+- **Known gaps (see ARCHITECTURE.md):** signed media URLs, S3 object storage, and a real job queue for production scale.
+
+### Database & migrations
+
+The data layer (`db.py`) runs on **SQLAlchemy Core** and works on both SQLite
+(dev default) and **Postgres** — just set `DATABASE_URL`:
+
+```bash
+export DATABASE_URL="postgresql+psycopg://user:pass@host:5432/playmetrics"
+pip install "psycopg[binary]"
+alembic upgrade head        # apply migrations (run on every deploy)
+```
+
+Schema changes: edit the `Table` definitions in `db.py`, then
+`alembic revision --autogenerate -m "describe change"` and commit the new file
+under `migrations/versions/`. In dev, `init_db()` create-alls the schema so no
+migration step is needed to get started.
 
 ### Deploying
 

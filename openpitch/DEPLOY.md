@@ -15,7 +15,7 @@ This repo ships ready-to-use configs for three paths. **Fly.io is recommended.**
 | `PLAYMETRICS_ADMIN_PASSWORD` | **yes** | Replaces the dev default. Use something strong. |
 | `PLAYMETRICS_ADMIN_EMAIL` | no | Defaults to `yazanalshuibe14@gmail.com`. |
 | `PLAYMETRICS_DATA` | preset | Job outputs dir (on the volume). |
-| `PLAYMETRICS_DB` | preset | SQLite path (on the volume). |
+| `DATABASE_URL` | no | `postgresql+psycopg://…` for Postgres; defaults to SQLite on the volume. Run `alembic upgrade head` on deploy. |
 
 ---
 
