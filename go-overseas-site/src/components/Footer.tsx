@@ -21,12 +21,20 @@ const cols = [
       { href: "/services#go-to-market", label: "Go-to-Market" },
     ],
   },
+  {
+    title: "Legal",
+    links: [
+      { href: "/privacy", label: "Privacy Policy" },
+      { href: "/terms", label: "Terms & Conditions" },
+      { href: "/refund", label: "Money-Back Policy" },
+    ],
+  },
 ];
 
 export function Footer() {
   return (
     <footer className="border-t border-line bg-ink-900">
-      <Container className="grid gap-12 py-16 md:grid-cols-[1.4fr_1fr_1fr]">
+      <Container className="grid gap-12 py-16 sm:grid-cols-2 md:grid-cols-[1.6fr_1fr_1fr_1fr]">
         <div className="max-w-sm">
           <div className="flex items-center gap-2.5">
             <LogoMark size={32} />

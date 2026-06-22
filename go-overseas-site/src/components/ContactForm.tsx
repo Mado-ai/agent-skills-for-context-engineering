@@ -80,6 +80,17 @@ export function ContactForm() {
           Your email client should open. If it doesn&apos;t, write to hello@gooverseas.example.
         </p>
       )}
+      <p className="text-xs text-mist-dim">
+        By submitting, you agree to our{" "}
+        <a href="/terms" className="underline hover:text-mist">
+          Terms
+        </a>{" "}
+        and{" "}
+        <a href="/privacy" className="underline hover:text-mist">
+          Privacy Policy
+        </a>
+        .
+      </p>
     </form>
   );
 }
