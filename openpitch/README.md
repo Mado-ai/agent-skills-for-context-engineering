@@ -197,6 +197,28 @@ reports `"calibration": "proxy"` in `summary.json` (vs `"homography"`).
 pytest -q          # generates a sample, runs the full pipeline, checks outputs
 ```
 
+### Validating against real tracking data
+
+The synthetic clip exercises the plumbing, but the analytics core is also
+sanity-checked against **Metrica Sports' public Sample_Game_1** ground-truth
+tracking data (the same engine, fed real player positions instead of detector
+output):
+
+```bash
+python scripts/analyze_metrica.py        # ~5 min window; downloads CSVs from GitHub
+```
+
+This surfaced real bugs the synthetic clip hid. Movement metrics held up
+(≈0.65 km/player per 5 min, top speeds 6–12 m/s, possession 45/55), but the
+first pass model reported **24% pass accuracy and ~62 turnovers per 5 min** —
+because "nearest player to the ball" flickers frame-to-frame in congested play
+and every flicker spawned a phantom pass. Adding a **possession-spell debounce**
+(a spell only counts once a player is nearest within radius for ≥0.4 s, and a
+pass/turnover is the transition between two *confirmed* spells) moved this to
+~42% accuracy and ~25 turnovers. The remaining gap is an honest limitation:
+proximity ≠ true possession, so credible pass stats ultimately need kick-event
+detection (a learned action model), not geometry alone.
+
 ## What this prototype is — and isn't
 
 It demonstrates the **complete data flow** of a capture-to-analytics product

@@ -59,8 +59,11 @@ class Analytics:
     ball_path: list[tuple[float, float]] = field(default_factory=list)
     # (frame, cumulative home frames, cumulative away frames) per processed frame.
     _timeline: list[tuple[int, int, int]] = field(default_factory=list)
-    # (track_id, team) of the last in-possession player, for pass/turnover events.
-    _last_poss: tuple | None = None
+    # Possession-spell tracking for passes/turnovers (debounced to ignore the
+    # per-frame flicker of "nearest player" in congested play).
+    _cand: tuple | None = None
+    _cand_n: int = 0
+    _confirmed: tuple | None = None
 
     def _pitch_pos(self, cx: float, cy: float) -> tuple[float, float, float, float]:
         """Return (X_m, Y_m, norm_x, norm_y) for a normalised image point."""
@@ -116,22 +119,30 @@ class Analytics:
                         rec["sprint_run"] = 0
             rec["last"] = (X, Y)
 
-        # Individual possession + pass/turnover events on possession change.
+        # Individual possession + passes. A "spell" is only confirmed once a
+        # player has been the nearest within radius for >= ~0.4s, so brief
+        # contests don't spawn phantom passes/turnovers. A pass/turnover is the
+        # transition between two confirmed spells.
         if possessor is not None:
-            self._rec(possessor.id, possessor.team)["poss"] += 1
-            cur = (possessor.id, possessor.team)
-            if self._last_poss is None or self._last_poss[0] != cur[0]:
-                self._player_paths[cur[0]]["touches"] += 1
-                if self._last_poss is not None:
-                    prev_id, prev_team = self._last_poss
-                    prev = self._player_paths.get(prev_id)
+            pid, team = possessor.id, possessor.team
+            self._rec(pid, team)["poss"] += 1
+            if self._cand and self._cand[0] == pid:
+                self._cand_n += 1
+            else:
+                self._cand, self._cand_n = (pid, team), 1
+            min_hold = max(2, round(0.4 * self.fps))
+            if self._cand_n == min_hold and (self._confirmed is None or self._confirmed[0] != pid):
+                self._player_paths[pid]["touches"] += 1
+                if self._confirmed is not None:
+                    ppid, pteam = self._confirmed
+                    prev = self._player_paths.get(ppid)
                     if prev is not None:
                         prev["passes"] += 1
-                        if prev_team == cur[1]:
+                        if pteam == team:
                             prev["completed"] += 1
                         else:
                             prev["turnovers"] += 1
-            self._last_poss = cur
+                self._confirmed = (pid, team)
 
         self._timeline.append(
             (state.frame, self.possession_frames[0], self.possession_frames[1])
