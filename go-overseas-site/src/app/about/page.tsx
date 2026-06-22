@@ -25,9 +25,21 @@ const values = [
 ];
 
 const team = [
-  { name: "Founders with operator scars", role: "Built and exited companies in 3 continents" },
-  { name: "Local market specialists", role: "On-the-ground partners in every region we serve" },
-  { name: "Creative & brand talent", role: "Designers and strategists who think globally" },
+  {
+    name: "Yazan Alshibi",
+    role: "Head of Growth & Brand Development",
+    initials: "YA",
+  },
+  {
+    name: "Wafeeq Alshibi",
+    role: "Organization Quality Manager",
+    initials: "WA",
+  },
+  {
+    name: "Yousef Alhelo",
+    role: "Operations Manager",
+    initials: "YA",
+  },
 ];
 
 export default function AboutPage() {
@@ -74,30 +86,27 @@ export default function AboutPage() {
       </section>
 
       <Section>
-        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-          <div>
-            <Eyebrow>Who we are</Eyebrow>
-            <h2 className="mt-5 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-              Operators, not just advisors.
-            </h2>
-            <p className="mt-5 max-w-md text-mist">
-              From our Canadian base in Toronto, Vancouver, and Montréal, our team has
-              launched products, signed distributors, and built local teams in markets
-              across Asia, Europe, and the Americas. We&apos;ve made the mistakes so you
-              don&apos;t have to.
-            </p>
-          </div>
-          <div className="grid gap-4">
-            {team.map((t) => (
-              <div key={t.name} className="flex items-start gap-4 rounded-2xl border border-line bg-ink-800/50 p-5">
-                <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-gradient-to-r from-blue to-green" />
-                <div>
-                  <p className="font-medium">{t.name}</p>
-                  <p className="text-sm text-mist-dim">{t.role}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="max-w-2xl">
+          <Eyebrow>Leadership</Eyebrow>
+          <h2 className="mt-5 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+            Operators, not just advisors.
+          </h2>
+          <p className="mt-5 text-mist">
+            From our Canadian base, our leadership team has launched products, signed
+            distributors, and built local teams across global markets — working directly
+            with owners to make crossing borders feel less like a leap.
+          </p>
+        </div>
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {team.map((t) => (
+            <Card key={t.name} className="flex flex-col items-start">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue to-green font-display text-lg font-semibold text-white">
+                {t.initials}
+              </span>
+              <p className="mt-5 font-display text-lg font-semibold">{t.name}</p>
+              <p className="mt-1 text-sm text-mist-dim">{t.role}</p>
+            </Card>
+          ))}
         </div>
       </Section>
 
