@@ -92,9 +92,10 @@ export default async function PostPage({
         />
 
         <div className="mt-16 rounded-[var(--radius-card)] border border-line bg-ink-800/50 p-8 text-center">
-          <h2 className="font-display text-2xl font-semibold">Thinking about your next market?</h2>
+          <h2 className="font-display text-2xl font-semibold">Want results like this for your brand?</h2>
           <p className="mx-auto mt-3 max-w-md text-mist">
-            We help companies turn thinking like this into a plan — and the plan into traction.
+            We help brands turn ideas like these into work that performs — brand, web, ads, and
+            automation.
           </p>
           <div className="mt-6 flex justify-center">
             <Button href="/contact">Start a conversation</Button>

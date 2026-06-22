@@ -77,8 +77,9 @@ export default function PrivacyPage() {
 
       <h2>6. International transfers</h2>
       <p>
-        As a cross-border firm, we may transfer data between countries. Where we do, we use
-        recognized safeguards such as Standard Contractual Clauses.
+        We may use service providers located in other countries, which can involve
+        transferring data internationally. Where we do, we use recognized safeguards such as
+        Standard Contractual Clauses.
       </p>
 
       <h2>7. Data retention</h2>

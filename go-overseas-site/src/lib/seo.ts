@@ -96,6 +96,19 @@ export function professionalServiceSchema() {
   };
 }
 
+/** FAQPage schema — eligible for FAQ rich results. */
+export function faqSchema(faqs: { q: string; a: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+}
+
 /** BlogPosting schema for an individual insight. */
 export function articleSchema(opts: {
   title: string;
