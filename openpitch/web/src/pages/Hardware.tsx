@@ -47,6 +47,13 @@ export default function Hardware() {
             ))}
           </div>
 
+          <div className="mt-5 rounded-xl border border-line bg-card p-4 text-sm text-slate-400">
+            <b className="text-slate-200">Network coverage:</b> a single <b>U7 Pro Outdoor</b> AP
+            covers 5- and 7-a-side pitches. For full 11-a-side, the standard is <b>2× U7 Pro
+            Outdoor</b> (mounted at opposite ends) for reliable end-to-end WiFi&nbsp;7 backhaul of
+            the cameras and the on-site sync agent.
+          </div>
+
           <h2 className="mt-12 text-2xl font-bold">On-site rack (edge)</h2>
           <p className="mt-2 text-sm text-slate-400">
             The local brain: records everything, runs first-pass AI on the <b>AI Key</b>, and owns

@@ -91,6 +91,21 @@ DEVICE_KINDS = [
     "ap-outdoor", "ap-indoor",
 ]
 
+# Friendly label + model for each pairable kind, so onboarding shows real
+# product names rather than slugs. Keyed by the DEVICE_KINDS slug.
+DEVICE_CATALOG = {
+    "gateway": {"label": "UniFi Gateway", "model": "UDM-Pro / UDM-Pro-Max"},
+    "nvr": {"label": "UniFi NVR", "model": "UNVR / UNVR-Pro"},
+    "ai-key": {"label": "AI Key", "model": "UniFi AI Key"},
+    "switch": {"label": "PoE Switch", "model": "USW-Pro-Max-24"},
+    "camera-ai-pro": {"label": "Camera AI Pro 4K", "model": "UVC-AI-Pro"},
+    "camera-g5-ptz": {"label": "Camera G5 PTZ", "model": "UVC-G5-PTZ"},
+    "camera-g5-pro": {"label": "Camera G5 Pro 4K", "model": "UVC-G5-Pro"},
+    "camera-g5-bullet": {"label": "Camera G5 Bullet", "model": "UVC-G5-Bullet"},
+    "ap-outdoor": {"label": "U7 Pro Outdoor AP", "model": "U7-Pro-Outdoor"},
+    "ap-indoor": {"label": "U7 Pro AP (indoor)", "model": "U7-Pro"},
+}
+
 
 def manifest() -> dict:
     """Serializable infrastructure manifest for the API / marketing site."""
@@ -103,4 +118,5 @@ def manifest() -> dict:
         "edge": EDGE,
         "vlans": VLANS,
         "device_kinds": DEVICE_KINDS,
+        "device_catalog": DEVICE_CATALOG,
     }

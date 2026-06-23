@@ -224,6 +224,7 @@ export const api = {
     edge: { device: string; model: string; role: string }[];
     vlans: { vlan: number; name: string; note: string }[];
     device_kinds: string[];
+    device_catalog?: Record<string, { label: string; model: string }>;
   }> {
     return parse(await fetch("/api/packages"));
   },

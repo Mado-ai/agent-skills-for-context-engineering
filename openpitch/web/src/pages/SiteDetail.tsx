@@ -12,7 +12,9 @@ export default function SiteDetail() {
   const [site, setSite] = useState<(Site & { devices: Device[] }) | null>(null);
   const [matches, setMatches] = useState<SiteJob[]>([]);
   const [kinds, setKinds] = useState<string[]>([]);
+  const [catalog, setCatalog] = useState<Record<string, { label: string; model: string }>>({});
   const [kind, setKind] = useState("gateway");
+  const kindLabel = (k: string) => catalog[k]?.label ?? k;
   const [dName, setDName] = useState("");
   const [newKey, setNewKey] = useState<string | null>(null);
 
@@ -23,7 +25,10 @@ export default function SiteDetail() {
 
   useEffect(() => {
     load();
-    api.packages().then((m) => setKinds(m.device_kinds ?? [])).catch(() => {});
+    api.packages().then((m) => {
+      setKinds(m.device_kinds ?? []);
+      setCatalog(m.device_catalog ?? {});
+    }).catch(() => {});
   }, [load]);
 
   if (!site) return <div className="p-10 text-center text-slate-400">Loading…</div>;
@@ -52,7 +57,7 @@ export default function SiteDetail() {
               {site.devices.map((d) => (
                 <li key={d.id} className="flex items-center justify-between rounded px-2 py-1.5 text-sm">
                   <span>
-                    <span className="text-slate-500">{d.kind}</span> · {d.name}
+                    <span className="text-slate-500">{kindLabel(d.kind)}</span> · {d.name}
                   </span>
                   <span className={deviceOnline(d.last_seen) ? "text-pitch" : "text-slate-500"}>
                     ● {deviceOnline(d.last_seen) ? "online" : "offline"}
@@ -65,7 +70,11 @@ export default function SiteDetail() {
           <div className="flex flex-wrap gap-2 border-t border-line pt-3">
             <select value={kind} onChange={(e) => setKind(e.target.value)}
               className="rounded border border-line bg-ink px-2 py-1.5 text-sm">
-              {kinds.map((k) => <option key={k} value={k}>{k}</option>)}
+              {kinds.map((k) => (
+                <option key={k} value={k}>
+                  {catalog[k] ? `${catalog[k].label} · ${catalog[k].model}` : k}
+                </option>
+              ))}
             </select>
             <input value={dName} onChange={(e) => setDName(e.target.value)} placeholder="Device name"
               className="min-w-0 flex-1 rounded border border-line bg-ink px-2 py-1.5 text-sm" />
