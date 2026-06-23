@@ -29,7 +29,7 @@ from fastapi import (
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from . import auth, authz, db, hardware, jobs_queue, profiles, storage
+from . import auth, authz, db, demo_seed, hardware, jobs_queue, profiles, storage
 
 IS_PRODUCTION = os.environ.get("PLAYMETRICS_ENV", "").lower() == "production"
 
@@ -60,6 +60,9 @@ async def lifespan(app: FastAPI):
     if db.get_user_by_email(email) is None:
         db.create_user(email, auth.hash_password(password), is_admin=True)
         print(f"[seed] admin account created: {email}")
+    # Optionally populate a fresh deployment with demo data (background, no-op
+    # unless PLAYMETRICS_SEED_DEMO is set and the demo squads aren't present).
+    demo_seed.maybe_seed()
     yield
 
 

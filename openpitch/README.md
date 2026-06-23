@@ -94,6 +94,22 @@ On first launch an **admin account is seeded**. Configure via environment:
 | `PLAYMETRICS_ENV` | (unset) | Set to `production` to **require** `PLAYMETRICS_SECRET` + admin password (fails fast otherwise) |
 | `PLAYMETRICS_STORAGE` | `local` | Object storage: `local` or `s3` (`PLAYMETRICS_S3_BUCKET`, `PLAYMETRICS_S3_PREFIX`) |
 | `PLAYMETRICS_QUEUE` | `thread` | Job queue: `thread` (in-process) or `rq` (needs `REDIS_URL`) |
+| `PLAYMETRICS_SEED_DEMO` | (unset) | Set to `1` to auto-seed demo data on first start: two named squads with timestamped matches/stats + a real-data dashboard analysis (downloads the Metrica sample from GitHub). Background, idempotent, never blocks or crashes startup. |
+
+### Demo data
+
+Populate a fresh instance with realistic content — two named squads (14 players
+each, positions, jerseys, per-match distance/speed/passing+accuracy/goals/
+assists across 3–4 timestamped matches) plus a real-data dashboard analysis:
+
+```bash
+python scripts/seed_demo.py            # manual, run once
+# or, hands-off on a fresh deploy:
+PLAYMETRICS_SEED_DEMO=1 uvicorn openpitch.api:app   # seeds in the background
+```
+
+Seeding is idempotent — it won't duplicate or clobber once the demo squads
+exist. The squad names and per-match numbers are synthetic demo data.
 
 ### Security posture
 
