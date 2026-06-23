@@ -1,20 +1,19 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import ShuffleHero from "../components/ShuffleHero";
+import { Icon } from "../components/ui";
 
-const FEATURES = [
-  ["🎥", "Capture & auto-produce", "Upload a panoramic clip. The virtual camera pans and zooms to follow play, with a live scoreboard and possession bar."],
-  ["📊", "Analyze", "CV tracking yields possession %, top-down heatmaps and per-player distance & speed, calibrated to a real 105×68 m pitch."],
-  ["✂️", "Highlight & review", "Exciting moments are detected and cut into clips automatically. Everything lands in your private dashboard."],
+const FEATURES: { icon: Parameters<typeof Icon>[0]["name"]; title: string; body: string }[] = [
+  { icon: "film", title: "Capture & auto-produce", body: "Upload a panoramic clip. The virtual camera pans and zooms to follow play, with a live scoreboard and possession bar." },
+  { icon: "chart", title: "Analyze", body: "CV tracking yields possession %, top-down heatmaps and per-player distance & speed, calibrated to a real 105×68 m pitch." },
+  { icon: "film", title: "Highlight & review", body: "Exciting moments are detected and cut into clips automatically. Everything lands in your private dashboard." },
 ];
-
-const PILLS = ["🎥 Auto-production", "📊 Possession & heatmaps", "🏃 Distance & speed", "✂️ Auto highlights", "📐 Pitch homography", "🧠 Color / YOLO"];
 
 export default function Landing() {
   const { user, login, register } = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  // CTAs link here with ?signup to open the create-account tab directly.
   const [mode, setMode] = useState<"login" | "register">(
     params.has("signup") ? "register" : "login",
   );
@@ -22,6 +21,15 @@ export default function Landing() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+
+  // Hero "Start free" links to /?signup — open the register tab and jump to it.
+  useEffect(() => {
+    if (params.has("signup")) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMode("register");
+      document.getElementById("get-started")?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [params]);
 
   if (user) return <Navigate to="/dashboard" replace />;
 
@@ -42,35 +50,19 @@ export default function Landing() {
 
   return (
     <>
-      <section className="mx-auto grid max-w-5xl items-center gap-10 px-5 py-14 md:grid-cols-[1.1fr_0.9fr]">
-        <div>
-          <h1 className="text-4xl font-bold leading-tight md:text-5xl">
-            Turn one wide camera into a broadcast — and a data room.
-          </h1>
-          <p className="mt-4 text-lg text-slate-400">
-            Play Metrics auto-produces your match, then tracks every player and the ball to deliver possession,
-            heatmaps, physical metrics and automatic highlights — no operator required.
-          </p>
-          <div className="mt-5 flex flex-wrap gap-2">
-            {PILLS.map((p) => (
-              <span key={p} className="rounded-full border border-line bg-card px-3 py-1.5 text-sm">
-                {p}
-              </span>
-            ))}
-          </div>
-        </div>
+      <ShuffleHero />
 
-        <div className="rounded-2xl border border-line bg-card p-6">
+      <section id="get-started" className="mx-auto max-w-md px-5 pb-16 scroll-mt-20">
+        <div className="rounded-2xl border border-line bg-card p-6 shadow-card">
+          <h2 className="text-lg font-semibold tracking-tight">Get started in seconds</h2>
+          <p className="mb-4 mt-1 text-sm text-mute">Create a free account or sign in to your club.</p>
           <div className="mb-4 flex gap-1.5">
             {(["login", "register"] as const).map((m) => (
               <button
                 key={m}
-                onClick={() => {
-                  setMode(m);
-                  setError("");
-                }}
-                className={`flex-1 rounded-lg py-2 text-sm font-medium ${
-                  mode === m ? "bg-pitch text-emerald-950" : "bg-ink text-slate-400"
+                onClick={() => { setMode(m); setError(""); }}
+                className={`flex-1 rounded-lg py-2 text-sm font-medium transition ${
+                  mode === m ? "bg-pitch text-emerald-950" : "bg-ink-2 text-mute hover:text-white"
                 }`}
               >
                 {m === "login" ? "Sign in" : "Create account"}
@@ -83,33 +75,35 @@ export default function Landing() {
               placeholder="you@club.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="rounded-lg border border-line bg-ink p-2.5 text-sm"
+              className="rounded-lg border border-line bg-ink-2 p-2.5 text-sm outline-none focus:border-pitch/60"
             />
             <input
               type="password"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="rounded-lg border border-line bg-ink p-2.5 text-sm"
+              className="rounded-lg border border-line bg-ink-2 p-2.5 text-sm outline-none focus:border-pitch/60"
             />
             <button
               type="submit"
               disabled={pending}
-              className="rounded-lg bg-pitch py-2.5 font-semibold text-emerald-950 hover:bg-pitch-dark disabled:opacity-50"
+              className="rounded-lg bg-pitch py-2.5 font-semibold text-emerald-950 transition hover:bg-pitch-dark disabled:opacity-50"
             >
               {mode === "login" ? "Sign in" : "Create account"}
             </button>
-            {error && <p className="text-sm text-red-400">{error}</p>}
+            {error && <p className="text-sm text-home">{error}</p>}
           </form>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-5xl gap-4 px-5 pb-16 md:grid-cols-3">
-        {FEATURES.map(([icon, title, body]) => (
-          <div key={title} className="rounded-xl border border-line bg-card p-5">
-            <div className="text-2xl">{icon}</div>
-            <h3 className="mt-2 font-semibold">{title}</h3>
-            <p className="mt-1 text-sm text-slate-400">{body}</p>
+      <section className="mx-auto grid max-w-5xl gap-4 px-5 pb-20 md:grid-cols-3">
+        {FEATURES.map((f) => (
+          <div key={f.title} className="lift rounded-2xl border border-line bg-card p-5 shadow-card hover:border-line-2">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-pitch/10 text-pitch">
+              <Icon name={f.icon} width={20} height={20} />
+            </span>
+            <h3 className="mt-3 font-semibold">{f.title}</h3>
+            <p className="mt-1 text-sm text-mute">{f.body}</p>
           </div>
         ))}
       </section>
