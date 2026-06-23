@@ -1,23 +1,19 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Container, Section, Button, Eyebrow } from "@/components/ui";
 import { Counter } from "@/components/Counter";
 import { CtaBanner } from "@/components/CtaBanner";
 import { ServiceCard } from "@/components/ServiceCard";
-import { Hero3D } from "@/components/Hero3D";
+import { HeroBanner } from "@/components/HeroBanner";
 import { JsonLd } from "@/components/JsonLd";
-import { Sparkle, GrowthArrow, LoopSquiggle, HalfRing } from "@/components/BrandGraphics";
-import { WebGLShader } from "@/components/ui/web-gl-shader";
-import { LiquidButton } from "@/components/ui/liquid-glass-button";
+import { Sparkle, GrowthArrow, LoopSquiggle } from "@/components/BrandGraphics";
 import { Magnetic } from "@/components/Magnetic";
 import { Tilt } from "@/components/Tilt";
 import { Reveal } from "@/components/Reveal";
-import { Parallax } from "@/components/Parallax";
-import { TextReveal } from "@/components/TextReveal";
 import { PinnedSteps } from "@/components/PinnedSteps";
 import { HorizontalStrip } from "@/components/HorizontalStrip";
 import { services, stats, process, sectors } from "@/lib/site";
 import { everySite } from "@/lib/pricing";
+import { banners } from "@/lib/banners";
 import { professionalServiceSchema } from "@/lib/seo";
 
 const pillars = [
@@ -79,81 +75,8 @@ export default function HomePage() {
   return (
     <>
       <JsonLd data={professionalServiceSchema()} />
-      {/* Hero */}
-      <section className="relative overflow-hidden border-b border-line">
-        {/* Animated WebGL shader background */}
-        <WebGLShader className="pointer-events-none absolute inset-0 block h-full w-full" />
-        {/* Legibility overlays — darker on the left where the copy sits */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/30" />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/50 via-transparent to-ink" />
-
-        <Container className="relative z-10 grid items-center gap-12 py-24 sm:py-32 lg:grid-cols-[1.15fr_0.85fr]">
-          <div>
-            <Eyebrow>Creative Management & Growth</Eyebrow>
-            <TextReveal
-              as="h1"
-              className="mt-6 font-display text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl"
-              words={[
-                { t: "We" },
-                { t: "build" },
-                { t: "brands" },
-                { t: "and" },
-                { t: "the" },
-                { t: "systems" },
-                { t: "that" },
-                { t: "grow", className: "text-gradient" },
-                { t: "them.", className: "text-gradient" },
-              ]}
-            />
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-mist">
-              go overseas is a creative management agency. From brand identity and websites
-              to ads, PR, and automation, we handle the strategy, the creative, and the
-              execution that turn ambitious ideas into real traction.
-            </p>
-            <div className="mt-9 flex flex-wrap items-center gap-3">
-              <Link href="/contact" aria-label="Start a conversation">
-                <LiquidButton size="xl" className="rounded-full border border-white/30 text-white">
-                  Start a conversation
-                </LiquidButton>
-              </Link>
-              <Magnetic>
-                <Button href="/services" variant="ghost">
-                  Explore services
-                </Button>
-              </Magnetic>
-            </div>
-            <p className="mt-10 text-xs font-semibold uppercase tracking-[0.2em]">
-              <span className="text-blue">Strategy</span>{" "}
-              <span className="text-mist-dim">·</span>{" "}
-              <span className="text-purple">Creativity</span>{" "}
-              <span className="text-mist-dim">·</span>{" "}
-              <span className="text-green">Growth</span>
-            </p>
-          </div>
-
-          <Parallax speed={0.06} className="relative hidden lg:block">
-            {/* Signature blue sparkle framing the mark — straight from the brand cards */}
-            <Sparkle className="pointer-events-none absolute inset-0 m-auto h-[32rem] w-[32rem] text-blue animate-spin-slow-rev" />
-            <HalfRing className="pointer-events-none absolute right-4 top-2 h-24 w-24 text-pink" />
-            <LoopSquiggle className="pointer-events-none absolute -bottom-1 left-2 h-12 w-32 text-lime" />
-            <div className="relative mx-auto flex aspect-square max-w-[17rem] items-center justify-center rounded-full bg-ink-900 ring-1 ring-line">
-              <Hero3D />
-            </div>
-            <div className="absolute bottom-0 right-0 rounded-2xl border border-line bg-ink-900/90 px-5 py-4 backdrop-blur">
-              <p className="text-xs text-mist-dim">Trusted by</p>
-              <p className="font-display text-2xl font-semibold">60+ brands</p>
-            </div>
-          </Parallax>
-        </Container>
-        <div className="pointer-events-none absolute inset-x-0 bottom-6 hidden justify-center lg:flex">
-          <span className="flex flex-col items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.25em] text-mist-dim">
-            Scroll
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-bob">
-              <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </span>
-        </div>
-      </section>
+      {/* Hero — rotating banner carousel (up to 4 banners) */}
+      <HeroBanner banners={banners} />
 
       {/* Stats */}
       <section className="border-b border-line bg-ink-900">
