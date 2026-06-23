@@ -79,7 +79,7 @@ flowchart LR
 | Camera G5 PTZ (UVC-G5-PTZ) | 1 | 1 | 1 | Auto-tracking; player close-ups |
 | Camera G5 Pro 4K (UVC-G5-Pro) | 0 | 1 | 2 | Sideline multi-angle |
 | Camera G5 Bullet (UVC-G5-Bullet) | 1 | 1 | 1 | Endline |
-| Outdoor AP (U7-Outdoor / Pro-Outdoor) | 1 | 1 | 2 | Pitch-side WiFi |
+| U7 Pro Outdoor AP (U7-Pro-Outdoor) | 1 | 1 | 2 | Pitch-side WiFi 7 — weatherproof PoE+ backhaul for cameras + sync agent |
 | Indoor AP (U7-Pro) | 0 | 1 | 1 | Clubhouse WiFi |
 
 ### 2.2 How cameras connect
