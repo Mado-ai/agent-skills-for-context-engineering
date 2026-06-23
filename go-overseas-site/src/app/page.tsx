@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Container, Section, Button, Eyebrow } from "@/components/ui";
 import { Counter } from "@/components/Counter";
 import { CtaBanner } from "@/components/CtaBanner";
 import { ServiceCard } from "@/components/ServiceCard";
 import { Hero3D } from "@/components/Hero3D";
 import { JsonLd } from "@/components/JsonLd";
-import { BrandBackdrop, Sparkle, GrowthArrow, LoopSquiggle, HalfRing } from "@/components/BrandGraphics";
-import { HeroCanvas } from "@/components/HeroCanvas";
+import { Sparkle, GrowthArrow, LoopSquiggle, HalfRing } from "@/components/BrandGraphics";
+import { WebGLShader } from "@/components/ui/web-gl-shader";
+import { LiquidButton } from "@/components/ui/liquid-glass-button";
 import { Magnetic } from "@/components/Magnetic";
 import { Tilt } from "@/components/Tilt";
 import { Reveal } from "@/components/Reveal";
@@ -79,10 +81,13 @@ export default function HomePage() {
       <JsonLd data={professionalServiceSchema()} />
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-line">
-        <BrandBackdrop />
-        <HeroCanvas className="pointer-events-none absolute inset-0 h-full w-full opacity-70" />
+        {/* Animated WebGL shader background */}
+        <WebGLShader className="pointer-events-none absolute inset-0 block h-full w-full" />
+        {/* Legibility overlays — darker on the left where the copy sits */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/30" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/50 via-transparent to-ink" />
 
-        <Container className="relative grid items-center gap-12 py-24 sm:py-32 lg:grid-cols-[1.15fr_0.85fr]">
+        <Container className="relative z-10 grid items-center gap-12 py-24 sm:py-32 lg:grid-cols-[1.15fr_0.85fr]">
           <div>
             <Eyebrow>Creative Management & Growth</Eyebrow>
             <TextReveal
@@ -106,9 +111,11 @@ export default function HomePage() {
               execution that turn ambitious ideas into real traction.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
-              <Magnetic>
-                <Button href="/contact">Start a conversation</Button>
-              </Magnetic>
+              <Link href="/contact" aria-label="Start a conversation">
+                <LiquidButton size="xl" className="rounded-full border border-white/30 text-white">
+                  Start a conversation
+                </LiquidButton>
+              </Link>
               <Magnetic>
                 <Button href="/services" variant="ghost">
                   Explore services
