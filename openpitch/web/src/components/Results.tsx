@@ -361,18 +361,25 @@ function PlayersTab({ s, color }: { s: NonNullable<Job["summary"]>; color: (t: s
       </div>
 
       {players.length >= 2 && pa && pb && (
-        <Card title="Head-to-head" subtitle="Compare any two players" icon="users">
-          <div className="mb-4 grid grid-cols-2 gap-3">
+        <Card title="Head-to-head" subtitle="Compare any two players · swap to add a different one" icon="users">
+          <div className="mb-4 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
             <select value={aId} onChange={(e) => setAId(e.target.value)}
-              className="rounded-lg border border-line bg-ink-2 p-2 text-sm outline-none focus:border-pitch/60">
+              className="min-w-0 rounded-lg border border-line bg-ink-2 p-2 text-sm outline-none focus:border-pitch/60">
               {players.map((p) => (
                 <option key={String(p.player_id)} value={String(p.player_id)}>
                   {p.team} · #{p.jersey ?? p.player_id}
                 </option>
               ))}
             </select>
+            <button
+              onClick={() => { setAId(bId); setBId(aId); }}
+              title="Swap players"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-line bg-ink-2 text-mute transition hover:border-line-2 hover:text-white"
+            >
+              <Icon name="route" width={16} height={16} />
+            </button>
             <select value={bId} onChange={(e) => setBId(e.target.value)}
-              className="rounded-lg border border-line bg-ink-2 p-2 text-sm outline-none focus:border-pitch/60">
+              className="min-w-0 rounded-lg border border-line bg-ink-2 p-2 text-sm outline-none focus:border-pitch/60">
               {players.map((p) => (
                 <option key={String(p.player_id)} value={String(p.player_id)}>
                   {p.team} · #{p.jersey ?? p.player_id}

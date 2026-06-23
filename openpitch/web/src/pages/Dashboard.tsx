@@ -1,6 +1,7 @@
 import { useAuth } from "../auth/AuthContext";
 import JobList from "../components/JobList";
 import NewAnalysis from "../components/NewAnalysis";
+import PlayerSwitcher from "../components/PlayerSwitcher";
 import Results from "../components/Results";
 import { Card, Icon } from "../components/ui";
 import { useJobs } from "../hooks/useJobs";
@@ -29,6 +30,7 @@ export default function Dashboard() {
       <div className="grid items-start gap-5 lg:grid-cols-[340px_1fr]">
         <div className="flex flex-col gap-5 lg:sticky lg:top-20">
           <NewAnalysis busy={busy} progress={progress} onStarted={track} />
+          <PlayerSwitcher />
           <JobList
             jobs={jobs}
             activeId={active?.id}
