@@ -31,6 +31,9 @@ export interface TeamStat {
   final_third_passes: number;
   shots: number;
   xg: number;
+  final_third_entries?: number;
+  final_third_time_s?: number;
+  final_third_channels?: { left: number; center: number; right: number };
 }
 
 export interface Highlight {

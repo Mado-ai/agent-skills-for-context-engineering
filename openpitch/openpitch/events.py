@@ -78,6 +78,13 @@ class TeamEvents:
     final_third: int = 0
     shots: int = 0
     xg: float = 0.0
+    # Broadcast-style final-third entries (image: "FINAL THIRD ENTRIES").
+    final_third_entries: int = 0
+    final_third_time_s: float = 0.0
+    channels: dict | None = None  # {"left":int,"center":int,"right":int}
+
+    def channel_dict(self) -> dict:
+        return self.channels or {"left": 0, "center": 0, "right": 0}
 
 
 def _attack_goal_x(team: int, player_mean_x: dict[int, tuple[float, int]]) -> float:
@@ -192,5 +199,34 @@ def compute(
                     by_team[shooter_team].shots += 1
                     by_team[shooter_team].xg += val
             in_zone = near_goal
+
+    # --- final-third entries (per possessing team) ---
+    # Walk the ball; the team in possession "enters" its attacking final third
+    # when the ball crosses xn = 2/3 with them on it. Count entries (debounced
+    # by leaving the zone / losing the ball), time spent there, and the channel
+    # (left/center/right of the attacking width) the entry came through.
+    if spells and ball_m:
+        for t in (0, 1):
+            by_team[t].channels = {"left": 0, "center": 0, "right": 0}
+        si = 0
+        prev_team: int | None = None
+        in_third = False
+        for frame, bx, by in ball_m:
+            while si + 1 < len(spells) and spells[si + 1]["frame"] <= frame:
+                si += 1
+            team = spells[si]["team"]
+            inside = xn_of(team, bx) >= _FINAL_THIRD
+            if inside:
+                by_team[team].final_third_time_s += 1.0 / fps
+                if not in_third or team != prev_team:
+                    by_team[team].final_third_entries += 1
+                    # Channel from the attacking team's perspective.
+                    yn = by / PITCH_WIDTH_M
+                    if attack[team] == 0.0:
+                        yn = 1.0 - yn
+                    side = "left" if yn < 1 / 3 else "center" if yn < 2 / 3 else "right"
+                    by_team[team].channels[side] += 1
+            in_third = inside
+            prev_team = team
 
     return by_pid, by_team

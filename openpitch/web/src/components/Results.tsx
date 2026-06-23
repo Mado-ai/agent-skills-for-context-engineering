@@ -2,6 +2,13 @@ import { useMemo, useState } from "react";
 import { api } from "../api/client";
 import type { Job, PlayerStat } from "../types";
 import { DistanceChart, PossessionTimeline, SpeedDistribution, TouchLeaders, XtLeaders } from "./Charts";
+import HeadToHead from "./HeadToHead";
+
+function fmtTime(s: number): string {
+  const m = Math.floor(s / 60);
+  const sec = Math.round(s % 60);
+  return `${m}'${String(sec).padStart(2, "0")}"`;
+}
 import { cx } from "../lib/cx";
 import { Avatar, Badge, Card, CellBar, Donut, Icon, StatCard, Tabs, TeamChip, VersusRow } from "./ui";
 
@@ -169,6 +176,40 @@ export default function Results({ job }: { job: Job | null }) {
             </Card>
           )}
 
+          {ts && ts[home]?.final_third_entries != null && (
+            <Card title="Final third entries" subtitle="Territory won in the attacking third" icon="route">
+              <div className="grid gap-4 sm:grid-cols-2">
+                {teams.map((t) => {
+                  const st = ts[t]!;
+                  const ch = st.final_third_channels ?? { left: 0, center: 0, right: 0 };
+                  const peak = Math.max(ch.left, ch.center, ch.right, 1);
+                  return (
+                    <div key={t} className="rounded-xl border border-line bg-ink-2 p-4">
+                      <div className="flex items-center justify-between">
+                        <TeamChip name={t} color={color(t)} />
+                        <div className="text-right">
+                          <div className="tnum text-2xl font-bold" style={{ color: color(t) }}>{st.final_third_entries ?? 0}</div>
+                          <div className="text-xs text-mute">entries · {fmtTime(st.final_third_time_s ?? 0)} in third</div>
+                        </div>
+                      </div>
+                      <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+                        {(["left", "center", "right"] as const).map((k) => (
+                          <div key={k}>
+                            <div className="flex h-16 items-end justify-center">
+                              <div className="w-7 rounded-t" style={{ height: `${(ch[k] / peak) * 100}%`, background: color(t), minHeight: 3 }} />
+                            </div>
+                            <div className="tnum mt-1 text-sm font-semibold">{ch[k]}</div>
+                            <div className="text-[0.6rem] uppercase tracking-wide text-mute">{k}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+          )}
+
           <Card title="Positional heatmaps" icon="flame">
             <div className="grid gap-4 sm:grid-cols-2">
               {teams.map((t) => (
@@ -281,6 +322,14 @@ function PlayersTab({ s, color }: { s: NonNullable<Job["summary"]>; color: (t: s
   );
   const top = useMemo(() => [...s.players].sort((a, b) => b.distance_m - a.distance_m).slice(0, 3), [s.players]);
 
+  // Head-to-head: default to the top mover vs the best player on the other team.
+  const players = s.players;
+  const defaultB = players.find((p) => p.team !== top[0]?.team) ?? players[1] ?? players[0];
+  const [aId, setAId] = useState<string>(() => String(top[0]?.player_id ?? ""));
+  const [bId, setBId] = useState<string>(() => String(defaultB?.player_id ?? ""));
+  const pa = players.find((p) => String(p.player_id) === aId) ?? players[0];
+  const pb = players.find((p) => String(p.player_id) === bId) ?? defaultB;
+
   const onSort = (key: SortKey) =>
     setSort((cur) => (cur.key === key ? { key, dir: (cur.dir * -1) as 1 | -1 } : { key, dir: -1 }));
 
@@ -310,6 +359,30 @@ function PlayersTab({ s, color }: { s: NonNullable<Job["summary"]>; color: (t: s
           </div>
         ))}
       </div>
+
+      {players.length >= 2 && pa && pb && (
+        <Card title="Head-to-head" subtitle="Compare any two players" icon="users">
+          <div className="mb-4 grid grid-cols-2 gap-3">
+            <select value={aId} onChange={(e) => setAId(e.target.value)}
+              className="rounded-lg border border-line bg-ink-2 p-2 text-sm outline-none focus:border-pitch/60">
+              {players.map((p) => (
+                <option key={String(p.player_id)} value={String(p.player_id)}>
+                  {p.team} · #{p.jersey ?? p.player_id}
+                </option>
+              ))}
+            </select>
+            <select value={bId} onChange={(e) => setBId(e.target.value)}
+              className="rounded-lg border border-line bg-ink-2 p-2 text-sm outline-none focus:border-pitch/60">
+              {players.map((p) => (
+                <option key={String(p.player_id)} value={String(p.player_id)}>
+                  {p.team} · #{p.jersey ?? p.player_id}
+                </option>
+              ))}
+            </select>
+          </div>
+          <HeadToHead a={pa} b={pb} colorA={color(pa.team)} colorB={color(pb.team)} />
+        </Card>
+      )}
 
       <Card title="Player metrics" subtitle={`${s.players.length} players · click a column to sort`} icon="users" pad={false}>
         <div className="overflow-x-auto">

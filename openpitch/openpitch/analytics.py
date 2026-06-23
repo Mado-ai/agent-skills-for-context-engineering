@@ -307,10 +307,12 @@ class Analytics:
         """Team-level report metrics derived from the per-player rows."""
         out = {}
         rows = self.player_stats()
+        _, by_team = self._events()
         for i, team in enumerate(self.config.teams):
             tr = [r for r in rows if r["team"] == team.name]
             completed = sum(r["passes"] - r["turnovers"] for r in tr)
             attempts = sum(r["passes"] for r in tr)
+            te = by_team.get(i)
             out[team.name] = {
                 "distance_km": round(sum(r["distance_m"] for r in tr) / 1000, 2),
                 "sprints": sum(r["sprints"] for r in tr),
@@ -323,6 +325,9 @@ class Analytics:
                 "final_third_passes": sum(r["final_third_passes"] for r in tr),
                 "shots": sum(r["shots"] for r in tr),
                 "xg": round(sum(r["xg"] for r in tr), 2),
+                "final_third_entries": te.final_third_entries if te else 0,
+                "final_third_time_s": round(te.final_third_time_s, 1) if te else 0.0,
+                "final_third_channels": te.channel_dict() if te else {"left": 0, "center": 0, "right": 0},
             }
         return out
 

@@ -50,6 +50,12 @@ def main() -> int:
         print(f"  {name:5} xT {t['xt_added']:5}  progressive {t['progressive_passes']:3}  "
               f"final-third {t['final_third_passes']:3}  shots {t['shots']:2}  "
               f"xG {t['xg']}")
+    print("\nFinal third entries (total · time · by channel):")
+    for name, t in ts.items():
+        ch = t["final_third_channels"]
+        print(f"  {name:5} {t['final_third_entries']:3} entries  "
+              f"{t['final_third_time_s']:5}s  "
+              f"L{ch['left']} C{ch['center']} R{ch['right']}")
 
     print("\nTop movers (real players):")
     for p in players[:10]:
