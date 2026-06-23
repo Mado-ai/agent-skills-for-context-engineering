@@ -46,7 +46,13 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="hidden md:block">
+        <div className="hidden items-center gap-5 md:flex">
+          <Link
+            href="/login"
+            className="text-sm font-medium text-mist transition-colors hover:text-white"
+          >
+            Sign in
+          </Link>
           <Magnetic>
             <Button href="/contact">Start a conversation</Button>
           </Magnetic>
@@ -77,6 +83,13 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
+            <Link
+              href="/login"
+              onClick={() => setOpen(false)}
+              className="rounded-lg px-3 py-2.5 text-sm font-medium text-mist hover:bg-ink-700 hover:text-white"
+            >
+              Sign in
+            </Link>
             <Button href="/contact" className="mt-2 w-full">
               Start a conversation
             </Button>

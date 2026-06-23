@@ -3,6 +3,8 @@ import { Container, Eyebrow } from "@/components/ui";
 import { BrandBackdrop } from "@/components/BrandGraphics";
 import { PortalDemo } from "@/components/PortalDemo";
 import { CtaBanner } from "@/components/CtaBanner";
+import { isAuthConfigured } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Client Portal — Your Whole Growth Picture",
@@ -18,12 +20,45 @@ const features = [
   { t: "Revenue + website together", b: "CorePay revenue beside your site data — a view Wix can't show." },
 ];
 
-export default function PortalPage() {
+async function getSignedInEmail(): Promise<string | null> {
+  if (!isAuthConfigured()) return null;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user?.email ?? user?.phone ?? null;
+}
+
+export default async function PortalPage() {
+  const configured = isAuthConfigured();
+  const identity = await getSignedInEmail();
+
   return (
     <>
       <section className="relative overflow-hidden border-b border-line">
         <BrandBackdrop />
         <Container className="relative py-20 text-center sm:py-28">
+          {identity ? (
+            <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-line bg-ink-800/70 px-4 py-2 text-xs text-mist">
+              <span className="h-2 w-2 rounded-full bg-green" />
+              <span>
+                Signed in as <span className="font-semibold text-white">{identity}</span>
+              </span>
+              <form action="/auth/signout" method="post" className="contents">
+                <button
+                  type="submit"
+                  className="rounded-full border border-line px-3 py-1 font-semibold text-white transition hover:border-mist-dim"
+                >
+                  Sign out
+                </button>
+              </form>
+            </div>
+          ) : !configured ? (
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-line bg-ink-800/70 px-4 py-2 text-xs text-mist-dim">
+              <span className="h-2 w-2 rounded-full bg-purple" />
+              Demo mode — connect Supabase to require a login.
+            </div>
+          ) : null}
           <div className="inline-flex flex-col items-center">
             <Eyebrow>Client portal</Eyebrow>
           </div>
