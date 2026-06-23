@@ -150,6 +150,24 @@ body {
   transform: translateY(0);
 }
 
+/* Hero autoplay progress bar */
+@keyframes hb-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.hb-progress {
+  transform-origin: left center;
+  animation-name: hb-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hb-progress {
+    animation: none;
+    transform: scaleX(1);
+  }
+}
+
 /* Hide scrollbar on horizontal strips */
 .no-scrollbar {
   scrollbar-width: none;

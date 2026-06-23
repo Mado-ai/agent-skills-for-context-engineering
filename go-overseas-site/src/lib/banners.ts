@@ -15,6 +15,11 @@ export type Banner = {
   body: string;
   /** Optional meta line (dates, terms, etc.). */
   meta?: string;
+  /**
+   * Optional background image for this banner. When set, the photo replaces
+   * the animated shader for that slide (a dark overlay keeps text readable).
+   */
+  image?: { src: string; alt?: string };
   /** Primary call-to-action (rendered as the liquid-glass button). */
   primary: { label: string; href: string };
   /** Optional secondary CTA (ghost button). */
@@ -64,6 +69,10 @@ export const banners: Banner[] = [
     highlight: "SEO.",
     body: "A practical 45-minute session for small-business owners — what actually moves rankings, and the quick wins you can do this week.",
     meta: "Online · Pick a date when you register",
+    image: {
+      src: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=80",
+      alt: "Team collaborating around a laptop in a workshop",
+    },
     primary: { label: "Save your spot", href: "/contact" },
     secondary: { label: "Read our insights", href: "/insights" },
   },
@@ -78,6 +87,10 @@ export const banners: Banner[] = [
     highlight: "client portal.",
     body: "Every Growth and Performance care plan now includes a private dashboard — your website performance and CorePay revenue, together in real time.",
     meta: "Included with Growth & Performance care",
+    image: {
+      src: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1600&q=80",
+      alt: "Analytics dashboard with charts on a screen",
+    },
     primary: { label: "Explore the portal", href: "/portal" },
     secondary: { label: "See pricing", href: "/pricing" },
   },
