@@ -54,7 +54,7 @@ def test_start_404_when_unconfigured(client, monkeypatch):
     assert client.get("/api/auth/oauth/github/start", follow_redirects=False).status_code == 404
 
 
-def test_callback_creates_user_and_returns_token(client, monkeypatch):
+def test_callback_creates_user_and_sets_cookie(client, monkeypatch):
     monkeypatch.setenv("GOOGLE_OAUTH_CLIENT_ID", "cid")
     monkeypatch.setenv("GOOGLE_OAUTH_CLIENT_SECRET", "secret")
     monkeypatch.setattr(oauth, "exchange_code",
@@ -64,11 +64,29 @@ def test_callback_creates_user_and_returns_token(client, monkeypatch):
     r = client.get(f"/api/auth/oauth/google/callback?code=abc&state={state}",
                    follow_redirects=False)
     assert r.status_code in (302, 307)
-    loc = r.headers["location"]
-    assert loc.startswith("/?token=")
-    token = loc.split("token=", 1)[1]
+    assert r.headers["location"] == "/dashboard"
+    # Session is handed back as an HttpOnly cookie, never in the URL.
+    set_cookie = r.headers.get("set-cookie", "")
+    assert "pm_session=" in set_cookie and "HttpOnly" in set_cookie
+    token = set_cookie.split("pm_session=", 1)[1].split(";", 1)[0]
     assert auth.decode_token(token)["email"] == "oauthuser@club.com"
     assert db.get_user_by_email("oauthuser@club.com") is not None
+
+
+def test_cookie_session_authorizes_without_bearer(client):
+    """A login sets the session cookie; subsequent requests authorize via it."""
+    fresh = TestClient(app)  # isolated cookie jar
+    r = fresh.post("/api/auth/login",
+                   data={"email": "yazanalshuibe14@gmail.com", "password": "adminpass"})
+    assert r.status_code == 200
+    assert "pm_session=" in r.headers.get("set-cookie", "")
+    # No Authorization header — the cookie carries the session.
+    me = fresh.get("/api/auth/me")
+    assert me.status_code == 200 and me.json()["email"] == "yazanalshuibe14@gmail.com"
+    # Logout clears it.
+    fresh.post("/api/auth/logout")
+    fresh.cookies.clear()
+    assert fresh.get("/api/auth/me").status_code == 401
 
 
 def test_callback_rejects_bad_state(client, monkeypatch):

@@ -52,6 +52,10 @@ export const api = {
     return parse(await fetch("/api/auth/me", { headers: authHeaders() }));
   },
 
+  async logout(): Promise<void> {
+    await fetch("/api/auth/logout", { method: "POST", headers: authHeaders() }).catch(() => {});
+  },
+
   async authProviders(): Promise<{ id: string; label: string }[]> {
     return (await parse(await fetch("/api/auth/providers"))).providers as { id: string; label: string }[];
   },

@@ -131,12 +131,30 @@ def _audit(user: dict | None, action: str, target_type: str | None,
 
 # --- auth helpers -----------------------------------------------------------
 
+SESSION_COOKIE = "pm_session"
+_COOKIE_MAX_AGE = 7 * 24 * 3600
+
+
+def _set_session(resp, token: str) -> None:
+    """Attach the session JWT as an HttpOnly cookie (not readable from JS).
+
+    SameSite=Lax keeps it off cross-site requests (CSRF) while still riding the
+    top-level OAuth redirect; Secure is on in production (HTTPS)."""
+    resp.set_cookie(
+        SESSION_COOKIE, token, max_age=_COOKIE_MAX_AGE, httponly=True,
+        samesite="lax", secure=IS_PRODUCTION, path="/")
+
+
 def current_user(
+    request: Request,
     creds: HTTPAuthorizationCredentials | None = Depends(_bearer),
 ) -> dict:
-    if creds is None:
+    # Prefer the Authorization header (programmatic clients); fall back to the
+    # HttpOnly session cookie (the web app).
+    token = creds.credentials if creds else request.cookies.get(SESSION_COOKIE)
+    if not token:
         raise HTTPException(401, "missing token")
-    data = auth.decode_token(creds.credentials)
+    data = auth.decode_token(token)
     if not data:
         raise HTTPException(401, "invalid or expired token")
     user = db.get_user_by_id(data["sub"])
@@ -155,7 +173,9 @@ def register(email: str = Form(...), password: str = Form(...)) -> JSONResponse:
         raise HTTPException(409, "email already registered")
     user = db.create_user(email, auth.hash_password(password))
     token = auth.create_token(user["id"], user["email"])
-    return JSONResponse({"token": token, "email": user["email"]})
+    resp = JSONResponse({"token": token, "email": user["email"]})
+    _set_session(resp, token)
+    return resp
 
 
 @app.post("/api/auth/login")
@@ -168,7 +188,16 @@ def login(request: Request, email: str = Form(...), password: str = Form(...)) -
         raise HTTPException(401, "invalid credentials")
     _login_reset(key)
     token = auth.create_token(user["id"], user["email"])
-    return JSONResponse({"token": token, "email": user["email"]})
+    resp = JSONResponse({"token": token, "email": user["email"]})
+    _set_session(resp, token)
+    return resp
+
+
+@app.post("/api/auth/logout")
+def logout() -> JSONResponse:
+    resp = JSONResponse({"status": "ok"})
+    resp.delete_cookie(SESSION_COOKIE, path="/")
+    return resp
 
 
 @app.get("/api/auth/providers")
@@ -204,7 +233,11 @@ def oauth_callback(provider: str, request: Request, code: str = "", state: str =
         user = db.create_user(email, auth.hash_password(uuid.uuid4().hex))
     _audit(user, "auth.oauth", "user", provider)
     token = auth.create_token(user["id"], user["email"])
-    return RedirectResponse(f"/?token={token}")
+    # Hand the session back as an HttpOnly cookie (never expose the JWT in the
+    # URL / browser history), then land on the dashboard.
+    resp = RedirectResponse("/dashboard")
+    _set_session(resp, token)
+    return resp
 
 
 @app.get("/api/health")

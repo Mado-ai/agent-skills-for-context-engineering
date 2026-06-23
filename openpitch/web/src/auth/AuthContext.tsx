@@ -14,35 +14,24 @@ const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  // Only "loading" if there's a stored token to verify on mount.
-  const [loading, setLoading] = useState(() => Boolean(tokenStore.get()));
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // OAuth callback returns the browser to /?token=<jwt>; capture and strip it.
-    const url = new URL(window.location.href);
-    const urlToken = url.searchParams.get("token");
-    if (urlToken) {
-      tokenStore.set(urlToken);
-      url.searchParams.delete("token");
-      url.searchParams.delete("oauth_error");
-      window.history.replaceState({}, "", url.pathname + url.search + url.hash);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLoading(true);
-    }
-    if (!tokenStore.get()) return;
-    // Async session restore; setState runs in the promise callbacks below.
+    // Session lives in an HttpOnly cookie (not readable from JS), so we always
+    // ask the server who we are; same-origin fetch sends the cookie.
     api
       .me()
       .then((u) => {
         setUser(u);
         void api.fetchMediaToken();
       })
-      .catch(() => tokenStore.clear())
+      .catch(() => setUser(null))
       .finally(() => setLoading(false));
   }, []);
 
-  const finishAuth = async (token: string) => {
-    tokenStore.set(token);
+  const finishAuth = async () => {
+    // The login/register/oauth responses set the HttpOnly cookie server-side;
+    // we just refresh identity from it.
     setUser(await api.me());
     await api.fetchMediaToken();
   };
@@ -50,10 +39,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value: AuthState = {
     user,
     loading,
-    login: async (email, password) => finishAuth((await api.login(email, password)).token),
-    register: async (email, password) => finishAuth((await api.register(email, password)).token),
+    login: async (email, password) => { await api.login(email, password); await finishAuth(); },
+    register: async (email, password) => { await api.register(email, password); await finishAuth(); },
     logout: () => {
-      tokenStore.clear();
+      void api.logout();
+      tokenStore.clear(); // clear any legacy localStorage token
       setUser(null);
     },
   };

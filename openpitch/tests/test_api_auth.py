@@ -67,6 +67,7 @@ def test_packages_manifest_is_public_and_correct(client):
 
 
 def test_jobs_require_auth(client):
+    client.cookies.clear()  # ensure no session cookie from a prior login
     assert client.get("/api/jobs").status_code == 401
     assert client.post("/api/demo", data={"seconds": "3"}).status_code == 401
 
