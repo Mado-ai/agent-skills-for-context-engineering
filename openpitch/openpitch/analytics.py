@@ -71,6 +71,9 @@ class Analytics:
     # spells (see events.py). Filled during update(), consumed lazily.
     _ball_m: list[tuple[int, float, float]] = field(default_factory=list)
     _spells: list[dict] = field(default_factory=list)
+    # Downsampled per-frame player positions in metres, for off-ball metrics
+    # (runs in behind): (frame, [(pid, team, X_m), ...]).
+    _pos_stream: list[tuple[int, list]] = field(default_factory=list)
     _event_cache: tuple | None = None
 
     def _pitch_pos(self, cx: float, cy: float) -> tuple[float, float, float, float]:
@@ -109,9 +112,11 @@ class Analytics:
             ball_m = (bX, bY)
             self._ball_m.append((state.frame, bX, bY))
 
+        lineup: list[tuple] = []  # (pid, team, X_m) for every player this frame
         for p in state.players:
             X, Y, nx, ny = self._pitch_pos(p.cx, p.cy)
             self._positions[p.team].append((nx, ny))
+            lineup.append((p.id, p.team, X))
             rec = self._rec(p.id, p.team)
             rec["frames"] += 1
             rec["sum_x"] += X  # mean X drives attack-direction inference
@@ -156,6 +161,10 @@ class Analytics:
                     rec["acc_run"] = rec["dec_run"] = 0
             rec["last"] = (X, Y)
 
+        # Downsampled positional snapshot (~5 Hz) for off-ball metrics.
+        if lineup and state.frame % max(1, round(0.2 * self.fps)) == 0:
+            self._pos_stream.append((state.frame, lineup))
+
         # Individual possession + passes. A "spell" is only confirmed once a
         # player has been the nearest within radius for >= ~0.4s, so brief
         # contests don't spawn phantom passes/turnovers. A pass/turnover is the
@@ -186,6 +195,7 @@ class Analytics:
                 pos = ball_m or self._pitch_pos(possessor.cx, possessor.cy)[:2]
                 self._spells.append({
                     "pid": pid, "team": team, "frame": state.frame, "start": pos,
+                    "lineup": lineup,  # all players' X at the moment of the gain
                 })
 
         self._timeline.append(
@@ -252,7 +262,7 @@ class Analytics:
                 if f:
                     means[rec["team"]][pid] = (rec["sum_x"] / f, f)
             self._event_cache = events.compute(
-                self._spells, self._ball_m, means, self.fps)
+                self._spells, self._ball_m, means, self.fps, self._pos_stream)
         return self._event_cache
 
     def player_stats(self) -> list[dict]:
@@ -280,7 +290,8 @@ class Analytics:
                 "touches": 0, "passes": 0, "completed": 0, "turnovers": 0,
                 "zones": {"walk": 0.0, "jog": 0.0, "run": 0.0, "sprint": 0.0},
                 "xt_added": 0.0, "progressive": 0, "final_third": 0,
-                "shots": 0, "xg": 0.0, "accels": 0, "decels": 0})
+                "shots": 0, "xg": 0.0, "accels": 0, "decels": 0,
+                "xa": 0.0, "line_breaking": 0, "packing": 0, "runs_in_behind": 0})
             g["dist"] += rec["dist_m"]
             g["top"] = max(g["top"], rec["top_speed"])
             for k in ("frames", "sprints", "poss", "touches", "passes",
@@ -292,7 +303,9 @@ class Analytics:
             if ev:
                 g["xt_added"] += ev["xt_added"]
                 g["xg"] += ev["xg"]
-                for k in ("progressive", "final_third", "shots"):
+                g["xa"] += ev["xa"]
+                for k in ("progressive", "final_third", "shots",
+                          "line_breaking", "packing", "runs_in_behind"):
                     g[k] += ev[k]
 
         have_jersey = any(g["jersey"] is not None for g in groups.values())
@@ -329,6 +342,10 @@ class Analytics:
                 "decelerations": g["decels"],
                 "hsr_m": round(g["zones"]["run"] + g["zones"]["sprint"], 1),
                 "sprint_dist_m": round(g["zones"]["sprint"], 1),
+                "xa": round(g["xa"], 3),
+                "line_breaking_passes": g["line_breaking"],
+                "packing": g["packing"],
+                "runs_in_behind": g["runs_in_behind"],
             })
         rows.sort(key=lambda r: r["distance_m"], reverse=True)
         return rows
@@ -358,6 +375,10 @@ class Analytics:
                 "final_third_entries": te.final_third_entries if te else 0,
                 "final_third_time_s": round(te.final_third_time_s, 1) if te else 0.0,
                 "final_third_channels": te.channel_dict() if te else {"left": 0, "center": 0, "right": 0},
+                "xa": round(sum(r["xa"] for r in tr), 2),
+                "line_breaking_passes": sum(r["line_breaking_passes"] for r in tr),
+                "packing": sum(r["packing"] for r in tr),
+                "runs_in_behind": sum(r["runs_in_behind"] for r in tr),
             }
         return out
 

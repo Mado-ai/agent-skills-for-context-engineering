@@ -82,6 +82,11 @@ class TeamEvents:
     final_third_entries: int = 0
     final_third_time_s: float = 0.0
     channels: dict | None = None  # {"left":int,"center":int,"right":int}
+    # BePro-style advanced metrics.
+    xa: float = 0.0
+    line_breaking: int = 0
+    packing: int = 0
+    runs_in_behind: int = 0
 
     def channel_dict(self) -> dict:
         return self.channels or {"left": 0, "center": 0, "right": 0}
@@ -113,6 +118,7 @@ def compute(
     ball_m: list[tuple[int, float, float]],
     player_mean_x: dict[int, dict[int, tuple[float, int]]],
     fps: float,
+    pos_stream: list[tuple[int, list]] | None = None,
 ) -> tuple[dict[int, dict], dict[int, TeamEvents]]:
     """Derive per-player and per-team event metrics.
 
@@ -132,7 +138,8 @@ def compute(
     def rec(pid: int) -> dict:
         return by_pid.setdefault(pid, {
             "xt_added": 0.0, "progressive": 0, "final_third": 0,
-            "shots": 0, "xg": 0.0})
+            "shots": 0, "xg": 0.0, "xa": 0.0, "line_breaking": 0,
+            "packing": 0, "runs_in_behind": 0})
 
     def toward(team: int, x: float) -> float:
         """Distance gained toward the attacking goal for a coordinate."""
@@ -166,6 +173,19 @@ def compute(
         if xn_of(team, dx) >= _FINAL_THIRD > xn_of(team, ox):
             r["final_third"] += 1
             by_team[team].final_third += 1
+        # Packing / line-breaking: opponents bypassed by a forward pass (their
+        # toward-goal position falls between the pass origin and destination),
+        # using the lineup snapshot at the moment the receiver gained the ball.
+        o_tw, d_tw = toward(team, ox), toward(team, dx)
+        if d_tw > o_tw:
+            lineup = nxt.get("lineup") or prev.get("lineup") or []
+            bypassed = sum(1 for (_pid, t2, x2) in lineup
+                           if t2 != team and o_tw < toward(team, x2) <= d_tw)
+            if bypassed:
+                r["packing"] += bypassed
+                r["line_breaking"] += 1
+                by_team[team].packing += bypassed
+                by_team[team].line_breaking += 1
 
     # --- shots: ball arrivals inside a tight goal-mouth zone ---
     # The strike location is the ball ~0.7 s before it reached the goal (it
@@ -198,6 +218,14 @@ def compute(
                     r["xg"] += val
                     by_team[shooter_team].shots += 1
                     by_team[shooter_team].xg += val
+                    # Expected assist: credit the shot's xG to the team-mate
+                    # whose pass set up the shooter (the previous confirmed
+                    # spell, if it was a completed pass to them).
+                    if si >= 1 and spells[si - 1]["team"] == shooter_team \
+                            and spells[si - 1]["pid"] != sp["pid"]:
+                        a = rec(spells[si - 1]["pid"])
+                        a["xa"] += val
+                        by_team[shooter_team].xa += val
             in_zone = near_goal
 
     # --- final-third entries (per possessing team) ---
@@ -228,5 +256,31 @@ def compute(
                     by_team[team].channels[side] += 1
             in_third = inside
             prev_team = team
+
+    # --- runs in behind (off-ball) ---
+    # While a team is in possession, count rising-edge moments where one of its
+    # players breaks beyond the opponent's last defensive line (past the
+    # second-deepest opponent, i.e. excluding the keeper) into the final third.
+    if pos_stream and spells:
+        was_behind: dict[int, bool] = {}
+        si = 0
+        for frame, lineup in pos_stream:
+            while si + 1 < len(spells) and spells[si + 1]["frame"] <= frame:
+                si += 1
+            team = spells[si]["team"]
+            opp_tw = sorted((toward(team, x) for (_pid, t2, x) in lineup if t2 != team),
+                            reverse=True)
+            if len(opp_tw) < 2:
+                continue
+            last_line = opp_tw[1]  # deepest is the keeper; next is the back line
+            for pid, t2, x in lineup:
+                if t2 != team:
+                    continue
+                tw = toward(team, x)
+                behind = tw > last_line and tw >= _FINAL_THIRD * PITCH_LENGTH_M
+                if behind and not was_behind.get(pid, False):
+                    rec(pid)["runs_in_behind"] += 1
+                    by_team[team].runs_in_behind += 1
+                was_behind[pid] = behind
 
     return by_pid, by_team

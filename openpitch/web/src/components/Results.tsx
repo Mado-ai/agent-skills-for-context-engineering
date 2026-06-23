@@ -171,7 +171,11 @@ export default function Results({ job }: { job: Job | null }) {
                 <VersusRow label="Pass acc." a={ts[home]?.pass_accuracy ?? 0} b={ts[away]?.pass_accuracy ?? 0} colorA={HOME} colorB={AWAY} fmt={(n) => `${n}%`} />
                 <VersusRow label="Progressive" a={ts[home]?.progressive_passes ?? 0} b={ts[away]?.progressive_passes ?? 0} colorA={HOME} colorB={AWAY} />
                 <VersusRow label="xT added" a={ts[home]?.xt_added ?? 0} b={ts[away]?.xt_added ?? 0} colorA={HOME} colorB={AWAY} fmt={(n) => n.toFixed(2)} />
+                <VersusRow label="Line-breaking" a={ts[home]?.line_breaking_passes ?? 0} b={ts[away]?.line_breaking_passes ?? 0} colorA={HOME} colorB={AWAY} />
+                <VersusRow label="Packing" a={ts[home]?.packing ?? 0} b={ts[away]?.packing ?? 0} colorA={HOME} colorB={AWAY} />
+                <VersusRow label="Runs in behind" a={ts[home]?.runs_in_behind ?? 0} b={ts[away]?.runs_in_behind ?? 0} colorA={HOME} colorB={AWAY} />
                 <VersusRow label="Shots" a={ts[home]?.shots ?? 0} b={ts[away]?.shots ?? 0} colorA={HOME} colorB={AWAY} />
+                <VersusRow label="xA" a={ts[home]?.xa ?? 0} b={ts[away]?.xa ?? 0} colorA={HOME} colorB={AWAY} fmt={(n) => n.toFixed(2)} />
                 <VersusRow label="xG" a={ts[home]?.xg ?? 0} b={ts[away]?.xg ?? 0} colorA={HOME} colorB={AWAY} fmt={(n) => n.toFixed(2)} />
               </div>
             </Card>
@@ -418,7 +422,11 @@ function PlayersTab({ s, color, jobId }: { s: NonNullable<Job["summary"]>; color
               { label: "Touches", a: pa.touches ?? 0, b: pb.touches ?? 0 },
               { label: "Passes completed", a: pa.passes ?? 0, b: pb.passes ?? 0 },
               { label: "Pass accuracy", a: pa.pass_accuracy ?? 0, b: pb.pass_accuracy ?? 0, fmt: (n) => `${n}%` },
+              { label: "Line-breaking passes", a: pa.line_breaking_passes ?? 0, b: pb.line_breaking_passes ?? 0 },
+              { label: "Packing", a: pa.packing ?? 0, b: pb.packing ?? 0 },
+              { label: "Runs in behind", a: pa.runs_in_behind ?? 0, b: pb.runs_in_behind ?? 0 },
               { label: "Attempts (shots)", a: pa.shots ?? 0, b: pb.shots ?? 0 },
+              { label: "Expected assists", a: pa.xa ?? 0, b: pb.xa ?? 0, fmt: (n) => n.toFixed(2) },
               { label: "Expected goals", a: pa.xg ?? 0, b: pb.xg ?? 0, fmt: (n) => n.toFixed(2) },
             ]}
           />

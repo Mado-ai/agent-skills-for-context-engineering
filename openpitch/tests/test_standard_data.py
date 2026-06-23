@@ -29,7 +29,8 @@ def test_player_stats_expose_computed_physical_metrics():
     rows = a.player_stats()
     assert rows, "expected a player row"
     p = rows[0]
-    for k in ("accelerations", "decelerations", "hsr_m", "sprint_dist_m"):
+    for k in ("accelerations", "decelerations", "hsr_m", "sprint_dist_m",
+              "xa", "line_breaking_passes", "packing", "runs_in_behind"):
         assert k in p and p[k] >= 0
 
 

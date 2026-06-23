@@ -70,6 +70,11 @@ def main() -> int:
               f"xT {p['xt_added']:+.3f}  progressive {p['progressive_passes']}  "
               f"final-third {p['final_third_passes']}  shots {p['shots']}  "
               f"xG {p['xg']}")
+
+    print("\nAdvanced (xA / line-breaking / packing / runs-in-behind):")
+    for name, t in ts.items():
+        print(f"  {name:5} xA {t['xa']}  line-breaking {t['line_breaking_passes']:3}  "
+              f"packing {t['packing']:3}  runs-in-behind {t['runs_in_behind']:3}")
     return 0
 
 

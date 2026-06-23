@@ -21,6 +21,10 @@ export interface PlayerStat {
   decelerations?: number;
   hsr_m?: number;
   sprint_dist_m?: number;
+  xa?: number;
+  line_breaking_passes?: number;
+  packing?: number;
+  runs_in_behind?: number;
 }
 
 export interface TeamStat {
@@ -38,6 +42,10 @@ export interface TeamStat {
   final_third_entries?: number;
   final_third_time_s?: number;
   final_third_channels?: { left: number; center: number; right: number };
+  xa?: number;
+  line_breaking_passes?: number;
+  packing?: number;
+  runs_in_behind?: number;
 }
 
 export interface Highlight {
