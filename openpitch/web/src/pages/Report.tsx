@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api/client";
 import { brandColor } from "../lib/brand";
+import { fmtBench } from "../components/ProfileInsights";
 import type { PlayerProfile, TeamProfile } from "../types";
 
 /** A light-themed, print-optimised one-pager. "Save as PDF" from the browser
@@ -141,7 +142,7 @@ function PlayerReport({ p }: { p: PlayerProfile }) {
                 <div className="mb-0.5 flex justify-between text-xs text-slate-600">
                   <span>{b.label}</span>
                   <span>
-                    <b className="text-slate-900">{b.value}</b> · {b.percentile}th pct
+                    <b className="text-slate-900">{fmtBench(b.key, b.value)}</b> · {b.percentile}th pct
                   </span>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-slate-200">

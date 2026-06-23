@@ -83,6 +83,11 @@ export function FormTrends({ trends, color = ACCENT }: { trends: TrendPoint[]; c
   );
 }
 
+/** Distance benchmarks read in km; everything else in raw units. */
+export function fmtBench(key: string, v: number): string {
+  return key === "distance_per_match" ? `${(v / 1000).toFixed(1)} km` : `${v}`;
+}
+
 /** Percentile bars vs team-mates. 50 = team median-ish, 100 = team best. */
 export function BenchmarkBars({ benchmarks, color = ACCENT }: { benchmarks: Benchmark[]; color?: string }) {
   if (benchmarks.length === 0)
@@ -98,7 +103,7 @@ export function BenchmarkBars({ benchmarks, color = ACCENT }: { benchmarks: Benc
           <div className="mb-1 flex items-baseline justify-between text-sm">
             <span className="text-slate-300">{b.label}</span>
             <span className="tnum text-xs text-mute">
-              <b className="text-white">{b.value}</b> · team avg {b.team_avg} · best {b.team_best}
+              <b className="text-white">{fmtBench(b.key, b.value)}</b> · team avg {fmtBench(b.key, b.team_avg)} · best {fmtBench(b.key, b.team_best)}
             </span>
           </div>
           <div className="relative h-2.5 overflow-hidden rounded-full bg-line">

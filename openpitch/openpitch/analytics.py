@@ -115,6 +115,11 @@ class Analytics:
 
         lineup: list[tuple] = []  # (pid, team, X_m) for every player this frame
         for p in state.players:
+            # Tracking sources may list a player every frame but report NaN
+            # coordinates while they're off the pitch (e.g. unused subs). Those
+            # would poison position means, distance and the pass network — skip.
+            if not (np.isfinite(p.cx) and np.isfinite(p.cy)):
+                continue
             X, Y, nx, ny = self._pitch_pos(p.cx, p.cy)
             self._positions[p.team].append((nx, ny))
             lineup.append((p.id, p.team, X))

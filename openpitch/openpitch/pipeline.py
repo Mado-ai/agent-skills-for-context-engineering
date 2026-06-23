@@ -118,7 +118,7 @@ def process_video(
         analytics={
             k: summary[k]
             for k in ("possession", "players", "heatmaps", "possession_timeline",
-                      "team_stats")
+                      "team_stats", "shots", "pass_network", "zones")
         },
         highlights=summary["highlights"],
         meta=summary["meta"],
