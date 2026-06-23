@@ -540,6 +540,16 @@ def delete_player(player_id: str) -> None:
         c.execute(delete(players).where(players.c.id == player_id))
 
 
+def list_all_players(user_id: int) -> list[dict]:
+    """Every player across the user's teams (for the cross-team compare picker)."""
+    sql = text(
+        "SELECT p.id, p.name, p.jersey, p.team_id, t.name AS team_name "
+        "FROM players p JOIN teams t ON t.id = p.team_id "
+        "WHERE t.user_id = :uid ORDER BY t.name, p.jersey")
+    with _engine.connect() as c:
+        return _rows(c, sql, {"uid": user_id})
+
+
 # --- matches ----------------------------------------------------------------
 
 def create_match(match_id: str, user_id: int, team_id: str, field_type: int,

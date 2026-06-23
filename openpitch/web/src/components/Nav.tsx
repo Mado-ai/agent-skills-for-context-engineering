@@ -44,6 +44,9 @@ export default function Nav() {
             <Link to="/teams" className="text-slate-300 hover:text-white">
               Teams
             </Link>
+            <Link to="/compare" className="hidden text-slate-300 hover:text-white sm:block">
+              Compare
+            </Link>
             <Link to="/sites" className="text-slate-300 hover:text-white">
               Sites
             </Link>

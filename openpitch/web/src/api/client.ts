@@ -189,6 +189,9 @@ export const api = {
   async getPlayer(id: string): Promise<PlayerProfile> {
     return authed(`/api/players/${id}`);
   },
+  async allPlayers(): Promise<{ id: string; name: string; jersey: number | null; team_id: string; team_name: string }[]> {
+    return (await authed("/api/players")).players;
+  },
   async sharePlayer(id: string): Promise<{ public: boolean; public_token: string | null }> {
     return authed(`/api/players/${id}/share`, { method: "POST" });
   },

@@ -711,6 +711,12 @@ def create_player(
     )
 
 
+@app.get("/api/players")
+def all_players(user: dict = Depends(current_user)) -> JSONResponse:
+    """Flat list of the user's players across teams — for the compare picker."""
+    return JSONResponse({"players": db.list_all_players(user["id"])})
+
+
 @app.get("/api/players/{player_id}")
 def player_detail(player_id: str, user: dict = Depends(current_user)) -> JSONResponse:
     _readable_player(player_id, user)
