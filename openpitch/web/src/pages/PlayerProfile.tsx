@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api/client";
 import FieldBreakdown from "../components/FieldBreakdown";
@@ -9,16 +9,30 @@ import type { PlayerProfile as PP } from "../types";
 export default function PlayerProfile() {
   const { id = "" } = useParams();
   const [pp, setPp] = useState<PP | null>(null);
+  const [ver, setVer] = useState(0);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(() => api.getPlayer(id).then(setPp).catch(() => setPp(null)), [id]);
   useEffect(() => {
     void load();
   }, [load]);
 
+  const onPhoto = async (f?: File) => {
+    if (!f) return;
+    try {
+      await api.uploadAvatar(id, f);
+      setVer(Date.now());
+      load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Upload failed");
+    }
+  };
+
   if (!pp) return <div className="p-10 text-center text-mute">Loading…</div>;
   const t = pp.totals;
   const brand = brandColor(pp.team_id);
   const label = pp.player.jersey != null ? String(pp.player.jersey) : initials(pp.player.name);
+  const avatarSrc = pp.player.avatar ? `${api.playerAvatarUrl(id)}&v=${ver}` : undefined;
 
   const share = async () => {
     try {
@@ -52,7 +66,23 @@ export default function PlayerProfile() {
         <div className="absolute inset-0 opacity-20" style={{ background: `radial-gradient(600px 220px at 100% 0%, ${brand}, transparent 70%)` }} />
         <div className="relative flex flex-wrap items-center justify-between gap-4 p-5">
           <div className="flex items-center gap-4">
-            <Avatar label={label} color={brand} size={60} />
+            <div className="relative">
+              <Avatar label={label} color={brand} size={60} src={avatarSrc} />
+              <button
+                onClick={() => fileRef.current?.click()}
+                title="Change photo"
+                className="absolute -bottom-1 -right-1 grid h-6 w-6 place-items-center rounded-full bg-pitch text-emerald-950 ring-2 ring-card hover:bg-pitch-dark"
+              >
+                <Icon name="upload" width={12} height={12} />
+              </button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                onChange={(e) => onPhoto(e.target.files?.[0] ?? undefined)}
+              />
+            </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight">{pp.player.name}</h1>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-mute">

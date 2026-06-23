@@ -135,6 +135,7 @@ export interface Player {
   name: string;
   position: string | null;
   jersey: number | null;
+  avatar?: boolean;
 }
 
 export interface Match {
@@ -161,11 +162,11 @@ export interface TeamProfile {
     goals_against: number;
   };
   recent_matches: Match[];
-  leaderboard: { player_id: string; name: string; matches: number; distance_m: number; top_speed_ms: number; sprints: number; passes: number; passes_completed?: number; pass_accuracy?: number | null; shots?: number; shots_on_target?: number; fouls?: number; goals: number; assists?: number }[];
+  leaderboard: { player_id: string; name: string; matches: number; distance_m: number; top_speed_ms: number; sprints: number; passes: number; passes_completed?: number; pass_accuracy?: number | null; shots?: number; shots_on_target?: number; fouls?: number; goals: number; assists?: number; avatar?: boolean }[];
 }
 
 export interface PlayerProfile {
-  player: { id: string; name: string; position: string | null; jersey: number | null };
+  player: { id: string; name: string; position: string | null; jersey: number | null; avatar?: boolean };
   team_id: string;
   public_token?: string | null;
   is_minor?: boolean;

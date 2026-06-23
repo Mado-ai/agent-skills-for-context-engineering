@@ -72,9 +72,11 @@ export default function Compare() {
           {a && b && refOf(aId) && refOf(bId) ? (
             <HeadToHead
               a={{ name: a.player.name, sub: `${refOf(aId)!.team_name} · ${a.totals.matches} matches`,
-                   jersey: a.player.jersey ?? initials(a.player.name), color: brandColor(a.team_id) }}
+                   jersey: a.player.jersey ?? initials(a.player.name), color: brandColor(a.team_id),
+                   src: a.player.avatar ? api.playerAvatarUrl(a.player.id) : undefined }}
               b={{ name: b.player.name, sub: `${refOf(bId)!.team_name} · ${b.totals.matches} matches`,
-                   jersey: b.player.jersey ?? initials(b.player.name), color: brandColor(b.team_id) }}
+                   jersey: b.player.jersey ?? initials(b.player.name), color: brandColor(b.team_id),
+                   src: b.player.avatar ? api.playerAvatarUrl(b.player.id) : undefined }}
               rows={rows(a.totals, b.totals)}
             />
           ) : (

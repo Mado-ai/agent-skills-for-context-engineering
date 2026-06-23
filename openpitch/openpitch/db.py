@@ -124,6 +124,7 @@ players = Table(
     Column("is_minor", Integer, default=1),
     Column("guardian_consent_at", Float),
     Column("guardian_consent_by", Integer),
+    Column("avatar_url", Text),
     Column("created_at", Float, nullable=False),
 )
 matches = Table(
@@ -534,6 +535,12 @@ def set_player_public(player_id: str, token: str | None) -> None:
                   .values(public_token=token))
 
 
+def set_player_avatar(player_id: str, avatar_url: str | None) -> None:
+    with _engine.begin() as c:
+        c.execute(players.update().where(players.c.id == player_id)
+                  .values(avatar_url=avatar_url))
+
+
 def delete_player(player_id: str) -> None:
     with _engine.begin() as c:
         c.execute(delete(player_match_stats).where(player_match_stats.c.player_id == player_id))
@@ -543,11 +550,18 @@ def delete_player(player_id: str) -> None:
 def list_all_players(user_id: int) -> list[dict]:
     """Every player across the user's teams (for the cross-team compare picker)."""
     sql = text(
-        "SELECT p.id, p.name, p.jersey, p.team_id, t.name AS team_name "
+        "SELECT p.id, p.name, p.jersey, p.team_id, p.avatar_url, t.name AS team_name "
         "FROM players p JOIN teams t ON t.id = p.team_id "
         "WHERE t.user_id = :uid ORDER BY t.name, p.jersey")
     with _engine.connect() as c:
         return _rows(c, sql, {"uid": user_id})
+
+
+def match_for_job(job_id: str) -> dict | None:
+    """The match (if any) a dashboard analysis job is linked to."""
+    with _engine.connect() as c:
+        return _row(c, select(matches).where(matches.c.job_id == job_id)
+                    .order_by(matches.c.created_at.desc()))
 
 
 # --- matches ----------------------------------------------------------------

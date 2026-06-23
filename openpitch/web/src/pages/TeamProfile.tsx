@@ -134,7 +134,8 @@ export default function TeamProfile() {
             <ul className="flex flex-col gap-2.5">
               {tp.leaderboard.slice(0, 5).map((l) => (
                 <li key={l.player_id} className="flex items-center gap-3">
-                  <Avatar label={initials(l.name)} color={brand} size={28} />
+                  <Avatar label={initials(l.name)} color={brand} size={28}
+                    src={l.avatar ? api.playerAvatarUrl(l.player_id) : undefined} />
                   <div className="min-w-0 flex-1">
                     <div className="flex justify-between text-sm">
                       <Link to={`/players/${l.player_id}`} className="truncate hover:text-white">{l.name}</Link>
@@ -162,8 +163,10 @@ export default function TeamProfile() {
             </select>
           </div>
           <HeadToHead
-            a={{ name: lA.name, sub: `${lA.matches} matches`, jersey: initials(lA.name), color: H2H_COLOR_A }}
-            b={{ name: lB.name, sub: `${lB.matches} matches`, jersey: initials(lB.name), color: H2H_COLOR_B }}
+            a={{ name: lA.name, sub: `${lA.matches} matches`, jersey: initials(lA.name), color: H2H_COLOR_A,
+                 src: lA.avatar ? api.playerAvatarUrl(lA.player_id) : undefined }}
+            b={{ name: lB.name, sub: `${lB.matches} matches`, jersey: initials(lB.name), color: H2H_COLOR_B,
+                 src: lB.avatar ? api.playerAvatarUrl(lB.player_id) : undefined }}
             rows={[
               { label: "Goals", a: lA.goals, b: lB.goals },
               { label: "Assists", a: lA.assists ?? 0, b: lB.assists ?? 0 },
@@ -185,7 +188,8 @@ export default function TeamProfile() {
             {tp.players.map((p) => (
               <li key={p.id}>
                 <Link to={`/players/${p.id}`} className="flex items-center gap-3 rounded-lg px-2 py-1.5 text-sm transition hover:bg-white/[0.03]">
-                  <Avatar label={p.jersey != null ? String(p.jersey) : initials(p.name)} color={brand} size={28} />
+                  <Avatar label={p.jersey != null ? String(p.jersey) : initials(p.name)} color={brand} size={28}
+                    src={p.avatar ? api.playerAvatarUrl(p.id) : undefined} />
                   <span className="flex-1 truncate">{p.name}</span>
                   <span className="text-xs text-mute">{p.position}</span>
                 </Link>

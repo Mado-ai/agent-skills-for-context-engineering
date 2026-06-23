@@ -119,6 +119,20 @@ export const api = {
   fileUrl(jobId: string, path: string): string {
     return `/api/files/${jobId}/${path}?mt=${encodeURIComponent(_mediaToken)}`;
   },
+  // Player photo URL; the media token (when present) authorizes the owner to
+  // see minors' photos. Public/anonymous viewers only get non-minor photos.
+  playerAvatarUrl(playerId: string): string {
+    const base = `/api/players/${playerId}/avatar`;
+    return _mediaToken ? `${base}?mt=${encodeURIComponent(_mediaToken)}` : base;
+  },
+  async uploadAvatar(playerId: string, file: File): Promise<void> {
+    const fd = new FormData();
+    fd.append("file", file);
+    await authed(`/api/players/${playerId}/avatar`, { method: "POST", body: fd });
+  },
+  async jobRosterMap(jobId: string): Promise<{ team_id: string | null; players: { jersey: number; id: string; name: string; avatar: boolean }[] }> {
+    return authed(`/api/jobs/${jobId}/roster-map`);
+  },
 
   // --- organizations / RBAC ---
   async listOrgs(): Promise<Org[]> {

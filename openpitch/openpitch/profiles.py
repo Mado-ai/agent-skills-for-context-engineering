@@ -48,7 +48,8 @@ def player_profile(player_id: str) -> dict | None:
         round(100 * completed / totals["passes"], 1) if totals["passes"] else None)
     totals["avg_distance_m"] = round(totals["distance_m"] / totals["matches"], 1) if stats else 0
     return {
-        "player": {k: p[k] for k in ("id", "name", "position", "jersey")},
+        "player": {**{k: p[k] for k in ("id", "name", "position", "jersey")},
+                   "avatar": bool(p.get("avatar_url"))},
         "team_id": p["team_id"],
         "matches_by_field": _by_field(stats),
         "totals": totals,
@@ -97,14 +98,17 @@ def team_profile(team_id: str) -> dict | None:
             a["fouls"] += s.get("fouls") or 0
             a["goals"] += s["goals"] or 0
             a["assists"] += s["assists"] or 0
+    avatar_by_pid = {p["id"]: bool(p.get("avatar_url")) for p in players}
     for a in agg.values():
         a["pass_accuracy"] = (
             round(100 * a["passes_completed"] / a["passes"], 1) if a["passes"] else None)
+        a["avatar"] = avatar_by_pid.get(a["player_id"], False)
     leaderboard = sorted(agg.values(), key=lambda a: a["distance_m"], reverse=True)
 
     return {
         "team": {"id": t["id"], "name": t["name"], "public_token": t["public_token"]},
-        "players": [dict(p) for p in players],
+        "players": [{"id": p["id"], "name": p["name"], "position": p["position"],
+                     "jersey": p["jersey"], "avatar": bool(p.get("avatar_url"))} for p in players],
         "player_count": len(players),
         "matches_by_field": _by_field(matches),
         "record": {"played": len(matches), "wins": wins, "draws": draws,

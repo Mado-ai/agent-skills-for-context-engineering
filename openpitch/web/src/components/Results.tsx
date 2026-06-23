@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import type { Job, PlayerStat } from "../types";
 import { DistanceChart, PossessionTimeline, SpeedDistribution, TouchLeaders, XtLeaders } from "./Charts";
@@ -225,7 +226,7 @@ export default function Results({ job }: { job: Job | null }) {
         </div>
       )}
 
-      {tab === "players" && <PlayersTab s={s} color={color} />}
+      {tab === "players" && <PlayersTab s={s} color={color} jobId={job.id} />}
 
       {tab === "highlights" && (
         <Card title="Auto highlights" subtitle="Detected high-intensity moments" icon="film">
@@ -312,9 +313,18 @@ function num(p: PlayerStat, k: SortKey): number {
   return Number(p[k] ?? 0);
 }
 
-function PlayersTab({ s, color }: { s: NonNullable<Job["summary"]>; color: (t: string) => string }) {
+function PlayersTab({ s, color, jobId }: { s: NonNullable<Job["summary"]>; color: (t: string) => string; jobId: string }) {
   const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: "distance_m", dir: -1 });
   const maxDist = useMemo(() => Math.max(...s.players.map((p) => p.distance_m), 1), [s.players]);
+
+  // If this analysis is linked to a match/team, map jersey -> roster account.
+  const [roster, setRoster] = useState<Record<number, { id: string; name: string; avatar: boolean }>>({});
+  useEffect(() => {
+    api.jobRosterMap(jobId)
+      .then((r) => setRoster(Object.fromEntries(r.players.map((p) => [p.jersey, p]))))
+      .catch(() => setRoster({}));
+  }, [jobId]);
+  const accountFor = (p: PlayerStat) => (p.jersey != null ? roster[p.jersey] : undefined);
 
   const rows = useMemo(
     () => [...s.players].sort((a, b) => (num(a, sort.key) - num(b, sort.key)) * sort.dir),
@@ -344,20 +354,28 @@ function PlayersTab({ s, color }: { s: NonNullable<Job["summary"]>; color: (t: s
   return (
     <div className="flex flex-col gap-5">
       <div className="grid gap-3 sm:grid-cols-3">
-        {top.map((p, i) => (
-          <div key={String(p.player_id)} className="lift flex items-center gap-3 rounded-2xl border border-line bg-card p-4 shadow-card hover:border-line-2">
-            <Avatar label={String(p.jersey ?? "?")} color={color(p.team)} size={42} />
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="truncate font-semibold">{p.player_id}</span>
-                {i === 0 && <Icon name="trophy" width={15} height={15} className="text-amber" />}
+        {top.map((p, i) => {
+          const acct = accountFor(p);
+          const inner = (
+            <>
+              <Avatar label={String(p.jersey ?? "?")} color={color(p.team)} size={42}
+                src={acct?.avatar ? api.playerAvatarUrl(acct.id) : undefined} />
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="truncate font-semibold">{acct?.name ?? p.player_id}</span>
+                  {i === 0 && <Icon name="trophy" width={15} height={15} className="text-amber" />}
+                </div>
+                <p className="tnum text-xs text-mute">
+                  {(p.distance_m / 1000).toFixed(2)} km · {p.top_speed_ms} m/s · {p.passes ?? 0} passes
+                </p>
               </div>
-              <p className="tnum text-xs text-mute">
-                {(p.distance_m / 1000).toFixed(2)} km · {p.top_speed_ms} m/s · {p.passes ?? 0} passes
-              </p>
-            </div>
-          </div>
-        ))}
+            </>
+          );
+          const cls = "lift flex items-center gap-3 rounded-2xl border border-line bg-card p-4 shadow-card hover:border-line-2";
+          return acct
+            ? <Link key={String(p.player_id)} to={`/players/${acct.id}`} className={cls} title="Open player account">{inner}</Link>
+            : <div key={String(p.player_id)} className={cls}>{inner}</div>;
+        })}
       </div>
 
       {players.length >= 2 && pa && pb && (
@@ -421,16 +439,32 @@ function PlayersTab({ s, color }: { s: NonNullable<Job["summary"]>; color: (t: s
               </tr>
             </thead>
             <tbody>
-              {rows.map((p) => (
+              {rows.map((p) => {
+                const acct = accountFor(p);
+                const ava = (
+                  <Avatar label={String(p.jersey ?? "?")} color={color(p.team)} size={30}
+                    src={acct?.avatar ? api.playerAvatarUrl(acct.id) : undefined} />
+                );
+                return (
                 <tr key={String(p.player_id)} className="border-b border-line/50 transition hover:bg-white/[0.02]">
                   <td className="py-2 pl-5">
-                    <div className="flex items-center gap-2.5">
-                      <Avatar label={String(p.jersey ?? "?")} color={color(p.team)} size={30} />
-                      <div className="min-w-0">
-                        <span className="block truncate font-medium">{p.player_id}</span>
-                        <span className="text-xs text-mute">{p.team}</span>
+                    {acct ? (
+                      <Link to={`/players/${acct.id}`} className="flex items-center gap-2.5 hover:text-white" title="Open player account">
+                        {ava}
+                        <div className="min-w-0">
+                          <span className="block truncate font-medium">{acct.name}</span>
+                          <span className="flex items-center gap-1 text-xs text-pitch">#{p.jersey} · open account →</span>
+                        </div>
+                      </Link>
+                    ) : (
+                      <div className="flex items-center gap-2.5">
+                        {ava}
+                        <div className="min-w-0">
+                          <span className="block truncate font-medium">{p.player_id}</span>
+                          <span className="text-xs text-mute">{p.team}</span>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </td>
                   <td className="px-2 py-2">
                     <div className="flex items-center justify-end gap-2">
@@ -446,7 +480,8 @@ function PlayersTab({ s, color }: { s: NonNullable<Job["summary"]>; color: (t: s
                     </td>
                   ))}
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

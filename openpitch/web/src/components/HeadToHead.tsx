@@ -10,6 +10,7 @@ export type H2HHeader = {
   sub?: string;
   jersey?: string | number | null;
   color: string;
+  src?: string;
 };
 
 export type H2HRow = {
@@ -25,7 +26,7 @@ export default function HeadToHead({ a, b, rows }: { a: H2HHeader; b: H2HHeader;
     <div>
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2.5">
-          <Avatar label={String(a.jersey ?? "?")} color={a.color} size={40} />
+          <Avatar label={String(a.jersey ?? "?")} color={a.color} size={40} src={a.src} />
           <div className="min-w-0">
             <div className="truncate text-sm font-semibold">{a.name}</div>
             {a.sub && <div className="truncate text-xs text-mute">{a.sub}</div>}
@@ -37,7 +38,7 @@ export default function HeadToHead({ a, b, rows }: { a: H2HHeader; b: H2HHeader;
             <div className="truncate text-sm font-semibold">{b.name}</div>
             {b.sub && <div className="truncate text-xs text-mute">{b.sub}</div>}
           </div>
-          <Avatar label={String(b.jersey ?? "?")} color={b.color} size={40} />
+          <Avatar label={String(b.jersey ?? "?")} color={b.color} size={40} src={b.src} />
         </div>
       </div>
 

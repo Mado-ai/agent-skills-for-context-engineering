@@ -353,6 +353,20 @@ def job_status(job_id: str, user: dict = Depends(current_user)) -> JSONResponse:
     return JSONResponse(_owned_job(job_id, user))
 
 
+@app.get("/api/jobs/{job_id}/roster-map")
+def job_roster_map(job_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    """If this analysis is linked to a match, map jersey -> roster player so the
+    dashboard can open detected players' accounts."""
+    _owned_job(job_id, user)
+    m = db.match_for_job(job_id)
+    if not m or m["user_id"] != user["id"]:
+        return JSONResponse({"team_id": None, "players": []})
+    players = [{"jersey": p["jersey"], "id": p["id"], "name": p["name"],
+                "avatar": bool(p.get("avatar_url"))}
+               for p in db.list_players(m["team_id"]) if p.get("jersey") is not None]
+    return JSONResponse({"team_id": m["team_id"], "players": players})
+
+
 @app.patch("/api/jobs/{job_id}")
 def rename_job(
     job_id: str, name: str = Form(...), user: dict = Depends(current_user)
@@ -714,7 +728,61 @@ def create_player(
 @app.get("/api/players")
 def all_players(user: dict = Depends(current_user)) -> JSONResponse:
     """Flat list of the user's players across teams — for the compare picker."""
-    return JSONResponse({"players": db.list_all_players(user["id"])})
+    rows = db.list_all_players(user["id"])
+    for r in rows:
+        r["avatar"] = bool(r.pop("avatar_url", None))
+    return JSONResponse({"players": rows})
+
+
+_AVATAR_TYPES = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}
+
+
+@app.post("/api/players/{player_id}/avatar")
+async def upload_avatar(player_id: str, file: UploadFile,
+                        user: dict = Depends(current_user)) -> JSONResponse:
+    """Upload a player's profile photo (owner only)."""
+    _owned_player(player_id, user)
+    ext = _AVATAR_TYPES.get((file.content_type or "").lower())
+    if not ext:
+        raise HTTPException(400, "image must be JPEG, PNG or WebP")
+    data = await file.read()
+    if len(data) > 5_000_000:
+        raise HTTPException(400, "image too large (max 5 MB)")
+    key = f"avatar-{player_id}"
+    d = STORAGE.job_dir(key)
+    for old in d.glob("avatar.*"):
+        old.unlink()
+    (d / f"avatar{ext}").write_bytes(data)
+    STORAGE.finalize_job(key)  # uploads to S3 when configured
+    db.set_player_avatar(player_id, f"avatar{ext}")
+    _audit(user, "player.avatar", "player", player_id)
+    return JSONResponse({"status": "ok"})
+
+
+@app.get("/api/players/{player_id}/avatar")
+def serve_avatar(player_id: str, mt: str = ""):
+    """Serve a player photo. Minors' photos require the owner's media token, so
+    they're never exposed on public pages."""
+    p = db.get_player(player_id)
+    if not p or not p.get("avatar_url"):
+        raise HTTPException(404, "not found")
+    uid = auth.verify_media_token(mt)
+    owner = False
+    if uid is not None:
+        team = db.get_team(p["team_id"])
+        owner = bool(team and team["user_id"] == uid)
+    if p["is_minor"] and not owner:
+        raise HTTPException(404, "not found")
+    try:
+        local = STORAGE.local_path(f"avatar-{player_id}", p["avatar_url"])
+        if local is not None:
+            return FileResponse(local)
+        url = STORAGE.presigned_url(f"avatar-{player_id}", p["avatar_url"])
+    except ValueError:
+        raise HTTPException(404, "not found")
+    if url:
+        return RedirectResponse(url)
+    raise HTTPException(404, "not found")
 
 
 @app.get("/api/players/{player_id}")
@@ -752,6 +820,7 @@ def update_player(
 def remove_player(player_id: str, user: dict = Depends(current_user)) -> JSONResponse:
     _owned_player(player_id, user)
     db.delete_player(player_id)
+    STORAGE.delete_job(f"avatar-{player_id}")  # remove any stored photo
     return JSONResponse({"status": "ok"})
 
 

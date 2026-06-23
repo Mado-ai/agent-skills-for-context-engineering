@@ -4,7 +4,7 @@ import { api } from "../api/client";
 import { Avatar, Card, Icon } from "./ui";
 import { brandColor, initials } from "../lib/brand";
 
-type Ref = { id: string; name: string; jersey: number | null; team_id: string; team_name: string };
+type Ref = { id: string; name: string; jersey: number | null; team_id: string; team_name: string; avatar?: boolean };
 
 /* Dashboard quick-access: pick any roster player (across teams) and jump to
  * their account, without leaving the analytics view. */
@@ -42,7 +42,8 @@ export default function PlayerSwitcher() {
               <Link key={p.id} to={`/players/${p.id}`}
                 className="lift flex items-center gap-2 rounded-full border border-line bg-ink-2 py-1 pl-1 pr-3 text-sm hover:border-line-2"
                 title={`${p.team_name} · ${p.name}`}>
-                <Avatar label={p.jersey != null ? String(p.jersey) : initials(p.name)} color={brandColor(p.team_id)} size={24} />
+                <Avatar label={p.jersey != null ? String(p.jersey) : initials(p.name)} color={brandColor(p.team_id)} size={24}
+                  src={p.avatar ? api.playerAvatarUrl(p.id) : undefined} />
                 <span className="max-w-28 truncate">{p.name}</span>
               </Link>
             ))}

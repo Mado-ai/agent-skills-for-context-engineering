@@ -173,11 +173,11 @@ export function TeamChip({ name, color }: { name: string; color: string }) {
   );
 }
 
-/** Jersey-number / initials avatar. */
-export function Avatar({ label, color, size = 34 }: { label: string; color: string; size?: number }) {
+/** Jersey-number / initials avatar, optionally overlaid with a photo. */
+export function Avatar({ label, color, size = 34, src }: { label: string; color: string; size?: number; src?: string }) {
   return (
     <span
-      className="grid shrink-0 place-items-center rounded-full font-bold text-white ring-1 ring-inset ring-white/15"
+      className="relative grid shrink-0 place-items-center overflow-hidden rounded-full font-bold text-white ring-1 ring-inset ring-white/15"
       style={{
         width: size,
         height: size,
@@ -186,6 +186,14 @@ export function Avatar({ label, color, size = 34 }: { label: string; color: stri
       }}
     >
       {label}
+      {src && (
+        <img
+          src={src}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+        />
+      )}
     </span>
   );
 }
