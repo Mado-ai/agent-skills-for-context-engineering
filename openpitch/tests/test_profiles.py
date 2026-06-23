@@ -70,6 +70,16 @@ def test_team_player_match_profile_flow(auth):
     assert pp["totals"]["goals"] == 3
     assert pp["totals"]["distance_m"] == 14700.0
 
+    # trends: chronological per-match series (oldest → newest)
+    assert len(pp["trends"]) == 2
+    assert all(k in pp["trends"][0] for k in ("distance_m", "top_speed_ms", "goals"))
+
+    # benchmarks: percentile vs team-mates. p1 has the higher top speed (8.1
+    # vs 7.9) so it sits at the top of that ranking.
+    bench = {b["key"]: b for b in pp["benchmarks"]}
+    assert bench["top_speed_ms"]["percentile"] == 100
+    assert bench["top_speed_ms"]["team_best"] == 8.1
+
 
 def test_sharing_and_public_access(auth):
     c, h = auth

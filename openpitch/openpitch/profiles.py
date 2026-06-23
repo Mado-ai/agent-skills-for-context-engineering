@@ -14,6 +14,54 @@ from . import db
 
 FIELD_TYPES = (5, 7, 11)
 
+# Metrics surfaced as percentile benchmarks. Each maps to (label, how-to-reduce
+# a player's stat rows → a single comparable value). "higher is better" for all.
+def _avg(rows, key):
+    vals = [r.get(key) or 0 for r in rows]
+    return sum(vals) / len(vals) if vals else 0.0
+
+
+def _max(rows, key):
+    return max((r.get(key) or 0 for r in rows), default=0.0)
+
+
+def _pass_acc(rows):
+    p = sum(r.get("passes") or 0 for r in rows)
+    c = sum(r.get("passes_completed") or 0 for r in rows)
+    return 100 * c / p if p else 0.0
+
+
+BENCHMARKS = (
+    ("distance_per_match", "Distance / match", lambda r: _avg(r, "distance_m")),
+    ("top_speed_ms", "Top speed", lambda r: _max(r, "top_speed_ms")),
+    ("sprints_per_match", "Sprints / match", lambda r: _avg(r, "sprints")),
+    ("pass_accuracy", "Pass accuracy", _pass_acc),
+    ("goal_contributions", "Goals + assists / match",
+     lambda r: _avg(r, "goals") + _avg(r, "assists")),
+)
+
+
+def _benchmarks(player_id: str, team_id: str) -> list[dict]:
+    """Percentile-rank a player against rostered team-mates (>=1 match each)."""
+    peers = {p["id"]: db.stats_for_player(p["id"]) for p in db.list_players(team_id)}
+    peers = {pid: rows for pid, rows in peers.items() if rows}
+    if player_id not in peers or len(peers) < 2:
+        return []
+    out = []
+    for key, label, fn in BENCHMARKS:
+        vals = {pid: fn(rows) for pid, rows in peers.items()}
+        mine = vals[player_id]
+        ranked = sorted(vals.values())
+        # Percentile = share of peers at or below the player's value.
+        pct = round(100 * sum(v <= mine for v in vals.values()) / len(vals))
+        out.append({
+            "key": key, "label": label,
+            "value": round(mine, 2), "percentile": pct,
+            "team_avg": round(sum(ranked) / len(ranked), 2),
+            "team_best": round(ranked[-1], 2),
+        })
+    return out
+
 
 def _by_field(rows: list[dict]) -> dict[str, int]:
     out = {str(f): 0 for f in FIELD_TYPES}
@@ -48,6 +96,21 @@ def player_profile(player_id: str) -> dict | None:
     totals["pass_accuracy"] = (
         round(100 * completed / totals["passes"], 1) if totals["passes"] else None)
     totals["avg_distance_m"] = round(totals["distance_m"] / totals["matches"], 1) if stats else 0
+    # Trends: chronological (oldest → newest) per-match series for sparkline /
+    # form charts. stats_for_player is newest-first, so reverse a slice.
+    trends = [{
+        "match_id": s.get("match_id"),
+        "played_on": s.get("played_on"),
+        "opponent": s.get("opponent"),
+        "distance_m": round(s.get("distance_m") or 0, 1),
+        "top_speed_ms": round(s.get("top_speed_ms") or 0, 2),
+        "sprints": s.get("sprints") or 0,
+        "passes": s.get("passes") or 0,
+        "pass_accuracy": (round(100 * (s.get("passes_completed") or 0) / s["passes"], 1)
+                          if s.get("passes") else None),
+        "goals": s.get("goals") or 0,
+        "assists": s.get("assists") or 0,
+    } for s in reversed(stats[:12])]
     return {
         "player": {**{k: p[k] for k in ("id", "name", "position", "jersey")},
                    "avatar": bool(p.get("avatar_url"))},
@@ -55,6 +118,8 @@ def player_profile(player_id: str) -> dict | None:
         "matches_by_field": _by_field(stats),
         "totals": totals,
         "recent": stats[:10],
+        "trends": trends,
+        "benchmarks": _benchmarks(player_id, p["team_id"]),
     }
 
 

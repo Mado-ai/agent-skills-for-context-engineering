@@ -246,4 +246,28 @@ export interface PlayerProfile {
     saves?: number;
   };
   recent: { match_id: string; field_type: number; opponent: string | null; played_on: string | null; distance_m: number; top_speed_ms: number; sprints?: number; passes?: number; passes_completed?: number; shots?: number; shots_on_target?: number; fouls?: number; goals: number; assists: number }[];
+  trends?: TrendPoint[];
+  benchmarks?: Benchmark[];
+}
+
+export interface TrendPoint {
+  match_id: string | null;
+  played_on: string | null;
+  opponent: string | null;
+  distance_m: number;
+  top_speed_ms: number;
+  sprints: number;
+  passes: number;
+  pass_accuracy: number | null;
+  goals: number;
+  assists: number;
+}
+
+export interface Benchmark {
+  key: string;
+  label: string;
+  value: number;
+  percentile: number;
+  team_avg: number;
+  team_best: number;
 }

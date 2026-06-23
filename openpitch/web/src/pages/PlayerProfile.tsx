@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api/client";
 import FieldBreakdown from "../components/FieldBreakdown";
+import { BenchmarkBars, FormTrends } from "../components/ProfileInsights";
 import { Avatar, Badge, Card, Icon, StatCard } from "../components/ui";
 import { brandColor, initials } from "../lib/brand";
 import type { PlayerProfile as PP } from "../types";
@@ -161,6 +162,15 @@ export default function PlayerProfile() {
             <Mini label="Yellow" value={t.yellow_cards ?? 0} />
             <Mini label="Red" value={t.red_cards ?? 0} />
           </div>
+        </Card>
+      </div>
+
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <Card title="Form trends" subtitle="Match-by-match · pick a metric" icon="activity">
+          <FormTrends trends={pp.trends ?? []} color={brand} />
+        </Card>
+        <Card title="Squad benchmarks" subtitle="Percentile vs team-mates" icon="gauge">
+          <BenchmarkBars benchmarks={pp.benchmarks ?? []} color={brand} />
         </Card>
       </div>
 
