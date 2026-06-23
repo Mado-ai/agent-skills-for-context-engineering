@@ -998,29 +998,29 @@ def auto_import_stats(match_id: str, user: dict = Depends(current_user)) -> JSON
 
 
 @app.post("/api/matches/{match_id}/stats")
-def add_stat(
-    match_id: str,
-    player_id: str = Form(...),
-    goals: int | None = Form(None),
-    assists: int | None = Form(None),
-    shots: int | None = Form(None),
-    shots_on_target: int | None = Form(None),
-    fouls: int | None = Form(None),
-    minutes: int | None = Form(None),
-    distance_m: float | None = Form(None),
-    top_speed_ms: float | None = Form(None),
-    user: dict = Depends(current_user),
-) -> JSONResponse:
-    """Manually set per-player match stats (merges with auto-imported tracking)."""
+async def add_stat(match_id: str, request: Request,
+                   user: dict = Depends(current_user)) -> JSONResponse:
+    """Manually set per-player match stats (merges with auto-imported tracking).
+
+    Accepts player_id plus any of the core (goals/assists/shots/shots_on_target/
+    fouls/minutes/distance_m/top_speed_ms) and event-taxonomy fields."""
+    form = await request.form()
+    player_id = form.get("player_id")
+    if not player_id:
+        raise HTTPException(400, "player_id required")
     _owned_match(match_id, user)
-    _owned_player(player_id, user)  # validates ownership
-    fields = {k: v for k, v in {
-        "goals": goals, "assists": assists, "shots": shots,
-        "shots_on_target": shots_on_target, "fouls": fouls, "minutes": minutes,
-        "distance_m": distance_m, "top_speed_ms": top_speed_ms,
-    }.items() if v is not None}
-    db.upsert_player_stat(match_id, player_id, fields)
-    _audit(user, "match.set_stat", "player", player_id)
+    _owned_player(str(player_id), user)
+    allowed = {"goals", "assists", "shots", "shots_on_target", "fouls", "minutes",
+               "distance_m", "top_speed_ms", *db.EVENT_FIELDS}
+    fields: dict = {}
+    for k in allowed:
+        if k in form and form.get(k) != "":
+            try:
+                fields[k] = float(form[k]) if k in ("distance_m", "top_speed_ms") else int(float(form[k]))
+            except (ValueError, TypeError):
+                continue
+    db.upsert_player_stat(match_id, str(player_id), fields)
+    _audit(user, "match.set_stat", "player", str(player_id))
     return JSONResponse({"status": "ok"})
 
 

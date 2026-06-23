@@ -251,7 +251,6 @@ export default function TeamProfile() {
                   <MatchStatsEditor
                     matchId={m.id}
                     players={tp.players}
-                    brand={brand}
                     onDone={() => { setEditStats(null); load(); }}
                   />
                 )}

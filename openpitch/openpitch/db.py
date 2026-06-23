@@ -157,7 +157,26 @@ player_match_stats = Table(
     Column("fouls", Integer, default=0),
     Column("goals", Integer, default=0),
     Column("assists", Integer, default=0),
+    # FIFA-style event taxonomy (BePro "standard data"); entered/annotated.
+    Column("key_passes", Integer, default=0),
+    Column("crosses", Integer, default=0),
+    Column("dribbles", Integer, default=0),
+    Column("tackles", Integer, default=0),
+    Column("interceptions", Integer, default=0),
+    Column("clearances", Integer, default=0),
+    Column("blocks", Integer, default=0),
+    Column("duels_won", Integer, default=0),
+    Column("recoveries", Integer, default=0),
+    Column("offsides", Integer, default=0),
+    Column("yellow_cards", Integer, default=0),
+    Column("red_cards", Integer, default=0),
+    Column("saves", Integer, default=0),
 )
+
+# Manual/annotated event fields (kept in sync across upsert, profiles, UI).
+EVENT_FIELDS = ("key_passes", "crosses", "dribbles", "tackles", "interceptions",
+                "clearances", "blocks", "duels_won", "recoveries", "offsides",
+                "yellow_cards", "red_cards", "saves")
 
 
 def init_db() -> None:
@@ -626,7 +645,7 @@ def upsert_player_stat(match_id: str, player_id: str, fields: dict) -> None:
     versa."""
     cols = ("minutes", "distance_m", "top_speed_ms", "sprints", "passes",
             "passes_completed", "shots", "shots_on_target", "fouls",
-            "goals", "assists")
+            "goals", "assists", *EVENT_FIELDS)
     with _engine.begin() as c:
         existing = _row(c, select(player_match_stats).where(
             (player_match_stats.c.match_id == match_id)

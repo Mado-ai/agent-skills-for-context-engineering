@@ -129,14 +129,37 @@ export default function PlayerProfile() {
         <Card title="Matches by field" icon="chart">
           <FieldBreakdown data={pp.matches_by_field} />
         </Card>
-        <Card title="Output & workload" icon="route">
+        <Card title="Attacking" icon="target">
           <div className="grid grid-cols-3 gap-3">
-            <Mini label="Pass acc." value={t.pass_accuracy != null ? `${t.pass_accuracy}%` : "—"} />
-            <Mini label="Passes" value={t.passes} />
             <Mini label="Shots" value={t.shots ?? 0} />
             <Mini label="On target" value={t.shots_on_target ?? 0} />
-            <Mini label="Fouls" value={t.fouls ?? 0} />
+            <Mini label="Key passes" value={t.key_passes ?? 0} />
+            <Mini label="Crosses" value={t.crosses ?? 0} />
+            <Mini label="Dribbles" value={t.dribbles ?? 0} />
+            <Mini label="Pass acc." value={t.pass_accuracy != null ? `${t.pass_accuracy}%` : "—"} />
+          </div>
+        </Card>
+      </div>
+
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <Card title="Defending" icon="shield">
+          <div className="grid grid-cols-3 gap-3">
+            <Mini label="Tackles" value={t.tackles ?? 0} />
+            <Mini label="Intercept." value={t.interceptions ?? 0} />
+            <Mini label="Clearances" value={t.clearances ?? 0} />
+            <Mini label="Blocks" value={t.blocks ?? 0} />
+            <Mini label="Duels won" value={t.duels_won ?? 0} />
+            <Mini label="Recoveries" value={t.recoveries ?? 0} />
+          </div>
+        </Card>
+        <Card title="Workload & discipline" icon="activity">
+          <div className="grid grid-cols-3 gap-3">
             <Mini label="Minutes" value={t.minutes} />
+            <Mini label="Passes" value={t.passes} />
+            <Mini label="Saves" value={t.saves ?? 0} />
+            <Mini label="Offsides" value={t.offsides ?? 0} />
+            <Mini label="Yellow" value={t.yellow_cards ?? 0} />
+            <Mini label="Red" value={t.red_cards ?? 0} />
           </div>
         </Card>
       </div>

@@ -89,6 +89,25 @@ def _stat_line(rng: random.Random, family: str, minutes: int) -> dict:
     }
 
 
+def _events_line(rng: random.Random, family: str, minutes: int) -> dict:
+    """Position-aware standard-data events for the demo squads."""
+    if minutes < 30:
+        return {}
+    defend = {"GK": 0, "DEF": 3, "MID": 2, "FWD": 1}[family]
+    attack = {"GK": 0, "DEF": 1, "MID": 3, "FWD": 3}[family]
+    out = {
+        "tackles": rng.randint(0, defend), "interceptions": rng.randint(0, defend),
+        "clearances": rng.randint(0, defend + 1 if family == "DEF" else 1),
+        "blocks": rng.randint(0, 1), "duels_won": rng.randint(0, defend + 2),
+        "recoveries": rng.randint(1, defend + 3),
+        "key_passes": rng.randint(0, attack), "crosses": rng.randint(0, attack),
+        "dribbles": rng.randint(0, attack), "offsides": rng.randint(0, 1) if family == "FWD" else 0,
+        "yellow_cards": 1 if rng.random() < 0.12 else 0, "red_cards": 0,
+        "saves": rng.randint(1, 5) if family == "GK" else 0,
+    }
+    return out
+
+
 def _distribute(n: int, pool: list[int], rng: random.Random) -> dict[int, int]:
     out: dict[int, int] = {}
     for _ in range(n):
@@ -148,6 +167,9 @@ def build_teams(user_id: int) -> list[str]:
                     goals.get(idx, 0), assists.get(idx, 0),
                     line["sprints"], line["passes"], line["passes_completed"],
                     line["shots"], line["shots_on_target"], line["fouls"])
+                ev = _events_line(mrng, family, minutes)
+                if ev:
+                    db.upsert_player_stat(match_id, pid, ev)
     return team_ids
 
 

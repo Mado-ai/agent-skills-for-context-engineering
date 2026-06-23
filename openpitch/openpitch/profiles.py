@@ -43,6 +43,7 @@ def player_profile(player_id: str) -> dict | None:
         "goals": sum(s["goals"] or 0 for s in stats),
         "assists": sum(s["assists"] or 0 for s in stats),
         "minutes": sum(s["minutes"] or 0 for s in stats),
+        **{f: sum(s.get(f) or 0 for s in stats) for f in db.EVENT_FIELDS},
     }
     totals["pass_accuracy"] = (
         round(100 * completed / totals["passes"], 1) if totals["passes"] else None)
@@ -85,8 +86,10 @@ def team_profile(team_id: str) -> dict | None:
                  "matches": 0, "distance_m": 0.0, "top_speed_ms": 0.0,
                  "sprints": 0, "passes": 0, "passes_completed": 0,
                  "shots": 0, "shots_on_target": 0, "fouls": 0,
-                 "goals": 0, "assists": 0},
+                 "goals": 0, "assists": 0, **{f: 0 for f in db.EVENT_FIELDS}},
             )
+            for f in db.EVENT_FIELDS:
+                a[f] += s.get(f) or 0
             a["matches"] += 1
             a["distance_m"] = round(a["distance_m"] + (s["distance_m"] or 0), 1)
             a["top_speed_ms"] = round(max(a["top_speed_ms"], s["top_speed_ms"] or 0), 2)
@@ -143,7 +146,8 @@ def export_team(team_id: str) -> dict:
                                 "shots": s.get("shots") or 0,
                                 "shots_on_target": s.get("shots_on_target") or 0,
                                 "fouls": s.get("fouls") or 0,
-                                "goals": s["goals"], "assists": s["assists"]}
+                                "goals": s["goals"], "assists": s["assists"],
+                                **{f: s.get(f) or 0 for f in db.EVENT_FIELDS}}
                                for s in m["stats"]]}
                     for m in full_matches],
     }
@@ -182,4 +186,7 @@ def import_team(user_id: int, bundle: dict) -> dict:
                                int(s.get("passes") or 0), int(s.get("passes_completed") or 0),
                                int(s.get("shots") or 0), int(s.get("shots_on_target") or 0),
                                int(s.get("fouls") or 0))
+            ev = {f: int(s.get(f) or 0) for f in db.EVENT_FIELDS if s.get(f)}
+            if ev:
+                db.upsert_player_stat(mid, id_map[old], ev)
     return {"team_id": team_id, "name": name}

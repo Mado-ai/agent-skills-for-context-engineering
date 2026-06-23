@@ -32,6 +32,8 @@ MAX_PLAYER_SPEED_MS = 12.0
 _SPRINT_MS = 7.0
 _RUN_MS = 4.0
 _JOG_MS = 2.0
+# High-intensity accel/decel threshold (m/s^2) — BePro-style burst counting.
+_ACCEL_MS2 = 2.5
 
 
 def _zone(speed: float) -> str:
@@ -88,6 +90,8 @@ class Analytics:
             "touches": 0, "passes": 0, "completed": 0, "turnovers": 0,
             "zones": {"walk": 0.0, "jog": 0.0, "run": 0.0, "sprint": 0.0},
             "numbers": {}, "sum_x": 0.0,
+            "last_speed": None, "acc_run": 0, "dec_run": 0,
+            "accels": 0, "decels": 0,
         })
 
     def update(self, state: FrameState) -> tuple[float, float]:
@@ -128,6 +132,28 @@ class Analytics:
                             rec["sprints"] += 1
                     else:
                         rec["sprint_run"] = 0
+                    # Accelerations / decelerations: a burst counts once the
+                    # rate stays past +/- _ACCEL_MS2 for ~0.25 s, so per-frame
+                    # tracking jitter doesn't inflate the count (BePro-style).
+                    if rec["last_speed"] is not None:
+                        a = (speed - rec["last_speed"]) * self.fps
+                        need = max(2, round(0.25 * self.fps))
+                        if a >= _ACCEL_MS2:
+                            rec["acc_run"] += 1
+                            rec["dec_run"] = 0
+                            if rec["acc_run"] == need:
+                                rec["accels"] += 1
+                        elif a <= -_ACCEL_MS2:
+                            rec["dec_run"] += 1
+                            rec["acc_run"] = 0
+                            if rec["dec_run"] == need:
+                                rec["decels"] += 1
+                        else:
+                            rec["acc_run"] = rec["dec_run"] = 0
+                    rec["last_speed"] = speed
+                else:
+                    rec["last_speed"] = None  # ID swap — don't fake an accel
+                    rec["acc_run"] = rec["dec_run"] = 0
             rec["last"] = (X, Y)
 
         # Individual possession + passes. A "spell" is only confirmed once a
@@ -254,11 +280,11 @@ class Analytics:
                 "touches": 0, "passes": 0, "completed": 0, "turnovers": 0,
                 "zones": {"walk": 0.0, "jog": 0.0, "run": 0.0, "sprint": 0.0},
                 "xt_added": 0.0, "progressive": 0, "final_third": 0,
-                "shots": 0, "xg": 0.0})
+                "shots": 0, "xg": 0.0, "accels": 0, "decels": 0})
             g["dist"] += rec["dist_m"]
             g["top"] = max(g["top"], rec["top_speed"])
             for k in ("frames", "sprints", "poss", "touches", "passes",
-                      "completed", "turnovers"):
+                      "completed", "turnovers", "accels", "decels"):
                 g[k] += rec.get(k, 0)
             for z in g["zones"]:
                 g["zones"][z] += rec["zones"][z]
@@ -299,6 +325,10 @@ class Analytics:
                 "final_third_passes": g["final_third"],
                 "shots": g["shots"],
                 "xg": round(g["xg"], 3),
+                "accelerations": g["accels"],
+                "decelerations": g["decels"],
+                "hsr_m": round(g["zones"]["run"] + g["zones"]["sprint"], 1),
+                "sprint_dist_m": round(g["zones"]["sprint"], 1),
             })
         rows.sort(key=lambda r: r["distance_m"], reverse=True)
         return rows

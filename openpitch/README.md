@@ -11,10 +11,14 @@ Upload a wide-angle / panoramic match clip and OpenPitch produces:
    feed to follow the action (no operator), with a live scoreboard and
    possession bar burned in.
 2. **Performance analytics** — possession %, positional heatmaps, per-player
-   physical metrics (distance, top speed, sprints, work-rate zones), passing
-   (attempts / accuracy / turnovers), and an **event model**: passes valued by
-   an xT-style threat surface (progressive / final-third / xT-added) and shots
-   valued by **xG**.
+   physical metrics (distance, top speed, sprints, work-rate zones,
+   high-speed-running distance, accelerations / decelerations), passing
+   (attempts / accuracy / turnovers), final-third entries (by channel), and an
+   **event model**: passes valued by an xT-style threat surface (progressive /
+   final-third / xT-added) and shots valued by **xG**. A FIFA-style **event
+   taxonomy** (key passes, crosses, dribbles, tackles, interceptions,
+   clearances, blocks, duels won, recoveries, offsides, cards, saves) is
+   recorded via match-stat entry — mirroring a BePro-style standard-data set.
 3. **Automatic highlights** — exciting moments (fast ball into an attacking
    third) cut into standalone clips.
 

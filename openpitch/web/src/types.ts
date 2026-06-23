@@ -17,6 +17,10 @@ export interface PlayerStat {
   final_third_passes?: number;
   shots?: number;
   xg?: number;
+  accelerations?: number;
+  decelerations?: number;
+  hsr_m?: number;
+  sprint_dist_m?: number;
 }
 
 export interface TeamStat {
@@ -187,6 +191,19 @@ export interface PlayerProfile {
     goals: number;
     assists: number;
     minutes: number;
+    key_passes?: number;
+    crosses?: number;
+    dribbles?: number;
+    tackles?: number;
+    interceptions?: number;
+    clearances?: number;
+    blocks?: number;
+    duels_won?: number;
+    recoveries?: number;
+    offsides?: number;
+    yellow_cards?: number;
+    red_cards?: number;
+    saves?: number;
   };
   recent: { match_id: string; field_type: number; opponent: string | null; played_on: string | null; distance_m: number; top_speed_ms: number; sprints?: number; passes?: number; passes_completed?: number; shots?: number; shots_on_target?: number; fouls?: number; goals: number; assists: number }[];
 }
