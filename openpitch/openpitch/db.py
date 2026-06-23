@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 import os
 import time
+import uuid
 from pathlib import Path
 
 from sqlalchemy import (
@@ -150,6 +151,9 @@ player_match_stats = Table(
     Column("sprints", Integer, default=0),
     Column("passes", Integer, default=0),
     Column("passes_completed", Integer, default=0),
+    Column("shots", Integer, default=0),
+    Column("shots_on_target", Integer, default=0),
+    Column("fouls", Integer, default=0),
     Column("goals", Integer, default=0),
     Column("assists", Integer, default=0),
 )
@@ -579,13 +583,40 @@ def delete_match(match_id: str) -> None:
 def add_player_stat(stat_id: str, match_id: str, player_id: str, minutes: int,
                     distance_m: float, top_speed_ms: float, goals: int,
                     assists: int, sprints: int = 0, passes: int = 0,
-                    passes_completed: int = 0) -> None:
+                    passes_completed: int = 0, shots: int = 0,
+                    shots_on_target: int = 0, fouls: int = 0) -> None:
     with _engine.begin() as c:
         c.execute(player_match_stats.insert().values(
             id=stat_id, match_id=match_id, player_id=player_id, minutes=minutes,
             distance_m=distance_m, top_speed_ms=top_speed_ms, sprints=sprints,
             passes=passes, passes_completed=passes_completed,
+            shots=shots, shots_on_target=shots_on_target, fouls=fouls,
             goals=goals, assists=assists))
+
+
+def upsert_player_stat(match_id: str, player_id: str, fields: dict) -> None:
+    """Merge per-player match stats (one row per player per match).
+
+    Reads any existing row, applies ``fields`` over it, and rewrites — so manual
+    edits (goals/fouls/…) don't wipe auto-imported tracking metrics and vice
+    versa."""
+    cols = ("minutes", "distance_m", "top_speed_ms", "sprints", "passes",
+            "passes_completed", "shots", "shots_on_target", "fouls",
+            "goals", "assists")
+    with _engine.begin() as c:
+        existing = _row(c, select(player_match_stats).where(
+            (player_match_stats.c.match_id == match_id)
+            & (player_match_stats.c.player_id == player_id)))
+        merged = {k: (existing.get(k) if existing else 0) or 0 for k in cols}
+        for k, v in fields.items():
+            if k in cols and v is not None:
+                merged[k] = v
+        c.execute(player_match_stats.delete().where(
+            (player_match_stats.c.match_id == match_id)
+            & (player_match_stats.c.player_id == player_id)))
+        c.execute(player_match_stats.insert().values(
+            id="st_" + uuid.uuid4().hex[:10], match_id=match_id,
+            player_id=player_id, **merged))
 
 
 def clear_match_stats(match_id: str) -> None:

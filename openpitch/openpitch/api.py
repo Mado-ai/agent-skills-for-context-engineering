@@ -874,7 +874,8 @@ def import_match_stats(
         db.add_player_stat("st_" + uuid.uuid4().hex[:10], match_id, m["player_id"],
                            int(minutes), float(det.get("distance_m") or 0),
                            float(det.get("top_speed_ms") or 0), 0, 0,
-                           int(det.get("sprints") or 0), passes, completed)
+                           int(det.get("sprints") or 0), passes, completed,
+                           int(det.get("shots") or 0))
         written += 1
     _audit(user, "match.import_stats", "match", match_id, detail=f"{written} players")
     return JSONResponse({"status": "ok", "imported": written})
@@ -913,7 +914,8 @@ def auto_import_stats(match_id: str, user: dict = Depends(current_user)) -> JSON
         db.add_player_stat("st_" + uuid.uuid4().hex[:10], match_id, rp["id"], 0,
                            float(d.get("distance_m") or 0),
                            float(d.get("top_speed_ms") or 0), 0, 0,
-                           int(d.get("sprints") or 0), passes, completed)
+                           int(d.get("sprints") or 0), passes, completed,
+                           int(d.get("shots") or 0))
         written += 1
     _audit(user, "match.auto_import", "match", match_id,
            detail=f"{written} by jersey, side={best_side}")
@@ -924,17 +926,26 @@ def auto_import_stats(match_id: str, user: dict = Depends(current_user)) -> JSON
 def add_stat(
     match_id: str,
     player_id: str = Form(...),
-    minutes: int = Form(0),
-    distance_m: float = Form(0),
-    top_speed_ms: float = Form(0),
-    goals: int = Form(0),
-    assists: int = Form(0),
+    goals: int | None = Form(None),
+    assists: int | None = Form(None),
+    shots: int | None = Form(None),
+    shots_on_target: int | None = Form(None),
+    fouls: int | None = Form(None),
+    minutes: int | None = Form(None),
+    distance_m: float | None = Form(None),
+    top_speed_ms: float | None = Form(None),
     user: dict = Depends(current_user),
 ) -> JSONResponse:
+    """Manually set per-player match stats (merges with auto-imported tracking)."""
     _owned_match(match_id, user)
-    player = _owned_player(player_id, user)  # noqa: F841 (validates ownership)
-    db.add_player_stat("st_" + uuid.uuid4().hex[:10], match_id, player_id,
-                       minutes, distance_m, top_speed_ms, goals, assists)
+    _owned_player(player_id, user)  # validates ownership
+    fields = {k: v for k, v in {
+        "goals": goals, "assists": assists, "shots": shots,
+        "shots_on_target": shots_on_target, "fouls": fouls, "minutes": minutes,
+        "distance_m": distance_m, "top_speed_ms": top_speed_ms,
+    }.items() if v is not None}
+    db.upsert_player_stat(match_id, player_id, fields)
+    _audit(user, "match.set_stat", "player", player_id)
     return JSONResponse({"status": "ok"})
 
 

@@ -380,7 +380,20 @@ function PlayersTab({ s, color }: { s: NonNullable<Job["summary"]>; color: (t: s
               ))}
             </select>
           </div>
-          <HeadToHead a={pa} b={pb} colorA={color(pa.team)} colorB={color(pb.team)} />
+          <HeadToHead
+            a={{ name: `#${pa.jersey ?? pa.player_id}`, sub: pa.team, jersey: pa.jersey ?? "?", color: color(pa.team) }}
+            b={{ name: `#${pb.jersey ?? pb.player_id}`, sub: pb.team, jersey: pb.jersey ?? "?", color: color(pb.team) }}
+            rows={[
+              { label: "Distance (km)", a: pa.distance_m / 1000, b: pb.distance_m / 1000, fmt: (n) => n.toFixed(1) },
+              { label: "Top speed (km/h)", a: pa.top_speed_ms * 3.6, b: pb.top_speed_ms * 3.6, fmt: (n) => n.toFixed(1) },
+              { label: "Sprints", a: pa.sprints ?? 0, b: pb.sprints ?? 0 },
+              { label: "Touches", a: pa.touches ?? 0, b: pb.touches ?? 0 },
+              { label: "Passes completed", a: pa.passes ?? 0, b: pb.passes ?? 0 },
+              { label: "Pass accuracy", a: pa.pass_accuracy ?? 0, b: pb.pass_accuracy ?? 0, fmt: (n) => `${n}%` },
+              { label: "Attempts (shots)", a: pa.shots ?? 0, b: pb.shots ?? 0 },
+              { label: "Expected goals", a: pa.xg ?? 0, b: pb.xg ?? 0, fmt: (n) => n.toFixed(2) },
+            ]}
+          />
         </Card>
       )}
 

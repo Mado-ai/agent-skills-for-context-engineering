@@ -66,17 +66,26 @@ def _name(team_idx: int, jersey: int) -> str:
     return f"{first} {last}"
 
 
+# Shot/foul propensity by role family (max shots, foul ceiling).
+_ATTACK = {"GK": (0, 1), "DEF": (1, 3), "MID": (3, 2), "FWD": (5, 2)}
+
+
 def _stat_line(rng: random.Random, family: str, minutes: int) -> dict:
     d0, d1, s0, s1, sp0, sp1, p0, p1, a0, a1 = _PROFILE[family]
     scale = minutes / 90.0
     passes = round(rng.randint(p0, p1) * scale)
     acc = rng.uniform(a0, a1)
+    shot_max, foul_max = _ATTACK[family]
+    shots = rng.randint(0, shot_max) if minutes >= 45 else 0
     return {
         "distance_m": round(rng.uniform(d0, d1) * 1000 * scale),
         "top_speed_ms": round(rng.uniform(s0, s1), 1),
         "sprints": round(rng.randint(sp0, sp1) * scale),
         "passes": passes,
         "passes_completed": round(passes * acc / 100),
+        "shots": shots,
+        "shots_on_target": rng.randint(0, shots) if shots else 0,
+        "fouls": rng.randint(0, foul_max),
     }
 
 
@@ -137,7 +146,8 @@ def build_teams(user_id: int) -> list[str]:
                     "st_" + uuid.uuid4().hex[:10], match_id, pid, minutes,
                     line["distance_m"], line["top_speed_ms"],
                     goals.get(idx, 0), assists.get(idx, 0),
-                    line["sprints"], line["passes"], line["passes_completed"])
+                    line["sprints"], line["passes"], line["passes_completed"],
+                    line["shots"], line["shots_on_target"], line["fouls"])
     return team_ids
 
 

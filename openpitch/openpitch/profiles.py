@@ -37,6 +37,9 @@ def player_profile(player_id: str) -> dict | None:
         "sprints": sum(s["sprints"] or 0 for s in stats),
         "passes": sum(s["passes"] or 0 for s in stats),
         "passes_completed": completed,
+        "shots": sum(s.get("shots") or 0 for s in stats),
+        "shots_on_target": sum(s.get("shots_on_target") or 0 for s in stats),
+        "fouls": sum(s.get("fouls") or 0 for s in stats),
         "goals": sum(s["goals"] or 0 for s in stats),
         "assists": sum(s["assists"] or 0 for s in stats),
         "minutes": sum(s["minutes"] or 0 for s in stats),
@@ -80,6 +83,7 @@ def team_profile(team_id: str) -> dict | None:
                 {"player_id": s["player_id"], "name": s["player_name"],
                  "matches": 0, "distance_m": 0.0, "top_speed_ms": 0.0,
                  "sprints": 0, "passes": 0, "passes_completed": 0,
+                 "shots": 0, "shots_on_target": 0, "fouls": 0,
                  "goals": 0, "assists": 0},
             )
             a["matches"] += 1
@@ -88,6 +92,9 @@ def team_profile(team_id: str) -> dict | None:
             a["sprints"] += s["sprints"] or 0
             a["passes"] += s["passes"] or 0
             a["passes_completed"] += s.get("passes_completed") or 0
+            a["shots"] += s.get("shots") or 0
+            a["shots_on_target"] += s.get("shots_on_target") or 0
+            a["fouls"] += s.get("fouls") or 0
             a["goals"] += s["goals"] or 0
             a["assists"] += s["assists"] or 0
     for a in agg.values():
@@ -129,6 +136,9 @@ def export_team(team_id: str) -> dict:
                                 "distance_m": s["distance_m"], "top_speed_ms": s["top_speed_ms"],
                                 "sprints": s.get("sprints") or 0, "passes": s.get("passes") or 0,
                                 "passes_completed": s.get("passes_completed") or 0,
+                                "shots": s.get("shots") or 0,
+                                "shots_on_target": s.get("shots_on_target") or 0,
+                                "fouls": s.get("fouls") or 0,
                                 "goals": s["goals"], "assists": s["assists"]}
                                for s in m["stats"]]}
                     for m in full_matches],
@@ -165,5 +175,7 @@ def import_team(user_id: int, bundle: dict) -> dict:
                                int(s.get("minutes") or 0), float(s.get("distance_m") or 0),
                                float(s.get("top_speed_ms") or 0), int(s.get("goals") or 0),
                                int(s.get("assists") or 0), int(s.get("sprints") or 0),
-                               int(s.get("passes") or 0), int(s.get("passes_completed") or 0))
+                               int(s.get("passes") or 0), int(s.get("passes_completed") or 0),
+                               int(s.get("shots") or 0), int(s.get("shots_on_target") or 0),
+                               int(s.get("fouls") or 0))
     return {"team_id": team_id, "name": name}

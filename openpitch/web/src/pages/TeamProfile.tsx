@@ -2,10 +2,15 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api/client";
 import FieldBreakdown from "../components/FieldBreakdown";
+import HeadToHead from "../components/HeadToHead";
+import MatchStatsEditor from "../components/MatchStatsEditor";
 import MatchStatsImport from "../components/MatchStatsImport";
 import { Avatar, Badge, Card, CellBar, StatCard } from "../components/ui";
 import { brandColor, initials } from "../lib/brand";
 import type { TeamProfile as TP } from "../types";
+
+const H2H_COLOR_A = "#2ee27a";
+const H2H_COLOR_B = "#4d7cff";
 
 export default function TeamProfile() {
   const { id = "" } = useParams();
@@ -20,6 +25,9 @@ export default function TeamProfile() {
   const [mAway, setMAway] = useState("");
   const [pMinor, setPMinor] = useState(true);
   const [importing, setImporting] = useState<string | null>(null);
+  const [editStats, setEditStats] = useState<string | null>(null);
+  const [hA, setHA] = useState("");
+  const [hB, setHB] = useState("");
 
   const load = useCallback(() => api.getTeam(id).then(setTp).catch(() => setTp(null)), [id]);
   useEffect(() => {
@@ -30,6 +38,9 @@ export default function TeamProfile() {
   const r = tp.record;
   const brand = brandColor(tp.team.id);
   const maxDist = Math.max(...tp.leaderboard.map((l) => l.distance_m), 1);
+  const lb = tp.leaderboard;
+  const lA = lb.find((l) => l.player_id === hA) ?? lb[0];
+  const lB = lb.find((l) => l.player_id === hB) ?? lb[1] ?? lb[0];
 
   const addPlayer = async () => {
     if (!pName.trim()) return;
@@ -138,6 +149,36 @@ export default function TeamProfile() {
         </Card>
       </div>
 
+      {lb.length >= 2 && lA && lB && (
+        <Card title="Head-to-head" subtitle="Compare two players across the season" icon="users" className="mt-4">
+          <div className="mb-4 grid grid-cols-2 gap-3">
+            <select value={lA.player_id} onChange={(e) => setHA(e.target.value)}
+              className="rounded-lg border border-line bg-ink-2 p-2 text-sm outline-none focus:border-pitch/60">
+              {lb.map((l) => <option key={l.player_id} value={l.player_id}>{l.name}</option>)}
+            </select>
+            <select value={lB.player_id} onChange={(e) => setHB(e.target.value)}
+              className="rounded-lg border border-line bg-ink-2 p-2 text-sm outline-none focus:border-pitch/60">
+              {lb.map((l) => <option key={l.player_id} value={l.player_id}>{l.name}</option>)}
+            </select>
+          </div>
+          <HeadToHead
+            a={{ name: lA.name, sub: `${lA.matches} matches`, jersey: initials(lA.name), color: H2H_COLOR_A }}
+            b={{ name: lB.name, sub: `${lB.matches} matches`, jersey: initials(lB.name), color: H2H_COLOR_B }}
+            rows={[
+              { label: "Goals", a: lA.goals, b: lB.goals },
+              { label: "Assists", a: lA.assists ?? 0, b: lB.assists ?? 0 },
+              { label: "Attempts (shots)", a: lA.shots ?? 0, b: lB.shots ?? 0 },
+              { label: "On target", a: lA.shots_on_target ?? 0, b: lB.shots_on_target ?? 0 },
+              { label: "Passes completed", a: lA.passes_completed ?? lA.passes, b: lB.passes_completed ?? lB.passes },
+              { label: "Pass accuracy", a: lA.pass_accuracy ?? 0, b: lB.pass_accuracy ?? 0, fmt: (n) => `${n}%` },
+              { label: "Distance (km)", a: lA.distance_m / 1000, b: lB.distance_m / 1000, fmt: (n) => n.toFixed(1) },
+              { label: "Top speed (km/h)", a: lA.top_speed_ms * 3.6, b: lB.top_speed_ms * 3.6, fmt: (n) => n.toFixed(1) },
+              { label: "Fouls", a: lA.fouls ?? 0, b: lB.fouls ?? 0, better: "low" },
+            ]}
+          />
+        </Card>
+      )}
+
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <Card title={`Roster · ${tp.player_count}`} icon="users">
           <ul className="mb-3 flex flex-col gap-1">
@@ -184,6 +225,13 @@ export default function TeamProfile() {
                         ↳ analysis
                       </button>
                     )}
+                    <button
+                      onClick={() => setEditStats(editStats === m.id ? null : m.id)}
+                      className="rounded-md bg-line px-2 py-0.5 text-xs hover:bg-line-2"
+                      title="Enter goals, assists, shots, fouls"
+                    >
+                      ✎ stats
+                    </button>
                   </span>
                 </div>
                 {importing === m.id && (
@@ -193,6 +241,14 @@ export default function TeamProfile() {
                       setImporting(null);
                       load();
                     }}
+                  />
+                )}
+                {editStats === m.id && (
+                  <MatchStatsEditor
+                    matchId={m.id}
+                    players={tp.players}
+                    brand={brand}
+                    onDone={() => { setEditStats(null); load(); }}
                   />
                 )}
               </li>

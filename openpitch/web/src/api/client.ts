@@ -224,6 +224,16 @@ export const api = {
   async autoImportStats(matchId: string): Promise<{ imported: number; matched_side: string }> {
     return authed(`/api/matches/${matchId}/auto-import`, { method: "POST" });
   },
+  async matchStats(matchId: string): Promise<{
+    stats: { player_id: string; player_name: string; goals: number; assists: number;
+      shots: number; shots_on_target: number; fouls: number; distance_m: number;
+      top_speed_ms: number; passes: number }[];
+  }> {
+    return authed(`/api/matches/${matchId}`);
+  },
+  async setPlayerStat(matchId: string, fields: Record<string, string>): Promise<void> {
+    await authed(`/api/matches/${matchId}/stats`, { method: "POST", body: new URLSearchParams(fields) });
+  },
 
   // public (no auth)
   async packages(): Promise<{

@@ -99,11 +99,13 @@ export default function PlayerProfile() {
         <Card title="Matches by field" icon="chart">
           <FieldBreakdown data={pp.matches_by_field} />
         </Card>
-        <Card title="Passing & workload" icon="route">
-          <div className="grid grid-cols-2 gap-3">
-            <Mini label="Pass accuracy" value={t.pass_accuracy != null ? `${t.pass_accuracy}%` : "—"} />
+        <Card title="Output & workload" icon="route">
+          <div className="grid grid-cols-3 gap-3">
+            <Mini label="Pass acc." value={t.pass_accuracy != null ? `${t.pass_accuracy}%` : "—"} />
             <Mini label="Passes" value={t.passes} />
-            <Mini label="Avg distance" value={`${(t.avg_distance_m / 1000).toFixed(1)} km`} />
+            <Mini label="Shots" value={t.shots ?? 0} />
+            <Mini label="On target" value={t.shots_on_target ?? 0} />
+            <Mini label="Fouls" value={t.fouls ?? 0} />
             <Mini label="Minutes" value={t.minutes} />
           </div>
         </Card>
