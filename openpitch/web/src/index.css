@@ -89,3 +89,32 @@ body {
 @utility fade-up {
   animation: fade-up 0.35s ease both;
 }
+
+/* ---- Printable reports (Save as PDF from the browser) ---- */
+@media print {
+  /* Chrome/Safari: keep the brand colours in the PDF. */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body {
+    background: #fff !important;
+  }
+  /* App chrome and any explicitly-marked controls drop out of the print. */
+  nav,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+  .report-page {
+    color: #0a0d12 !important;
+    background: #fff !important;
+  }
+  /* Avoid splitting a card across a page break. */
+  .report-block {
+    break-inside: avoid;
+  }
+  @page {
+    margin: 14mm;
+  }
+}

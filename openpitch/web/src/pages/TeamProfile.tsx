@@ -106,6 +106,7 @@ export default function TeamProfile() {
             </div>
           </div>
           <div className="flex gap-2">
+            <Link to={`/report/team/${id}`} className={btn}>Report</Link>
             <button onClick={share} className={btn}>{tp.team.public_token ? "Unshare" : "Share"}</button>
             <button onClick={exportTeam} className={btn}>Export</button>
             <button onClick={remove} className={`${btn} text-home`}>Delete</button>

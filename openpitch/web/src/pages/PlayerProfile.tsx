@@ -104,6 +104,7 @@ export default function PlayerProfile() {
                 {pp.guardian_consent ? "✓ Consent" : "Grant consent"}
               </button>
             )}
+            <Link to={`/report/player/${id}`} className={btn}>Report</Link>
             <button onClick={share} className={btn}>{pp.public_token ? "Unshare" : "Share profile"}</button>
           </div>
         </div>
