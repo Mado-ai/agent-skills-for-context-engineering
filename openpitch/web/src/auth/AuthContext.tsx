@@ -18,6 +18,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(() => Boolean(tokenStore.get()));
 
   useEffect(() => {
+    // OAuth callback returns the browser to /?token=<jwt>; capture and strip it.
+    const url = new URL(window.location.href);
+    const urlToken = url.searchParams.get("token");
+    if (urlToken) {
+      tokenStore.set(urlToken);
+      url.searchParams.delete("token");
+      url.searchParams.delete("oauth_error");
+      window.history.replaceState({}, "", url.pathname + url.search + url.hash);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLoading(true);
+    }
     if (!tokenStore.get()) return;
     // Async session restore; setState runs in the promise callbacks below.
     api

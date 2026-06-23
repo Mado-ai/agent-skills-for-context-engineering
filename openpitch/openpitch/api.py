@@ -29,7 +29,7 @@ from fastapi import (
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from . import auth, authz, db, demo_seed, hardware, jobs_queue, profiles, storage
+from . import auth, authz, db, demo_seed, hardware, jobs_queue, oauth, profiles, storage
 
 IS_PRODUCTION = os.environ.get("PLAYMETRICS_ENV", "").lower() == "production"
 
@@ -169,6 +169,42 @@ def login(request: Request, email: str = Form(...), password: str = Form(...)) -
     _login_reset(key)
     token = auth.create_token(user["id"], user["email"])
     return JSONResponse({"token": token, "email": user["email"]})
+
+
+@app.get("/api/auth/providers")
+def oauth_providers() -> JSONResponse:
+    """Configured social-login providers (so the UI only shows working buttons)."""
+    return JSONResponse({"providers": oauth.enabled()})
+
+
+@app.get("/api/auth/oauth/{provider}/start")
+def oauth_start(provider: str, request: Request):
+    """Redirect the browser to the provider's consent screen."""
+    redirect_uri = f"{str(request.base_url).rstrip('/')}/api/auth/oauth/{provider}/callback"
+    url = oauth.authorize_url(provider, redirect_uri)
+    if not url:
+        raise HTTPException(404, "provider not configured")
+    return RedirectResponse(url)
+
+
+@app.get("/api/auth/oauth/{provider}/callback")
+def oauth_callback(provider: str, request: Request, code: str = "", state: str = ""):
+    """Provider redirect target: verify, upsert the user, hand back a session."""
+    if oauth.verify_state(state) != provider:
+        return RedirectResponse("/?oauth_error=state")
+    redirect_uri = f"{str(request.base_url).rstrip('/')}/api/auth/oauth/{provider}/callback"
+    try:
+        email, _name = oauth.exchange_code(provider, code, redirect_uri)
+    except Exception as exc:  # provider/network/email failure — fail to the UI
+        _audit(None, "auth.oauth_fail", "user", provider, detail=str(exc)[:200])
+        return RedirectResponse("/?oauth_error=exchange")
+    user = db.get_user_by_email(email)
+    if not user:
+        # OAuth accounts have no usable password (random, unguessable hash).
+        user = db.create_user(email, auth.hash_password(uuid.uuid4().hex))
+    _audit(user, "auth.oauth", "user", provider)
+    token = auth.create_token(user["id"], user["email"])
+    return RedirectResponse(f"/?token={token}")
 
 
 @app.get("/api/health")

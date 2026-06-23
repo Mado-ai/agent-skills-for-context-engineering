@@ -52,6 +52,10 @@ export const api = {
     return parse(await fetch("/api/auth/me", { headers: authHeaders() }));
   },
 
+  async authProviders(): Promise<{ id: string; label: string }[]> {
+    return (await parse(await fetch("/api/auth/providers"))).providers as { id: string; label: string }[];
+  },
+
   async listJobs(): Promise<Job[]> {
     const data = await parse(await fetch("/api/jobs", { headers: authHeaders() }));
     return data.jobs as Job[];

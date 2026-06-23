@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import ShuffleHero from "../components/ShuffleHero";
+import SocialButtons from "../components/SocialButtons";
 import { Icon } from "../components/ui";
 
 const FEATURES: { icon: Parameters<typeof Icon>[0]["name"]; title: string; body: string }[] = [
@@ -56,6 +57,11 @@ export default function Landing() {
         <div className="rounded-2xl border border-line bg-card p-6 shadow-card">
           <h2 className="text-lg font-semibold tracking-tight">Get started in seconds</h2>
           <p className="mb-4 mt-1 text-sm text-mute">Create a free account or sign in to your club.</p>
+          {params.has("oauth_error") && (
+            <p className="mb-3 rounded-lg border border-home/40 bg-home/10 px-3 py-2 text-sm text-home">
+              Social sign-in didn't complete. Please try again or use email.
+            </p>
+          )}
           <div className="mb-4 flex gap-1.5">
             {(["login", "register"] as const).map((m) => (
               <button
@@ -93,6 +99,7 @@ export default function Landing() {
             </button>
             {error && <p className="text-sm text-home">{error}</p>}
           </form>
+          <SocialButtons />
         </div>
       </section>
 

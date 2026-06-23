@@ -95,6 +95,8 @@ On first launch an **admin account is seeded**. Configure via environment:
 | `PLAYMETRICS_STORAGE` | `local` | Object storage: `local` or `s3` (`PLAYMETRICS_S3_BUCKET`, `PLAYMETRICS_S3_PREFIX`) |
 | `PLAYMETRICS_QUEUE` | `thread` | Job queue: `thread` (in-process) or `rq` (needs `REDIS_URL`) |
 | `PLAYMETRICS_SEED_DEMO` | (unset) | Set to `1` to auto-seed demo data on first start: two named squads with timestamped matches/stats + a real-data dashboard analysis (downloads the Metrica sample from GitHub). Background, idempotent, never blocks or crashes startup. |
+| `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET` | (unset) | Enable "Continue with Google". Register redirect URI `<origin>/api/auth/oauth/google/callback`. |
+| `GITHUB_OAUTH_CLIENT_ID` / `GITHUB_OAUTH_CLIENT_SECRET` | (unset) | Enable "Continue with GitHub". Register redirect URI `<origin>/api/auth/oauth/github/callback`. |
 
 ### Demo data
 

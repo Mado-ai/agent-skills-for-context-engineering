@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { Job } from "../types";
+import OverflowActions from "./OverflowActions";
 import { cx } from "../lib/cx";
 import { Card } from "./ui";
 
@@ -65,26 +66,20 @@ export default function JobList({ jobs, activeId, onSelect, onRename, onDelete }
                     <span className="block truncate text-sm font-medium">{j.input_name}</span>
                     <span className="text-xs text-mute">{j.detector}</span>
                   </button>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
                     <span className={cx("rounded-full px-2 py-0.5 text-[0.65rem] font-medium", badge[j.status])}>
                       {j.status}
                     </span>
-                    <button
-                      title="Rename"
-                      onClick={() => startEdit(j)}
-                      className="rounded-md p-1 text-mute opacity-0 transition hover:bg-line hover:text-white group-hover:opacity-100"
-                    >
-                      ✎
-                    </button>
-                    <button
-                      title="Delete"
-                      onClick={() => {
-                        if (confirm(`Delete "${j.input_name}"? This cannot be undone.`)) onDelete(j.id);
-                      }}
-                      className="rounded-md p-1 text-mute opacity-0 transition hover:bg-line hover:text-home group-hover:opacity-100"
-                    >
-                      🗑
-                    </button>
+                    <OverflowActions
+                      primaryActions={[]}
+                      overflowActions={[
+                        { id: "rename", label: "Rename", onClick: () => startEdit(j) },
+                        {
+                          id: "delete", label: "Delete", danger: true,
+                          onClick: () => { if (confirm(`Delete "${j.input_name}"? This cannot be undone.`)) onDelete(j.id); },
+                        },
+                      ]}
+                    />
                   </div>
                 </div>
               )}
