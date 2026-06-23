@@ -68,5 +68,17 @@ export const banners: Banner[] = [
     secondary: { label: "Read our insights", href: "/insights" },
   },
 
-  // ——— ADD A 4th BANNER HERE (e.g. a new listing) ———————————————
+  // ——— SAMPLE: NEW LISTING ———————————————————————————————————
+  {
+    id: "listing",
+    tag: "New",
+    accent: "green",
+    eyebrow: "Just launched",
+    title: "See your traffic, leads & revenue in one",
+    highlight: "client portal.",
+    body: "Every Growth and Performance care plan now includes a private dashboard — your website performance and CorePay revenue, together in real time.",
+    meta: "Included with Growth & Performance care",
+    primary: { label: "Explore the portal", href: "/portal" },
+    secondary: { label: "See pricing", href: "/pricing" },
+  },
 ];

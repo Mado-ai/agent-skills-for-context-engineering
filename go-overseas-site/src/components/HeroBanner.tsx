@@ -79,7 +79,11 @@ export function HeroBanner({ banners }: { banners: Banner[] }) {
       <Sparkle className="pointer-events-none absolute right-[12%] top-[16%] hidden h-28 w-28 text-blue/15 lg:block animate-twinkle" />
 
       <Container className="relative z-10 w-full py-20 sm:py-24">
-        <div className="relative min-h-[19rem] sm:min-h-[17rem]">
+        <div className="overflow-hidden">
+          <div
+            className="flex transition-transform duration-700 ease-[cubic-bezier(0.65,0.05,0.2,1)]"
+            style={{ transform: `translateX(-${index * 100}%)` }}
+          >
           {items.map((b, idx) => {
             const active = idx === index;
             const accent = b.accent ?? "blue";
@@ -88,12 +92,10 @@ export function HeroBanner({ banners }: { banners: Banner[] }) {
                 key={b.id}
                 aria-hidden={!active}
                 aria-roledescription="slide"
-                className={`max-w-2xl transition-all duration-700 ${
-                  active
-                    ? "opacity-100 translate-y-0"
-                    : "pointer-events-none absolute inset-0 translate-y-3 opacity-0"
-                }`}
+                inert={active ? undefined : true}
+                className="w-full shrink-0"
               >
+                <div className="min-h-[19rem] max-w-2xl sm:min-h-[17rem]">
                 {b.tag && (
                   <span
                     className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${PILL[accent]}`}
@@ -130,9 +132,11 @@ export function HeroBanner({ banners }: { banners: Banner[] }) {
                     </Button>
                   )}
                 </div>
+                </div>
               </div>
             );
           })}
+          </div>
         </div>
 
         {/* Controls */}
