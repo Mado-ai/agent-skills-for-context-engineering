@@ -75,6 +75,7 @@ class Analytics:
     # (runs in behind): (frame, [(pid, team, X_m), ...]).
     _pos_stream: list[tuple[int, list]] = field(default_factory=list)
     _event_cache: tuple | None = None
+    _shots: list = field(default_factory=list)
 
     def _pitch_pos(self, cx: float, cy: float) -> tuple[float, float, float, float]:
         """Return (X_m, Y_m, norm_x, norm_y) for a normalised image point."""
@@ -92,7 +93,7 @@ class Analytics:
             "frames": 0, "sprint_run": 0, "sprints": 0, "poss": 0,
             "touches": 0, "passes": 0, "completed": 0, "turnovers": 0,
             "zones": {"walk": 0.0, "jog": 0.0, "run": 0.0, "sprint": 0.0},
-            "numbers": {}, "sum_x": 0.0,
+            "numbers": {}, "sum_x": 0.0, "sum_nx": 0.0, "sum_ny": 0.0,
             "last_speed": None, "acc_run": 0, "dec_run": 0,
             "accels": 0, "decels": 0,
         })
@@ -120,6 +121,8 @@ class Analytics:
             rec = self._rec(p.id, p.team)
             rec["frames"] += 1
             rec["sum_x"] += X  # mean X drives attack-direction inference
+            rec["sum_nx"] += nx
+            rec["sum_ny"] += ny
             if p.number is not None:  # vote jersey numbers across frames
                 rec["numbers"][p.number] = rec["numbers"].get(p.number, 0) + 1
             if rec["last"] is not None:
@@ -261,8 +264,10 @@ class Analytics:
                 f = rec["frames"]
                 if f:
                     means[rec["team"]][pid] = (rec["sum_x"] / f, f)
-            self._event_cache = events.compute(
+            by_pid, by_team, shots = events.compute(
                 self._spells, self._ball_m, means, self.fps, self._pos_stream)
+            self._shots = shots
+            self._event_cache = (by_pid, by_team)
         return self._event_cache
 
     def player_stats(self) -> list[dict]:
@@ -382,11 +387,68 @@ class Analytics:
             }
         return out
 
+    def _identity(self) -> dict:
+        """pid -> (team, jersey|None) using the same majority rule as player_stats."""
+        ident = {}
+        for pid, rec in self._player_paths.items():
+            numbers = rec.get("numbers") or {}
+            jersey = max(numbers, key=numbers.get) if numbers else None
+            votes = numbers.get(jersey, 0)
+            total = sum(numbers.values())
+            if not (jersey and votes >= 3 and votes >= 0.5 * total):
+                jersey = None
+            ident[pid] = (rec["team"], jersey)
+        return ident
+
+    def pass_network(self) -> dict:
+        """Per-team average positions (nodes) + pass links (edges), keyed by jersey."""
+        ident = self._identity()
+        agg: dict[tuple, dict] = {}
+        for pid, rec in self._player_paths.items():
+            team, jersey = ident[pid]
+            if jersey is None or not rec["frames"]:
+                continue
+            a = agg.setdefault((team, jersey), {
+                "team": team, "jersey": jersey, "fnx": 0.0, "fny": 0.0, "frames": 0, "passes": 0})
+            a["fnx"] += rec["sum_nx"]; a["fny"] += rec["sum_ny"]
+            a["frames"] += rec["frames"]; a["passes"] += rec.get("passes", 0)
+        edges: dict[tuple, int] = {}
+        for prev, nxt in zip(self._spells, self._spells[1:]):
+            ka, kb = ident.get(prev["pid"]), ident.get(nxt["pid"])
+            if not ka or not kb or ka[1] is None or kb[1] is None or ka == kb or ka[0] != kb[0]:
+                continue
+            pair = tuple(sorted((ka[1], kb[1])))
+            edges[(ka[0], pair)] = edges.get((ka[0], pair), 0) + 1
+        out = {}
+        for i, t in enumerate(self.config.teams):
+            out[t.name] = {
+                "nodes": [{"jersey": a["jersey"], "x": round(a["fnx"] / a["frames"], 3),
+                           "y": round(a["fny"] / a["frames"], 3), "passes": a["passes"]}
+                          for a in agg.values() if a["team"] == i],
+                "edges": [{"a": pair[0], "b": pair[1], "count": c}
+                          for (team, pair), c in edges.items() if team == i],
+            }
+        return out
+
+    def zones(self) -> dict:
+        """Per-team territory as an 18-cell grid (3 width x 6 length), normalised."""
+        out = {}
+        for i, t in enumerate(self.config.teams):
+            grid = [0] * 18
+            for nx, ny in self._positions[i]:
+                if not (0.0 <= nx <= 1.0 and 0.0 <= ny <= 1.0):
+                    continue
+                grid[min(2, int(ny * 3)) * 6 + min(5, int(nx * 6))] += 1
+            tot = sum(grid) or 1
+            out[t.name] = [round(v / tot, 3) for v in grid]
+        return out
+
     def summary(self, out_dir: Path) -> dict:
         out_dir.mkdir(parents=True, exist_ok=True)
         self._heatmap(0, out_dir / "heatmap_home.png")
         self._heatmap(1, out_dir / "heatmap_away.png")
         home_p, away_p = self.possession_pct()
+        players = self.player_stats()  # also fills self._shots via _events()
         return {
             "possession": {
                 self.config.teams[0].name: round(home_p, 1),
@@ -396,9 +458,12 @@ class Analytics:
                 self.config.teams[0].name: "heatmap_home.png",
                 self.config.teams[1].name: "heatmap_away.png",
             },
-            "players": self.player_stats(),
+            "players": players,
             "team_stats": self.team_stats(),
             "possession_timeline": self.possession_timeline(),
+            "shots": self._shots,
+            "pass_network": self.pass_network(),
+            "zones": self.zones(),
             "ball_path_points": len(self.ball_path),
             "calibration": "homography" if self.homography is not None else "proxy",
         }

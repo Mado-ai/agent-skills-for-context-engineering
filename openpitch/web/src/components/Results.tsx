@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import type { Job, PlayerStat } from "../types";
 import { DistanceChart, PossessionTimeline, SpeedDistribution, TouchLeaders, XtLeaders } from "./Charts";
+import { CumulativeXg, PassNetwork, ShotMap, Territory } from "./Tactical";
 import HeadToHead from "./HeadToHead";
 
 function fmtTime(s: number): string {
@@ -16,7 +17,7 @@ import { Avatar, Badge, Card, CellBar, Donut, Icon, StatCard, Tabs, TeamChip, Ve
 const HOME = "#ff5a5a";
 const AWAY = "#4d7cff";
 
-type TabId = "overview" | "players" | "highlights";
+type TabId = "overview" | "tactical" | "players" | "highlights";
 
 export default function Results({ job }: { job: Job | null }) {
   const [tab, setTab] = useState<TabId>("overview");
@@ -76,6 +77,7 @@ export default function Results({ job }: { job: Job | null }) {
           onChange={setTab}
           tabs={[
             { id: "overview", label: "Overview", icon: "activity" },
+            { id: "tactical", label: "Tactical", icon: "route" },
             { id: "players", label: "Players", icon: "users" },
             { id: "highlights", label: "Highlights", icon: "film" },
           ]}
@@ -227,6 +229,27 @@ export default function Results({ job }: { job: Job | null }) {
               ))}
             </div>
           </Card>
+        </div>
+      )}
+
+      {tab === "tactical" && (
+        <div className="flex flex-col gap-5">
+          <div className="grid gap-5 lg:grid-cols-2">
+            <Card title="Shot map" subtitle="Every attempt · dot size = xG · all attacking →" icon="target">
+              <ShotMap summary={s} />
+            </Card>
+            <Card title="Cumulative xG" subtitle="The expected-goals race over the match" icon="activity">
+              <CumulativeXg summary={s} />
+            </Card>
+          </div>
+          <div className="grid gap-5 lg:grid-cols-2">
+            <Card title="Passing network" subtitle="Average positions · line weight = pass volume" icon="route">
+              <PassNetwork summary={s} />
+            </Card>
+            <Card title="Territory" subtitle="Share of tracked positions by pitch zone" icon="flame">
+              <Territory summary={s} />
+            </Card>
+          </div>
         </div>
       )}
 

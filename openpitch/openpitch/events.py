@@ -119,16 +119,18 @@ def compute(
     player_mean_x: dict[int, dict[int, tuple[float, int]]],
     fps: float,
     pos_stream: list[tuple[int, list]] | None = None,
-) -> tuple[dict[int, dict], dict[int, TeamEvents]]:
-    """Derive per-player and per-team event metrics.
+) -> tuple[dict[int, dict], dict[int, TeamEvents], list[dict]]:
+    """Derive per-player and per-team event metrics + a shot list.
 
     ``spells``: ordered confirmed possession spells, each
       ``{"pid", "team", "start": (X,Y), "end": (X,Y), "frame", "end_frame"}``.
     ``ball_m``: ``(frame, X, Y)`` ball positions in metres.
     ``player_mean_x``: ``{team: {pid: (mean_x, frames)}}`` for attack inference.
 
-    Returns ``(by_pid, by_team)``.
+    Returns ``(by_pid, by_team, shots)`` where each shot is
+      ``{"team", "xn", "yn", "xg", "t"}`` (xn/yn normalised toward the goal).
     """
+    shots: list[dict] = []
     attack: dict[int, float] = {
         t: _attack_goal_x(t, player_mean_x.get(t, {})) for t in (0, 1)
     }
@@ -218,6 +220,13 @@ def compute(
                     r["xg"] += val
                     by_team[shooter_team].shots += 1
                     by_team[shooter_team].xg += val
+                    shots.append({
+                        "team": shooter_team,
+                        "xn": round(xn_of(shooter_team, sx), 3),
+                        "yn": round(sy / PITCH_WIDTH_M, 3),
+                        "xg": round(val, 3),
+                        "t": round(frame / fps, 1),
+                    })
                     # Expected assist: credit the shot's xG to the team-mate
                     # whose pass set up the shooter (the previous confirmed
                     # spell, if it was a completed pass to them).
@@ -283,4 +292,4 @@ def compute(
                     by_team[team].runs_in_behind += 1
                 was_behind[pid] = behind
 
-    return by_pid, by_team
+    return by_pid, by_team, shots

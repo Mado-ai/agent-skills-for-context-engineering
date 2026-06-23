@@ -48,7 +48,7 @@ def test_progressive_pass_and_xt_credited():
         {"pid": 2, "team": 0, "frame": 25, "start": (70.0, 34.0)},
     ]
     means = {0: {1: (5.0, 50)}, 1: {3: (100.0, 50)}}  # keeper low → attack +x
-    by_pid, by_team = events.compute(spells, [], means, fps=25)
+    by_pid, by_team, _shots = events.compute(spells, [], means, fps=25)
     assert by_team[0].completed == 1
     assert by_team[0].progressive == 1
     assert by_pid[1]["xt_added"] > 0  # threat increased

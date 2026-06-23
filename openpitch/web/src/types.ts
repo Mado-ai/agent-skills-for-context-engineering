@@ -61,6 +61,33 @@ export interface PossessionPoint {
   away: number;
 }
 
+export interface Shot {
+  team: string;
+  /** Normalised attacking-direction coords (0 = own goal, 1 = target goal). */
+  xn: number;
+  yn: number;
+  xg: number;
+  t: number;
+}
+
+export interface PassNode {
+  jersey: number;
+  x: number;
+  y: number;
+  passes: number;
+}
+
+export interface PassEdge {
+  a: number;
+  b: number;
+  count: number;
+}
+
+export interface PassNetwork {
+  nodes: PassNode[];
+  edges: PassEdge[];
+}
+
 export interface JobSummary {
   possession: Record<string, number>;
   possession_timeline: PossessionPoint[];
@@ -69,6 +96,11 @@ export interface JobSummary {
   heatmaps: Record<string, string>;
   highlights: Highlight[];
   meta: Record<string, string | number>;
+  /** Tactical visuals. */
+  shots?: Shot[];
+  pass_network?: Record<string, PassNetwork>;
+  /** Per-team 18-cell (3 width x 6 length) normalised territory grid. */
+  zones?: Record<string, number[]>;
   /** False for tracking-data sources that have no broadcast video. */
   broadcast?: boolean;
 }
