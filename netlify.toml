@@ -5,6 +5,9 @@
   base = "go-overseas-site"
   command = "npm run build"
 
+[build.environment]
+  NODE_VERSION = "20"
+
 # Next.js runtime (App Router, SSR, image optimization, OG image routes).
 [[plugins]]
   package = "@netlify/plugin-nextjs"
