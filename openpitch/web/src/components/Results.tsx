@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import type { Job, PlayerStat } from "../types";
 import { DistanceChart, PossessionTimeline, SpeedDistribution, TouchLeaders, XtLeaders } from "./Charts";
 import { CumulativeXg, PassNetwork, ShotMap, Territory } from "./Tactical";
+import { EventTimeline } from "./EventTimeline";
 import HeadToHead from "./HeadToHead";
 
 function fmtTime(s: number): string {
@@ -21,6 +22,17 @@ type TabId = "overview" | "tactical" | "players" | "highlights";
 
 export default function Results({ job }: { job: Job | null }) {
   const [tab, setTab] = useState<TabId>("overview");
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Event-linked video: jump the broadcast player to an event's timestamp.
+  const seek = (t: number) => {
+    const v = videoRef.current;
+    if (!v) return;
+    setTab("overview");
+    v.currentTime = Math.max(0, t);
+    void v.play().catch(() => {});
+    v.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
 
   if (!job || !job.summary) {
     return (
@@ -107,6 +119,7 @@ export default function Results({ job }: { job: Job | null }) {
               ) : (
                 <video
                   key={job.id}
+                  ref={videoRef}
                   src={api.fileUrl(job.id, "broadcast.mp4")}
                   controls
                   className="aspect-video w-full rounded-b-2xl bg-black"
@@ -137,6 +150,14 @@ export default function Results({ job }: { job: Job | null }) {
               </div>
             </Card>
           </div>
+
+          <Card
+            title="Match events"
+            subtitle={s.broadcast === false ? "Timestamped feed (no broadcast to seek)" : "Click an event to jump the broadcast"}
+            icon="film"
+          >
+            <EventTimeline summary={s} jobId={job.id} onSeek={seek} hasVideo={s.broadcast !== false} />
+          </Card>
 
           <div className="grid gap-5 md:grid-cols-2">
             <Card title="Possession over time" icon="activity">
