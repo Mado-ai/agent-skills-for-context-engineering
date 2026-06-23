@@ -126,15 +126,27 @@ export function HeroBanner({ banners }: { banners: Banner[] }) {
                   <div className={b.tag ? "mt-4" : ""}>
                     <Eyebrow>{b.eyebrow}</Eyebrow>
                   </div>
-                  <h1 className="mt-5 font-display text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-                    {b.title}
-                    {b.highlight && (
+                  {(() => {
+                    const cls =
+                      "mt-5 font-display text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl";
+                    const content = (
                       <>
-                        {" "}
-                        <span className="text-gradient">{b.highlight}</span>
+                        {b.title}
+                        {b.highlight && (
+                          <>
+                            {" "}
+                            <span className="text-gradient">{b.highlight}</span>
+                          </>
+                        )}
                       </>
-                    )}
-                  </h1>
+                    );
+                    // Only the visible slide carries the page <h1>; the rest use <p>.
+                    return active ? (
+                      <h1 className={cls}>{content}</h1>
+                    ) : (
+                      <p className={cls}>{content}</p>
+                    );
+                  })()}
                   <p className="mt-6 max-w-xl text-lg leading-relaxed text-mist">{b.body}</p>
                   {b.meta && <p className="mt-3 text-sm text-mist-dim">{b.meta}</p>}
                   <div className="mt-8 flex flex-wrap items-center gap-3">
