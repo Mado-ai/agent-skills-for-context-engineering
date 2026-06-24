@@ -23,6 +23,8 @@ const PlayerProfile = lazy(() => import("./pages/PlayerProfile"));
 const PublicProfile = lazy(() => import("./pages/PublicProfile"));
 const Compare = lazy(() => import("./pages/Compare"));
 const Report = lazy(() => import("./pages/Report"));
+const Playbooks = lazy(() => import("./pages/Playbooks"));
+const Scouting = lazy(() => import("./pages/Scouting"));
 
 function Loading() {
   return <div className="p-10 text-center text-slate-400">Loading…</div>;
@@ -62,6 +64,8 @@ export default function App() {
                 <Route path="/players/:id" element={<ProtectedRoute><PlayerProfile /></ProtectedRoute>} />
                 <Route path="/report/player/:id" element={<ProtectedRoute><Report kind="player" /></ProtectedRoute>} />
                 <Route path="/report/team/:id" element={<ProtectedRoute><Report kind="team" /></ProtectedRoute>} />
+                <Route path="/teams/:teamId/playbooks" element={<ProtectedRoute><Playbooks /></ProtectedRoute>} />
+                <Route path="/teams/:teamId/scouting" element={<ProtectedRoute><Scouting /></ProtectedRoute>} />
               </Routes>
             </Suspense>
           </main>

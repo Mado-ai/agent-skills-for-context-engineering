@@ -1,4 +1,7 @@
-import type { Device, Job, Member, Org, PlayerProfile, Site, SiteJob, TeamProfile, TeamSummary, User } from "../types";
+import type {
+  ClipTag, Device, Job, Member, Org, Playbook, PlaybookData, PlayerProfile, ScoutingReport,
+  Shape, Site, SiteJob, TeamProfile, TeamSummary, Telestration, User,
+} from "../types";
 
 const TOKEN_KEY = "pm_token";
 let _mediaToken = "";
@@ -250,6 +253,58 @@ export const api = {
   },
   async setPlayerStat(matchId: string, fields: Record<string, string>): Promise<void> {
     await authed(`/api/matches/${matchId}/stats`, { method: "POST", body: new URLSearchParams(fields) });
+  },
+
+  // --- coach tools: clip tags (coding) ---
+  async listTags(jobId: string): Promise<{ tags: ClipTag[] }> {
+    return authed(`/api/jobs/${jobId}/tags`);
+  },
+  async addTag(jobId: string, body: { t: number; label: string; note?: string; player_id?: string | null }): Promise<ClipTag> {
+    return authed(`/api/jobs/${jobId}/tags`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+    });
+  },
+  async deleteTag(tagId: string): Promise<void> {
+    await authed(`/api/tags/${tagId}`, { method: "DELETE" });
+  },
+
+  // --- coach tools: telestration ---
+  async listTelestrations(jobId: string): Promise<{ telestrations: Telestration[] }> {
+    return authed(`/api/jobs/${jobId}/telestrations`);
+  },
+  async addTelestration(jobId: string, body: { name: string; t: number; shapes: Shape[] }): Promise<Telestration> {
+    return authed(`/api/jobs/${jobId}/telestrations`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+    });
+  },
+  async deleteTelestration(id: string): Promise<void> {
+    await authed(`/api/telestrations/${id}`, { method: "DELETE" });
+  },
+
+  // --- coach tools: playbooks ---
+  async listPlaybooks(teamId: string): Promise<{ playbooks: Playbook[] }> {
+    return authed(`/api/teams/${teamId}/playbooks`);
+  },
+  async createPlaybook(teamId: string, body: { name: string; field_type: number; data: PlaybookData }): Promise<Playbook> {
+    return authed(`/api/teams/${teamId}/playbooks`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+    });
+  },
+  async getPlaybook(id: string): Promise<Playbook> {
+    return authed(`/api/playbooks/${id}`);
+  },
+  async savePlaybook(id: string, body: { name: string; field_type: number; data: PlaybookData }): Promise<void> {
+    await authed(`/api/playbooks/${id}`, {
+      method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+    });
+  },
+  async deletePlaybook(id: string): Promise<void> {
+    await authed(`/api/playbooks/${id}`, { method: "DELETE" });
+  },
+
+  // --- coach tools: scouting ---
+  async scouting(teamId: string): Promise<ScoutingReport> {
+    return authed(`/api/teams/${teamId}/scouting`);
   },
 
   // public (no auth)

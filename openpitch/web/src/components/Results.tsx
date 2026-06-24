@@ -5,6 +5,7 @@ import type { Job, PlayerStat } from "../types";
 import { DistanceChart, PossessionTimeline, SpeedDistribution, TouchLeaders, XtLeaders } from "./Charts";
 import { CumulativeXg, PassNetwork, ShotMap, Territory } from "./Tactical";
 import { EventTimeline } from "./EventTimeline";
+import FilmRoom from "./FilmRoom";
 import HeadToHead from "./HeadToHead";
 
 function fmtTime(s: number): string {
@@ -18,7 +19,7 @@ import { Avatar, Badge, Card, CellBar, Donut, Icon, StatCard, Tabs, TeamChip, Ve
 const HOME = "#ff5a5a";
 const AWAY = "#4d7cff";
 
-type TabId = "overview" | "tactical" | "players" | "highlights";
+type TabId = "overview" | "tactical" | "filmroom" | "players" | "highlights";
 
 export default function Results({ job }: { job: Job | null }) {
   const [tab, setTab] = useState<TabId>("overview");
@@ -90,6 +91,7 @@ export default function Results({ job }: { job: Job | null }) {
           tabs={[
             { id: "overview", label: "Overview", icon: "activity" },
             { id: "tactical", label: "Tactical", icon: "route" },
+            { id: "filmroom", label: "Film room", icon: "film" },
             { id: "players", label: "Players", icon: "users" },
             { id: "highlights", label: "Highlights", icon: "film" },
           ]}
@@ -273,6 +275,8 @@ export default function Results({ job }: { job: Job | null }) {
           </div>
         </div>
       )}
+
+      {tab === "filmroom" && <FilmRoom job={job} />}
 
       {tab === "players" && <PlayersTab s={s} color={color} jobId={job.id} />}
 

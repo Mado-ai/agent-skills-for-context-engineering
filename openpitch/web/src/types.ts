@@ -271,3 +271,78 @@ export interface Benchmark {
   team_avg: number;
   team_best: number;
 }
+
+// --- coach tools ---
+
+export interface ClipTag {
+  id: string;
+  job_id?: string;
+  t: number;
+  label: string;
+  note?: string | null;
+  player_id?: string | null;
+  player_name?: string | null;
+}
+
+export type Shape =
+  | { kind: "arrow"; x1: number; y1: number; x2: number; y2: number; color: string }
+  | { kind: "line"; x1: number; y1: number; x2: number; y2: number; color: string }
+  | { kind: "ellipse"; x1: number; y1: number; x2: number; y2: number; color: string }
+  | { kind: "rect"; x1: number; y1: number; x2: number; y2: number; color: string }
+  | { kind: "free"; points: number[]; color: string };
+
+export interface Telestration {
+  id: string;
+  job_id?: string;
+  name: string;
+  t: number;
+  shapes: Shape[];
+  created_at?: number;
+}
+
+export interface PlaybookToken {
+  id: string;
+  x: number;
+  y: number;
+  label: string;
+  team: "home" | "away" | "ball";
+}
+
+export interface PlaybookArrow {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  dashed?: boolean;
+}
+
+export interface PlaybookData {
+  tokens: PlaybookToken[];
+  arrows: PlaybookArrow[];
+  notes?: string;
+}
+
+export interface Playbook {
+  id: string;
+  team_id: string;
+  name: string;
+  field_type: number;
+  data: PlaybookData;
+  created_at?: number;
+}
+
+export interface ScoutingReport {
+  team: { id: string; name: string; public_token?: string | null };
+  record: { played: number; wins: number; draws: number; losses: number; goals_for: number; goals_against: number };
+  matches: number;
+  danger_men: { player_id: string; name: string; goals: number; assists?: number; shots?: number; matches: number; avatar?: boolean }[];
+  totals: { goals: number; assists: number; shots: number; shots_on_target: number; fouls: number; yellow_cards: number; red_cards: number };
+  attacking: {
+    channels: { left: number; center: number; right: number };
+    channel_pct: { left: number; center: number; right: number };
+    favoured_channel: "left" | "center" | "right" | null;
+    final_third_entries: number;
+    possession_avg: number | null;
+  };
+  snapshot: { opponent: string | null; played_on: string | null; shots: Shot[]; zones: number[] } | null;
+}

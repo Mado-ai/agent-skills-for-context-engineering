@@ -19,7 +19,7 @@ from openpitch.api import app  # noqa: E402
 def auth():
     with TestClient(app) as c:
         tok = c.post("/api/auth/register",
-                     data={"email": "coach@club.com", "password": "secret1"}
+                     data={"email": "filmroom-coach@club.com", "password": "secret1"}
                      ).json()["token"]
         yield c, {"Authorization": f"Bearer {tok}"}
 
@@ -96,7 +96,7 @@ def test_playbook_crud(auth):
 
     # ownership isolation
     other = c.post("/api/auth/register",
-                   data={"email": "rival@club.com", "password": "secret1"}).json()["token"]
+                   data={"email": "pb-rival@club.com", "password": "secret1"}).json()["token"]
     oh = {"Authorization": f"Bearer {other}"}
     assert c.get(f"/api/playbooks/{pb['id']}", headers=oh).status_code == 404
 
