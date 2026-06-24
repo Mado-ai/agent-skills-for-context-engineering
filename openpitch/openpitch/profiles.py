@@ -221,9 +221,13 @@ def scouting_report(team_id: str) -> dict | None:
         job = db.get_job(m["job_id"])
         if not job or not job.get("summary"):
             continue
-        try:
-            s = json.loads(job["summary"])
-        except (TypeError, ValueError):
+        s = job["summary"]
+        if isinstance(s, str):  # some accessors hand back raw JSON
+            try:
+                s = json.loads(s)
+            except (TypeError, ValueError):
+                continue
+        if not isinstance(s, dict):
             continue
         ts = s.get("team_stats") or {}
         home = next(iter(ts), None)

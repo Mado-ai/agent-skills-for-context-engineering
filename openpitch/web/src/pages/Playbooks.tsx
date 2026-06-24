@@ -103,8 +103,12 @@ function Editor({ teamId, initial, onSaved, onDeleted }: {
   };
 
   const addToken = (team: PlaybookToken["team"]) => {
-    const label = team === "ball" ? "" : team === "home" ? String(tokens.filter((t) => t.team === "home").length + 1) : "X";
-    setTokens((s) => [...s, { id: uid(), x: 0.5, y: 0.5, label, team }]);
+    const n = tokens.filter((t) => t.team === team).length;
+    const label = team === "ball" ? "" : team === "home" ? String(n + 1) : "X";
+    // Spread new tokens in a tidy column so they don't land on top of each other.
+    const x = team === "home" ? 0.3 : team === "away" ? 0.7 : 0.5;
+    const y = team === "ball" ? 0.5 : Math.min(0.9, 0.15 + n * 0.12);
+    setTokens((s) => [...s, { id: uid(), x, y, label, team }]);
   };
 
   const onTokenDown = (e: React.PointerEvent, id: string) => {

@@ -56,7 +56,8 @@ _FIXTURES = [
      ("Metrica Sample", 11, 2, 1, 4, True)],
     [("Northgate United", 11, 1, 3, 35, False),
      ("Parkside City", 11, 2, 0, 19, False),
-     ("Eastfield Rangers", 11, 0, 0, 9, False)],
+     ("Eastfield Rangers", 11, 0, 0, 9, False),
+     ("Metrica Sample", 11, 3, 2, 3, True)],
 ]
 
 
