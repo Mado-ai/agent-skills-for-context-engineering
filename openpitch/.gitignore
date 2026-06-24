@@ -1,0 +1,17 @@
+runs/
+*.mp4
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+*.pt
+*.db
+playmetrics.db
+live_preview.png
+preview.png
+review_preview.png
+*_preview.png
+web/node_modules/
+web/dist/

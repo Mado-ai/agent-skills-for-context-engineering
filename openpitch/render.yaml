@@ -1,0 +1,25 @@
+# Render.com Blueprint — connect the repo and Render reads this file.
+# Set PLAYMETRICS_ADMIN_PASSWORD in the dashboard (marked sync:false below).
+services:
+  - type: web
+    name: play-metrics
+    runtime: docker
+    dockerfilePath: ./openpitch/Dockerfile
+    dockerContext: ./openpitch
+    plan: standard            # video processing needs real CPU/RAM
+    healthCheckPath: /api/health
+    disk:
+      name: playmetrics-data
+      mountPath: /data
+      sizeGB: 3
+    envVars:
+      - key: PLAYMETRICS_SECRET
+        generateValue: true
+      - key: PLAYMETRICS_DATA
+        value: /data/runs
+      - key: PLAYMETRICS_DB
+        value: /data/playmetrics.db
+      - key: PLAYMETRICS_ADMIN_EMAIL
+        value: yazanalshuibe14@gmail.com
+      - key: PLAYMETRICS_ADMIN_PASSWORD
+        sync: false           # set manually in the Render dashboard

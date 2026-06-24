@@ -1,0 +1,39 @@
+# Fly.io deployment (recommended: Docker + persistent volume + simple CLI).
+# 1) fly launch --no-deploy --copy-config   (or edit `app` below)
+# 2) fly volumes create playmetrics_data --size 3
+# 3) fly secrets set PLAYMETRICS_SECRET=$(openssl rand -hex 32) \
+#                   PLAYMETRICS_ADMIN_PASSWORD=<strong-password>
+# 4) fly deploy
+app = "play-metrics"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PLAYMETRICS_DATA = "/data/runs"
+  PLAYMETRICS_DB = "/data/playmetrics.db"
+  PLAYMETRICS_ADMIN_EMAIL = "yazanalshuibe14@gmail.com"
+
+[mounts]
+  source = "playmetrics_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [http_service.checks]
+    [[http_service.checks.http]]
+      method = "GET"
+      path = "/api/health"
+      interval = "30s"
+      timeout = "5s"
+
+# Video processing is CPU-bound; give it room.
+[[vm]]
+  size = "shared-cpu-2x"
+  memory = "2gb"

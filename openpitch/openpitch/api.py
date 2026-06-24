@@ -1,0 +1,1197 @@
+"""HTTP API + static website host for Play Metrics.
+
+A FastAPI backend that turns the OpenPitch pipeline into a multi-user web
+app: account login, persistent per-user job history (SQLite), and every
+pipeline capability (upload, detector choice, pitch calibration, broadcast,
+analytics, heatmaps, highlights) exposed to an authenticated dashboard.
+
+    uvicorn openpitch.api:app --reload      # http://localhost:8000
+
+On first start an admin account is seeded from PLAYMETRICS_ADMIN_EMAIL /
+PLAYMETRICS_ADMIN_PASSWORD (sensible dev defaults if unset).
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import subprocess
+import sys
+import threading
+import time
+import uuid
+from contextlib import asynccontextmanager
+from pathlib import Path
+
+from fastapi import (
+    Body, Depends, FastAPI, Form, Header, HTTPException, Request, UploadFile,
+)
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from . import auth, authz, db, demo_seed, hardware, jobs_queue, oauth, profiles, storage
+
+IS_PRODUCTION = os.environ.get("PLAYMETRICS_ENV", "").lower() == "production"
+
+ROOT = Path(__file__).resolve().parent.parent
+# Object storage (local FS today; S3/GCS-ready). RUNS = its local root.
+STORAGE = storage.get_storage()
+RUNS = STORAGE.root
+# Prefer the built Vite SPA (web/dist); fall back to the no-build frontend.
+WEB_DIST = ROOT / "web" / "dist"
+SPA_DIR = WEB_DIST if (WEB_DIST / "index.html").exists() else ROOT / "frontend"
+RUNS.mkdir(parents=True, exist_ok=True)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Production must not run on insecure defaults.
+    if IS_PRODUCTION:
+        if not os.environ.get("PLAYMETRICS_SECRET"):
+            raise RuntimeError("PLAYMETRICS_SECRET is required in production")
+        if not os.environ.get("PLAYMETRICS_ADMIN_PASSWORD"):
+            raise RuntimeError("PLAYMETRICS_ADMIN_PASSWORD is required in production")
+    elif not os.environ.get("PLAYMETRICS_SECRET"):
+        print("[warn] PLAYMETRICS_SECRET unset — tokens reset on restart (dev only)")
+
+    db.init_db()
+    email = os.environ.get("PLAYMETRICS_ADMIN_EMAIL", "yazanalshuibe14@gmail.com")
+    password = os.environ.get("PLAYMETRICS_ADMIN_PASSWORD", "playmetrics-dev")
+    if db.get_user_by_email(email) is None:
+        db.create_user(email, auth.hash_password(password), is_admin=True)
+        print(f"[seed] admin account created: {email}")
+    # Optionally populate a fresh deployment with demo data (background, no-op
+    # unless PLAYMETRICS_SEED_DEMO is set and the demo squads aren't present).
+    demo_seed.maybe_seed()
+    yield
+
+
+app = FastAPI(title="Play Metrics", version="0.2.0", lifespan=lifespan)
+_bearer = HTTPBearer(auto_error=False)
+
+# Content-Security-Policy: SPA serves its own assets; inline styles come from
+# React style props + Tailwind, so style-src allows 'unsafe-inline'.
+_CSP = (
+    "default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; "
+    "script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; "
+    "base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+)
+
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    resp = await call_next(request)
+    resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+    resp.headers.setdefault("X-Frame-Options", "DENY")
+    resp.headers.setdefault("Referrer-Policy", "no-referrer")
+    resp.headers.setdefault("Content-Security-Policy", _CSP)
+    resp.headers.setdefault(
+        "Strict-Transport-Security", "max-age=63072000; includeSubDomains"
+    )
+    return resp
+
+
+# --- login rate limiting (in-memory; per process — use Redis at scale) -------
+
+_LOGIN_MAX_FAILS = 5
+_LOGIN_WINDOW_S = 300
+_login_fails: dict[str, list[float]] = {}
+_login_lock = threading.Lock()
+
+
+def _login_key(email: str, request: Request) -> str:
+    ip = request.client.host if request.client else "?"
+    return f"{email.lower()}|{ip}"
+
+
+def _login_guard(key: str) -> None:
+    now = time.time()
+    with _login_lock:
+        fails = [t for t in _login_fails.get(key, []) if now - t < _LOGIN_WINDOW_S]
+        _login_fails[key] = fails
+        if len(fails) >= _LOGIN_MAX_FAILS:
+            raise HTTPException(429, "too many attempts — try again later")
+
+
+def _login_record_fail(key: str) -> None:
+    with _login_lock:
+        _login_fails.setdefault(key, []).append(time.time())
+
+
+def _login_reset(key: str) -> None:
+    with _login_lock:
+        _login_fails.pop(key, None)
+
+
+def _audit(user: dict | None, action: str, target_type: str | None,
+           target_id: str | None, detail: str | None = None) -> None:
+    db.add_audit("aud_" + uuid.uuid4().hex[:12],
+                 user["id"] if user else None, action, target_type, target_id, detail)
+
+
+# --- auth helpers -----------------------------------------------------------
+
+SESSION_COOKIE = "pm_session"
+_COOKIE_MAX_AGE = 7 * 24 * 3600
+
+
+def _set_session(resp, token: str) -> None:
+    """Attach the session JWT as an HttpOnly cookie (not readable from JS).
+
+    SameSite=Lax keeps it off cross-site requests (CSRF) while still riding the
+    top-level OAuth redirect; Secure is on in production (HTTPS)."""
+    resp.set_cookie(
+        SESSION_COOKIE, token, max_age=_COOKIE_MAX_AGE, httponly=True,
+        samesite="lax", secure=IS_PRODUCTION, path="/")
+
+
+def current_user(
+    request: Request,
+    creds: HTTPAuthorizationCredentials | None = Depends(_bearer),
+) -> dict:
+    # Prefer the Authorization header (programmatic clients); fall back to the
+    # HttpOnly session cookie (the web app).
+    token = creds.credentials if creds else request.cookies.get(SESSION_COOKIE)
+    if not token:
+        raise HTTPException(401, "missing token")
+    data = auth.decode_token(token)
+    if not data:
+        raise HTTPException(401, "invalid or expired token")
+    user = db.get_user_by_id(data["sub"])
+    if not user:
+        raise HTTPException(401, "unknown user")
+    return dict(user)
+
+
+# --- auth endpoints ---------------------------------------------------------
+
+@app.post("/api/auth/register")
+def register(email: str = Form(...), password: str = Form(...)) -> JSONResponse:
+    if len(password) < 6:
+        raise HTTPException(400, "password must be at least 6 characters")
+    if db.get_user_by_email(email):
+        raise HTTPException(409, "email already registered")
+    user = db.create_user(email, auth.hash_password(password))
+    token = auth.create_token(user["id"], user["email"])
+    resp = JSONResponse({"token": token, "email": user["email"]})
+    _set_session(resp, token)
+    return resp
+
+
+@app.post("/api/auth/login")
+def login(request: Request, email: str = Form(...), password: str = Form(...)) -> JSONResponse:
+    key = _login_key(email, request)
+    _login_guard(key)  # 429 if too many recent failures
+    user = db.get_user_by_email(email)
+    if not user or not auth.verify_password(password, user["password_hash"]):
+        _login_record_fail(key)
+        raise HTTPException(401, "invalid credentials")
+    _login_reset(key)
+    token = auth.create_token(user["id"], user["email"])
+    resp = JSONResponse({"token": token, "email": user["email"]})
+    _set_session(resp, token)
+    return resp
+
+
+@app.post("/api/auth/logout")
+def logout() -> JSONResponse:
+    resp = JSONResponse({"status": "ok"})
+    resp.delete_cookie(SESSION_COOKIE, path="/")
+    return resp
+
+
+@app.get("/api/auth/providers")
+def oauth_providers() -> JSONResponse:
+    """Configured social-login providers (so the UI only shows working buttons)."""
+    return JSONResponse({"providers": oauth.enabled()})
+
+
+@app.get("/api/auth/oauth/{provider}/start")
+def oauth_start(provider: str, request: Request):
+    """Redirect the browser to the provider's consent screen."""
+    redirect_uri = f"{str(request.base_url).rstrip('/')}/api/auth/oauth/{provider}/callback"
+    url = oauth.authorize_url(provider, redirect_uri)
+    if not url:
+        raise HTTPException(404, "provider not configured")
+    return RedirectResponse(url)
+
+
+@app.get("/api/auth/oauth/{provider}/callback")
+def oauth_callback(provider: str, request: Request, code: str = "", state: str = ""):
+    """Provider redirect target: verify, upsert the user, hand back a session."""
+    if oauth.verify_state(state) != provider:
+        return RedirectResponse("/?oauth_error=state")
+    redirect_uri = f"{str(request.base_url).rstrip('/')}/api/auth/oauth/{provider}/callback"
+    try:
+        email, _name = oauth.exchange_code(provider, code, redirect_uri)
+    except Exception as exc:  # provider/network/email failure — fail to the UI
+        _audit(None, "auth.oauth_fail", "user", provider, detail=str(exc)[:200])
+        return RedirectResponse("/?oauth_error=exchange")
+    user = db.get_user_by_email(email)
+    if not user:
+        # OAuth accounts have no usable password (random, unguessable hash).
+        user = db.create_user(email, auth.hash_password(uuid.uuid4().hex))
+    _audit(user, "auth.oauth", "user", provider)
+    token = auth.create_token(user["id"], user["email"])
+    # Hand the session back as an HttpOnly cookie (never expose the JWT in the
+    # URL / browser history), then land on the dashboard.
+    resp = RedirectResponse("/dashboard")
+    _set_session(resp, token)
+    return resp
+
+
+@app.get("/api/health")
+def health() -> JSONResponse:
+    return JSONResponse({"status": "ok", "version": app.version})
+
+
+@app.delete("/api/account")
+def delete_account(user: dict = Depends(current_user)) -> JSONResponse:
+    """Right-to-delete: remove the account and its personal data + files."""
+    job_ids = db.delete_user_cascade(user["id"])
+    for jid in job_ids:
+        STORAGE.delete_job(jid)
+    _audit(None, "account.delete", "user", str(user["id"]))
+    return JSONResponse({"status": "ok"})
+
+
+@app.get("/api/auth/me")
+def me(user: dict = Depends(current_user)) -> JSONResponse:
+    return JSONResponse(
+        {"email": user["email"], "is_admin": bool(user["is_admin"])}
+    )
+
+
+@app.get("/api/auth/media-token")
+def media_token(user: dict = Depends(current_user)) -> JSONResponse:
+    """Short-lived, read-only token for <video>/<img> URLs (not the session JWT)."""
+    return JSONResponse({"media_token": auth.create_media_token(user["id"]),
+                         "expires_in": auth._MEDIA_TTL_S})
+
+
+@app.post("/api/auth/change-password")
+def change_password(
+    current_password: str = Form(...),
+    new_password: str = Form(...),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    if not auth.verify_password(current_password, user["password_hash"]):
+        raise HTTPException(401, "current password is incorrect")
+    if len(new_password) < 6:
+        raise HTTPException(400, "new password must be at least 6 characters")
+    db.set_password(user["id"], auth.hash_password(new_password))
+    return JSONResponse({"status": "ok"})
+
+
+# --- job execution ----------------------------------------------------------
+
+def _start(job_id: str, user_id: int, input_path: Path, detector: str,
+           input_name: str, source: str = "upload", site_id: str | None = None) -> None:
+    db.create_job(job_id, user_id, input_name, detector, source=source, site_id=site_id)
+    jobs_queue.enqueue(job_id, str(input_path), detector)
+
+
+# --- job endpoints ----------------------------------------------------------
+
+MAX_UPLOAD_BYTES = 500 * 1024 * 1024  # 500 MB
+
+
+@app.post("/api/jobs")
+async def create_job(
+    file: UploadFile,
+    detector: str = Form("color"),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    if detector not in ("color", "yolo"):
+        raise HTTPException(400, "detector must be 'color' or 'yolo'")
+    if file.content_type and not file.content_type.startswith("video/"):
+        raise HTTPException(400, "please upload a video file")
+    data = await file.read()
+    if not data:
+        raise HTTPException(400, "uploaded file is empty")
+    if len(data) > MAX_UPLOAD_BYTES:
+        raise HTTPException(413, "file too large (max 500 MB)")
+    job_id = uuid.uuid4().hex[:12]
+    out_dir = STORAGE.job_dir(job_id)
+    (out_dir / "input.mp4").write_bytes(data)
+    _start(job_id, user["id"], out_dir / "input.mp4", detector, file.filename or "upload.mp4")
+    return JSONResponse({"job_id": job_id})
+
+
+@app.post("/api/demo")
+def create_demo(
+    seconds: int = Form(10),
+    detector: str = Form("color"),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    job_id = uuid.uuid4().hex[:12]
+    out_dir = STORAGE.job_dir(job_id)
+    sample = out_dir / "input.mp4"
+    subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "generate_sample.py"),
+         "--out", str(sample), "--seconds", str(min(max(seconds, 3), 30))],
+        check=True,
+    )
+    _start(job_id, user["id"], sample, detector, "synthetic-demo.mp4")
+    return JSONResponse({"job_id": job_id})
+
+
+@app.get("/api/jobs")
+def list_jobs(user: dict = Depends(current_user)) -> JSONResponse:
+    return JSONResponse({"jobs": db.list_jobs_for_user(user["id"])})
+
+
+def _owned_job(job_id: str, user: dict) -> dict:
+    job = db.get_job(job_id)
+    if not job or job["user_id"] != user["id"]:
+        raise HTTPException(404, "job not found")
+    return job
+
+
+@app.get("/api/jobs/{job_id}")
+def job_status(job_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    return JSONResponse(_owned_job(job_id, user))
+
+
+@app.get("/api/jobs/{job_id}/roster-map")
+def job_roster_map(job_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    """If this analysis is linked to a match, map jersey -> roster player so the
+    dashboard can open detected players' accounts."""
+    _owned_job(job_id, user)
+    m = db.match_for_job(job_id)
+    if not m or m["user_id"] != user["id"]:
+        return JSONResponse({"team_id": None, "players": []})
+    players = [{"jersey": p["jersey"], "id": p["id"], "name": p["name"],
+                "avatar": bool(p.get("avatar_url"))}
+               for p in db.list_players(m["team_id"]) if p.get("jersey") is not None]
+    return JSONResponse({"team_id": m["team_id"], "players": players})
+
+
+@app.patch("/api/jobs/{job_id}")
+def rename_job(
+    job_id: str, name: str = Form(...), user: dict = Depends(current_user)
+) -> JSONResponse:
+    _owned_job(job_id, user)
+    name = name.strip()[:120]
+    if not name:
+        raise HTTPException(400, "name cannot be empty")
+    db.rename_job(job_id, name)
+    return JSONResponse({"status": "ok", "name": name})
+
+
+@app.delete("/api/jobs/{job_id}")
+def delete_job(job_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_job(job_id, user)
+    db.delete_job(job_id)
+    STORAGE.delete_job(job_id)
+    return JSONResponse({"status": "ok"})
+
+
+# --- coach tools: clip tagging (coding) -------------------------------------
+
+@app.get("/api/jobs/{job_id}/tags")
+def list_tags(job_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_job(job_id, user)
+    return JSONResponse({"tags": db.list_clip_tags(job_id)})
+
+
+@app.post("/api/jobs/{job_id}/tags")
+def add_tag(job_id: str, payload: dict = Body(...),
+            user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_job(job_id, user)
+    label = str(payload.get("label", "")).strip()[:60]
+    if not label:
+        raise HTTPException(400, "label required")
+    tag = db.add_clip_tag(
+        "tag_" + uuid.uuid4().hex[:10], job_id, user["id"],
+        float(payload.get("t") or 0.0), label,
+        (str(payload.get("note") or "").strip()[:500] or None),
+        payload.get("player_id") or None)
+    return JSONResponse(tag)
+
+
+@app.delete("/api/tags/{tag_id}")
+def delete_tag(tag_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    tag = db.get_clip_tag(tag_id)
+    if not tag or tag["user_id"] != user["id"]:
+        raise HTTPException(404, "tag not found")
+    db.delete_clip_tag(tag_id)
+    return JSONResponse({"status": "ok"})
+
+
+# --- coach tools: telestration ----------------------------------------------
+
+@app.get("/api/jobs/{job_id}/telestrations")
+def list_tele(job_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_job(job_id, user)
+    rows = db.list_telestrations(job_id)
+    for r in rows:
+        r["shapes"] = json.loads(r["shapes"]) if r.get("shapes") else []
+    return JSONResponse({"telestrations": rows})
+
+
+@app.post("/api/jobs/{job_id}/telestrations")
+def add_tele(job_id: str, payload: dict = Body(...),
+             user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_job(job_id, user)
+    shapes = payload.get("shapes") or []
+    if not isinstance(shapes, list):
+        raise HTTPException(400, "shapes must be a list")
+    row = db.add_telestration(
+        "tel_" + uuid.uuid4().hex[:10], job_id, user["id"],
+        str(payload.get("name") or "Untitled").strip()[:80],
+        float(payload.get("t") or 0.0), json.dumps(shapes))
+    row["shapes"] = shapes
+    return JSONResponse(row)
+
+
+@app.delete("/api/telestrations/{tel_id}")
+def delete_tele(tel_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    row = db.get_telestration(tel_id)
+    if not row or row["user_id"] != user["id"]:
+        raise HTTPException(404, "telestration not found")
+    db.delete_telestration(tel_id)
+    return JSONResponse({"status": "ok"})
+
+
+@app.get("/api/files/{job_id}/{path:path}")
+def serve_file(job_id: str, path: str, mt: str = ""):
+    # Media tags can't send Authorization headers, so accept a short-lived,
+    # read-only media token (?mt=) — not the full session JWT.
+    uid = auth.verify_media_token(mt)
+    if uid is None:
+        raise HTTPException(401, "invalid or expired media token")
+    job = db.get_job(job_id)
+    if not job or job["user_id"] != uid:
+        raise HTTPException(404, "not found")
+    try:
+        local = STORAGE.local_path(job_id, path)
+        if local is not None:
+            return FileResponse(local)
+        url = STORAGE.presigned_url(job_id, path)
+    except ValueError:
+        raise HTTPException(404, "not found")
+    if url:
+        return RedirectResponse(url)  # S3 presigned GET
+    raise HTTPException(404, "not found")
+
+
+# --- capture-site registry (Layer 1/2 onboarding) ---------------------------
+
+@app.get("/api/packages")
+def packages() -> JSONResponse:
+    """Public hardware infrastructure manifest (UniFi 3-package model)."""
+    return JSONResponse(hardware.manifest())
+
+
+@app.post("/api/sites")
+def create_site(
+    name: str = Form(...),
+    package: str = Form(...),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    if package not in hardware.PACKAGES:
+        raise HTTPException(400, "package must be starter, growth or pro")
+    site_id = "site_" + uuid.uuid4().hex[:10]
+    site = db.create_site(site_id, user["id"], name.strip()[:120], package)
+    return JSONResponse(site)
+
+
+@app.get("/api/sites")
+def list_sites(user: dict = Depends(current_user)) -> JSONResponse:
+    return JSONResponse({"sites": db.list_sites(user["id"])})
+
+
+def _owned_site(site_id: str, user: dict):
+    site = db.get_site(site_id)
+    if not site or site["user_id"] != user["id"]:
+        raise HTTPException(404, "site not found")
+    return site
+
+
+@app.get("/api/sites/{site_id}")
+def site_detail(site_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    site = _owned_site(site_id, user)
+    return JSONResponse({**dict(site), "devices": db.list_devices(site_id)})
+
+
+@app.get("/api/sites/{site_id}/matches")
+def site_matches(site_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_site(site_id, user)
+    return JSONResponse({"jobs": db.list_jobs_for_site(site_id)})
+
+
+@app.post("/api/sites/{site_id}/devices")
+def pair_device(
+    site_id: str,
+    kind: str = Form(...),
+    name: str = Form(...),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    _owned_site(site_id, user)
+    device_id = "dev_" + uuid.uuid4().hex[:10]
+    api_key = auth.new_api_key()
+    db.create_device(device_id, site_id, kind.strip()[:40], name.strip()[:80],
+                     auth.hash_token(api_key))
+    # The plaintext key is returned exactly once — the gateway stores it.
+    return JSONResponse({"device_id": device_id, "api_key": api_key})
+
+
+# --- cloud ingestion (Layer 2 edge gateway -> Layer 3 cloud) ----------------
+
+def _device_from_key(x_device_key: str | None):
+    if not x_device_key:
+        raise HTTPException(401, "missing X-Device-Key")
+    device = db.get_device_by_key_hash(auth.hash_token(x_device_key))
+    if not device:
+        raise HTTPException(401, "unknown device key")
+    db.touch_device(device["id"])
+    return device
+
+
+@app.post("/api/ingest/heartbeat")
+def ingest_heartbeat(x_device_key: str | None = Header(None)) -> JSONResponse:
+    device = _device_from_key(x_device_key)
+    return JSONResponse({"status": "ok", "device_id": device["id"], "site_id": device["site_id"]})
+
+
+@app.post("/api/ingest/matches")
+async def ingest_match(
+    file: UploadFile,
+    match_label: str = Form("Match"),
+    idempotency_key: str = Form(...),
+    detector: str = Form("color"),
+    x_device_key: str | None = Header(None),
+) -> JSONResponse:
+    """Edge gateway syncs a processed match clip + metadata for analysis."""
+    device = _device_from_key(x_device_key)
+    if detector not in ("color", "yolo"):
+        raise HTTPException(400, "detector must be 'color' or 'yolo'")
+
+    # Idempotent: a retried sync returns the original job, never double-processes.
+    existing = db.get_ingest_job(idempotency_key)
+    if existing:
+        return JSONResponse({"job_id": existing, "deduplicated": True})
+
+    data = await file.read()
+    if not data:
+        raise HTTPException(400, "empty clip")
+    if len(data) > MAX_UPLOAD_BYTES:
+        raise HTTPException(413, "clip too large (max 500 MB)")
+
+    site = db.get_site(device["site_id"])
+    job_id = uuid.uuid4().hex[:12]
+    out_dir = STORAGE.job_dir(job_id)
+    (out_dir / "input.mp4").write_bytes(data)
+    label = f"{site['name']} · {match_label.strip()[:80]}"
+    _start(job_id, site["user_id"], out_dir / "input.mp4", detector, label,
+           source="ingest", site_id=site["id"])
+    db.record_ingest_job(idempotency_key, job_id)
+    return JSONResponse({"job_id": job_id, "deduplicated": False})
+
+
+# --- organizations & memberships (RBAC) -------------------------------------
+
+@app.post("/api/orgs")
+def create_org(name: str = Form(...), user: dict = Depends(current_user)) -> JSONResponse:
+    org_id = "org_" + uuid.uuid4().hex[:10]
+    org = db.create_org(org_id, name.strip()[:120])
+    db.add_membership("mem_" + uuid.uuid4().hex[:10], org_id, user["id"], authz.OWNER)
+    return JSONResponse(org)
+
+
+@app.get("/api/orgs")
+def list_orgs(user: dict = Depends(current_user)) -> JSONResponse:
+    return JSONResponse({"orgs": db.list_orgs_for_user(user["id"])})
+
+
+def _require_org_role(org_id: str, user: dict, allowed: set[str]):
+    if not db.get_org(org_id):
+        raise HTTPException(404, "org not found")
+    role = _org_role(org_id, user)
+    if role is None:
+        raise HTTPException(404, "org not found")
+    if role not in allowed:
+        raise HTTPException(403, "not permitted")
+    return role
+
+
+@app.get("/api/orgs/{org_id}/members")
+def org_members(org_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _require_org_role(org_id, user, authz.ALL_ROLES)
+    return JSONResponse({"members": db.list_members(org_id)})
+
+
+@app.post("/api/orgs/{org_id}/members")
+def add_member(
+    org_id: str,
+    email: str = Form(...),
+    role: str = Form(...),
+    player_id: str = Form(""),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    _require_org_role(org_id, user, authz.ADMIN_ROLES)
+    if role not in authz.ALL_ROLES:
+        raise HTTPException(400, f"role must be one of {sorted(authz.ALL_ROLES)}")
+    target = db.get_user_by_email(email)
+    if not target:
+        raise HTTPException(404, "no registered user with that email")
+    if role in authz.LINKED_ROLES and not player_id:
+        raise HTTPException(400, "parent/player members must be linked to a player_id")
+    db.add_membership("mem_" + uuid.uuid4().hex[:10], org_id, target["id"], role,
+                      player_id or None)
+    return JSONResponse({"status": "ok"})
+
+
+@app.post("/api/orgs/{org_id}/teams")
+def create_org_team(org_id: str, name: str = Form(...),
+                    user: dict = Depends(current_user)) -> JSONResponse:
+    _require_org_role(org_id, user, authz.STAFF_ROLES)
+    team_id = "team_" + uuid.uuid4().hex[:10]
+    return JSONResponse(db.create_team(team_id, user["id"], name.strip()[:120], org_id))
+
+
+@app.get("/api/orgs/{org_id}/teams")
+def org_teams(org_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _require_org_role(org_id, user, authz.ALL_ROLES)
+    return JSONResponse({"teams": db.list_org_teams(org_id)})
+
+
+@app.delete("/api/orgs/{org_id}")
+def remove_org(org_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _require_org_role(org_id, user, {authz.OWNER})
+    db.delete_org_cascade(org_id)
+    return JSONResponse({"status": "ok"})
+
+
+# --- teams ------------------------------------------------------------------
+
+def _org_role(org_id: str, user: dict) -> str | None:
+    m = db.get_membership(org_id, user["id"])
+    return m["role"] if m else None
+
+
+def _owned_team(team_id: str, user: dict):
+    """Team access for staff (org coach+) or the owner of a personal team."""
+    team = db.get_team(team_id)
+    if not team:
+        raise HTTPException(404, "team not found")
+    if team["org_id"]:
+        if _org_role(team["org_id"], user) not in authz.STAFF_ROLES:
+            raise HTTPException(404, "team not found")
+    elif team["user_id"] != user["id"]:
+        raise HTTPException(404, "team not found")
+    return team
+
+
+def _readable_player(player_id: str, user: dict):
+    """Read access: staff see any; parent/player see only their linked player."""
+    player = db.get_player(player_id)
+    if not player:
+        raise HTTPException(404, "player not found")
+    team = db.get_team(player["team_id"])
+    if team and team["org_id"]:
+        m = db.get_membership(team["org_id"], user["id"])
+        if not m:
+            raise HTTPException(404, "player not found")
+        if m["role"] in authz.STAFF_ROLES:
+            return player
+        if m["role"] in authz.LINKED_ROLES and m["player_id"] == player_id:
+            return player
+        raise HTTPException(403, "not permitted")
+    if not team or team["user_id"] != user["id"]:
+        raise HTTPException(404, "player not found")
+    return player
+
+
+def _owned_player(player_id: str, user: dict):
+    """Manage access (staff / personal owner only)."""
+    player = db.get_player(player_id)
+    if not player:
+        raise HTTPException(404, "player not found")
+    _owned_team(player["team_id"], user)  # raises unless staff/owner
+    return player
+
+
+def _owned_match(match_id: str, user: dict):
+    match = db.get_match(match_id)
+    if not match:
+        raise HTTPException(404, "match not found")
+    _owned_team(match["team_id"], user)  # access governed by the match's team
+    return match
+
+
+@app.post("/api/teams")
+def create_team(name: str = Form(...), user: dict = Depends(current_user)) -> JSONResponse:
+    team_id = "team_" + uuid.uuid4().hex[:10]
+    return JSONResponse(db.create_team(team_id, user["id"], name.strip()[:120]))
+
+
+@app.get("/api/teams")
+def list_teams(user: dict = Depends(current_user)) -> JSONResponse:
+    return JSONResponse({"teams": db.list_teams(user["id"])})
+
+
+@app.get("/api/teams/{team_id}")
+def team_detail(team_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_team(team_id, user)
+    return JSONResponse(profiles.team_profile(team_id))
+
+
+@app.patch("/api/teams/{team_id}")
+def update_team(team_id: str, name: str = Form(...), user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_team(team_id, user)
+    db.update_team(team_id, name.strip()[:120])
+    return JSONResponse({"status": "ok"})
+
+
+@app.delete("/api/teams/{team_id}")
+def remove_team(team_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_team(team_id, user)
+    db.delete_team(team_id)
+    return JSONResponse({"status": "ok"})
+
+
+@app.post("/api/teams/{team_id}/share")
+def share_team(team_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    team = _owned_team(team_id, user)
+    token = None if team["public_token"] else uuid.uuid4().hex[:12]
+    db.set_team_public(team_id, token)
+    return JSONResponse({"public": token is not None, "public_token": token})
+
+
+@app.get("/api/teams/{team_id}/export")
+def export_team(team_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_team(team_id, user)
+    return JSONResponse(profiles.export_team(team_id))
+
+
+@app.post("/api/teams/import")
+def import_team(bundle: dict = Body(...), user: dict = Depends(current_user)) -> JSONResponse:
+    if not isinstance(bundle.get("team"), dict):
+        raise HTTPException(400, "invalid bundle")
+    return JSONResponse(profiles.import_team(user["id"], bundle))
+
+
+# --- coach tools: opponent scouting -----------------------------------------
+
+@app.get("/api/teams/{team_id}/scouting")
+def team_scouting(team_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_team(team_id, user)
+    return JSONResponse(profiles.scouting_report(team_id))
+
+
+# --- coach tools: playbooks (team-scoped) -----------------------------------
+
+def _owned_playbook(pid: str, user: dict) -> dict:
+    pb = db.get_playbook(pid)
+    if not pb:
+        raise HTTPException(404, "playbook not found")
+    _owned_team(pb["team_id"], user)  # access governed by the team
+    return pb
+
+
+@app.get("/api/teams/{team_id}/playbooks")
+def list_team_playbooks(team_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_team(team_id, user)
+    rows = db.list_playbooks(team_id)
+    for r in rows:
+        r["data"] = json.loads(r["data"]) if r.get("data") else {}
+    return JSONResponse({"playbooks": rows})
+
+
+@app.post("/api/teams/{team_id}/playbooks")
+def create_playbook(team_id: str, payload: dict = Body(...),
+                    user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_team(team_id, user)
+    data = payload.get("data") or {}
+    row = db.add_playbook(
+        "pb_" + uuid.uuid4().hex[:10], team_id, user["id"],
+        str(payload.get("name") or "New play").strip()[:80],
+        int(payload.get("field_type") or 11), json.dumps(data))
+    row["data"] = data
+    return JSONResponse(row)
+
+
+@app.get("/api/playbooks/{pid}")
+def get_playbook(pid: str, user: dict = Depends(current_user)) -> JSONResponse:
+    pb = _owned_playbook(pid, user)
+    pb["data"] = json.loads(pb["data"]) if pb.get("data") else {}
+    return JSONResponse(pb)
+
+
+@app.put("/api/playbooks/{pid}")
+def save_playbook(pid: str, payload: dict = Body(...),
+                  user: dict = Depends(current_user)) -> JSONResponse:
+    pb = _owned_playbook(pid, user)
+    data = payload.get("data") if payload.get("data") is not None else json.loads(pb["data"] or "{}")
+    db.update_playbook(
+        pid, str(payload.get("name") or pb["name"]).strip()[:80],
+        int(payload.get("field_type") or pb["field_type"] or 11),
+        json.dumps(data))
+    return JSONResponse({"status": "ok"})
+
+
+@app.delete("/api/playbooks/{pid}")
+def remove_playbook(pid: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_playbook(pid, user)
+    db.delete_playbook(pid)
+    return JSONResponse({"status": "ok"})
+
+
+# --- players ----------------------------------------------------------------
+
+@app.post("/api/teams/{team_id}/players")
+def create_player(
+    team_id: str,
+    name: str = Form(...),
+    position: str = Form(""),
+    jersey: int | None = Form(None),
+    is_minor: bool = Form(True),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    _owned_team(team_id, user)
+    player_id = "ply_" + uuid.uuid4().hex[:10]
+    return JSONResponse(
+        db.create_player(player_id, team_id, name.strip()[:80],
+                         position.strip()[:40] or None, jersey, is_minor)
+    )
+
+
+@app.get("/api/players")
+def all_players(user: dict = Depends(current_user)) -> JSONResponse:
+    """Flat list of the user's players across teams — for the compare picker."""
+    rows = db.list_all_players(user["id"])
+    for r in rows:
+        r["avatar"] = bool(r.pop("avatar_url", None))
+    return JSONResponse({"players": rows})
+
+
+_AVATAR_TYPES = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}
+
+
+@app.post("/api/players/{player_id}/avatar")
+async def upload_avatar(player_id: str, file: UploadFile,
+                        user: dict = Depends(current_user)) -> JSONResponse:
+    """Upload a player's profile photo (owner only)."""
+    _owned_player(player_id, user)
+    ext = _AVATAR_TYPES.get((file.content_type or "").lower())
+    if not ext:
+        raise HTTPException(400, "image must be JPEG, PNG or WebP")
+    data = await file.read()
+    if len(data) > 5_000_000:
+        raise HTTPException(400, "image too large (max 5 MB)")
+    key = f"avatar-{player_id}"
+    d = STORAGE.job_dir(key)
+    for old in d.glob("avatar.*"):
+        old.unlink()
+    (d / f"avatar{ext}").write_bytes(data)
+    STORAGE.finalize_job(key)  # uploads to S3 when configured
+    db.set_player_avatar(player_id, f"avatar{ext}")
+    _audit(user, "player.avatar", "player", player_id)
+    return JSONResponse({"status": "ok"})
+
+
+@app.get("/api/players/{player_id}/avatar")
+def serve_avatar(player_id: str, mt: str = ""):
+    """Serve a player photo. Minors' photos require the owner's media token, so
+    they're never exposed on public pages."""
+    p = db.get_player(player_id)
+    if not p or not p.get("avatar_url"):
+        raise HTTPException(404, "not found")
+    uid = auth.verify_media_token(mt)
+    owner = False
+    if uid is not None:
+        team = db.get_team(p["team_id"])
+        owner = bool(team and team["user_id"] == uid)
+    if p["is_minor"] and not owner:
+        raise HTTPException(404, "not found")
+    try:
+        local = STORAGE.local_path(f"avatar-{player_id}", p["avatar_url"])
+        if local is not None:
+            return FileResponse(local)
+        url = STORAGE.presigned_url(f"avatar-{player_id}", p["avatar_url"])
+    except ValueError:
+        raise HTTPException(404, "not found")
+    if url:
+        return RedirectResponse(url)
+    raise HTTPException(404, "not found")
+
+
+@app.get("/api/players/{player_id}")
+def player_detail(player_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _readable_player(player_id, user)
+    _audit(user, "player.view", "player", player_id)
+    profile = profiles.player_profile(player_id)
+    player = db.get_player(player_id)
+    profile["public_token"] = player["public_token"]
+    profile["is_minor"] = bool(player["is_minor"])
+    profile["guardian_consent"] = player["guardian_consent_at"] is not None
+    return JSONResponse(profile)
+
+
+@app.get("/api/players/{player_id}/audit")
+def player_audit(player_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_player(player_id, user)  # staff/owner only
+    return JSONResponse({"audit": db.list_audit_for_target("player", player_id)})
+
+
+@app.patch("/api/players/{player_id}")
+def update_player(
+    player_id: str,
+    name: str = Form(...),
+    position: str = Form(""),
+    jersey: int | None = Form(None),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    _owned_player(player_id, user)
+    db.update_player(player_id, name.strip()[:80], position.strip()[:40] or None, jersey)
+    return JSONResponse({"status": "ok"})
+
+
+@app.delete("/api/players/{player_id}")
+def remove_player(player_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_player(player_id, user)
+    db.delete_player(player_id)
+    STORAGE.delete_job(f"avatar-{player_id}")  # remove any stored photo
+    return JSONResponse({"status": "ok"})
+
+
+@app.post("/api/players/{player_id}/share")
+def share_player(player_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    player = _owned_player(player_id, user)
+    turning_on = not player["public_token"]
+    # Child-safety: a minor's profile cannot be made public without guardian consent.
+    if turning_on and player["is_minor"] and player["guardian_consent_at"] is None:
+        raise HTTPException(403, "guardian consent required before sharing a minor's profile")
+    token = uuid.uuid4().hex[:12] if turning_on else None
+    db.set_player_public(player_id, token)
+    _audit(user, "player.share" if token else "player.unshare", "player", player_id)
+    return JSONResponse({"public": token is not None, "public_token": token})
+
+
+@app.post("/api/players/{player_id}/consent")
+def grant_consent(
+    player_id: str, granted: bool = Form(True), user: dict = Depends(current_user)
+) -> JSONResponse:
+    """Guardian consent for a minor — by the linked parent, or a personal owner."""
+    player = db.get_player(player_id)
+    if not player:
+        raise HTTPException(404, "player not found")
+    team = db.get_team(player["team_id"])
+    allowed = False
+    if team and team["org_id"]:
+        m = db.get_membership(team["org_id"], user["id"])
+        allowed = bool(m and m["role"] == authz.PARENT and m["player_id"] == player_id)
+    elif team and team["user_id"] == user["id"]:
+        allowed = True  # personal/solo owner acts as guardian
+    if not allowed:
+        raise HTTPException(403, "only the linked guardian can grant consent")
+    db.set_player_consent(player_id, user["id"] if granted else None)
+    if not granted:  # revoking consent also withdraws any public exposure
+        db.set_player_public(player_id, None)
+    _audit(user, "player.consent" if granted else "player.consent_revoked", "player", player_id)
+    return JSONResponse({"consent": granted})
+
+
+# --- matches & stats --------------------------------------------------------
+
+@app.post("/api/teams/{team_id}/matches")
+def create_match(
+    team_id: str,
+    field_type: int = Form(...),
+    opponent: str = Form(""),
+    played_on: str = Form(""),
+    job_id: str = Form(""),
+    home_score: int | None = Form(None),
+    away_score: int | None = Form(None),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    _owned_team(team_id, user)
+    if field_type not in (5, 7, 11):
+        raise HTTPException(400, "field_type must be 5, 7 or 11")
+    # Snapshot team metrics from a linked, completed analysis job.
+    summary = None
+    linked_job = None
+    if job_id:
+        job = db.get_job(job_id)
+        if job and job["user_id"] == user["id"] and job.get("summary"):
+            linked_job = job_id
+            summary = json.dumps({"possession": job["summary"].get("possession")})
+    match_id = "match_" + uuid.uuid4().hex[:10]
+    db.create_match(match_id, user["id"], team_id, field_type,
+                    opponent.strip()[:80] or None, played_on.strip()[:20] or None,
+                    linked_job, home_score, away_score, summary)
+    return JSONResponse({"id": match_id})
+
+
+@app.get("/api/matches/{match_id}")
+def match_detail(match_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    match = _owned_match(match_id, user)
+    match["stats"] = db.stats_for_match(match_id)
+    return JSONResponse(match)
+
+
+@app.delete("/api/matches/{match_id}")
+def remove_match(match_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_match(match_id, user)
+    db.delete_match(match_id)
+    return JSONResponse({"status": "ok"})
+
+
+@app.get("/api/matches/{match_id}/detected")
+def match_detected(match_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    """Detected players from the linked analysis job + the team roster, for mapping."""
+    match = _owned_match(match_id, user)
+    roster = db.list_players(match["team_id"])
+    detected: list[dict] = []
+    if match.get("job_id"):
+        job = db.get_job(match["job_id"])
+        if job and job.get("summary"):
+            detected = job["summary"].get("players", [])
+    return JSONResponse({"detected": detected, "roster": [dict(p) for p in roster]})
+
+
+@app.post("/api/matches/{match_id}/import-stats")
+def import_match_stats(
+    match_id: str,
+    mapping: list[dict] = Body(..., embed=True),
+    minutes: int = Body(0, embed=True),
+    user: dict = Depends(current_user),
+) -> JSONResponse:
+    """Map detected track IDs -> roster players and write their stats to the match.
+
+    `mapping` = [{"detected_id": <job player_id>, "player_id": <roster id>}].
+    Re-importing replaces the match's prior auto-imported stats (idempotent).
+    """
+    match = _owned_match(match_id, user)
+    if not match.get("job_id"):
+        raise HTTPException(400, "match has no linked analysis job")
+    job = db.get_job(match["job_id"])
+    detected = {str(p["player_id"]): p for p in (job["summary"].get("players", []) if job and job.get("summary") else [])}
+    roster_ids = {p["id"] for p in db.list_players(match["team_id"])}
+
+    db.clear_match_stats(match_id)
+    written = 0
+    for m in mapping:
+        det = detected.get(str(m.get("detected_id")))
+        if not det or m.get("player_id") not in roster_ids:
+            continue
+        passes = int(det.get("passes") or 0)
+        completed = round(passes * (det.get("pass_accuracy") or 0) / 100)
+        db.add_player_stat("st_" + uuid.uuid4().hex[:10], match_id, m["player_id"],
+                           int(minutes), float(det.get("distance_m") or 0),
+                           float(det.get("top_speed_ms") or 0), 0, 0,
+                           int(det.get("sprints") or 0), passes, completed,
+                           int(det.get("shots") or 0))
+        written += 1
+    _audit(user, "match.import_stats", "match", match_id, detail=f"{written} players")
+    return JSONResponse({"status": "ok", "imported": written})
+
+
+@app.post("/api/matches/{match_id}/auto-import")
+def auto_import_stats(match_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    """Fully automatic: map detected jersey numbers (OCR) -> roster by number."""
+    match = _owned_match(match_id, user)
+    if not match.get("job_id"):
+        raise HTTPException(400, "match has no linked analysis job")
+    job = db.get_job(match["job_id"])
+    detected = (job.get("summary") or {}).get("players", []) if job else []
+    roster_by_jersey = {p["jersey"]: p for p in db.list_players(match["team_id"])
+                        if p.get("jersey") is not None}
+    if not roster_by_jersey:
+        raise HTTPException(400, "roster has no jersey numbers to match")
+
+    # Group detected players by team side; pick the side that best overlaps the roster.
+    sides: dict[str, dict] = {}
+    for d in detected:
+        if d.get("jersey") is not None:
+            sides.setdefault(d["team"], {})[d["jersey"]] = d
+    if not sides:
+        raise HTTPException(400, "no jersey numbers detected in the analysis")
+    best_side = max(sides, key=lambda s: len(set(sides[s]) & set(roster_by_jersey)))
+
+    db.clear_match_stats(match_id)
+    written = 0
+    for jersey, rp in roster_by_jersey.items():
+        d = sides[best_side].get(jersey)
+        if not d:
+            continue
+        passes = int(d.get("passes") or 0)
+        completed = round(passes * (d.get("pass_accuracy") or 0) / 100)
+        db.add_player_stat("st_" + uuid.uuid4().hex[:10], match_id, rp["id"], 0,
+                           float(d.get("distance_m") or 0),
+                           float(d.get("top_speed_ms") or 0), 0, 0,
+                           int(d.get("sprints") or 0), passes, completed,
+                           int(d.get("shots") or 0))
+        written += 1
+    _audit(user, "match.auto_import", "match", match_id,
+           detail=f"{written} by jersey, side={best_side}")
+    return JSONResponse({"status": "ok", "imported": written, "matched_side": best_side})
+
+
+@app.post("/api/matches/{match_id}/stats")
+async def add_stat(match_id: str, request: Request,
+                   user: dict = Depends(current_user)) -> JSONResponse:
+    """Manually set per-player match stats (merges with auto-imported tracking).
+
+    Accepts player_id plus any of the core (goals/assists/shots/shots_on_target/
+    fouls/minutes/distance_m/top_speed_ms) and event-taxonomy fields."""
+    form = await request.form()
+    player_id = form.get("player_id")
+    if not player_id:
+        raise HTTPException(400, "player_id required")
+    _owned_match(match_id, user)
+    _owned_player(str(player_id), user)
+    allowed = {"goals", "assists", "shots", "shots_on_target", "fouls", "minutes",
+               "distance_m", "top_speed_ms", *db.EVENT_FIELDS}
+    fields: dict = {}
+    for k in allowed:
+        if k in form and form.get(k) != "":
+            try:
+                fields[k] = float(form[k]) if k in ("distance_m", "top_speed_ms") else int(float(form[k]))
+            except (ValueError, TypeError):
+                continue
+    db.upsert_player_stat(match_id, str(player_id), fields)
+    _audit(user, "match.set_stat", "player", str(player_id))
+    return JSONResponse({"status": "ok"})
+
+
+# --- public (no auth) read-only profiles ------------------------------------
+
+@app.get("/api/public/teams/{token}")
+def public_team(token: str) -> JSONResponse:
+    team = db.get_team_by_token(token)
+    if not team:
+        raise HTTPException(404, "not found")
+    profile = profiles.team_profile(team["id"])
+    profile["team"].pop("public_token", None)
+    return JSONResponse(profile)
+
+
+@app.get("/api/public/players/{token}")
+def public_player(token: str) -> JSONResponse:
+    player = db.get_player_by_token(token)
+    if not player:
+        raise HTTPException(404, "not found")
+    _audit(None, "player.view_public", "player", player["id"])
+    return JSONResponse(profiles.player_profile(player["id"]))
+
+
+@app.get("/{full_path:path}")
+def serve_spa(full_path: str):
+    """Serve built static assets; fall back to index.html for SPA routes.
+
+    Registered last, so all /api/* routes take precedence.
+    """
+    candidate = (SPA_DIR / full_path).resolve()
+    if (
+        full_path
+        and str(candidate).startswith(str(SPA_DIR.resolve()))
+        and candidate.is_file()
+    ):
+        return FileResponse(candidate)
+    index = SPA_DIR / "index.html"
+    if index.exists():
+        return FileResponse(index)
+    raise HTTPException(404, "frontend not built — run `npm run build` in web/")

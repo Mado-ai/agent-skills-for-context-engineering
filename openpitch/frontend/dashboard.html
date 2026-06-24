@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard — Play Metrics</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="brand">⚽ Play<span class="dot">Metrics</span></div>
+    <div class="nav-right">
+      <span class="muted" id="who"></span>
+      <button class="ghost" id="logout">Log out</button>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <div class="grid3">
+      <!-- LEFT: tools + jobs -->
+      <div>
+        <div class="card">
+          <h2>New analysis</h2>
+          <label class="field"><span>Match video (panoramic / wide)</span>
+            <input id="file" type="file" accept="video/*" />
+          </label>
+          <label class="field"><span>Detector</span>
+            <select id="detector">
+              <option value="color">Color segmentation (no download)</option>
+              <option value="yolo">YOLO (real footage · needs weights)</option>
+            </select>
+          </label>
+          <div class="row">
+            <button id="process">Process upload</button>
+            <button id="demo" class="secondary">Run demo clip</button>
+          </div>
+          <div class="progress hidden" id="progress" style="margin-top:14px">
+            <div class="bar"><div id="barfill"></div></div>
+            <span class="muted" id="status" style="font-size:.78rem"></span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Your analyses</h2>
+          <div class="joblist" id="joblist"><p class="muted">No jobs yet.</p></div>
+        </div>
+
+        <div class="card">
+          <h2>Pipeline tools</h2>
+          <div class="toolgrid">
+            <div class="tool"><b>🎥 Virtual camera</b><p>Auto pan/zoom follow</p></div>
+            <div class="tool"><b>🏷️ Overlay</b><p>Scoreboard + possession</p></div>
+            <div class="tool"><b>📐 Homography</b><p>Pixels → metres</p></div>
+            <div class="tool"><b>🧠 Detection</b><p>Color / YOLO</p></div>
+            <div class="tool"><b>📊 Analytics</b><p>Heatmaps + physical</p></div>
+            <div class="tool"><b>✂️ Highlights</b><p>Auto clip export</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: results -->
+      <div>
+        <div class="card" id="empty">
+          <h2>Results</h2>
+          <p class="muted">Run the demo clip or upload a match, then select a job on the left to see the broadcast and analytics here.</p>
+        </div>
+
+        <div id="results" class="hidden">
+          <div class="card">
+            <h2>Auto-produced broadcast</h2>
+            <p class="muted" style="font-size:.8rem">Virtual cameraman — no operator.</p>
+            <video id="broadcast" controls></video>
+          </div>
+
+          <div class="grid2">
+            <div class="card">
+              <h2>Possession</h2>
+              <div class="poss-bar"><div class="h" id="poss-h"></div><div class="a" id="poss-a"></div></div>
+              <div class="poss-legend">
+                <span><b id="home-name">Home</b> <span id="home-pct"></span></span>
+                <span><span id="away-pct"></span> <b id="away-name">Away</b></span>
+              </div>
+            </div>
+            <div class="card">
+              <h2>Match info</h2>
+              <ul class="meta" id="meta"></ul>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Positional heatmaps</h2>
+            <div class="heatmaps">
+              <figure><img id="hm-home" alt="home heatmap" /><figcaption>Home</figcaption></figure>
+              <figure><img id="hm-away" alt="away heatmap" /><figcaption>Away</figcaption></figure>
+            </div>
+          </div>
+
+          <div class="grid2">
+            <div class="card">
+              <h2>Player physical metrics</h2>
+              <table id="players">
+                <thead><tr><th>#</th><th>Team</th><th>Dist (m)</th><th>Top (m/s)</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="card">
+              <h2>Auto highlights</h2>
+              <div class="highlights" id="highlights"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Play Metrics prototype · signed in session</footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

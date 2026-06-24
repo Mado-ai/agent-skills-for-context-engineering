@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Play Metrics — AI Soccer Capture & Analytics</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="brand">⚽ Play<span class="dot">Metrics</span></div>
+    <div class="nav-right">
+      <a href="#how">How it works</a>
+      <button class="secondary" onclick="document.getElementById('email').focus()">Sign in</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div>
+      <h1>Turn one wide camera into a broadcast — and a data room.</h1>
+      <p class="lead">
+        Play Metrics auto-produces your match (virtual cameraman, live graphics),
+        then tracks every player and the ball to deliver possession, heatmaps,
+        physical metrics and automatic highlights — no operator required.
+      </p>
+      <div class="pills">
+        <span class="pill">🎥 Auto-production</span>
+        <span class="pill">📊 Possession & heatmaps</span>
+        <span class="pill">🏃 Distance & speed</span>
+        <span class="pill">✂️ Auto highlights</span>
+        <span class="pill">📐 Pitch homography</span>
+        <span class="pill">🧠 Color / YOLO detection</span>
+      </div>
+    </div>
+
+    <div class="auth">
+      <div class="tabs">
+        <button id="tab-login" class="active" onclick="showTab('login')">Sign in</button>
+        <button id="tab-register" onclick="showTab('register')">Create account</button>
+      </div>
+      <form id="auth-form" onsubmit="return false;">
+        <label class="field"><span>Email</span>
+          <input id="email" type="email" autocomplete="email" placeholder="you@club.com" />
+        </label>
+        <label class="field"><span>Password</span>
+          <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+        </label>
+        <button id="submit" style="width:100%">Sign in</button>
+        <div class="error" id="auth-error"></div>
+      </form>
+    </div>
+  </section>
+
+  <section class="features" id="how">
+    <div class="card"><div class="icon">🎥</div><h3>1 · Capture & auto-produce</h3>
+      <p class="muted">Upload a panoramic clip. The virtual camera pans and zooms to follow play and burns in a live scoreboard + possession bar.</p></div>
+    <div class="card"><div class="icon">📊</div><h3>2 · Analyze</h3>
+      <p class="muted">Computer-vision tracking yields possession %, top-down heatmaps and per-player distance & top speed, calibrated to a real 105×68 m pitch.</p></div>
+    <div class="card"><div class="icon">✂️</div><h3>3 · Highlight & review</h3>
+      <p class="muted">Exciting moments are detected and cut into clips automatically. Everything lands in your private dashboard.</p></div>
+  </section>
+
+  <footer>Play Metrics prototype · self-hosted · color-segmentation + optional YOLO pipeline</footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/landing.js"></script>
+</body>
+</html>

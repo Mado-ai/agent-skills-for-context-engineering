@@ -1,0 +1,20 @@
+# Self-host / VPS deployment.
+#   PLAYMETRICS_SECRET=... PLAYMETRICS_ADMIN_PASSWORD=... docker compose up -d --build
+services:
+  playmetrics:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # Generate a strong value: `openssl rand -hex 32`
+      PLAYMETRICS_SECRET: ${PLAYMETRICS_SECRET:?set a strong secret}
+      PLAYMETRICS_ADMIN_EMAIL: ${PLAYMETRICS_ADMIN_EMAIL:-yazanalshuibe14@gmail.com}
+      PLAYMETRICS_ADMIN_PASSWORD: ${PLAYMETRICS_ADMIN_PASSWORD:?set an admin password}
+      PLAYMETRICS_DATA: /data/runs
+      PLAYMETRICS_DB: /data/playmetrics.db
+    volumes:
+      - playmetrics_data:/data
+    restart: unless-stopped
+
+volumes:
+  playmetrics_data:
