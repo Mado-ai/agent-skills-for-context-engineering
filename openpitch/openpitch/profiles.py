@@ -8,6 +8,7 @@ export and re-creates it on import.
 
 from __future__ import annotations
 
+import json
 import uuid
 
 from . import db
@@ -183,6 +184,82 @@ def team_profile(team_id: str) -> dict | None:
                    "losses": losses, "goals_for": gf, "goals_against": ga},
         "recent_matches": matches[:10],
         "leaderboard": leaderboard[:10],
+    }
+
+
+def scouting_report(team_id: str) -> dict | None:
+    """A one-page opponent scout: record, danger men, set/attacking tendencies
+    and a tactical snapshot from the most recently analysed match."""
+    prof = team_profile(team_id)
+    if not prof:
+        return None
+    lb = prof["leaderboard"]
+
+    # Danger men: weight goals/assists heavily, then shooting volume.
+    def threat(p):
+        return 3 * p.get("goals", 0) + 2 * p.get("assists", 0) + p.get("shots", 0)
+    danger = sorted(lb, key=threat, reverse=True)[:6]
+
+    totals = {
+        "goals": sum(p.get("goals", 0) for p in lb),
+        "assists": sum(p.get("assists", 0) for p in lb),
+        "shots": sum(p.get("shots", 0) for p in lb),
+        "shots_on_target": sum(p.get("shots_on_target", 0) for p in lb),
+        "fouls": sum(p.get("fouls", 0) for p in lb),
+        "yellow_cards": sum(p.get("yellow_cards", 0) for p in lb),
+        "red_cards": sum(p.get("red_cards", 0) for p in lb),
+    }
+
+    # Attacking tendencies + tactical snapshot from linked analysis jobs. The
+    # uploaded footage represents this team as the home side (index 0).
+    channels = {"left": 0, "center": 0, "right": 0}
+    ft_entries = poss_sum = poss_n = 0
+    snapshot = None
+    for m in db.list_matches(team_id):
+        if not m.get("job_id"):
+            continue
+        job = db.get_job(m["job_id"])
+        if not job or not job.get("summary"):
+            continue
+        try:
+            s = json.loads(job["summary"])
+        except (TypeError, ValueError):
+            continue
+        ts = s.get("team_stats") or {}
+        home = next(iter(ts), None)
+        if home and isinstance(ts.get(home), dict):
+            ch = ts[home].get("final_third_channels") or {}
+            for k in channels:
+                channels[k] += ch.get(k, 0)
+            ft_entries += ts[home].get("final_third_entries", 0)
+        poss = s.get("possession") or {}
+        if home and home in poss:
+            poss_sum += poss[home]
+            poss_n += 1
+        if snapshot is None and s.get("shots") is not None:
+            snapshot = {
+                "opponent": m.get("opponent"),
+                "played_on": m.get("played_on"),
+                "shots": s.get("shots", []),
+                "zones": (s.get("zones") or {}).get(home, []) if home else [],
+            }
+
+    ch_total = sum(channels.values()) or 1
+    favoured = max(channels, key=channels.get) if sum(channels.values()) else None
+    return {
+        "team": prof["team"],
+        "record": prof["record"],
+        "matches": prof["record"]["played"],
+        "danger_men": danger,
+        "totals": totals,
+        "attacking": {
+            "channels": channels,
+            "channel_pct": {k: round(100 * v / ch_total) for k, v in channels.items()},
+            "favoured_channel": favoured,
+            "final_third_entries": ft_entries,
+            "possession_avg": round(poss_sum / poss_n, 1) if poss_n else None,
+        },
+        "snapshot": snapshot,
     }
 
 

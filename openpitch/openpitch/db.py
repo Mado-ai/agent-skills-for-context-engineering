@@ -178,6 +178,40 @@ EVENT_FIELDS = ("key_passes", "crosses", "dribbles", "tackles", "interceptions",
                 "clearances", "blocks", "duels_won", "recoveries", "offsides",
                 "yellow_cards", "red_cards", "saves")
 
+# --- coach tools: tagging, telestration, playbooks --------------------------
+
+clip_tags = Table(
+    "clip_tags", metadata,
+    Column("id", Text, primary_key=True),
+    Column("job_id", Text, nullable=False),
+    Column("user_id", Integer, nullable=False),
+    Column("t", Float, nullable=False),          # video timestamp (seconds)
+    Column("label", Text, nullable=False),       # e.g. "press", "turnover"
+    Column("note", Text),
+    Column("player_id", Text),                   # optional player the tag is about
+    Column("created_at", Float, nullable=False),
+)
+telestrations = Table(
+    "telestrations", metadata,
+    Column("id", Text, primary_key=True),
+    Column("job_id", Text, nullable=False),
+    Column("user_id", Integer, nullable=False),
+    Column("name", Text, nullable=False),
+    Column("t", Float, nullable=False),          # frame time the drawing pins to
+    Column("shapes", Text, nullable=False),      # JSON list of vector shapes
+    Column("created_at", Float, nullable=False),
+)
+playbooks = Table(
+    "playbooks", metadata,
+    Column("id", Text, primary_key=True),
+    Column("team_id", Text, nullable=False),
+    Column("user_id", Integer, nullable=False),
+    Column("name", Text, nullable=False),
+    Column("field_type", Integer, default=11),
+    Column("data", Text, nullable=False),        # JSON: tokens + arrows
+    Column("created_at", Float, nullable=False),
+)
+
 
 def init_db() -> None:
     metadata.create_all(_engine)
@@ -682,3 +716,97 @@ def stats_for_player(player_id: str) -> list[dict]:
         "WHERE s.player_id = :pid ORDER BY COALESCE(m.played_on, '') DESC")
     with _engine.connect() as c:
         return _rows(c, sql, {"pid": player_id})
+
+
+# --- clip tags (coding) -----------------------------------------------------
+
+def add_clip_tag(tag_id: str, job_id: str, user_id: int, t: float,
+                 label: str, note: str | None, player_id: str | None) -> dict:
+    with _engine.begin() as c:
+        c.execute(clip_tags.insert().values(
+            id=tag_id, job_id=job_id, user_id=user_id, t=t, label=label,
+            note=note, player_id=player_id, created_at=time.time()))
+    return {"id": tag_id, "job_id": job_id, "t": t, "label": label,
+            "note": note, "player_id": player_id}
+
+
+def list_clip_tags(job_id: str) -> list[dict]:
+    sql = text(
+        "SELECT ct.*, p.name AS player_name FROM clip_tags ct "
+        "LEFT JOIN players p ON p.id = ct.player_id "
+        "WHERE ct.job_id = :jid ORDER BY ct.t ASC")
+    with _engine.connect() as c:
+        return _rows(c, sql, {"jid": job_id})
+
+
+def get_clip_tag(tag_id: str) -> dict | None:
+    with _engine.connect() as c:
+        return _row(c, select(clip_tags).where(clip_tags.c.id == tag_id))
+
+
+def delete_clip_tag(tag_id: str) -> None:
+    with _engine.begin() as c:
+        c.execute(delete(clip_tags).where(clip_tags.c.id == tag_id))
+
+
+# --- telestrations ----------------------------------------------------------
+
+def add_telestration(tid: str, job_id: str, user_id: int, name: str,
+                     t: float, shapes: str) -> dict:
+    with _engine.begin() as c:
+        c.execute(telestrations.insert().values(
+            id=tid, job_id=job_id, user_id=user_id, name=name, t=t,
+            shapes=shapes, created_at=time.time()))
+    return {"id": tid, "job_id": job_id, "name": name, "t": t, "shapes": shapes}
+
+
+def list_telestrations(job_id: str) -> list[dict]:
+    with _engine.connect() as c:
+        return _rows(c, select(telestrations)
+                     .where(telestrations.c.job_id == job_id)
+                     .order_by(telestrations.c.t.asc()))
+
+
+def get_telestration(tid: str) -> dict | None:
+    with _engine.connect() as c:
+        return _row(c, select(telestrations).where(telestrations.c.id == tid))
+
+
+def delete_telestration(tid: str) -> None:
+    with _engine.begin() as c:
+        c.execute(delete(telestrations).where(telestrations.c.id == tid))
+
+
+# --- playbooks --------------------------------------------------------------
+
+def add_playbook(pid: str, team_id: str, user_id: int, name: str,
+                 field_type: int, data: str) -> dict:
+    with _engine.begin() as c:
+        c.execute(playbooks.insert().values(
+            id=pid, team_id=team_id, user_id=user_id, name=name,
+            field_type=field_type, data=data, created_at=time.time()))
+    return {"id": pid, "team_id": team_id, "name": name,
+            "field_type": field_type, "data": data}
+
+
+def update_playbook(pid: str, name: str, field_type: int, data: str) -> None:
+    with _engine.begin() as c:
+        c.execute(playbooks.update().where(playbooks.c.id == pid)
+                  .values(name=name, field_type=field_type, data=data))
+
+
+def list_playbooks(team_id: str) -> list[dict]:
+    with _engine.connect() as c:
+        return _rows(c, select(playbooks)
+                     .where(playbooks.c.team_id == team_id)
+                     .order_by(playbooks.c.created_at.desc()))
+
+
+def get_playbook(pid: str) -> dict | None:
+    with _engine.connect() as c:
+        return _row(c, select(playbooks).where(playbooks.c.id == pid))
+
+
+def delete_playbook(pid: str) -> None:
+    with _engine.begin() as c:
+        c.execute(delete(playbooks).where(playbooks.c.id == pid))

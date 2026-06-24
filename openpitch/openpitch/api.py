@@ -387,6 +387,73 @@ def delete_job(job_id: str, user: dict = Depends(current_user)) -> JSONResponse:
     return JSONResponse({"status": "ok"})
 
 
+# --- coach tools: clip tagging (coding) -------------------------------------
+
+@app.get("/api/jobs/{job_id}/tags")
+def list_tags(job_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_job(job_id, user)
+    return JSONResponse({"tags": db.list_clip_tags(job_id)})
+
+
+@app.post("/api/jobs/{job_id}/tags")
+def add_tag(job_id: str, payload: dict = Body(...),
+            user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_job(job_id, user)
+    label = str(payload.get("label", "")).strip()[:60]
+    if not label:
+        raise HTTPException(400, "label required")
+    tag = db.add_clip_tag(
+        "tag_" + uuid.uuid4().hex[:10], job_id, user["id"],
+        float(payload.get("t") or 0.0), label,
+        (str(payload.get("note") or "").strip()[:500] or None),
+        payload.get("player_id") or None)
+    return JSONResponse(tag)
+
+
+@app.delete("/api/tags/{tag_id}")
+def delete_tag(tag_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    tag = db.get_clip_tag(tag_id)
+    if not tag or tag["user_id"] != user["id"]:
+        raise HTTPException(404, "tag not found")
+    db.delete_clip_tag(tag_id)
+    return JSONResponse({"status": "ok"})
+
+
+# --- coach tools: telestration ----------------------------------------------
+
+@app.get("/api/jobs/{job_id}/telestrations")
+def list_tele(job_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_job(job_id, user)
+    rows = db.list_telestrations(job_id)
+    for r in rows:
+        r["shapes"] = json.loads(r["shapes"]) if r.get("shapes") else []
+    return JSONResponse({"telestrations": rows})
+
+
+@app.post("/api/jobs/{job_id}/telestrations")
+def add_tele(job_id: str, payload: dict = Body(...),
+             user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_job(job_id, user)
+    shapes = payload.get("shapes") or []
+    if not isinstance(shapes, list):
+        raise HTTPException(400, "shapes must be a list")
+    row = db.add_telestration(
+        "tel_" + uuid.uuid4().hex[:10], job_id, user["id"],
+        str(payload.get("name") or "Untitled").strip()[:80],
+        float(payload.get("t") or 0.0), json.dumps(shapes))
+    row["shapes"] = shapes
+    return JSONResponse(row)
+
+
+@app.delete("/api/telestrations/{tel_id}")
+def delete_tele(tel_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    row = db.get_telestration(tel_id)
+    if not row or row["user_id"] != user["id"]:
+        raise HTTPException(404, "telestration not found")
+    db.delete_telestration(tel_id)
+    return JSONResponse({"status": "ok"})
+
+
 @app.get("/api/files/{job_id}/{path:path}")
 def serve_file(job_id: str, path: str, mt: str = ""):
     # Media tags can't send Authorization headers, so accept a short-lived,
@@ -704,6 +771,72 @@ def import_team(bundle: dict = Body(...), user: dict = Depends(current_user)) ->
     if not isinstance(bundle.get("team"), dict):
         raise HTTPException(400, "invalid bundle")
     return JSONResponse(profiles.import_team(user["id"], bundle))
+
+
+# --- coach tools: opponent scouting -----------------------------------------
+
+@app.get("/api/teams/{team_id}/scouting")
+def team_scouting(team_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_team(team_id, user)
+    return JSONResponse(profiles.scouting_report(team_id))
+
+
+# --- coach tools: playbooks (team-scoped) -----------------------------------
+
+def _owned_playbook(pid: str, user: dict) -> dict:
+    pb = db.get_playbook(pid)
+    if not pb:
+        raise HTTPException(404, "playbook not found")
+    _owned_team(pb["team_id"], user)  # access governed by the team
+    return pb
+
+
+@app.get("/api/teams/{team_id}/playbooks")
+def list_team_playbooks(team_id: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_team(team_id, user)
+    rows = db.list_playbooks(team_id)
+    for r in rows:
+        r["data"] = json.loads(r["data"]) if r.get("data") else {}
+    return JSONResponse({"playbooks": rows})
+
+
+@app.post("/api/teams/{team_id}/playbooks")
+def create_playbook(team_id: str, payload: dict = Body(...),
+                    user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_team(team_id, user)
+    data = payload.get("data") or {}
+    row = db.add_playbook(
+        "pb_" + uuid.uuid4().hex[:10], team_id, user["id"],
+        str(payload.get("name") or "New play").strip()[:80],
+        int(payload.get("field_type") or 11), json.dumps(data))
+    row["data"] = data
+    return JSONResponse(row)
+
+
+@app.get("/api/playbooks/{pid}")
+def get_playbook(pid: str, user: dict = Depends(current_user)) -> JSONResponse:
+    pb = _owned_playbook(pid, user)
+    pb["data"] = json.loads(pb["data"]) if pb.get("data") else {}
+    return JSONResponse(pb)
+
+
+@app.put("/api/playbooks/{pid}")
+def save_playbook(pid: str, payload: dict = Body(...),
+                  user: dict = Depends(current_user)) -> JSONResponse:
+    pb = _owned_playbook(pid, user)
+    data = payload.get("data") if payload.get("data") is not None else json.loads(pb["data"] or "{}")
+    db.update_playbook(
+        pid, str(payload.get("name") or pb["name"]).strip()[:80],
+        int(payload.get("field_type") or pb["field_type"] or 11),
+        json.dumps(data))
+    return JSONResponse({"status": "ok"})
+
+
+@app.delete("/api/playbooks/{pid}")
+def remove_playbook(pid: str, user: dict = Depends(current_user)) -> JSONResponse:
+    _owned_playbook(pid, user)
+    db.delete_playbook(pid)
+    return JSONResponse({"status": "ok"})
 
 
 # --- players ----------------------------------------------------------------
