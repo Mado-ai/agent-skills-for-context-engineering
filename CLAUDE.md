@@ -16,20 +16,21 @@ Context engineering is the discipline of curating everything that enters a model
 - `researcher/` — Research output examples
 - `template/SKILL.md` — Canonical skill template (use when creating new skills)
 - `SKILL.md` (root) — Collection-level metadata and skill map
-- `.claude-plugin/marketplace.json` — Claude Code marketplace manifest (5 bundled plugins)
-- `.plugin/plugin.json` — Open Plugins format manifest (v2.0.0)
+- `.claude-plugin/marketplace.json` — Claude Code marketplace manifest (single `context-engineering` plugin bundling all 14 skills)
+- `.plugin/plugin.json` — Open Plugins format manifest (kept version-synced with the marketplace manifest, currently v2.1.0)
 
 ## Build & Test Commands
 
-No top-level build system. Individual example projects have their own tooling:
+No top-level build system — skills are pure markdown. Individual example projects have their own tooling:
 
 ### examples/llm-as-judge-skills (TypeScript, Node >= 18)
 ```
 cd examples/llm-as-judge-skills
 npm install
 npm run build        # tsc
-npm test             # vitest (19 tests)
-npm run lint         # eslint
+npm test             # vitest run (19 tests)
+npx vitest run tests/<file>.test.ts   # single test file
+npm run lint         # eslint src tests examples
 npm run format       # prettier
 npm run typecheck    # tsc --noEmit
 ```
@@ -37,19 +38,22 @@ npm run typecheck    # tsc --noEmit
 ### examples/interleaved-thinking (Python >= 3.10)
 ```
 cd examples/interleaved-thinking
-pip install -e ".[dev]"
-pytest               # pytest + pytest-asyncio
-ruff check .         # linting (100 char line length)
+pip install -e ".[dev]"                   # installs the `rto` CLI entry point
+pytest                                    # pytest + pytest-asyncio
+pytest tests/test_models.py::<test_name>  # single test
+ruff check .                              # linting (100 char line length)
 ```
 
-### examples/digital-brain-skill (Node.js)
+### examples/digital-brain-skill (Node.js wrapper around Python scripts)
 ```
 cd examples/digital-brain-skill
-npm run setup
-npm run weekly-review
+npm run setup            # node scripts/setup.js
+npm run weekly-review    # python3 agents/scripts/weekly_review.py
 npm run content-ideas
 npm run stale-contacts
 ```
+
+`book-sft-pipeline` and `x-to-book-system` are documentation/PRD examples with no build tooling.
 
 ## Skill Authoring Rules
 
@@ -62,8 +66,9 @@ When creating or editing skills:
 5. **Platform-agnostic** — no vendor-locked examples or platform-specific tool names without abstraction
 6. **Token-conscious** — challenge each paragraph: "Does Claude really need this?" Assume advanced audience
 7. **Include a Gotchas section** — experience-derived failure modes are the highest-signal content in any skill
-8. **Update root README.md** when adding new skills
-9. **Update marketplace/plugin manifests** when adding skills (`.claude-plugin/marketplace.json`, `.plugin/plugin.json`)
+8. **One focus per skill** — if a topic grows too large, split into multiple skills with clear dependencies
+9. **Update root README.md** when adding new skills (skills tables, Skill Triggers table, and individual-skill list)
+10. **Update both manifests** when adding skills: add the skill path to the plugin's `skills` array in `.claude-plugin/marketplace.json`, and keep `.plugin/plugin.json` version/description in sync
 
 ## Plugin Architecture
 
