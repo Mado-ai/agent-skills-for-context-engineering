@@ -1,0 +1,297 @@
+{
+  ".claude-plugin/marketplace.json": {
+    "mtime": 1783435655.9138875,
+    "ast_hash": "81f9136f0e39f543061804535c53f655",
+    "semantic_hash": "81f9136f0e39f543061804535c53f655"
+  },
+  ".plugin/plugin.json": {
+    "mtime": 1783435655.9138875,
+    "ast_hash": "4d3c80587ec7e7fd0a4c09757d81b819",
+    "semantic_hash": "4d3c80587ec7e7fd0a4c09757d81b819"
+  },
+  "examples/book-sft-pipeline/examples/gertrude-stein/training_config.json": {
+    "mtime": 1783435655.9304388,
+    "ast_hash": "35602a80e03413a0f5a32d2af4d47dc9",
+    "semantic_hash": "35602a80e03413a0f5a32d2af4d47dc9"
+  },
+  "examples/book-sft-pipeline/scripts/pipeline_example.py": {
+    "mtime": 1783435655.9338875,
+    "ast_hash": "e7668b985d145a806d177e25e14c0502",
+    "semantic_hash": "e7668b985d145a806d177e25e14c0502"
+  },
+  "examples/digital-brain-skill/agents/scripts/content_ideas.py": {
+    "mtime": 1783435655.939982,
+    "ast_hash": "9551d6e5d61a197f4de34bb8f392dcd0",
+    "semantic_hash": "9551d6e5d61a197f4de34bb8f392dcd0"
+  },
+  "examples/digital-brain-skill/agents/scripts/idea_to_draft.py": {
+    "mtime": 1783435655.940546,
+    "ast_hash": "b8a740673f5a7f643a1106b1629a3cf1",
+    "semantic_hash": "b8a740673f5a7f643a1106b1629a3cf1"
+  },
+  "examples/digital-brain-skill/agents/scripts/stale_contacts.py": {
+    "mtime": 1783435655.940546,
+    "ast_hash": "5420b9c57ce7436d0f461e891398a6e9",
+    "semantic_hash": "5420b9c57ce7436d0f461e891398a6e9"
+  },
+  "examples/digital-brain-skill/agents/scripts/weekly_review.py": {
+    "mtime": 1783435655.940546,
+    "ast_hash": "4f49b0da81eeb420ac4471d835e1e2a3",
+    "semantic_hash": "4f49b0da81eeb420ac4471d835e1e2a3"
+  },
+  "examples/digital-brain-skill/package.json": {
+    "mtime": 1783435655.9502492,
+    "ast_hash": "c5fac33aa1bf9ea9b14fca233ce5e933",
+    "semantic_hash": "c5fac33aa1bf9ea9b14fca233ce5e933"
+  },
+  "examples/digital-brain-skill/scripts/install.sh": {
+    "mtime": 1783435655.9502492,
+    "ast_hash": "3d09f644556fe3598ef9d521a804bf57",
+    "semantic_hash": "3d09f644556fe3598ef9d521a804bf57"
+  },
+  "examples/interleaved-thinking/examples/01_basic_capture.py": {
+    "mtime": 1783435655.9533975,
+    "ast_hash": "28e1de3180324fdea14293531570af91",
+    "semantic_hash": "28e1de3180324fdea14293531570af91"
+  },
+  "examples/interleaved-thinking/examples/02_tool_usage.py": {
+    "mtime": 1783435655.9546018,
+    "ast_hash": "1f11b5ca6b606b8fcd26f919db0fe2eb",
+    "semantic_hash": "1f11b5ca6b606b8fcd26f919db0fe2eb"
+  },
+  "examples/interleaved-thinking/examples/03_full_optimization.py": {
+    "mtime": 1783435655.9546018,
+    "ast_hash": "e046e8670292c28222cf85544821e532",
+    "semantic_hash": "e046e8670292c28222cf85544821e532"
+  },
+  "examples/interleaved-thinking/generated_skills/comprehensive-research-agent/references/optimization_summary.json": {
+    "mtime": 1783435655.9566357,
+    "ast_hash": "15e69d5d2628aa46087ce4f21fd99ce0",
+    "semantic_hash": "15e69d5d2628aa46087ce4f21fd99ce0"
+  },
+  "examples/interleaved-thinking/generated_skills/comprehensive-research-agent/references/patterns_found.json": {
+    "mtime": 1783435655.9574876,
+    "ast_hash": "4ccca43ebd6ad86d7608fffbcda62e1f",
+    "semantic_hash": "4ccca43ebd6ad86d7608fffbcda62e1f"
+  },
+  "examples/interleaved-thinking/optimization_artifacts/summary.json": {
+    "mtime": 1783435655.972223,
+    "ast_hash": "3f08adde94a23c0c8827f175d58a3317",
+    "semantic_hash": "3f08adde94a23c0c8827f175d58a3317"
+  },
+  "examples/interleaved-thinking/pyproject.toml": {
+    "mtime": 1783435655.972223,
+    "ast_hash": "49f9ea5716ccb28cc160c8f17915f2ea",
+    "semantic_hash": "49f9ea5716ccb28cc160c8f17915f2ea"
+  },
+  "examples/interleaved-thinking/reasoning_trace_optimizer/__init__.py": {
+    "mtime": 1783435655.972223,
+    "ast_hash": "ee40c2ea4331c8ad2757e12245ba85ae",
+    "semantic_hash": "ee40c2ea4331c8ad2757e12245ba85ae"
+  },
+  "examples/interleaved-thinking/reasoning_trace_optimizer/analyzer.py": {
+    "mtime": 1783435655.974111,
+    "ast_hash": "1c44ff266b3065e86972e449a4fff86a",
+    "semantic_hash": "1c44ff266b3065e86972e449a4fff86a"
+  },
+  "examples/interleaved-thinking/reasoning_trace_optimizer/capture.py": {
+    "mtime": 1783435655.974111,
+    "ast_hash": "fbf012d7c170bf4b2a2915862718ac99",
+    "semantic_hash": "fbf012d7c170bf4b2a2915862718ac99"
+  },
+  "examples/interleaved-thinking/reasoning_trace_optimizer/cli.py": {
+    "mtime": 1783435655.974111,
+    "ast_hash": "25dbb7d54de0535e1f2cb92ff91eefeb",
+    "semantic_hash": "25dbb7d54de0535e1f2cb92ff91eefeb"
+  },
+  "examples/interleaved-thinking/reasoning_trace_optimizer/loop.py": {
+    "mtime": 1783435655.974111,
+    "ast_hash": "7e848fe8ac7e055b732377eb70d00c62",
+    "semantic_hash": "7e848fe8ac7e055b732377eb70d00c62"
+  },
+  "examples/interleaved-thinking/reasoning_trace_optimizer/models.py": {
+    "mtime": 1783435655.974111,
+    "ast_hash": "133f767680c5b7ddb9b3ba56bfe66912",
+    "semantic_hash": "133f767680c5b7ddb9b3ba56bfe66912"
+  },
+  "examples/interleaved-thinking/reasoning_trace_optimizer/optimizer.py": {
+    "mtime": 1783435655.974111,
+    "ast_hash": "2e9dac85268780f2368303e54f45743a",
+    "semantic_hash": "2e9dac85268780f2368303e54f45743a"
+  },
+  "examples/interleaved-thinking/reasoning_trace_optimizer/skill_generator.py": {
+    "mtime": 1783435655.974111,
+    "ast_hash": "f2eb647b651413444065b4194b5bc863",
+    "semantic_hash": "f2eb647b651413444065b4194b5bc863"
+  },
+  "examples/interleaved-thinking/tests/__init__.py": {
+    "mtime": 1783435655.974111,
+    "ast_hash": "255db4c3063de8d6b5859787c8f7daa2",
+    "semantic_hash": "255db4c3063de8d6b5859787c8f7daa2"
+  },
+  "examples/interleaved-thinking/tests/test_models.py": {
+    "mtime": 1783435655.977079,
+    "ast_hash": "618c948ab35c8fee03edf03f4b6d9856",
+    "semantic_hash": "618c948ab35c8fee03edf03f4b6d9856"
+  },
+  "examples/llm-as-judge-skills/eslint.config.js": {
+    "mtime": 1783435655.9794812,
+    "ast_hash": "fd262bead6cd98f21d5302786047827a",
+    "semantic_hash": "fd262bead6cd98f21d5302786047827a"
+  },
+  "examples/llm-as-judge-skills/examples/basic-evaluation.ts": {
+    "mtime": 1783435655.9794812,
+    "ast_hash": "79fcbe57f989c498742381f136ee8dcd",
+    "semantic_hash": "79fcbe57f989c498742381f136ee8dcd"
+  },
+  "examples/llm-as-judge-skills/examples/full-evaluation-workflow.ts": {
+    "mtime": 1783435655.9814422,
+    "ast_hash": "746a46c6fce5d5a526c9c6e3fa0609ee",
+    "semantic_hash": "746a46c6fce5d5a526c9c6e3fa0609ee"
+  },
+  "examples/llm-as-judge-skills/examples/generate-rubric.ts": {
+    "mtime": 1783435655.9814422,
+    "ast_hash": "7b1ac97e27a2d13186b407d907372e8e",
+    "semantic_hash": "7b1ac97e27a2d13186b407d907372e8e"
+  },
+  "examples/llm-as-judge-skills/examples/pairwise-comparison.ts": {
+    "mtime": 1783435655.9814422,
+    "ast_hash": "dc5e2f2c9765570d74c26a05540cfdda",
+    "semantic_hash": "dc5e2f2c9765570d74c26a05540cfdda"
+  },
+  "examples/llm-as-judge-skills/package.json": {
+    "mtime": 1783435655.9814422,
+    "ast_hash": "a0b07a4abece6e437b3c029788e3be5c",
+    "semantic_hash": "a0b07a4abece6e437b3c029788e3be5c"
+  },
+  "examples/llm-as-judge-skills/src/agents/evaluator.ts": {
+    "mtime": 1783435655.9883494,
+    "ast_hash": "8c6c425b3be3ae7abe8578942c99bb02",
+    "semantic_hash": "8c6c425b3be3ae7abe8578942c99bb02"
+  },
+  "examples/llm-as-judge-skills/src/agents/index.ts": {
+    "mtime": 1783435655.9890482,
+    "ast_hash": "bcbfdcb03a47d3d03bfabb05999dc133",
+    "semantic_hash": "bcbfdcb03a47d3d03bfabb05999dc133"
+  },
+  "examples/llm-as-judge-skills/src/config/index.ts": {
+    "mtime": 1783435655.9890482,
+    "ast_hash": "b51bd0f37844090aba0442833085a296",
+    "semantic_hash": "b51bd0f37844090aba0442833085a296"
+  },
+  "examples/llm-as-judge-skills/src/index.ts": {
+    "mtime": 1783435655.9890482,
+    "ast_hash": "aa9346d1a9f271e4e3a6897962fb1b68",
+    "semantic_hash": "aa9346d1a9f271e4e3a6897962fb1b68"
+  },
+  "examples/llm-as-judge-skills/src/tools/evaluation/direct-score.ts": {
+    "mtime": 1783435655.9902403,
+    "ast_hash": "3b0c7d7d56530ee4dcece1cd9dd6953c",
+    "semantic_hash": "3b0c7d7d56530ee4dcece1cd9dd6953c"
+  },
+  "examples/llm-as-judge-skills/src/tools/evaluation/generate-rubric.ts": {
+    "mtime": 1783435655.991094,
+    "ast_hash": "6571873064ce5fb17a65e2e2624a981b",
+    "semantic_hash": "6571873064ce5fb17a65e2e2624a981b"
+  },
+  "examples/llm-as-judge-skills/src/tools/evaluation/index.ts": {
+    "mtime": 1783435655.991094,
+    "ast_hash": "08d4d5fb821ea891e12f4af1d2358c1c",
+    "semantic_hash": "08d4d5fb821ea891e12f4af1d2358c1c"
+  },
+  "examples/llm-as-judge-skills/src/tools/evaluation/pairwise-compare.ts": {
+    "mtime": 1783435655.991094,
+    "ast_hash": "a871bd06f829a32b941bccc04b0ac627",
+    "semantic_hash": "a871bd06f829a32b941bccc04b0ac627"
+  },
+  "examples/llm-as-judge-skills/tests/evaluation.test.ts": {
+    "mtime": 1783435655.991094,
+    "ast_hash": "00c4f04bf4eb6ea55e469c7d3ab018dd",
+    "semantic_hash": "00c4f04bf4eb6ea55e469c7d3ab018dd"
+  },
+  "examples/llm-as-judge-skills/tests/setup.ts": {
+    "mtime": 1783435655.9927182,
+    "ast_hash": "fbc41039a132979632bfff38f34a5211",
+    "semantic_hash": "fbc41039a132979632bfff38f34a5211"
+  },
+  "examples/llm-as-judge-skills/tests/skills.test.ts": {
+    "mtime": 1783435655.9927182,
+    "ast_hash": "bbf9ddbbf66e3f224319cda692d4832a",
+    "semantic_hash": "bbf9ddbbf66e3f224319cda692d4832a"
+  },
+  "examples/llm-as-judge-skills/tsconfig.json": {
+    "mtime": 1783435655.9963293,
+    "ast_hash": "58f6efae4f95bd185fb3e5893c2eb9d7",
+    "semantic_hash": "58f6efae4f95bd185fb3e5893c2eb9d7"
+  },
+  "examples/llm-as-judge-skills/vitest.config.ts": {
+    "mtime": 1783435655.9963293,
+    "ast_hash": "309b84600af427af19cce11e943e8553",
+    "semantic_hash": "309b84600af427af19cce11e943e8553"
+  },
+  "skills/advanced-evaluation/scripts/evaluation_example.py": {
+    "mtime": 1783435656.0016055,
+    "ast_hash": "3d47e8d48415f5c53210a493bad4c98a",
+    "semantic_hash": "3d47e8d48415f5c53210a493bad4c98a"
+  },
+  "skills/context-compression/scripts/compression_evaluator.py": {
+    "mtime": 1783435656.006055,
+    "ast_hash": "3a4940070c61857dbdf58925a2ef5feb",
+    "semantic_hash": "3a4940070c61857dbdf58925a2ef5feb"
+  },
+  "skills/context-compression/tests/test_compression_evaluator.py": {
+    "mtime": 1783435656.006055,
+    "ast_hash": "3710e1fe5166978741f944435119a94a",
+    "semantic_hash": "3710e1fe5166978741f944435119a94a"
+  },
+  "skills/context-degradation/scripts/degradation_detector.py": {
+    "mtime": 1783435656.0092156,
+    "ast_hash": "c05237929e60889bf40f96f41b41427b",
+    "semantic_hash": "c05237929e60889bf40f96f41b41427b"
+  },
+  "skills/context-fundamentals/scripts/context_manager.py": {
+    "mtime": 1783435656.0123587,
+    "ast_hash": "204ef2a06fd2097a474d422957813237",
+    "semantic_hash": "204ef2a06fd2097a474d422957813237"
+  },
+  "skills/context-optimization/scripts/compaction.py": {
+    "mtime": 1783435656.0147393,
+    "ast_hash": "7f5bb96d06d3ce1ac629e287ffcba8ec",
+    "semantic_hash": "7f5bb96d06d3ce1ac629e287ffcba8ec"
+  },
+  "skills/evaluation/scripts/evaluator.py": {
+    "mtime": 1783435656.017654,
+    "ast_hash": "1f52baa288bdc98b6eef63a52a5b54c8",
+    "semantic_hash": "1f52baa288bdc98b6eef63a52a5b54c8"
+  },
+  "skills/filesystem-context/scripts/filesystem_context.py": {
+    "mtime": 1783435656.0197601,
+    "ast_hash": "730f848e31f1923e456e7907fbb5b6ee",
+    "semantic_hash": "730f848e31f1923e456e7907fbb5b6ee"
+  },
+  "skills/hosted-agents/scripts/sandbox_manager.py": {
+    "mtime": 1783435656.0218873,
+    "ast_hash": "6e86ecb8a31dd08fc8c8dfa129a3e00d",
+    "semantic_hash": "6e86ecb8a31dd08fc8c8dfa129a3e00d"
+  },
+  "skills/memory-systems/scripts/memory_store.py": {
+    "mtime": 1783435656.0249832,
+    "ast_hash": "66299c5e1bf055806332dc6bd95fdb2f",
+    "semantic_hash": "66299c5e1bf055806332dc6bd95fdb2f"
+  },
+  "skills/multi-agent-patterns/scripts/coordination.py": {
+    "mtime": 1783435656.0269518,
+    "ast_hash": "84fc53ac21fa1b6412a8b256ec7f5e0d",
+    "semantic_hash": "84fc53ac21fa1b6412a8b256ec7f5e0d"
+  },
+  "skills/project-development/scripts/pipeline_template.py": {
+    "mtime": 1783435656.0300548,
+    "ast_hash": "ec659b0c2c1d2ac67e2eda353affdaf8",
+    "semantic_hash": "ec659b0c2c1d2ac67e2eda353affdaf8"
+  },
+  "skills/tool-design/scripts/description_generator.py": {
+    "mtime": 1783435656.0322862,
+    "ast_hash": "83896ad6e0d7317d2d238b45247b158e",
+    "semantic_hash": "83896ad6e0d7317d2d238b45247b158e"
+  }
+}
