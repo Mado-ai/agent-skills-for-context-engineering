@@ -2,65 +2,77 @@
    Categories follow the official brand category system.
    Stories are launch placeholder editorial content. */
 
+/* White / blue / black theme — every category maps to the
+   blue-navy-black spectrum; `ink` is the text color used on chips. */
 const GON_CATEGORIES = {
   "go-now": {
     name: "GO NOW",
     tagline: "What matters now.",
     color: "#078FDD",
+    ink: "#FFFFFF",
     icon: "globe"
   },
   "go-trend": {
     name: "GO TREND",
     tagline: "What's moving the internet.",
-    color: "#7A3FD0",
+    color: "#0A1633",
+    ink: "#FFFFFF",
     icon: "arrow"
   },
   "go-sound": {
     name: "GO SOUND",
     tagline: "The sound shaping culture.",
-    color: "#F04BB8",
+    color: "#29ABE2",
+    ink: "#0A1633",
     icon: "wave"
   },
   "go-ai": {
     name: "GO AI",
     tagline: "Tomorrow is already here.",
-    color: "#64E572",
+    color: "#0857A6",
+    ink: "#FFFFFF",
     icon: "chip"
   },
   "go-creator": {
     name: "GO CREATOR",
     tagline: "The people behind the movement.",
     color: "#43CBF5",
+    ink: "#0A1633",
     icon: "mic"
   },
   "go-tech": {
     name: "GO TECH",
     tagline: "Smarter tools, simpler lives.",
-    color: "#078FDD",
+    color: "#10151F",
+    ink: "#FFFFFF",
     icon: "bolt"
   },
   "go-business": {
     name: "GO BUSINESS",
     tagline: "Ideas becoming opportunities.",
-    color: "#64E572",
+    color: "#078FDD",
+    ink: "#FFFFFF",
     icon: "case"
   },
   "go-culture": {
     name: "GO CULTURE",
     tagline: "What the world is watching.",
-    color: "#F04BB8",
+    color: "#0A1633",
+    ink: "#FFFFFF",
     icon: "burst"
   },
   "go-play": {
     name: "GO PLAY",
     tagline: "Where digital worlds move.",
-    color: "#7A3FD0",
+    color: "#0857A6",
+    ink: "#FFFFFF",
     icon: "play"
   },
   "go-discover": {
     name: "GO DISCOVER",
     tagline: "People, places and possibilities.",
-    color: "#43CBF5",
+    color: "#29ABE2",
+    ink: "#0A1633",
     icon: "pin"
   }
 };

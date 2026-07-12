@@ -15,7 +15,7 @@
 
   const chip = (catKey) => {
     const c = GON_CATEGORIES[catKey];
-    return `<a class="chip" style="--chip-c:${c.color}" href="category.html?cat=${catKey}">
+    return `<a class="chip" style="--chip-c:${c.color}; --chip-ink:${c.ink || "#FFFFFF"}" href="category.html?cat=${catKey}">
       ${GON_ICONS[c.icon]}<span>${c.name}</span></a>`;
   };
 
@@ -31,25 +31,34 @@
 
   const hash = (str) => [...str].reduce((a, ch) => a + ch.charCodeAt(0), 0);
 
+  /* flowing wave pairs (main wave, front accent wave) — card motif */
+  const WAVES = [
+    ["M0 118 C 70 70, 130 170, 205 128 S 340 66, 400 118 L400 220 0 220 Z",
+     "M0 168 C 80 128, 150 208, 235 168 S 350 128, 400 165 L400 220 0 220 Z"],
+    ["M0 96 C 90 150, 170 60, 250 110 S 370 160, 400 100 L400 220 0 220 Z",
+     "M0 150 C 100 195, 180 120, 270 160 S 370 200, 400 150 L400 220 0 220 Z"],
+    ["M0 130 C 60 92, 150 176, 230 120 S 350 70, 400 128 L400 220 0 220 Z",
+     "M0 178 C 70 140, 160 210, 250 168 S 360 132, 400 176 L400 220 0 220 Z"]
+  ];
+
+  const DARK_CATS = new Set(["#0A1633", "#10151F"]);
+
   function coverArt(story, extraClass) {
     const c = catOf(story);
     const h = hash(story.id);
-    const v = h % 3;
-    const orb = [
-      ["78% -18%", "6% 116%", 158],
-      ["14% -22%", "92% 118%", 202],
-      ["88% 112%", "10% -14%", 118]
-    ][v];
-    const bg =
-      `radial-gradient(70% 95% at ${orb[0]}, color-mix(in srgb, ${c.color} 44%, transparent), transparent 70%),` +
-      `radial-gradient(55% 80% at ${orb[1]}, rgba(122, 63, 208, 0.30), transparent 65%),` +
-      `linear-gradient(${orb[2]}deg, #0E1D42, #0A1633)`;
+    const [wMain, wFront] = WAVES[h % 3];
+    // dark categories pair with blue; blue categories pair with black
+    const front = DARK_CATS.has(c.color) ? "#078FDD" : "#10151F";
+    const flip = h % 2 ? "transform:scaleX(-1);" : "";
     return `
-      <a class="cover-art ${extraClass || ""}" href="article.html?id=${story.id}" style="--ca-c:${c.color}; background:${bg}" aria-hidden="true" tabindex="-1">
+      <a class="cover-art ${extraClass || ""}" href="article.html?id=${story.id}" style="--ca-c:${c.color}" aria-hidden="true" tabindex="-1">
         <span class="ca-dots"></span>
         <svg class="ca-sweep" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21L21 3M9 3h12v12"/></svg>
         <span class="ca-glyph">${GON_ICONS[c.icon]}</span>
-        <span class="ca-scan"></span>
+        <svg class="ca-wave" viewBox="0 0 400 220" preserveAspectRatio="none" style="${flip}">
+          <path d="${wMain}" fill="${c.color}" opacity="0.94"/>
+          <path d="${wFront}" fill="${front}" opacity="0.92"/>
+        </svg>
       </a>`;
   }
 
@@ -125,7 +134,7 @@
         <div class="nav-links">
           <a href="index.html" style="--nd-c:#FFFFFF"${page === "home" ? ' class="active"' : ""}>Home</a>
           ${catLinks}
-          <a href="about.html" style="--nd-c:#9A5CF0"${page === "about" ? ' class="active"' : ""}><span class="nd"></span>About</a>
+          <a href="about.html" style="--nd-c:#43CBF5"${page === "about" ? ' class="active"' : ""}><span class="nd"></span>About</a>
         </div>
       </div>`;
 
@@ -244,7 +253,7 @@
         </ol>
       </div>
       <div class="rail-box rail-brief">
-        <div class="rail-head"><svg viewBox="0 0 24 24" fill="none" stroke="#43CBF5" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>The briefing</div>
+        <div class="rail-head"><svg viewBox="0 0 24 24" fill="none" stroke="#078FDD" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>The briefing</div>
         ${brief.map((s) => `
           <div class="brief-item">
             <h4><a href="article.html?id=${s.id}">${s.title}</a></h4>
@@ -281,21 +290,22 @@
         </section>`;
     }).join("");
 
-    // magazine covers strip
-    $("#covers-strip").innerHTML = GON_COVERS.map((cv) => {
+    // magazine covers strip — white top, wave break, blue face (card motif)
+    $("#covers-strip").innerHTML = GON_COVERS.map((cv, i) => {
       const s = byId(cv.story);
       if (!s) return "";
       const c = catOf(s);
-      const h = hash(s.id) % 2;
-      const bg =
-        `radial-gradient(120% 75% at ${h ? "80%" : "20%"} 100%, color-mix(in srgb, ${c.color} 52%, transparent), transparent 72%),` +
-        `radial-gradient(90% 60% at ${h ? "10%" : "90%"} -10%, rgba(122, 63, 208, 0.45), transparent 70%),` +
-        `linear-gradient(170deg, #101F4A, #070F26 70%)`;
+      const flip = i % 2 ? "transform:scaleX(-1);" : "";
       return `
-        <a class="cover-card" style="--cc-c:${c.color}; background:${bg}" href="article.html?id=${s.id}">
+        <a class="cover-card" style="--cc-c:${c.color}; background:#FFFFFF" href="article.html?id=${s.id}">
+          <svg class="cc-waves" viewBox="0 0 300 200" preserveAspectRatio="none" style="${flip}" aria-hidden="true">
+            <path d="M0 52 C 50 12, 115 88, 175 48 S 262 6, 300 46 L300 200 0 200 Z" fill="#10151F"/>
+            <path d="M0 64 C 50 22, 115 98, 175 58 S 262 16, 300 56 L300 200 0 200 Z" fill="#2FA9E5"/>
+            <path d="M0 100 C 60 64, 130 130, 195 96 S 270 60, 300 92 L300 200 0 200 Z" fill="#0768B8"/>
+          </svg>
           <span class="cover-masthead"><span class="logo-go">go</span><span class="logo-overseas">overseas</span></span>
           <span class="cover-spacer"></span>
-          <span class="chip" style="--chip-c:${c.color}">${c.name}</span>
+          <span class="chip" style="--chip-c:#FFFFFF; --chip-ink:${DARK_CATS.has(c.color) ? "#10151F" : c.color}">${c.name}</span>
           <span class="cover-title">${cv.coverTitle}</span>
           <span class="cover-issue">${cv.issue}</span>
         </a>`;
@@ -387,8 +397,8 @@
     $("#copy-link").addEventListener("click", async (e) => {
       try {
         await navigator.clipboard.writeText(location.href);
-        e.currentTarget.style.borderColor = "var(--green)";
-        e.currentTarget.style.color = "var(--green)";
+        e.currentTarget.style.borderColor = "var(--blue)";
+        e.currentTarget.style.color = "var(--blue)";
       } catch { /* clipboard unavailable — ignore */ }
     });
 
