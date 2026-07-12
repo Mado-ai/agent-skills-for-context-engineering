@@ -303,7 +303,161 @@ const GON_STORIES = [
       "None of this settles the hard questions. Financing for lower-income countries remains the sticking point of every negotiation, and adaptation still gets a fraction of what mitigation attracts. The gap between the money pledged and the money delivered is the story to watch this decade.",
       "But the direction is no longer in doubt, because it is no longer voluntary. What matters now is speed — and speed, unlike ambition, shows up in the receipts."
     ]
+  },
+  {
+    id: "slow-feeds",
+    cat: "go-trend",
+    featured: false,
+    title: "Slow Feeds: The Anti-Algorithm Apps Quietly Gaining Ground",
+    dek: "Chronological timelines, daily posting limits, no infinite scroll. A wave of deliberately calmer apps is betting attention is worth more than engagement.",
+    author: "Go Overseas Newsroom",
+    date: "June 28, 2026",
+    read: 4,
+    tags: ["Trends", "Social Pulse", "Wellbeing"],
+    body: [
+      "The pitch sounds almost rebellious in 2026: an app that shows you less. Chronological feeds, hard daily limits, no autoplay, no infinite scroll — and a growing waiting list of people who want in.",
+      "The slow-feed movement began as a niche protest against engagement-optimized platforms and has matured into a real product category. The apps differ in details but share a philosophy: your attention is the client, not the product. Sessions are designed to end. Notifications arrive in a single daily digest. Metrics are private by default.",
+      "What surprised skeptics is retention. Users of these apps open them less often but stay subscribed longer, and the churn curves — the numbers that decide which products live — look healthier than many attention-maximizing rivals. Calm, it turns out, is a feature people will pay for.",
+      "The giants have noticed, shipping their own quiet modes and screen-time tools. Whether that is genuine change or defensive theater is the debate — but the direction of travel is clear. The next status symbol of the internet may simply be an empty notification tray."
+    ]
+  },
+  {
+    id: "creator-unions",
+    cat: "go-creator",
+    featured: false,
+    title: "The Creator Union Era: Collective Bargaining Goes Digital",
+    dek: "Rate floors, contract templates, algorithm transparency demands — creators are organizing like the professional workforce they've become.",
+    author: "Go Overseas Newsroom",
+    date: "June 27, 2026",
+    read: 4,
+    tags: ["Creators", "Economy", "Community"],
+    body: [
+      "For years the creator economy had a structural oddity: a workforce of millions with no floor under it. Rates were secret, contracts were take-it-or-leave-it, and a platform policy change could erase a livelihood overnight. That era is ending — not by regulation, but by organization.",
+      "Creator collectives across several countries now publish standard rate cards, share contract red-flag lists, and negotiate with brands as blocs. The largest have won concessions that individual creators never could: payment terms measured in days instead of months, kill-fee protections, and disclosure requirements when campaign briefs change.",
+      "The harder fight is with platforms. Organized creators are demanding earlier notice of algorithm changes, transparent demonetization appeals, and portability of audiences — the right to take your subscriber list with you. Progress is uneven, but the asks are no longer dismissed as naive.",
+      "The people behind the movement have realized something simple: the platforms need full-time creators as much as creators need platforms. Professional media has always been a negotiation. The creator economy just learned to show up to it together."
+    ]
+  },
+  {
+    id: "repair-culture",
+    cat: "go-tech",
+    featured: false,
+    title: "Repair Culture Goes Mainstream: The Right-to-Fix Generation",
+    dek: "Repair scores on price tags, parts counters in electronics shops, and a generation that treats fixing things as a flex, not a chore.",
+    author: "Go Overseas Newsroom",
+    date: "June 26, 2026",
+    read: 4,
+    tags: ["Tech", "Sustainability", "Tools & Apps"],
+    body: [
+      "The most telling tech trend of the year isn't a new device — it's what's happening to old ones. Repairability scores now sit next to prices in electronics shops across a growing list of countries, spare-parts counters have returned to main streets, and teardown videos rack up views that product launches would envy.",
+      "Right-to-repair laws pushed the door open, requiring manufacturers to sell parts and publish manuals. But culture walked through it. A generation raised on climate anxiety and resale apps treats a repaired phone as a badge of competence, and repair cafés — volunteer-run fix-it meetups — have spread from a Dutch experiment to thousands of cities worldwide.",
+      "Manufacturers are adapting in two ways: some grudgingly, shipping self-repair kits with the enthusiasm of a hostage note; others strategically, designing modular devices where upgrades snap in and marketing longevity as a premium feature. The second group is winning customers the first group considers lost.",
+      "Smarter tools, simpler lives sometimes means an older tool, kept alive. The most sustainable device remains the one you already own — and for the first time in decades, the industry is being rebuilt around that fact."
+    ]
+  },
+  {
+    id: "four-day-week",
+    cat: "go-business",
+    featured: false,
+    title: "The Four-Day Week After the Hype: What Five Years of Data Say",
+    dek: "The trials ended, the spreadsheets are in. Shorter weeks survived contact with reality — with caveats the headlines skip.",
+    author: "Go Overseas Newsroom",
+    date: "June 25, 2026",
+    read: 5,
+    tags: ["Business", "Work", "Analysis"],
+    body: [
+      "Five years after the first large four-day-week trials made headlines, enough companies have kept — or abandoned — the model to move the conversation from ideology to evidence. The short version: it works far more often than skeptics predicted, and less universally than advocates promised.",
+      "Across published trials and company reports, the pattern repeats. Knowledge-work teams typically maintain output while burnout, sick days and attrition fall — the recruiting advantage alone pays for the model in tight labor markets. The failures cluster where the work is coverage-based: support desks, clinics, logistics — where a day off the schedule is a day someone else must staff.",
+      "The quiet insight from companies that made it stick: the fifth day was never the point. The redesign was — fewer meetings, sharper priorities, deeper focus blocks. Firms that cut hours without cutting waste simply compressed stress into four days and walked it back.",
+      "The model is now spreading less as a banner policy and more as a negotiated norm — team by team, contract by contract, country by country. Ideas becoming opportunities rarely arrive as revolutions. They arrive as line items in an employee handbook."
+    ]
+  },
+  {
+    id: "polycentric-fashion",
+    cat: "go-culture",
+    featured: false,
+    title: "Fashion Goes Polycentric: Lagos, Seoul and São Paulo Set the Pace",
+    dek: "The old four-city calendar no longer decides what the world wears. Style's center of gravity has multiplied.",
+    author: "Go Overseas Newsroom",
+    date: "June 24, 2026",
+    read: 4,
+    tags: ["Culture", "Fashion", "Global Style"],
+    body: [
+      "For a century, fashion had four capitals and a calendar to match. That geography is dissolving. The shows drawing the most online attention — and increasingly the most buyers — now happen in Lagos, Seoul, São Paulo, Copenhagen and Mumbai as often as in the legacy four.",
+      "The shift is structural. Social platforms broke the monopoly on visibility: a collection can now find its global audience without a Paris runway's permission. Diaspora communities amplify home-market designers across continents. And the growth markets for luxury and streetwear alike are precisely the regions the old calendar treated as customers, never creators.",
+      "The creative consequences are visible on any street with good style: Nigerian tailoring vocabularies, Korean streetwear proportions and Brazilian color sensibilities cross-pollinating at the speed of a group chat. Trend forecasting agencies have quietly rebuilt their scouting maps around it.",
+      "What the world is watching, it increasingly wears. Fashion's future looks less like a capital and more like a network — and the network has no head office."
+    ]
+  },
+  {
+    id: "esports-new-geography",
+    cat: "go-play",
+    featured: false,
+    title: "Esports' New Geography: How Southeast Asia Became Competitive Play's Center",
+    dek: "Mobile-first titles, packed arenas and a talent pipeline running through internet cafés — the region isn't emerging anymore. It's leading.",
+    author: "Go Overseas Newsroom",
+    date: "June 23, 2026",
+    read: 4,
+    tags: ["Gaming", "Esports", "Events"],
+    body: [
+      "Ask where competitive gaming's momentum lives and the honest answer has shifted: Jakarta, Manila, Ho Chi Minh City, Bangkok. Southeast Asia has moved from promising market to gravitational center — and it happened on phones.",
+      "The region skipped the console-and-PC era's economics and built its competitive culture around mobile titles, where a world-class setup costs a fraction of a gaming rig. The result is the deepest talent pool in esports: hundreds of millions of players, a café-tournament pipeline that functions like grassroots football academies, and arena finals that sell out in minutes.",
+      "The money followed the crowds. Regional leagues now command broadcast deals and sponsorships that rival legacy sports properties, and Western organizations open Southeast Asian academies the way football clubs scout South America.",
+      "Where digital worlds move, economies move with them. The next decade of competitive play is being drafted in places the old industry maps barely labeled — which, by now, should sound familiar."
+    ]
+  },
+  {
+    id: "sleeper-train-renaissance",
+    cat: "go-discover",
+    featured: false,
+    title: "The Sleeper Train Renaissance: A Continent Reconnects by Rail",
+    dek: "New night routes are selling out across Europe and Asia as travelers trade airport hours for a bed, a window and a slower map.",
+    author: "Go Overseas Newsroom",
+    date: "June 22, 2026",
+    read: 4,
+    tags: ["Travel", "Rail", "Slow Travel"],
+    body: [
+      "A decade ago the night train was a nostalgia act, quietly cancelled route by route. Now new sleeper services are launching across Europe and Asia faster than operators can source carriages, and the berths sell out weeks ahead.",
+      "The revival runs on three engines. Climate-conscious travelers want the flight-free option and will pay for it. Remote workers discovered that a night train is a hotel that commutes for you — board after dinner, wake up in another country, lose no working day. And rail operators finally rebuilt the product: private cabins, decent showers, booking apps that don't feel like archaeology.",
+      "The map is redrawing accordingly. Routes that made no sense as day trips — Berlin to the Adriatic, night links across Scandinavia, sleeper corridors threading Southeast Asia — work beautifully at bedtime speed, and secondary cities along the lines are seeing visitors the budget-airline map never delivered.",
+      "People, places and possibilities, at 90 kilometers an hour: the sleeper's real luxury was never the cabin. It is arriving somewhere new without the sky in between."
+    ]
+  },
+  {
+    id: "passport-power-shuffle",
+    cat: "go-now",
+    featured: false,
+    title: "The Passport Power Shuffle: Mobility in a Multipolar World",
+    dek: "Visa-free maps are being redrawn by trade blocs, talent wars and digital-nomad programs — and the rankings tell a bigger story than travel.",
+    author: "Go Overseas Newsroom",
+    date: "June 21, 2026",
+    read: 5,
+    tags: ["Global News", "Mobility", "Analysis"],
+    body: [
+      "Passport-power rankings read like a barometer of the world order, and the needle is moving. The historic gap between the strongest and weakest travel documents, after widening for decades, has begun to narrow — redrawn by regional blocs, talent shortages and a global competition for mobile spenders.",
+      "The drivers are pragmatic, not sentimental. Regional agreements in Asia, Africa and the Gulf have opened visa-free corridors that would have been unthinkable a generation ago, because tourism receipts and labor mobility are easier to bank than geopolitical grudges. Aging economies short of workers are trading access for skills. And more than sixty countries now run digital-nomad or long-stay programs, courting remote earners like the export industry they effectively are.",
+      "The counter-current is real: security politics still slams corridors shut on short notice, and the mobility divide remains stark — measured not only in destinations but in visa fees, appointment backlogs and the quiet indignity of proving intent to return.",
+      "What matters now is that mobility has become explicit policy — a lever governments pull, not a fact of birth to accept. Where you can go is being renegotiated, in real time, on trade-bloc letterhead."
+    ]
   }
+];
+
+/* Front-page trending rail — story ids, in rank order */
+const GON_TRENDING = [
+  "age-of-intelligence",
+  "internet-never-sleeps",
+  "sound-of-culture",
+  "passport-power-shuffle",
+  "creators-change-everything"
+];
+
+/* Magazine cover strip — mirrors the brand's cover system */
+const GON_COVERS = [
+  { story: "world-in-motion", issue: "Issue 01 · May 2026", coverTitle: "A World in Motion" },
+  { story: "internet-never-sleeps", issue: "Issue 02 · May 2026", coverTitle: "The Internet Never Sleeps" },
+  { story: "sound-of-culture", issue: "Issue 03 · May 2026", coverTitle: "The Sound of Culture" },
+  { story: "age-of-intelligence", issue: "Issue 04 · May 2026", coverTitle: "The Age of Intelligence" },
+  { story: "creators-change-everything", issue: "Issue 05 · May 2026", coverTitle: "Creators Change Everything" }
 ];
 
 const GON_ICONS = {

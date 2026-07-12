@@ -1,16 +1,17 @@
 /* Go Overseas News — site renderer
-   Shared chrome (header / category strip / footer) plus per-page
-   rendering, driven by <body data-page="...">. Content lives in data.js. */
+   Shared chrome (topbar / masthead / section nav / ticker / footer)
+   plus per-page rendering, driven by <body data-page="...">.
+   Content lives in data.js. */
 
 (function () {
   "use strict";
 
   const $ = (sel, root) => (root || document).querySelector(sel);
 
-  const icon = (name, cls) =>
-    `<span class="${cls || "icon"}" aria-hidden="true">${GON_ICONS[name] || ""}</span>`;
-
   const catOf = (story) => GON_CATEGORIES[story.cat];
+  const byId = (id) => GON_STORIES.find((s) => s.id === id);
+
+  const shortName = (c) => c.name.replace(/^GO /, "");
 
   const chip = (catKey) => {
     const c = GON_CATEGORIES[catKey];
@@ -18,8 +19,39 @@
       ${GON_ICONS[c.icon]}<span>${c.name}</span></a>`;
   };
 
-  const storyMeta = (s) =>
-    `<div class="meta"><span>${s.author}</span><span>${s.date}</span><span>${s.read} min read</span></div>`;
+  const kicker = (catKey) => {
+    const c = GON_CATEGORIES[catKey];
+    return `<a class="kicker-cat" style="--kc-c:${c.color}" href="category.html?cat=${catKey}">${c.name}</a>`;
+  };
+
+  const byline = (s, full) =>
+    `<div class="byline"><span class="b-author">${full ? "By " : ""}${s.author}</span><span class="b-sep">·</span><span>${s.date}</span><span class="b-sep">·</span><span>${s.read} min read</span></div>`;
+
+  /* ---------- generated cover art ---------- */
+
+  const hash = (str) => [...str].reduce((a, ch) => a + ch.charCodeAt(0), 0);
+
+  function coverArt(story, extraClass) {
+    const c = catOf(story);
+    const h = hash(story.id);
+    const v = h % 3;
+    const orb = [
+      ["78% -18%", "6% 116%", 158],
+      ["14% -22%", "92% 118%", 202],
+      ["88% 112%", "10% -14%", 118]
+    ][v];
+    const bg =
+      `radial-gradient(70% 95% at ${orb[0]}, color-mix(in srgb, ${c.color} 44%, transparent), transparent 70%),` +
+      `radial-gradient(55% 80% at ${orb[1]}, rgba(122, 63, 208, 0.30), transparent 65%),` +
+      `linear-gradient(${orb[2]}deg, #0E1D42, #0A1633)`;
+    return `
+      <a class="cover-art ${extraClass || ""}" href="article.html?id=${story.id}" style="--ca-c:${c.color}; background:${bg}" aria-hidden="true" tabindex="-1">
+        <span class="ca-dots"></span>
+        <svg class="ca-sweep" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21L21 3M9 3h12v12"/></svg>
+        <span class="ca-glyph">${GON_ICONS[c.icon]}</span>
+        <span class="ca-scan"></span>
+      </a>`;
+  }
 
   /* ---------- shared chrome ---------- */
 
@@ -40,37 +72,83 @@
     ["Facebook", "https://facebook.com/gooverseas.news", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 8h3V4.5h-3c-2.2 0-4 1.8-4 4V11H7v3.5h3V21h3.5v-6.5h3L17 11h-3.5V8.8c0-.5.2-.8.5-.8z"/></svg>']
   ];
 
+  const socialLinks = () =>
+    SOCIALS.map(([label, href, svg]) =>
+      `<a href="${href}" target="_blank" rel="noopener" aria-label="${label}">${svg}</a>`).join("");
+
   function renderChrome() {
     const page = document.body.dataset.page;
+    const activeCat = new URLSearchParams(location.search).get("cat");
 
-    const header = document.createElement("header");
-    header.className = "site-header";
-    header.innerHTML = `
-      <div class="wrap header-inner">
-        ${LOGO}
-        <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-        </button>
-        <nav class="main-nav" aria-label="Main">
-          <a href="index.html" ${page === "home" ? 'class="active"' : ""}>Home</a>
-          <a href="index.html#categories">Categories</a>
-          <a href="about.html" ${page === "about" ? 'class="active"' : ""}>About</a>
-          <a href="about.html#contact">Contact</a>
-        </nav>
+    // top utility bar
+    const topbar = document.createElement("div");
+    topbar.className = "topbar";
+    const today = new Date().toLocaleDateString("en-US", {
+      weekday: "long", month: "long", day: "numeric", year: "numeric"
+    });
+    topbar.innerHTML = `
+      <div class="wrap topbar-inner">
+        <div class="edition">
+          <span class="ed-date">${today}</span>
+          <span class="sep">|</span>
+          <span class="ed-name">Global Edition</span>
+        </div>
+        <div class="topbar-social">
+          <span class="follow">Follow us</span>
+          ${socialLinks()}
+        </div>
       </div>`;
 
-    const strip = document.createElement("nav");
-    strip.className = "cat-strip";
-    strip.setAttribute("aria-label", "News categories");
-    const activeCat = new URLSearchParams(location.search).get("cat");
-    strip.innerHTML = `<div class="cat-strip-inner">${Object.entries(GON_CATEGORIES)
-      .map(([key, c]) =>
-        `<a class="cat-pill${page === "category" && key === activeCat ? " active" : ""}" style="--pill-c:${c.color}" href="category.html?cat=${key}">${GON_ICONS[c.icon]}${c.name}</a>`)
-      .join("")}</div>`;
+    // masthead (front page only)
+    let masthead = null;
+    if (page === "home") {
+      masthead = document.createElement("header");
+      masthead.className = "masthead";
+      masthead.innerHTML = `
+        <div class="wrap">
+          ${LOGO}
+          <p class="masthead-tag">Global perspective. What's next.</p>
+        </div>`;
+    }
 
+    // sticky section nav
+    const nav = document.createElement("nav");
+    nav.className = "section-nav";
+    nav.setAttribute("aria-label", "Sections");
+    const catLinks = Object.entries(GON_CATEGORIES).map(([key, c]) => {
+      const active = (page === "category" && key === activeCat) ? " class=\"active\"" : "";
+      return `<a href="category.html?cat=${key}" style="--nd-c:${c.color}"${active}><span class="nd"></span>${shortName(c)}</a>`;
+    }).join("");
+    nav.innerHTML = `
+      <div class="section-nav-inner">
+        <a class="nav-logo" href="index.html" aria-label="Go Overseas News — home">go<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19L19 5M9 5h10v10"/></svg></a>
+        <div class="nav-links">
+          <a href="index.html" style="--nd-c:#FFFFFF"${page === "home" ? ' class="active"' : ""}>Home</a>
+          ${catLinks}
+          <a href="about.html" style="--nd-c:#9A5CF0"${page === "about" ? ' class="active"' : ""}><span class="nd"></span>About</a>
+        </div>
+      </div>`;
+
+    // breaking ticker (doubled for a seamless loop)
+    const ticker = document.createElement("div");
+    ticker.className = "ticker";
+    ticker.setAttribute("aria-label", "Latest headlines");
+    const items = GON_STORIES.slice(0, 8).map((s) => {
+      const c = catOf(s);
+      return `<a href="article.html?id=${s.id}"><span class="t-cat" style="color:${c.color}">${c.name}</span>${s.title}</a>`;
+    }).join("");
+    ticker.innerHTML = `
+      <span class="ticker-label"><span class="dot"></span>GO NOW</span>
+      <div class="ticker-track">${items}${items}</div>`;
+
+    const chrome = [topbar, masthead, nav, ticker].filter(Boolean);
+    const skip = $(".skip-link");
+    chrome.reverse().forEach((el) => skip.after(el));
+
+    // footer
     const footer = document.createElement("footer");
     footer.className = "site-footer";
-    const catLinks = Object.entries(GON_CATEGORIES)
+    const footLinks = Object.entries(GON_CATEGORIES)
       .map(([key, c]) => `<a href="category.html?cat=${key}">${c.name}</a>`);
     footer.innerHTML = `
       <div class="wrap">
@@ -78,13 +156,10 @@
           <div>
             ${LOGO}
             <p class="footer-tagline">Your daily source for global news, emerging trends, technology, music, AI, creators and culture. We cover what matters now — and what comes next.</p>
-            <div class="socials">
-              ${SOCIALS.map(([label, href, svg]) =>
-                `<a href="${href}" target="_blank" rel="noopener" aria-label="${label}">${svg}</a>`).join("")}
-            </div>
+            <div class="socials">${socialLinks()}</div>
           </div>
-          <div class="footer-col"><h5>Categories</h5>${catLinks.slice(0, 5).join("")}</div>
-          <div class="footer-col"><h5>&nbsp;</h5>${catLinks.slice(5).join("")}</div>
+          <div class="footer-col"><h5>Categories</h5>${footLinks.slice(0, 5).join("")}</div>
+          <div class="footer-col"><h5>&nbsp;</h5>${footLinks.slice(5).join("")}</div>
           <div class="footer-col">
             <h5>Company</h5>
             <a href="about.html">About us</a>
@@ -99,75 +174,134 @@
           <span>@gooverseas.news</span>
         </div>
       </div>`;
-
-    document.body.prepend(strip);
-    document.body.prepend(header);
     document.body.append(footer);
 
-    const toggle = $(".nav-toggle", header);
-    const nav = $(".main-nav", header);
-    toggle.addEventListener("click", () => {
-      const open = nav.classList.toggle("open");
-      toggle.setAttribute("aria-expanded", String(open));
-    });
+    // masthead logo hand-off on scroll (front page)
+    if (page === "home") {
+      const onScroll = () =>
+        document.body.classList.toggle("scrolled", window.scrollY > 150);
+      window.addEventListener("scroll", onScroll, { passive: true });
+      onScroll();
+    }
   }
 
-  /* ---------- card builders ---------- */
+  /* ---------- building blocks ---------- */
+
+  const storyRow = (s) => `
+    <article class="story-row">
+      ${coverArt(s)}
+      <div>
+        ${kicker(s.cat)}
+        <h4><a href="article.html?id=${s.id}">${s.title}</a></h4>
+        <div class="r-date">${s.date}</div>
+      </div>
+    </article>`;
 
   const storyCard = (s) => {
     const c = catOf(s);
     return `
       <article class="story-card" style="--card-c:${c.color}">
-        <a class="story-visual" href="article.html?id=${s.id}" aria-hidden="true" tabindex="-1">
-          <span class="dots"></span>
-          <span class="glyph">${GON_ICONS[c.icon]}</span>
-        </a>
+        ${coverArt(s)}
         <div class="story-body">
           ${chip(s.cat)}
           <h3><a href="article.html?id=${s.id}">${s.title}</a></h3>
           <p>${s.dek}</p>
-          ${storyMeta(s)}
+          ${byline(s)}
         </div>
       </article>`;
   };
 
-  /* ---------- pages ---------- */
+  /* ---------- front page ---------- */
 
   function renderHome() {
-    const featured = GON_STORIES.filter((s) => s.featured);
-    const rest = GON_STORIES.filter((s) => !s.featured);
+    const lead = GON_STORIES.find((s) => s.featured) || GON_STORIES[0];
+    const stack = GON_STORIES.filter((s) => s.id !== lead.id).slice(0, 4);
+    const used = new Set([lead.id, ...stack.map((s) => s.id)]);
 
-    // ticker (doubled for a seamless loop)
-    const items = GON_STORIES.slice(0, 8).map((s) => {
-      const c = catOf(s);
-      return `<a href="article.html?id=${s.id}"><span class="t-cat" style="color:${c.color}">${c.name}</span>${s.title}</a>`;
-    }).join("");
-    $("#ticker-track").innerHTML = items + items;
+    // lead story
+    $("#front-lead").innerHTML = `
+      ${coverArt(lead)}
+      ${kicker(lead.cat)}
+      <h1><a href="article.html?id=${lead.id}">${lead.title}</a></h1>
+      <p class="dek">${lead.dek}</p>
+      ${byline(lead, true)}`;
 
-    // hero
-    const [main, ...side] = featured;
-    const mc = catOf(main);
-    $("#hero-main").style.setProperty("--chip-c", mc.color);
-    $("#hero-main").innerHTML = `
-      <span class="bg-glyph">${GON_ICONS[mc.icon]}</span>
-      <p class="hero-kicker">Global perspective. What's next.</p>
-      ${chip(main.cat)}
-      <h1><a href="article.html?id=${main.id}">${main.title}</a></h1>
-      <p class="dek">${main.dek}</p>
-      ${storyMeta(main)}`;
+    // secondary stack
+    $("#front-stack").innerHTML = stack.map(storyRow).join("");
 
-    $("#hero-side").innerHTML = side.map((s) => {
-      const c = catOf(s);
+    // right rail: trending + briefing + newsletter CTA
+    const trending = GON_TRENDING.map(byId).filter(Boolean);
+    const brief = GON_STORIES.filter((s) => !used.has(s.id)).slice(0, 5);
+    $("#front-rail").innerHTML = `
+      <div class="rail-box">
+        <div class="rail-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11L9.5 22 19 10h-6.5L13 2z"/></svg>Trending now</div>
+        <ol class="trend-list">
+          ${trending.map((s, i) => `
+            <li>
+              <span class="trend-num">${String(i + 1).padStart(2, "0")}</span>
+              <div>${kicker(s.cat)}<h4><a href="article.html?id=${s.id}">${s.title}</a></h4></div>
+            </li>`).join("")}
+        </ol>
+      </div>
+      <div class="rail-box rail-brief">
+        <div class="rail-head"><svg viewBox="0 0 24 24" fill="none" stroke="#43CBF5" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>The briefing</div>
+        ${brief.map((s) => `
+          <div class="brief-item">
+            <h4><a href="article.html?id=${s.id}">${s.title}</a></h4>
+            <span class="r-date">${catOf(s).name} · ${s.date}</span>
+          </div>`).join("")}
+      </div>
+      <div class="rail-cta">
+        <div class="script">Go beyond the scroll.</div>
+        <p>The whole world in one sharp daily email.</p>
+        <a class="btn btn-sm" href="#newsletter">Subscribe free</a>
+      </div>`;
+
+    // category section fronts
+    const marquee = ["go-now", "go-trend", "go-sound", "go-ai", "go-creator", "go-culture"];
+    $("#sections-grid").innerHTML = marquee.map((key) => {
+      const c = GON_CATEGORIES[key];
+      const stories = GON_STORIES.filter((s) => s.cat === key);
+      if (!stories.length) return "";
+      const [feature, ...rest] = stories;
       return `
-        <article class="hero-card" style="--chip-c:${c.color}; border-color: color-mix(in srgb, ${c.color} 28%, transparent)">
-          <span class="bg-glyph" style="color:${c.color}">${GON_ICONS[c.icon]}</span>
-          ${chip(s.cat)}
-          <h3><a href="article.html?id=${s.id}">${s.title}</a></h3>
-          <p>${s.dek}</p>
-        </article>`;
+        <section class="section-front" style="--sf-c:${c.color}">
+          <div class="sf-head">
+            <a class="sf-name" href="category.html?cat=${key}">${c.name}</a>
+            <span class="sf-tagline">${c.tagline}</span>
+            <a class="sf-more" href="category.html?cat=${key}">More →</a>
+          </div>
+          <div class="sf-feature">
+            ${coverArt(feature)}
+            <h3><a href="article.html?id=${feature.id}">${feature.title}</a></h3>
+            <p>${feature.dek}</p>
+            ${byline(feature)}
+          </div>
+          ${rest.slice(0, 2).map(storyRow).join("")}
+        </section>`;
     }).join("");
 
-    // category tiles
+    // magazine covers strip
+    $("#covers-strip").innerHTML = GON_COVERS.map((cv) => {
+      const s = byId(cv.story);
+      if (!s) return "";
+      const c = catOf(s);
+      const h = hash(s.id) % 2;
+      const bg =
+        `radial-gradient(120% 75% at ${h ? "80%" : "20%"} 100%, color-mix(in srgb, ${c.color} 52%, transparent), transparent 72%),` +
+        `radial-gradient(90% 60% at ${h ? "10%" : "90%"} -10%, rgba(122, 63, 208, 0.45), transparent 70%),` +
+        `linear-gradient(170deg, #101F4A, #070F26 70%)`;
+      return `
+        <a class="cover-card" style="--cc-c:${c.color}; background:${bg}" href="article.html?id=${s.id}">
+          <span class="cover-masthead"><span class="logo-go">go</span><span class="logo-overseas">overseas</span></span>
+          <span class="cover-spacer"></span>
+          <span class="chip" style="--chip-c:${c.color}">${c.name}</span>
+          <span class="cover-title">${cv.coverTitle}</span>
+          <span class="cover-issue">${cv.issue}</span>
+        </a>`;
+    }).join("");
+
+    // explore all sections
     $("#cat-grid").innerHTML = Object.entries(GON_CATEGORIES).map(([key, c]) => `
       <a class="cat-tile" style="--tile-c:${c.color}" href="category.html?cat=${key}">
         ${GON_ICONS[c.icon]}
@@ -175,44 +309,67 @@
         <div class="cat-tag">${c.tagline}</div>
       </a>`).join("");
 
-    // latest stories
-    $("#latest-grid").innerHTML = rest.map(storyCard).join("");
+    // more headlines (desk sections not shown above)
+    const deskCats = ["go-tech", "go-business", "go-play", "go-discover"];
+    const headlines = GON_STORIES.filter((s) => deskCats.includes(s.cat));
+    $("#headlines-grid").innerHTML = headlines.map((s) => `
+      <div class="headline-item">
+        ${kicker(s.cat)}
+        <h4><a href="article.html?id=${s.id}">${s.title}</a></h4>
+        <span class="r-date">${s.date}</span>
+      </div>`).join("");
   }
+
+  /* ---------- category page ---------- */
 
   function renderCategory() {
     const key = new URLSearchParams(location.search).get("cat");
     const c = GON_CATEGORIES[key];
     if (!c) {
-      $("#cat-title").innerHTML = "Category not found";
+      $("#cat-title").innerHTML = "Section not found";
       $("#cat-stories").innerHTML =
         `<p class="empty-note">That section doesn't exist — head back to the <a href="index.html" style="color:var(--cyan)">front page</a>.</p>`;
       return;
     }
     document.title = `${c.name} — Go Overseas News`;
-    $("#cat-kicker").textContent = "Category";
+    const stories = GON_STORIES.filter((s) => s.cat === key);
+    $("#cat-kicker").textContent = "Section";
     $("#cat-kicker").style.color = c.color;
     $("#cat-title").innerHTML = `${c.name.replace("GO ", "GO&nbsp;")} <em>— ${c.tagline.replace(/\.$/, "")}</em>`;
-    const stories = GON_STORIES.filter((s) => s.cat === key);
+    $("#cat-count").textContent = `${stories.length} ${stories.length === 1 ? "story" : "stories"} · updated daily`;
     $("#cat-stories").innerHTML = stories.length
       ? stories.map(storyCard).join("")
       : `<p class="empty-note">Fresh ${c.name} stories are on the way. Check back soon.</p>`;
   }
 
+  /* ---------- article page ---------- */
+
   function renderArticle() {
     const id = new URLSearchParams(location.search).get("id");
-    const s = GON_STORIES.find((x) => x.id === id) || GON_STORIES[0];
+    const s = byId(id) || GON_STORIES[0];
     const c = catOf(s);
     document.title = `${s.title} — Go Overseas News`;
+
+    const pageUrl = encodeURIComponent(location.href);
+    const shareText = encodeURIComponent(`${s.title} — Go Overseas News`);
 
     $("#article-head").innerHTML = `
       ${chip(s.cat)}
       <h1>${s.title}</h1>
       <p class="dek">${s.dek}</p>
-      ${storyMeta(s)}`;
+      <div class="byline-row">
+        <span class="byline-avatar" aria-hidden="true">go</span>
+        ${byline(s, true)}
+        <div class="share-row">
+          <a href="https://x.com/intent/tweet?text=${shareText}&url=${pageUrl}" target="_blank" rel="noopener" aria-label="Share on X"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4l16 16M20 4L4 20"/></svg></a>
+          <a href="https://www.facebook.com/sharer/sharer.php?u=${pageUrl}" target="_blank" rel="noopener" aria-label="Share on Facebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 8h3V4.5h-3c-2.2 0-4 1.8-4 4V11H7v3.5h3V21h3.5v-6.5h3L17 11h-3.5V8.8c0-.5.2-.8.5-.8z"/></svg></a>
+          <a href="https://wa.me/?text=${shareText}%20${pageUrl}" target="_blank" rel="noopener" aria-label="Share on WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 00-7.8 13.5L3 21l4.7-1.2A9 9 0 1012 3z"/><path d="M9 8.5c0 4 2.5 6.5 6.5 6.5l1-2-2.2-1.1-1 1c-1.2-.5-1.9-1.2-2.4-2.4l1-1L10.8 7l-1.8 1.5z"/></svg></a>
+          <button type="button" id="copy-link" aria-label="Copy link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 14a4.5 4.5 0 006.4 0l3-3a4.5 4.5 0 00-6.4-6.4l-1.5 1.5"/><path d="M14 10a4.5 4.5 0 00-6.4 0l-3 3a4.5 4.5 0 006.4 6.4l1.5-1.5"/></svg></button>
+        </div>
+      </div>`;
 
     const banner = $("#article-banner");
-    banner.style.setProperty("--card-c", c.color);
-    banner.innerHTML = `<span class="dots"></span><span class="glyph">${GON_ICONS[c.icon]}</span>`;
+    banner.outerHTML = coverArt(s, "article-banner").replace('tabindex="-1"', "");
 
     $("#article-body").innerHTML =
       s.body.map((p) => `<p>${p}</p>`).join("") +
@@ -225,6 +382,26 @@
       .sort((a, b) => (b.cat === s.cat) - (a.cat === s.cat))
       .slice(0, 3);
     $("#related-grid").innerHTML = related.map(storyCard).join("");
+
+    // copy-link feedback
+    $("#copy-link").addEventListener("click", async (e) => {
+      try {
+        await navigator.clipboard.writeText(location.href);
+        e.currentTarget.style.borderColor = "var(--green)";
+        e.currentTarget.style.color = "var(--green)";
+      } catch { /* clipboard unavailable — ignore */ }
+    });
+
+    // reading progress bar
+    const bar = document.createElement("div");
+    bar.className = "progress-bar";
+    document.body.append(bar);
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.width = max > 0 ? `${(window.scrollY / max) * 100}%` : "0";
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
   }
 
   /* ---------- newsletter ---------- */

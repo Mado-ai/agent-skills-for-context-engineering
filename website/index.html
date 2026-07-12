@@ -12,33 +12,45 @@
 <body data-page="home">
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <div class="ticker" aria-label="Latest headlines">
-    <span class="ticker-label"><span class="dot"></span>GO NOW</span>
-    <div class="ticker-track" id="ticker-track"></div>
-  </div>
-
   <main id="main">
-    <section class="hero wrap" aria-label="Featured stories">
-      <div class="hero-grid">
-        <article class="hero-main" id="hero-main"></article>
-        <div class="hero-side" id="hero-side"></div>
+    <section class="front wrap" aria-label="Front page">
+      <div class="front-grid">
+        <article class="front-lead" id="front-lead"></article>
+        <div class="front-stack" id="front-stack"></div>
+        <aside class="front-rail" id="front-rail" aria-label="Trending and briefing"></aside>
       </div>
     </section>
 
-    <section class="section wrap" id="categories" aria-label="Category system">
+    <section class="section wrap" aria-label="Section fronts">
       <div class="section-head">
-        <h2>Choose your <em>direction</em></h2>
+        <h2>Around the world, by <em>direction</em></h2>
+        <a class="more" href="about.html">Why these sections →</a>
+      </div>
+      <div class="sections-grid" id="sections-grid"></div>
+    </section>
+
+    <section class="section wrap" aria-label="Cover stories">
+      <div class="section-head">
+        <h2>The <em>cover</em> stories</h2>
+        <a class="more" href="category.html?cat=go-now">All stories →</a>
+      </div>
+      <div class="covers-strip" id="covers-strip"></div>
+    </section>
+
+    <section class="section wrap" id="categories" aria-label="All sections">
+      <div class="section-head">
+        <h2>Explore every <em>section</em></h2>
         <a class="more" href="about.html">Why these ten →</a>
       </div>
       <div class="cat-grid" id="cat-grid"></div>
     </section>
 
-    <section class="section wrap" aria-label="Latest stories">
+    <section class="section wrap" aria-label="More headlines">
       <div class="section-head">
-        <h2>Latest from the <em>newsroom</em></h2>
-        <a class="more" href="category.html?cat=go-now">All stories →</a>
+        <h2>More <em>headlines</em></h2>
+        <a class="more" href="category.html?cat=go-discover">Keep exploring →</a>
       </div>
-      <div class="story-grid" id="latest-grid"></div>
+      <div class="headlines-grid" id="headlines-grid"></div>
     </section>
 
     <section class="promise" id="promise" aria-label="Our promise">
@@ -62,7 +74,7 @@
       </div>
     </section>
 
-    <section class="newsletter wrap" aria-label="Newsletter">
+    <section class="newsletter wrap" id="newsletter" aria-label="Newsletter">
       <div class="newsletter-box">
         <div class="script">Go beyond the scroll.</div>
         <h2>One email. The whole world.</h2>

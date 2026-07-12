@@ -8,9 +8,9 @@ A fully static site built on the official brand system: no build step, no framew
 
 | Page | Purpose |
 |---|---|
-| `index.html` | Front page — breaking ticker, featured stories, the 10-category system, latest stories, newsletter |
-| `category.html?cat=go-ai` | Category feed (works for all ten `go-*` category keys) |
-| `article.html?id=<story-id>` | Full article layout with related stories |
+| `index.html` | Front page — masthead + edition bar, breaking ticker, lead story, headline stack, Trending/Briefing rail, category section fronts, magazine cover strip, section tiles, more headlines, newsletter |
+| `category.html?cat=go-ai` | Section feed (works for all ten `go-*` category keys) |
+| `article.html?id=<story-id>` | Full article layout — byline + share row, reading progress bar, related stories |
 | `about.html` | Mission, values ("Our promise"), founder & contact |
 
 ## Structure
@@ -31,7 +31,9 @@ website/
 
 All content lives in `js/data.js`:
 
-- **Add a story**: append an object to `GON_STORIES` with `id`, `cat` (one of the ten category keys), `title`, `dek`, `author`, `date`, `read`, `tags`, and `body` (array of paragraphs). Set `featured: true` on exactly three stories to control the front-page hero.
+- **Add a story**: append an object to `GON_STORIES` with `id`, `cat` (one of the ten category keys), `title`, `dek`, `author`, `date`, `read`, `tags`, and `body` (array of paragraphs). The first story with `featured: true` becomes the front-page lead; the headline stack fills automatically from array order.
+- **Trending rail**: edit the `GON_TRENDING` id list (rank order).
+- **Cover strip**: edit `GON_COVERS` (story id, display title, issue line).
 - **Current stories are launch placeholders** — replace them with real editorial before going live.
 
 ## Brand system
