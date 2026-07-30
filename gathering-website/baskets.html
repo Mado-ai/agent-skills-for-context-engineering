@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Baskets &amp; Sharing Boxes — delivered for any occasion · Gathering</title>
+<meta name="description" content="Five Gathering baskets, from a brunch for four to a gathering for ten, dressed for any occasion and delivered in the drop window you choose. Because sharing is caring.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/gathering.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2324422f'/><text x='16' y='23' font-family='Georgia,serif' font-size='20' fill='%23c0a062' text-anchor='middle'>G</text></svg>">
+</head>
+<body data-page="baskets">
+<div data-chrome="header"></div>
+
+<main>
+  <section class="section section--tight" style="background:var(--cream-warm)">
+    <div class="wrap">
+      <div class="split" style="align-items:center">
+        <div>
+          <p class="eyebrow">Baskets &amp; sharing boxes</p>
+          <h1 class="d2" style="max-width:22ch">Five baskets. Dressed for whatever you are marking.</h1>
+          <p class="lede" style="margin-top:.9rem">
+            The five never change — that is deliberate. You already know what a Deluxe Sharing Basket
+            holds. What changes is the occasion it arrives dressed for, and the hour it lands: each drop
+            window is built from the buffet running in the kitchen at that time.
+          </p>
+          <div class="row" style="margin-top:1.5rem">
+            <a class="btn" href="#build">Build a basket</a>
+            <a class="btn btn--ghost" href="#lookbook">See the lookbook</a>
+          </div>
+        </div>
+        <div class="frame"><img src="assets/img/menu-baskets.jpg" alt="The Gathering basket menu — five standard baskets plus seasonal and occasion baskets"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ builder ============ -->
+  <section class="section" id="build">
+    <div class="wrap">
+      <div class="center" style="margin-bottom:2rem">
+        <p class="eyebrow">Step one</p>
+        <h2 class="d2">Choose the occasion and the hour</h2>
+        <p class="lede" style="margin-top:.7rem">Every basket below is rebuilt around these two choices before it is packed.</p>
+      </div>
+
+      <div class="card" style="margin-bottom:2rem">
+        <p class="lbl" style="margin-bottom:.6rem">Occasion dressing</p>
+        <div class="filters" data-occasions></div>
+
+        <hr class="divider" style="margin:1.4rem 0">
+
+        <p class="lbl" style="margin-bottom:.6rem">Delivery drop window</p>
+        <div class="grid g4" data-dayparts></div>
+
+        <hr class="divider" style="margin:1.4rem 0">
+
+        <div class="grid g2" style="gap:1rem">
+          <div class="field">
+            <label for="dlv-date">Delivery date</label>
+            <input class="input" type="date" id="dlv-date" data-delivery-date>
+            <p class="tiny muted" data-lead-note>Standard baskets need 24 hours. Occasion dressing needs 48.</p>
+          </div>
+          <div class="field">
+            <label for="dlv-addr">Delivery address</label>
+            <input class="input" id="dlv-addr" data-delivery-address placeholder="Street, unit, city">
+          </div>
+        </div>
+      </div>
+
+      <div class="center" style="margin-bottom:1.6rem">
+        <p class="eyebrow">Step two</p>
+        <h2 class="d3">The fixed five</h2>
+        <p class="muted" data-build-echo style="margin-top:.5rem"></p>
+      </div>
+
+      <div class="grid g-five" data-baskets></div>
+    </div>
+  </section>
+
+  <!-- ============ add-ons ============ -->
+  <section class="section section--sand">
+    <div class="wrap">
+      <p class="eyebrow eyebrow--moss">Step three</p>
+      <h2 class="d2">Popular add-ons</h2>
+      <p class="lede" style="margin-top:.6rem">Bottles from the counter, sweets from the dessert buffet, and the soft things that make it a picnic.</p>
+      <div class="swatch-grid" style="margin-top:1.6rem" data-addons></div>
+    </div>
+  </section>
+
+  <!-- ============ cart ============ -->
+  <section class="section" id="order">
+    <div class="wrap--narrow">
+      <p class="eyebrow center">Step four</p>
+      <h2 class="d2 center" style="margin-bottom:1.6rem">Your delivery</h2>
+      <div data-cart></div>
+    </div>
+  </section>
+
+  <!-- ============ occasions lookbook ============ -->
+  <section class="section section--warm" id="occasions">
+    <div class="wrap">
+      <p class="eyebrow">All year long</p>
+      <h2 class="d2">Occasion &amp; seasonal collection</h2>
+      <p class="lede" style="margin-top:.6rem">
+        Fourteen dressings across the calendar. Each one is one of the five baskets underneath —
+        same kitchen, same portions, different ribbon, plaque and seasonal sweets.
+      </p>
+      <div class="swatch-grid" style="margin-top:1.8rem" data-occasion-grid></div>
+    </div>
+  </section>
+
+  <!-- ============ lookbook ============ -->
+  <section class="section" id="lookbook">
+    <div class="wrap">
+      <p class="eyebrow center">The lookbook</p>
+      <h2 class="d2 center" style="margin-bottom:2rem">How they arrive</h2>
+      <div class="grid g2">
+        <figure class="card card--flush card--hover" style="margin:0">
+          <div class="card__media" style="aspect-ratio:4/3"><img src="assets/img/lookbook-occasion-baskets.jpg" alt="Six Gathering occasion baskets: Mother's Day brunch, Valentine's sweet, Halloween treat, taco fiesta, breakfast bliss and fruit"></div>
+          <figcaption class="card__body"><h3 class="d4">Occasion baskets</h3><p class="muted tiny">Ribbon, plaque, florals and a handwritten card — packed the morning of the drop.</p></figcaption>
+        </figure>
+        <figure class="card card--flush card--hover" style="margin:0">
+          <div class="card__media" style="aspect-ratio:4/3"><img src="assets/img/menu-sweet-gifts.jpg" alt="The Gathering sweet gift collection — chocolate bark, dipped biscuits, pretzels and strawberry boxes"></div>
+          <figcaption class="card__body"><h3 class="d4">Sweet gift boxes</h3><p class="muted tiny">Everything on the dessert buffet, boxed for the door. Sharing boxes ship the same day they are made.</p></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--forest">
+    <div class="wrap--narrow center">
+      <div class="rule" style="margin-bottom:1.4rem"><span>Because sharing is caring</span></div>
+      <h2 class="d2">Sending it instead of sitting down?</h2>
+      <p class="lede" style="margin-top:.9rem">Baskets go out seven days a week inside four drop windows. Members take 10% off, the Circle takes 18% and free local delivery.</p>
+      <div class="row" style="justify-content:center;margin-top:1.6rem">
+        <a class="btn btn--light" href="#build">Build a basket</a>
+        <a class="btn btn--outline-light" href="membership.html">See member pricing</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div data-chrome="footer"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/booking.js"></script>
+<script src="assets/js/pages.js"></script>
+</body>
+</html>

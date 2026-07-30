@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gathering — Five buffets a day, booked by the seat</title>
+<meta name="description" content="Gathering is a coffee house, buffet room and basket kitchen. Five ticketed self-serve buffets across a single day — breakfast, the ranch, healthy, dessert and dinner — each with a hard seat count. Members book first.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/gathering.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2324422f'/><text x='16' y='23' font-family='Georgia,serif' font-size='20' fill='%23c0a062' text-anchor='middle'>G</text></svg>">
+</head>
+<body data-page="index">
+<div data-chrome="header"></div>
+
+<main>
+  <!-- ================= HERO ================= -->
+  <section class="hero">
+    <div class="hero__media">
+      <img src="assets/img/spread-sandwiches.jpeg" alt="An overhead table of sandwiches, dips and chips laid out to share" fetchpriority="high">
+    </div>
+    <div class="wrap hero__inner">
+      <p class="eyebrow">Coffee house · Buffet room · Baskets</p>
+      <h1 class="d1">Five buffets.<br>One day.<br><em>Limited seats.</em></h1>
+      <p class="lede" style="margin-top:1.4rem">
+        From 7:30 in the morning to 8:30 at night, the room changes five times — breakfast, the ranch,
+        healthy, dessert, dinner. Each service is a ticketed event with a hard seat count, so the table
+        is never picked over and the room is never a crowd. Members book first.
+      </p>
+      <div class="hero__cta">
+        <a class="btn btn--light" href="buffets.html">See today’s services <span data-hero-seats class="muted"></span></a>
+        <a class="btn btn--outline-light" href="membership.html">Membership &amp; priority</a>
+      </div>
+      <div class="hero__facts">
+        <div class="fact"><div class="fact__n">5</div><div class="fact__l">Services a day</div></div>
+        <div class="fact"><div class="fact__n">13h</div><div class="fact__l">7:30am – 8:30pm</div></div>
+        <div class="fact"><div class="fact__n">32–48</div><div class="fact__l">Seats per service</div></div>
+        <div class="fact"><div class="fact__n">5</div><div class="fact__l">Baskets, every occasion</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= NOW SERVING ================= -->
+  <div class="wrap"><div class="now" data-now></div></div>
+
+  <!-- ================= TODAY ================= -->
+  <section class="section" id="today">
+    <div class="wrap">
+      <div class="row row--between" style="align-items:flex-end;margin-bottom:2rem;gap:1.5rem">
+        <div>
+          <p class="eyebrow">Today at Gathering</p>
+          <h2 class="d2">The day, service by service</h2>
+          <p class="lede" style="margin-top:.7rem">
+            Every service is booked separately, because every service has its own room count.
+            Breakfast then dessert is the most-booked pair of the day.
+          </p>
+        </div>
+        <a class="link" href="buffets.html">Pick another date &rarr;</a>
+      </div>
+      <div class="day" data-today-list></div>
+    </div>
+  </section>
+
+  <!-- ================= WHY BOOKING ================= -->
+  <section class="section section--forest">
+    <div class="wrap">
+      <div class="split">
+        <div>
+          <p class="eyebrow">The seat count is the product</p>
+          <h2 class="d2">A buffet gets worse the moment it gets crowded.</h2>
+          <p class="lede" style="margin-top:1rem">
+            So we cap it. Between 32 and 48 people per service, ticketed, never overbooked.
+            That single decision changes everything downstream: the food is replaced on a rhythm
+            instead of a rush, there is no queue at the carving board, and you can hear the
+            person across from you.
+          </p>
+          <div class="steps" style="margin-top:2.2rem">
+            <div class="step">
+              <div class="step__n"></div>
+              <div>
+                <h3 class="d4">Pick a day and a service</h3>
+                <p class="muted">Fourteen days of the calendar are visible. Each service shows exactly how many seats are left.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step__n"></div>
+              <div>
+                <h3 class="d4">Book, or take a place on the list</h3>
+                <p class="muted">If the room is gone, the waiting list is real: released seats are offered down it, Circle first.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step__n"></div>
+              <div>
+                <h3 class="d4">Arrive inside your window</h3>
+                <p class="muted">Your seat is held for twenty minutes past the service start. After that it goes to the list.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="frame">
+          <img src="assets/img/spread-sliders.jpeg" alt="Focaccia sliders with turkey, avocado and herb cream on a serving board">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MEMBERSHIP ================= -->
+  <section class="section" id="membership">
+    <div class="wrap">
+      <div class="center" style="margin-bottom:2.4rem">
+        <p class="eyebrow">Priority, not exclusivity</p>
+        <h2 class="d2">Members get to the seats first</h2>
+        <p class="lede" style="margin-top:.8rem">
+          Anyone can book. But a share of every service — between 35% and 50% of the room — is held
+          back for members until 24 hours before the doors open. That is the whole membership: earlier
+          access and more visible seats.
+        </p>
+      </div>
+      <div class="tiers" data-tiers></div>
+      <p class="tiny center muted" style="margin-top:1.6rem">
+        Monthly, cancel any time. Membership also carries basket pricing and free changes.
+        <a class="link" style="border:0" href="membership.html">Compare in full &rarr;</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ================= BASKETS ================= -->
+  <section class="section section--sand" id="baskets">
+    <div class="wrap">
+      <div class="row row--between" style="align-items:flex-end;margin-bottom:2rem;gap:1.5rem">
+        <div>
+          <p class="eyebrow eyebrow--moss">Because sharing is caring</p>
+          <h2 class="d2">Five baskets. Every occasion, all year.</h2>
+          <p class="lede" style="margin-top:.7rem">
+            The line-up never changes — five sizes, from a brunch for four to a gathering for ten.
+            What changes is the dressing: the occasion, the season, and the time of day you want it
+            delivered. Each drop window is built from the buffet running at that hour.
+          </p>
+        </div>
+        <a class="link" href="baskets.html">Order a basket &rarr;</a>
+      </div>
+      <div class="grid g-five" data-basket-strip></div>
+
+      <div class="grid g4" style="margin-top:2.4rem" data-daypart-strip></div>
+    </div>
+  </section>
+
+  <!-- ================= COFFEE HOUSE ================= -->
+  <section class="section">
+    <div class="wrap">
+      <div class="split split--reverse">
+        <div class="frame">
+          <img src="assets/img/lookbook-occasion-baskets.jpg" alt="Occasion baskets from the Gathering lookbook — Mother's Day, Valentine's, Halloween, Taco Fiesta, Breakfast Bliss and Fruit">
+        </div>
+        <div>
+          <p class="eyebrow">No booking, no seat, no fuss</p>
+          <h2 class="d2">The coffee house is always walk-in</h2>
+          <p class="lede" style="margin-top:1rem">
+            Booking is for the buffet room. The counter is not. From 7:00 to 20:00 you can walk in
+            for cardamom lattes, an 18-hour cold brew, pastry from the morning bake, and fast plates
+            pulled straight off whichever buffet is running behind the pass.
+          </p>
+          <ul class="perks" style="margin-top:1.6rem">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20 6 9 17l-5-5"/></svg><span>Counter plates ready in the case from 7:00 — ten minutes, in or out</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20 6 9 17l-5-5"/></svg><span>Filter coffee refilled free until 10:00</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20 6 9 17l-5-5"/></svg><span>Whatever the buffet is cooking, a small plate version is at the counter</span></li>
+          </ul>
+          <div class="row" style="margin-top:1.8rem">
+            <a class="btn btn--ghost" href="coffee-house.html">See the counter menu</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CLOSER ================= -->
+  <section class="section section--warm">
+    <div class="wrap--narrow center">
+      <div class="rule" style="margin-bottom:1.6rem"><span>Because sharing is caring</span></div>
+      <h2 class="d2">Book a seat at the next one</h2>
+      <p class="lede" style="margin-top:1rem">
+        There are only so many seats in a room, and that is on purpose. Choose a service,
+        bring someone, and let us carry the table.
+      </p>
+      <div class="row" style="justify-content:center;margin-top:1.8rem">
+        <a class="btn" href="buffets.html">Book a buffet</a>
+        <a class="btn btn--ghost" href="baskets.html">Send a basket</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div data-chrome="footer"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/booking.js"></script>
+<script src="assets/js/pages.js"></script>
+</body>
+</html>

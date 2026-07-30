@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Gathering — bookings, waiting lists, deliveries</title>
+<meta name="description" content="Your Gathering account: seated buffet bookings, waiting-list positions, basket deliveries and membership tier.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/gathering.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2324422f'/><text x='16' y='23' font-family='Georgia,serif' font-size='20' fill='%23c0a062' text-anchor='middle'>G</text></svg>">
+</head>
+<body data-page="account">
+<div data-chrome="header"></div>
+
+<main>
+  <section class="section section--tight section--forest">
+    <div class="wrap">
+      <p class="eyebrow">My Gathering</p>
+      <h1 class="d2" data-greeting>Your table</h1>
+      <div class="row" style="margin-top:1rem;gap:.5rem" data-account-badges></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr));gap:2rem;align-items:start">
+
+        <div class="stack" style="gap:2.2rem">
+          <div>
+            <div class="row row--between" style="margin-bottom:1rem">
+              <h2 class="d3">Seated bookings</h2>
+              <a class="link" href="buffets.html">Book another &rarr;</a>
+            </div>
+            <div class="grid" style="gap:.7rem" data-bookings></div>
+          </div>
+
+          <div>
+            <h2 class="d3" style="margin-bottom:1rem">Waiting lists</h2>
+            <div class="grid" style="gap:.7rem" data-waitlist></div>
+          </div>
+
+          <div>
+            <h2 class="d3" style="margin-bottom:1rem">Basket deliveries</h2>
+            <div class="grid" style="gap:.7rem" data-orders></div>
+          </div>
+        </div>
+
+        <aside class="stack" style="gap:1.2rem">
+          <div class="card">
+            <p class="eyebrow">Membership</p>
+            <div data-tier-card></div>
+          </div>
+          <div class="card" style="background:var(--sand);border-color:var(--gold-line)">
+            <h3 class="d4">Switch tier</h3>
+            <p class="tiny muted" style="margin:.4rem 0 .9rem">This is a live demo of the booking engine — switching tier recalculates every seat count on the site.</p>
+            <div class="grid" style="gap:.5rem" data-tier-switch></div>
+          </div>
+          <div class="card">
+            <h3 class="d4">Details</h3>
+            <form class="stack" style="gap:.8rem;margin-top:.8rem" data-profile>
+              <div class="field"><label for="ac-name">Name</label><input class="input" id="ac-name" name="name" autocomplete="name"></div>
+              <div class="field"><label for="ac-email">Email</label><input class="input" id="ac-email" name="email" type="email" autocomplete="email"></div>
+              <button class="btn btn--ghost btn--sm" type="submit">Save details</button>
+            </form>
+          </div>
+          <button class="btn btn--ghost btn--sm" data-reset>Clear all demo data</button>
+        </aside>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div data-chrome="footer"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/booking.js"></script>
+<script src="assets/js/pages.js"></script>
+</body>
+</html>

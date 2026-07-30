@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Membership — book before the room fills · Gathering</title>
+<meta name="description" content="Gathering membership is booking priority: members book 7 days ahead, the Circle books 14, and a third to a half of every buffet is held for members until 24 hours before doors.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/gathering.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2324422f'/><text x='16' y='23' font-family='Georgia,serif' font-size='20' fill='%23c0a062' text-anchor='middle'>G</text></svg>">
+</head>
+<body data-page="membership">
+<div data-chrome="header"></div>
+
+<main>
+  <section class="section section--forest">
+    <div class="wrap">
+      <div class="split">
+        <div>
+          <p class="eyebrow">Membership</p>
+          <h1 class="d2" style="max-width:26ch">The seats run out. Membership decides who sees them first.</h1>
+          <p class="lede" style="margin-top:1rem">
+            There is nothing behind a velvet rope here — a guest can book any service. But there are
+            only 32 to 48 seats per service, and a share of every room is held back for members until
+            24 hours before doors. Earlier access, more visible seats, better price. That is the deal.
+          </p>
+          <div class="row" style="margin-top:1.8rem">
+            <a class="btn btn--light" href="#tiers">Compare the tiers</a>
+            <a class="btn btn--outline-light" href="buffets.html">See what is open now</a>
+          </div>
+        </div>
+        <div class="grid" style="gap:.9rem">
+          <div class="card" style="background:rgba(255,253,248,.07);border-color:rgba(192,160,98,.35);color:var(--cream-warm)">
+            <p class="eyebrow" style="margin-bottom:.5rem">Booking window</p>
+            <div class="row row--between"><span>Guest</span><b class="num">2 days ahead</b></div>
+            <div class="row row--between" style="margin-top:.4rem"><span>Member</span><b class="num" style="color:var(--gold)">7 days ahead</b></div>
+            <div class="row row--between" style="margin-top:.4rem"><span>Circle</span><b class="num" style="color:var(--gold)">14 days ahead</b></div>
+          </div>
+          <div class="card" style="background:rgba(255,253,248,.07);border-color:rgba(192,160,98,.35);color:var(--cream-warm)">
+            <p class="eyebrow" style="margin-bottom:.5rem">Seats held for members</p>
+            <div data-hold-summary class="grid" style="gap:.4rem;font-size:.92rem"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ tiers ============ -->
+  <section class="section" id="tiers">
+    <div class="wrap">
+      <div class="center" style="margin-bottom:2.4rem">
+        <p class="eyebrow">Three ways in</p>
+        <h2 class="d2">Pick your place in the queue</h2>
+        <p class="lede" style="margin-top:.7rem">Switching tier below updates the whole site immediately — every seat count, price and booking window you see is recalculated for that tier.</p>
+      </div>
+      <div class="tiers" data-tiers-full></div>
+    </div>
+  </section>
+
+  <!-- ============ comparison ============ -->
+  <section class="section section--sand">
+    <div class="wrap">
+      <p class="eyebrow eyebrow--moss">Line by line</p>
+      <h2 class="d2" style="margin-bottom:1.6rem">What changes with each tier</h2>
+      <div class="card scroll-x">
+        <table class="tbl" data-compare></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ waitlist mechanics ============ -->
+  <section class="section section--forest">
+    <div class="wrap">
+      <div class="split">
+        <div>
+          <p class="eyebrow">When a room is gone</p>
+          <h2 class="d2">The waiting list is not a formality</h2>
+          <p class="lede" style="margin-top:1rem">
+            Roughly one seat in nine is released before service — plans change. Every released seat
+            is offered down the list in order, and the claim window is two hours. On a Friday dinner
+            that list moves three or four times.
+          </p>
+          <div class="steps" style="margin-top:2rem">
+            <div class="step"><div class="step__n"></div><div><h3 class="d4">Circle first</h3><p class="muted">Guaranteed-seat holders are offered the release immediately.</p></div></div>
+            <div class="step"><div class="step__n"></div><div><h3 class="d4">Members next</h3><p class="muted">Ranked by how long you have held the list place.</p></div></div>
+            <div class="step"><div class="step__n"></div><div><h3 class="d4">Guests after</h3><p class="muted">Still real, still moves — you sit behind the members on the same list.</p></div></div>
+          </div>
+        </div>
+        <div class="card" style="background:rgba(255,253,248,.07);border-color:rgba(192,160,98,.35);color:var(--cream-warm)">
+          <p class="eyebrow">Your position, right now</p>
+          <div data-live-wait class="grid" style="gap:.7rem;margin-top:.6rem"></div>
+          <p class="tiny" style="margin-top:1rem;color:rgba(251,246,236,.6)">Modelled from live seat counts across today and tomorrow.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="section">
+    <div class="wrap--narrow">
+      <p class="eyebrow center">Membership questions</p>
+      <h2 class="d2 center" style="margin-bottom:1.6rem">The fine print, in plain words</h2>
+      <div data-faq></div>
+      <div class="center" style="margin-top:2.4rem">
+        <a class="btn" href="#tiers">Choose a tier</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div data-chrome="footer"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/booking.js"></script>
+<script src="assets/js/pages.js"></script>
+</body>
+</html>

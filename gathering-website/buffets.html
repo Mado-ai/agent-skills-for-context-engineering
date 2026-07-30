@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Day — five buffet services · Gathering</title>
+<meta name="description" content="Book a seat at one of Gathering's five daily buffets: breakfast, the ranch, healthy, dessert and dinner. Every service is capped, ticketed and never overbooked. Members book seven days ahead.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/gathering.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2324422f'/><text x='16' y='23' font-family='Georgia,serif' font-size='20' fill='%23c0a062' text-anchor='middle'>G</text></svg>">
+</head>
+<body data-page="buffets">
+<div data-chrome="header"></div>
+
+<main>
+  <section class="section section--tight section--forest">
+    <div class="wrap">
+      <p class="eyebrow">Book by the seat</p>
+      <h1 class="d2" style="max-width:24ch">The day runs in five services</h1>
+      <p class="lede" style="margin-top:.9rem;max-width:64ch">
+        Breakfast at 7:30. The Ranch at 11. Healthy at 2. Dessert at 4:30. Dinner at 6:30.
+        Thirteen hours, five different rooms, and a seat count we never break.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ date rail ============ -->
+  <section class="section section--tight" style="background:var(--cream-warm);border-bottom:1px solid var(--gold-line);position:sticky;top:var(--nav-h);z-index:40">
+    <div class="wrap">
+      <div class="row row--between" style="margin-bottom:.6rem">
+        <p class="eyebrow" style="margin:0">Choose a date</p>
+        <p class="tiny muted" style="margin:0" data-window-note></p>
+      </div>
+      <div class="dates" data-dates role="group" aria-label="Choose a date"></div>
+    </div>
+  </section>
+
+  <!-- ============ services ============ -->
+  <section class="section">
+    <div class="wrap">
+      <div class="row row--between" style="align-items:flex-end;margin-bottom:1.6rem;gap:1rem">
+        <div>
+          <h2 class="d3" data-day-title>Today</h2>
+          <p class="script" data-day-theme></p>
+        </div>
+        <div class="row" style="gap:.5rem">
+          <span class="badge badge--outline" data-day-open>—</span>
+          <span class="badge badge--outline" data-day-tier>—</span>
+        </div>
+      </div>
+
+      <div class="day" data-service-list></div>
+
+      <div class="card" style="margin-top:2rem;background:var(--sand);border-color:var(--gold-line)">
+        <div class="split" style="gap:1.5rem;align-items:center">
+          <div>
+            <h3 class="d4">How the seat hold works</h3>
+            <p class="muted" style="font-size:.92rem;margin-top:.4rem">
+              Each service reserves a share of the room for members — 35% at breakfast, 50% at dinner —
+              and holds it until 24 hours before the doors open. Guests see the rest. When the hold
+              releases, whatever is left goes public. That is why a service can read
+              <em>“member seats only”</em> to one person and <em>“12 seats open”</em> to another.
+            </p>
+          </div>
+          <div class="scroll-x">
+            <table class="tbl">
+              <thead><tr><th>Service</th><th>Room</th><th>Held for members</th><th>Public</th></tr></thead>
+              <tbody data-hold-table></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ week ahead ============ -->
+  <section class="section section--warm">
+    <div class="wrap">
+      <p class="eyebrow">The fortnight</p>
+      <h2 class="d2">Where the pressure is</h2>
+      <p class="lede" style="margin-top:.7rem">
+        Seats taken across the next fourteen days. Dinner on a Friday is the hardest room in the
+        building; Tuesday breakfast is the easiest seat in the city.
+      </p>
+      <div class="scroll-x card" style="margin-top:1.6rem;padding:1rem">
+        <table class="tbl" data-heat-table></table>
+      </div>
+      <p class="tiny muted" style="margin-top:.8rem">
+        <b style="color:var(--ok)">●</b> open ·
+        <b style="color:var(--warn)">◐</b> filling ·
+        <b style="color:var(--stop)">◕</b> last seats ·
+        <b style="color:var(--stop)">✕</b> full ·
+        <b>○</b> outside your booking window — tap any cell to jump to that service.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="section">
+    <div class="wrap--narrow">
+      <p class="eyebrow center">Before you book</p>
+      <h2 class="d2 center" style="margin-bottom:1.6rem">Questions we get at the door</h2>
+      <div data-faq></div>
+    </div>
+  </section>
+</main>
+
+<div data-chrome="footer"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/booking.js"></script>
+<script src="assets/js/pages.js"></script>
+</body>
+</html>

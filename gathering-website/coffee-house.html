@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Coffee House — walk in, no booking · Gathering</title>
+<meta name="description" content="Gathering's coffee house is walk-in from 7:00 to 20:00 — espresso, 18-hour cold brew, morning pastry and fast counter plates pulled from whichever buffet is running.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/gathering.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2324422f'/><text x='16' y='23' font-family='Georgia,serif' font-size='20' fill='%23c0a062' text-anchor='middle'>G</text></svg>">
+</head>
+<body data-page="coffee-house">
+<div data-chrome="header"></div>
+
+<main>
+  <section class="hero" style="--nav-h:0">
+    <div class="hero__media"><img src="assets/img/spread-sliders.jpeg" alt="Focaccia sliders and bread on a marble counter"></div>
+    <div class="wrap hero__inner" style="padding-block:clamp(3rem,7vw,5.5rem)">
+      <p class="eyebrow">The counter</p>
+      <h1 class="d1" style="font-size:clamp(2.4rem,6vw,4.4rem)">Walk in.<br><em>No booking, ever.</em></h1>
+      <p class="lede" style="margin-top:1.2rem;max-width:52ch">
+        Booking is for the buffet room. The coffee house is the opposite of that: open 7:00 to 20:00,
+        no seat to hold, no list to join. Order at the counter and go.
+      </p>
+      <div class="hero__facts">
+        <div class="fact"><div class="fact__n">7–20</div><div class="fact__l">Open daily</div></div>
+        <div class="fact"><div class="fact__n">10 min</div><div class="fact__l">Counter plates</div></div>
+        <div class="fact"><div class="fact__n">18h</div><div class="fact__l">Cold brew steep</div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap"><div class="now" data-now></div></div>
+
+  <!-- ============ counter menu ============ -->
+  <section class="section">
+    <div class="wrap">
+      <div class="center" style="margin-bottom:2.4rem">
+        <p class="eyebrow">The counter menu</p>
+        <h2 class="d2">Fast orders, all day</h2>
+        <p class="lede" style="margin-top:.7rem">
+          Prices are counter prices — no service charge, no seat fee. Members get their buffet
+          pricing here too, on any plate that came off a buffet pass.
+        </p>
+      </div>
+      <div class="grid g3" style="align-items:start" data-counter></div>
+    </div>
+  </section>
+
+  <!-- ============ pass-through ============ -->
+  <section class="section section--sand">
+    <div class="wrap">
+      <p class="eyebrow eyebrow--moss">Off the pass</p>
+      <h2 class="d2">Whatever the buffet is cooking, there is a counter version</h2>
+      <p class="lede" style="margin-top:.7rem">
+        The kitchen is running a buffet for most of the day. A small-plate version of it comes
+        through the pass to the counter for anyone who did not book a seat.
+      </p>
+      <div class="day" style="margin-top:1.8rem" data-pass-list></div>
+      <p class="tiny muted" style="margin-top:1rem">
+        Counter portions are single-serve. For the full table, the buffet needs a seat —
+        <a class="link" style="border:0" href="buffets.html">check what is open &rarr;</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ visit ============ -->
+  <section class="section">
+    <div class="wrap">
+      <div class="split">
+        <div>
+          <p class="eyebrow">Find us</p>
+          <h2 class="d2">Come by</h2>
+          <div class="stack" style="margin-top:1.2rem">
+            <p class="d4" data-addr></p>
+            <p class="muted">Counter: <b data-hours></b> · Buffet services: 7:30am – 8:30pm, five sittings</p>
+            <p class="muted">Baskets go out in four drop windows, seven days a week.</p>
+          </div>
+          <div class="row" style="margin-top:1.6rem">
+            <a class="btn btn--ghost" data-tel href="#">Call the shop</a>
+            <a class="btn btn--ghost" href="baskets.html">Order a basket instead</a>
+          </div>
+        </div>
+        <div class="card" style="background:var(--forest);color:var(--cream-warm);border-color:var(--forest)">
+          <p class="eyebrow">Today’s rhythm</p>
+          <div class="grid" style="gap:.65rem;margin-top:.8rem" data-rhythm></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div data-chrome="footer"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/booking.js"></script>
+<script src="assets/js/pages.js"></script>
+</body>
+</html>
