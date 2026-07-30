@@ -144,7 +144,7 @@
           <div class="swatch__glyph">${d.glyph}</div>
           <div class="swatch__name">${d.name}</div>
           <div class="swatch__note">${d.window}</div>
-          <div class="swatch__note" style="margin-top:.3rem;color:var(--gold)">${d.note}</div>
+          <div class="swatch__note" style="margin-top:.3rem;color:var(--gold-text)">${d.note}</div>
         </div>`
         )
         .join('');
@@ -201,7 +201,7 @@
     const tier = window.G.tierOf(window.G.state.tier);
     const wn = $('[data-window-note]');
     if (wn)
-      wn.innerHTML = `Booking as <b>${tier.name}</b> — ${tier.window} day window. <a href="membership.html" style="color:var(--gold)">Change tier</a>`;
+      wn.innerHTML = `Booking as <b>${tier.name}</b> — ${tier.window} day window. <a href="membership.html" style="color:var(--gold-text)">Change tier</a>`;
 
     const title = $('[data-day-title]');
     if (title) title.textContent = F().rel(selectedDate);
@@ -210,13 +210,24 @@
       theme.textContent = `Dinner tonight is ${D.dinnerThemes[F().fromISO(selectedDate).getDay()]}`;
 
     const avails = D.services.map((s) => window.G.availability(selectedDate, s.id));
-    const openTotal = avails.reduce((n, a) => n + a.seatsLeftForTier, 0);
+    /* Seats you could actually take right now — a seat behind a closed
+       booking window is not open to you, however many are left in the room. */
+    const bookable = avails.reduce((n, a) => n + (a.windowOpen && a.phase !== 'past' ? a.seatsLeftForTier : 0), 0);
+    const dayLocked = avails.every((a) => !a.windowOpen);
     const heldTotal = avails.reduce((n, a) => n + (a.tier.holdAccess ? 0 : a.holdSeats), 0);
+    const roomTotal = avails.reduce((n, a) => n + a.seatsLeftTotal, 0);
+
     const dayOpen = $('[data-day-open]');
-    if (dayOpen) dayOpen.textContent = `${openTotal} seats open to you`;
+    if (dayOpen)
+      dayOpen.textContent = dayLocked
+        ? `Your window opens ${F().rel(avails[0].opensOn)}`
+        : `${bookable} seat${bookable === 1 ? '' : 's'} open to you`;
+
     const dayTier = $('[data-day-tier]');
     if (dayTier)
-      dayTier.textContent = heldTotal
+      dayTier.textContent = dayLocked
+        ? `${roomTotal} seats still unsold`
+        : heldTotal
         ? `${heldTotal} more held for members`
         : 'Full room visible to you';
 
@@ -290,7 +301,7 @@
       hold.innerHTML = D.services
         .map(
           (s) =>
-            `<div class="row row--between"><span>${s.name.replace('The ', '')}</span><b class="num" style="color:var(--gold)">${Math.floor(
+            `<div class="row row--between"><span>${s.name.replace('The ', '')}</span><b class="num" style="color:var(--gold-text)">${Math.floor(
               s.capacity * s.memberHold
             )} of ${s.capacity}</b></div>`
         )
@@ -398,7 +409,7 @@
             <div class="swatch__glyph">${d.glyph}</div>
             <div class="swatch__name">${d.name}</div>
             <div class="swatch__note">${d.window}</div>
-            <div class="swatch__note" style="color:var(--gold);margin-top:.3rem">built from ${svc}</div>
+            <div class="swatch__note" style="color:var(--gold-text);margin-top:.3rem">built from ${svc}</div>
           </button>`;
         })
         .join('');
@@ -438,7 +449,7 @@
             <p class="tiny muted">Dressed as: ${occObj.glyph} ${occObj.name} · ${dpObj.name}</p>
             ${
               discount
-                ? `<p class="tiny" style="color:var(--gold)">Your price ${F().money(
+                ? `<p class="tiny" style="color:var(--gold-text)">Your price ${F().money(
                     +(b.price * (1 - discount)).toFixed(2)
                   )} after ${Math.round(discount * 100)}% member discount</p>`
                 : ''
@@ -475,7 +486,7 @@
           <div class="swatch__glyph">${a.glyph}</div>
           <div class="swatch__name">${a.name}</div>
           <div class="swatch__note">${F().money(a.price)}</div>
-          <div class="swatch__note" style="color:var(--gold);margin-top:.25rem">Add +</div>
+          <div class="swatch__note" style="color:var(--gold-text);margin-top:.25rem">Add +</div>
         </button>`
         )
         .join('');
@@ -497,7 +508,7 @@
           <div class="swatch__glyph" style="color:var(--clay)">${o.glyph}</div>
           <div class="swatch__name">${o.name}</div>
           <div class="swatch__note">${o.note}</div>
-          <div class="swatch__note" style="margin-top:.3rem;color:var(--gold);text-transform:capitalize">${o.season === 'all' ? 'all year' : o.season}</div>
+          <div class="swatch__note" style="margin-top:.3rem;color:var(--gold-text);text-transform:capitalize">${o.season === 'all' ? 'all year' : o.season}</div>
         </button>`
         )
         .join('');
@@ -590,7 +601,7 @@
           <div class="summary-row"><span>Address</span><span><b>${build.address || 'Add an address above'}</b></span></div>
         </div>
 
-        ${!t.discount ? `<p class="tiny center" style="margin-top:.9rem"><a href="membership.html" style="color:var(--gold)">Members save 10% on this order — the Circle saves 18% and pays no delivery &rarr;</a></p>` : ''}
+        ${!t.discount ? `<p class="tiny center" style="margin-top:.9rem"><a href="membership.html" style="color:var(--gold-text)">Members save 10% on this order — the Circle saves 18% and pays no delivery &rarr;</a></p>` : ''}
 
         <div class="row" style="margin-top:1.2rem;gap:.6rem">
           <button class="btn" data-checkout>Confirm delivery</button>
@@ -715,7 +726,7 @@
           const a = window.G.availability(today, s.id);
           return `<div class="row row--between" style="font-size:.9rem;opacity:${a.phase === 'past' ? '.5' : '1'}">
             <span>${F().time(s.start)} · ${s.name.replace('The ', '')}</span>
-            <b style="color:var(--gold)">${a.phase === 'past' ? 'done' : a.phase === 'live' ? 'now' : a.seatsLeftTotal + ' seats'}</b>
+            <b style="color:var(--gold-text)">${a.phase === 'past' ? 'done' : a.phase === 'live' ? 'now' : a.seatsLeftTotal + ' seats'}</b>
           </div>`;
         })
         .join('');
@@ -756,7 +767,7 @@
                   <div class="tiny muted">${F().rel(b.dateISO)} · ${F().range(svc)} · ${b.party} guest${b.party === 1 ? '' : 's'} · ${F().money(
                 b.priceEach * b.party
               )} due at the table</div>
-                  <div class="tiny" style="color:var(--gold)">Ref ${b.id}${b.notes ? ' · ' + b.notes : ''}</div>
+                  <div class="tiny" style="color:var(--gold-text)">Ref ${b.id}${b.notes ? ' · ' + b.notes : ''}</div>
                 </div>
                 <button class="btn btn--ghost btn--sm" data-cancel="${b.id}">Release seats</button>
               </div>`;
@@ -821,7 +832,7 @@
                 <div>
                   <b style="font-family:var(--font-display);font-size:1.2rem;color:var(--forest)">${o.items.length} item${o.items.length === 1 ? '' : 's'} · ${F().money(o.total)}</b>
                   <div class="tiny muted">${o.items.map((i) => `${i.qty}× ${i.name}`).join(', ')}</div>
-                  <div class="tiny" style="color:var(--gold)">${dp ? dp.name + ' · ' + dp.window : ''} · ${o.address || 'address pending'} · ${o.id}</div>
+                  <div class="tiny" style="color:var(--gold-text)">${dp ? dp.name + ' · ' + dp.window : ''} · ${o.address || 'address pending'} · ${o.id}</div>
                 </div>
                 <span class="badge badge--live">Scheduled</span>
               </div>`;
@@ -836,7 +847,7 @@
         <h3 class="d3" style="margin-top:.3rem">${tier.name}</h3>
         <div class="tier__price" style="font-size:1.9rem;margin:.3rem 0 .6rem">${tier.priceLabel}<small>${tier.price ? '/ month' : 'always'}</small></div>
         <p class="tiny muted">${tier.note}</p>
-        ${s.joinedAt ? `<p class="tiny" style="color:var(--gold);margin-top:.5rem">Member since ${F().date(s.joinedAt.slice(0, 10), { month: 'long', day: 'numeric', year: 'numeric' })}</p>` : ''}
+        ${s.joinedAt ? `<p class="tiny" style="color:var(--gold-text);margin-top:.5rem">Member since ${F().date(s.joinedAt.slice(0, 10), { month: 'long', day: 'numeric', year: 'numeric' })}</p>` : ''}
         <ul class="perks" style="margin-top:1rem">${tier.perks
           .slice(0, 4)
           .map((p) => `<li>${window.UI.ICONS.check}<span>${p}</span></li>`)
@@ -904,7 +915,7 @@
             (s) =>
               `<tr><td><b>${s.name.replace('The ', '')}</b></td><td>${F().range(s)}</td><td class="num">${s.capacity}</td><td class="num">${F().money(
                 s.price
-              )}</td><td class="num" style="color:var(--gold)">${F().money(s.memberPrice)}</td></tr>`
+              )}</td><td class="num" style="color:var(--gold-text)">${F().money(s.memberPrice)}</td></tr>`
           )
           .join('')}</tbody>`;
     const v = $('[data-visit]');

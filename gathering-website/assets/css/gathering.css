@@ -10,6 +10,11 @@
   --forest-soft: #3a5c44;
   --moss: #4c6b52;
   --gold: #c0a062;
+  /* Gold as *text* fails contrast on cream (2.2:1), so text uses a darker
+     ink by default and dark surfaces below restore the bright gold. */
+  --gold-text: #745a22;
+  /* Clay is a display colour; small clay text needs this darker ink. */
+  --clay-text: #8d5138;
   --gold-soft: #ddc9a0;
   --gold-line: #e3d3ae;
   --cream: #fbf6ec;
@@ -75,7 +80,7 @@ p:last-child { margin-bottom: 0; }
 .script { font-family: var(--font-display); font-style: italic; font-weight: 400; color: var(--clay); }
 .eyebrow {
   font-size: .69rem; font-weight: 500; letter-spacing: .3em; text-transform: uppercase;
-  color: var(--gold); margin: 0 0 .9rem;
+  color: var(--gold-text); margin: 0 0 .9rem;
 }
 .eyebrow--moss { color: var(--moss); }
 .lede { font-size: clamp(1.02rem, .5vw + .9rem, 1.2rem); color: var(--ink-soft); max-width: 60ch; }
@@ -93,6 +98,9 @@ section { position: relative; }
 .section--forest h1, .section--forest h2, .section--forest h3, .section--forest h4 { color: var(--white); }
 .section--forest .lede, .section--forest .muted { color: rgba(251, 246, 236, .74); }
 .section--sand { background: var(--sand); }
+/* Dark surfaces: restore bright gold for text */
+.section--forest, .hero, .strip, .site-foot, .tier--feature, .on-dark,
+.date-btn[aria-pressed="true"] { --gold-text: #d4b878; --clay-text: var(--blush); }
 .section--warm { background: var(--cream-warm); }
 .stack > * + * { margin-top: 1rem; }
 .center { text-align: center; }
@@ -110,7 +118,7 @@ section { position: relative; }
 
 /* ---------- ornaments ---------- */
 .rule {
-  display: flex; align-items: center; gap: 1rem; color: var(--gold);
+  display: flex; align-items: center; gap: 1rem; color: var(--gold-text);
   font-size: .8rem; letter-spacing: .28em; text-transform: uppercase;
 }
 .rule::before, .rule::after { content: ""; flex: 1; height: 1px; background: currentColor; opacity: .45; }
@@ -133,13 +141,13 @@ section { position: relative; }
 .btn--ghost { --btn-bg: transparent; --btn-fg: var(--forest); --btn-bd: var(--gold); }
 .btn--ghost:hover { --btn-bg: var(--forest); --btn-fg: var(--cream); --btn-bd: var(--forest); }
 .btn--light { --btn-bg: var(--cream); --btn-fg: var(--forest); --btn-bd: var(--cream); }
-.btn--gold { --btn-bg: var(--gold); --btn-fg: #fff; --btn-bd: var(--gold); }
+.btn--gold { --btn-bg: var(--gold); --btn-fg: var(--forest-deep); --btn-bd: var(--gold); }
 .btn--outline-light { --btn-bg: transparent; --btn-fg: var(--cream); --btn-bd: rgba(251,246,236,.5); }
 .btn--outline-light:hover { --btn-bg: var(--cream); --btn-fg: var(--forest); }
 .btn--sm { padding: .55rem 1.05rem; font-size: .74rem; }
 .btn--block { width: 100%; }
 .btn--wait { --btn-bg: transparent; --btn-fg: var(--clay); --btn-bd: var(--clay); }
-.btn--wait:hover { --btn-bg: var(--clay); --btn-fg: #fff; }
+.btn--wait:hover { --btn-bg: #9a5a3f; --btn-fg: var(--white); --btn-bd: #9a5a3f; }
 .link {
   display: inline-flex; align-items: center; gap: .4rem; color: var(--forest);
   font-size: .82rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase;
@@ -155,11 +163,11 @@ section { position: relative; }
   font-size: .68rem; font-weight: 500; letter-spacing: .13em; text-transform: uppercase;
   background: var(--sand); color: var(--forest); white-space: nowrap;
 }
-.badge--gold { background: rgba(192, 160, 98, .16); color: #8a6c2c; }
+.badge--gold { background: rgba(192, 160, 98, .16); color: var(--gold-text); }
 .badge--live { background: rgba(75, 125, 85, .14); color: var(--ok); }
 .badge--warn { background: rgba(181, 132, 58, .15); color: var(--warn); }
 .badge--stop { background: rgba(168, 80, 63, .13); color: var(--stop); }
-.badge--blush { background: var(--blush-soft); color: var(--clay); }
+.badge--blush { background: var(--blush-soft); color: var(--clay-text); }
 .badge--forest { background: var(--forest); color: var(--cream); }
 .badge--outline { background: transparent; box-shadow: inset 0 0 0 1px var(--gold-line); color: var(--ink-soft); }
 .dot { width: .42rem; height: .42rem; border-radius: 50%; background: currentColor; flex: none; }
@@ -193,7 +201,7 @@ section { position: relative; }
 .brand__mark { width: 1.5rem; height: 1.5rem; color: var(--forest); }
 .brand__type { display: flex; flex-direction: column; line-height: 1; }
 .brand__name { font-family: var(--font-display); font-size: 1.6rem; font-weight: 600; color: var(--forest); letter-spacing: -.015em; }
-.brand__tag { font-size: .5rem; letter-spacing: .28em; text-transform: uppercase; color: var(--gold); margin-top: .18rem; }
+.brand__tag { font-size: .5rem; letter-spacing: .28em; text-transform: uppercase; color: var(--gold-text); margin-top: .18rem; }
 .nav { display: flex; gap: clamp(.5rem, 1.4vw, 1.35rem); margin-inline: auto; }
 .nav a {
   font-size: .78rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
@@ -286,7 +294,7 @@ section { position: relative; }
   margin-top: -2.5rem; position: relative; z-index: 5;
 }
 @media (max-width: 700px) { .now { grid-template-columns: 1fr; } }
-.now__label { font-size: .68rem; letter-spacing: .24em; text-transform: uppercase; color: var(--gold); }
+.now__label { font-size: .68rem; letter-spacing: .24em; text-transform: uppercase; color: var(--gold-text); }
 .now__title { font-family: var(--font-display); font-size: clamp(1.3rem, 2.2vw, 1.8rem); color: var(--forest); }
 .now__meta { font-size: .85rem; color: var(--ink-soft); }
 .now__count { display: flex; gap: .35rem; align-items: baseline; }
@@ -354,7 +362,8 @@ section { position: relative; }
 .date-btn[aria-pressed="true"] .date-btn__dow,
 .date-btn[aria-pressed="true"] .date-btn__m { color: rgba(251,246,236,.7); }
 .date-btn[aria-pressed="true"] .date-btn__d { color: var(--white); }
-.date-btn__flag { font-size: .6rem; color: var(--gold); letter-spacing: .1em; text-transform: uppercase; margin-top: .2rem; min-height: .9em; }
+.date-btn[aria-pressed="true"] .date-btn__flag { color: var(--gold-text); }
+.date-btn__flag { font-size: .6rem; color: var(--gold-text); letter-spacing: .1em; text-transform: uppercase; margin-top: .2rem; min-height: .9em; }
 
 /* ---------- feature split ---------- */
 .split { display: grid; gap: clamp(1.6rem, 4vw, 3.5rem); grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); align-items: center; }
@@ -386,14 +395,14 @@ section { position: relative; }
 .perks svg { width: 1.1rem; height: 1.1rem; color: var(--moss); margin-top: .22rem; }
 .tier__flag {
   position: absolute; top: -.75rem; left: 50%; transform: translateX(-50%);
-  background: var(--gold); color: #fff; font-size: .64rem; letter-spacing: .18em; text-transform: uppercase;
+  background: var(--gold); color: var(--forest-deep); font-size: .64rem; letter-spacing: .18em; text-transform: uppercase;
   padding: .3rem .9rem; border-radius: var(--r-pill); white-space: nowrap;
 }
 
 /* ---------- basket / product cards ---------- */
 .prod__head { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; }
 .prod__price { font-family: var(--font-display); font-size: 1.5rem; color: var(--clay); white-space: nowrap; }
-.prod__serves { font-size: .7rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin: .35rem 0 .6rem; }
+.prod__serves { font-size: .7rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-text); margin: .35rem 0 .6rem; }
 .prod__incl { font-size: .87rem; color: var(--ink-soft); }
 .prod__foot { display: flex; gap: .6rem; align-items: center; margin-top: 1.1rem; }
 .qty { display: inline-flex; align-items: center; box-shadow: inset 0 0 0 1px var(--gold-line); border-radius: var(--r-pill); overflow: hidden; }
@@ -431,7 +440,7 @@ section { position: relative; }
 .menu-item:last-child { border-bottom: 0; }
 .menu-item__name { font-family: var(--font-display); font-size: 1.15rem; color: var(--forest); }
 .menu-item__note { grid-column: 1 / -1; font-size: .82rem; color: var(--ink-soft); margin-top: -.35rem; }
-.menu-item__price { font-family: var(--font-display); font-size: 1.1rem; color: var(--clay); font-variant-numeric: tabular-nums; }
+.menu-item__price { font-family: var(--font-display); font-size: 1.1rem; color: var(--clay-text); font-variant-numeric: tabular-nums; }
 
 /* ---------- steps ---------- */
 .steps { counter-reset: s; display: grid; gap: clamp(1.2rem, 2.5vw, 2rem); }
@@ -510,7 +519,7 @@ dialog[open] { animation: pop .28s cubic-bezier(.2,.8,.2,1); }
 /* ---------- table ---------- */
 .tbl { width: 100%; border-collapse: collapse; font-size: .88rem; }
 .tbl th, .tbl td { padding: .8rem .7rem; text-align: left; border-bottom: 1px solid var(--gold-line); }
-.tbl th { font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); font-weight: 500; }
+.tbl th { font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; color: var(--gold-text); font-weight: 500; }
 .tbl td:not(:first-child), .tbl th:not(:first-child) { text-align: center; }
 .tbl tr:last-child td { border-bottom: 0; }
 .scroll-x { overflow-x: auto; }
@@ -525,7 +534,7 @@ details.faq summary {
 }
 details.faq summary::-webkit-details-marker { display: none; }
 details.faq summary::after {
-  content: "+"; position: absolute; right: .3rem; top: .9rem; color: var(--gold); font-size: 1.3rem; transition: transform .25s ease;
+  content: "+"; position: absolute; right: .3rem; top: .9rem; color: var(--gold-text); font-size: 1.3rem; transition: transform .25s ease;
 }
 details.faq[open] summary::after { transform: rotate(45deg); }
 details.faq p { padding: 0 1.5rem 1.1rem 0; color: var(--ink-soft); font-size: .93rem; }
@@ -534,6 +543,7 @@ details.faq p { padding: 0 1.5rem 1.1rem 0; color: var(--ink-soft); font-size: .
 .site-foot { background: var(--forest-deep); color: rgba(251,246,236,.72); padding: clamp(2.6rem, 5vw, 4.2rem) 0 1.6rem; }
 .site-foot h4 { color: var(--white); font-size: 1.05rem; margin-bottom: .8rem; }
 .site-foot a:hover { color: var(--gold); }
+.site-foot .muted, .site-foot .tiny { color: rgba(251, 246, 236, .64); }
 .foot-grid { display: grid; gap: clamp(1.6rem, 3vw, 2.6rem); grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); }
 .foot-grid ul { display: grid; gap: .5rem; font-size: .88rem; }
 .foot-brand .brand__name { color: var(--white); }

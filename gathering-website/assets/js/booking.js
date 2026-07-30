@@ -82,7 +82,7 @@
       const join = `<button class="btn btn--wait btn--block btn--sm" data-wait="${key}">Join the waiting list</button>`;
       const up =
         a.status === 'member-only'
-          ? `<a class="tiny" style="text-align:center;color:var(--gold)" href="membership.html">Unlock ${a.seatsLeftTotal} held seats — become a member ${window.UI.ICONS.arrow}</a>`
+          ? `<a class="tiny" style="text-align:center;color:var(--gold-text)" href="membership.html">Unlock ${a.seatsLeftTotal} held seats — become a member ${window.UI.ICONS.arrow}</a>`
           : '';
       return join + up;
     }
@@ -166,7 +166,7 @@
 
         <button class="btn btn--block" type="submit">${wait ? 'Join the waiting list' : 'Confirm booking'}</button>
         ${a.tier.id === 'guest'
-          ? `<p class="tiny center muted">Booking as a guest. <a href="membership.html" style="color:var(--gold)">Members book 7 days ahead</a> and see every seat.</p>`
+          ? `<p class="tiny center muted">Booking as a guest. <a href="membership.html" style="color:var(--gold-text)">Members book 7 days ahead</a> and see every seat.</p>`
           : `<p class="tiny center muted">Free changes up to 4 hours before service.</p>`}
       </form>`;
 
