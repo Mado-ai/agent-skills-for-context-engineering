@@ -1,0 +1,41 @@
+{
+  "name": "gearbox",
+  "private": true,
+  "version": "0.1.0",
+  "description": "GearBox Spatial Operating Platform — monorepo root",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:unit": "turbo run test:unit",
+    "test:integration": "turbo run test:integration",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "codegen": "pnpm --filter @gearbox/protocol run codegen",
+    "codegen:check": "pnpm --filter @gearbox/protocol run codegen:check",
+    "dev:infra": "docker compose -f infrastructure/docker/compose.dev.yml up -d",
+    "dev:infra:down": "docker compose -f infrastructure/docker/compose.dev.yml down",
+    "dev:infra:reset": "docker compose -f infrastructure/docker/compose.dev.yml down -v",
+    "db:generate": "pnpm --filter @gearbox/core run db:generate",
+    "db:migrate": "pnpm --filter @gearbox/core run db:migrate",
+    "db:seed": "pnpm --filter @gearbox/core run db:seed",
+    "dev": "pnpm --filter @gearbox/core run dev"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@types/node": "^22.20.1",
+    "eslint": "^9.18.0",
+    "prettier": "^3.4.2",
+    "tsx": "^4.19.2",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0",
+    "vitest": "^2.1.8"
+  }
+}

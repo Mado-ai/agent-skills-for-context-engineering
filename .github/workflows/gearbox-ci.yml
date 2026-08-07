@@ -1,0 +1,134 @@
+name: gearbox-ci
+
+# CI for the GearBox platform (gearbox/). Scoped by path so it does not run on
+# changes to the rest of this repository.
+#
+# Pipeline order follows docs/gearbox/10-quality-devops.md §10.2: cheap checks first,
+# so a formatting mistake fails in seconds rather than after the integration suite.
+
+on:
+  push:
+    branches: [main]
+    paths: ['gearbox/**', '.github/workflows/gearbox-ci.yml']
+  pull_request:
+    paths: ['gearbox/**', '.github/workflows/gearbox-ci.yml']
+
+concurrency:
+  group: gearbox-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: gearbox
+
+jobs:
+  static:
+    name: lint · typecheck · codegen freshness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: gearbox/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm build
+      - run: pnpm typecheck
+      # Fails if the wire schema changed without committing the generated C#.
+      # This is what makes packages/protocol a real single source of truth.
+      - run: pnpm codegen:check
+
+  unit:
+    name: unit + API tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: gearbox/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm test:unit
+
+  integration:
+    name: integration tests (real Postgres)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: gearbox
+          POSTGRES_PASSWORD: gearbox
+          POSTGRES_DB: gearbox
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U gearbox -d gearbox"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgres://gearbox:gearbox@localhost:5432/gearbox
+      REDIS_URL: redis://localhost:6379
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: gearbox/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Create extensions
+        run: |
+          PGPASSWORD=gearbox psql -h localhost -U gearbox -d gearbox \
+            -c 'CREATE EXTENSION IF NOT EXISTS citext; CREATE EXTENSION IF NOT EXISTS postgis;'
+      - run: pnpm db:migrate
+      # Runs the shared repository contract against the Drizzle adapters, so the
+      # in-memory implementations can never be quietly more forgiving than Postgres.
+      - run: pnpm test:integration
+
+  security:
+    name: security checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: gearbox/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - name: Dependency audit
+        run: pnpm audit --audit-level high
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

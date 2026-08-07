@@ -1,0 +1,67 @@
+# Local development infrastructure.
+#
+# Goal: `pnpm dev:infra` brings up everything the service needs, with no manual steps.
+# If this ever needs a README paragraph to work, it has rotted — fix the compose file.
+
+name: gearbox-dev
+
+services:
+  postgres:
+    # PostGIS from day one: the place pipeline needs geography columns and a GiST
+    # index (docs/gearbox/11-geospatial-mvp.md §11.5). Adding it later means a
+    # migration on a live database for no reason.
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: gearbox
+      POSTGRES_PASSWORD: gearbox
+      POSTGRES_DB: gearbox
+    ports: ['5432:5432']
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U gearbox -d gearbox']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    # Live player positions and presence only — never durable state
+    # (docs/gearbox/11-geospatial-mvp.md §11.5).
+    image: redis:7-alpine
+    command: ['redis-server', '--save', '', '--appendonly', 'no']
+    ports: ['6379:6379']
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  minio:
+    # S3-compatible object storage for assets, snapshots and PMTiles.
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: gearbox
+      MINIO_ROOT_PASSWORD: gearboxgearbox
+    ports: ['9000:9000', '9001:9001']
+    volumes:
+      - miniodata:/data
+    healthcheck:
+      test: ['CMD', 'mc', 'ready', 'local']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  livekit:
+    # Carries both media and the realtime state datagrams (docs/gearbox/02-stack.md §2.3).
+    # Host networking because WebRTC needs a wide UDP port range.
+    image: livekit/livekit-server:latest
+    command: --config /etc/livekit.yaml
+    network_mode: host
+    volumes:
+      - ./livekit.dev.yaml:/etc/livekit.yaml:ro
+
+volumes:
+  pgdata:
+  miniodata:
