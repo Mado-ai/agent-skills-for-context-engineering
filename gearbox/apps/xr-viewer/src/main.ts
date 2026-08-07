@@ -48,6 +48,7 @@ import {
   WebGLRenderer,
 } from 'three';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
+import { XRInteraction, type Grabbable } from './xr-interaction.js';
 import { COLLECTION, DASHBOARD, type CollectedItem } from './collection.js';
 import {
   dashboardTexture,
@@ -435,44 +436,44 @@ function moveRig(dt: number): void {
   );
 }
 
-// ── input: VR controllers ───────────────────────────────────────────────────────
-const controllers: Group[] = [];
-for (let i = 0; i < 2; i++) {
-  const controller = renderer.xr.getController(i);
+// ── input: VR ───────────────────────────────────────────────────────────────────
+// Locomotion, comfort, grab and haptics live in xr-interaction.ts.
+const grabbables: Grabbable[] = placed.map((p) => ({
+  id: p.item.id,
+  pivot: p.pivot,
+  mesh: p.mesh,
+  home: p.pivot.position.clone(),
+}));
 
-  const rayGeo = new BufferGeometry();
-  rayGeo.setAttribute('position', new Float32BufferAttribute([0, 0, 0, 0, 0, -4], 3));
-  const ray = new Line(
-    rayGeo,
-    new LineBasicMaterial({ color: new Color(PALETTE.bone), transparent: true, opacity: 0.55 }),
-  );
-  controller.add(ray);
+let heldId: string | null = null;
 
-  controller.addEventListener('selectstart', () => select(pickFromController(controller)));
-  rig.add(controller);
-  controllers.push(controller);
-}
-
-function pickFromController(controller: Group): PlacedItem | null {
-  const origin = new Vector3();
-  const direction = new Vector3(0, 0, -1);
-  controller.getWorldPosition(origin);
-  direction.applyQuaternion(controller.getWorldQuaternion(controller.quaternion.clone()));
-  raycaster.set(origin, direction.normalize());
-  const hits = raycaster.intersectObjects(
-    placed.map((p) => p.mesh),
-    false,
-  );
-  const first = hits[0];
-  if (!first) return null;
-  return placed.find((p) => p.mesh === first.object) ?? null;
-}
+const xr = new XRInteraction({
+  renderer,
+  camera,
+  rig,
+  grabbables,
+  onSelect: (id) => select(placed.find((p) => p.item.id === id) ?? null),
+  onGrabChange: (id) => {
+    heldId = id;
+    if (id) {
+      // Picking something up selects it: you are already looking at it, and the
+      // provenance is the reason to pick it up at all.
+      select(placed.find((p) => p.item.id === id) ?? null);
+    }
+  },
+});
 
 // ── chrome ──────────────────────────────────────────────────────────────────────
 function setStatus(text: string): void {
   const el = document.getElementById('status');
   if (el) el.textContent = text;
 }
+
+// Show VR controls only when a headset is actually present, so a desktop visitor is
+// not told to use a grip button they do not have.
+void navigator.xr?.isSessionSupported?.('immersive-vr').then((supported) => {
+  if (supported) document.body.classList.add('xr-capable');
+});
 
 const vrButton = VRButton.createButton(renderer);
 vrButton.classList.add('gb-vr-button');
@@ -504,9 +505,14 @@ renderer.setAnimationLoop((time) => {
     camera.rotation.set(pitch, yaw, 0, 'YXZ');
   }
 
+  xr.update(dt);
+  if (renderer.xr.isPresenting) xr.clampToRoom(ROOM.width / 2, ROOM.depth / 2);
+
   for (const p of placed) {
     const isSelected = selected === p;
-    if (!reduceMotion) {
+    const isHeld = heldId === p.item.id;
+    // A held item follows the hand; idle bob would fight the grip.
+    if (!reduceMotion && !isHeld) {
       p.pivot.position.y = p.baseY + Math.sin(t * 0.9 + p.phase) * 0.035;
       p.mesh.rotation.y += dt * (isSelected ? 0.85 : 0.28);
       p.mesh.rotation.x = Math.sin(t * 0.4 + p.phase) * 0.12;
@@ -520,6 +526,17 @@ renderer.setAnimationLoop((time) => {
   // Billboards face the viewer, in both desktop and VR.
   camera.getWorldPosition(cameraWorld);
   (friend.userData.plate as Mesh).lookAt(cameraWorld);
+
+  // While holding something, bring the card to the hand rather than leaving it
+  // across the room — in VR you read it where you are looking.
+  const heldPlaced = heldId ? placed.find((p) => p.item.id === heldId) : undefined;
+  if (heldPlaced && card.visible) {
+    const toViewer = new Vector3().subVectors(cameraWorld, heldPlaced.pivot.position).normalize();
+    card.position
+      .copy(heldPlaced.pivot.position)
+      .addScaledVector(toViewer, -0.02)
+      .add(new Vector3(0, 0.42, 0));
+  }
 
   const targetOpacity = card.visible ? 1 : 0;
   cardOpacity += (targetOpacity - cardOpacity) * Math.min(dt * 7, 1);

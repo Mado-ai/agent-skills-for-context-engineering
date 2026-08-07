@@ -122,6 +122,20 @@
         gap: 0.75rem;
       }
 
+      /* Two hint sets: the desktop one until an XR device is present, the VR one
+         once the session can start. Swapped by a class on <body>. */
+      .hints[data-mode='vr'] {
+        display: none;
+      }
+
+      body.xr-capable .hints[data-mode='desktop'] {
+        display: none;
+      }
+
+      body.xr-capable .hints[data-mode='vr'] {
+        display: flex;
+      }
+
       .hints {
         display: flex;
         flex-wrap: wrap;
@@ -206,8 +220,8 @@
       <span class="eyebrow">GearBox · Room View</span>
       <h1>Everything here was collected somewhere real</h1>
       <p>
-        A design prototype of the bridge: game → collected item → your persistent room. Not the
-        client — no networking, no anchors.
+        A design prototype of the bridge: game → collected item → your persistent room. Put on a
+        headset and pick something up.
       </p>
     </header>
 
@@ -217,10 +231,16 @@
     </div>
 
     <div class="chrome controls">
-      <div class="hints">
+      <div class="hints" data-mode="desktop">
         <span class="hint"><b>drag</b> look</span>
         <span class="hint"><b>W A S D</b> walk</span>
         <span class="hint"><b>click</b> inspect</span>
+      </div>
+      <div class="hints" data-mode="vr">
+        <span class="hint"><b>left stick</b> move</span>
+        <span class="hint"><b>right stick</b> snap turn</span>
+        <span class="hint"><b>trigger</b> inspect</span>
+        <span class="hint"><b>grip</b> pick up</span>
       </div>
       <div id="vr-slot"></div>
     </div>
