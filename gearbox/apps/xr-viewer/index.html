@@ -112,6 +112,21 @@
         color: var(--muted);
       }
 
+      /* Who's here — top-right, the same pill language. */
+      .presence {
+        top: clamp(0.9rem, 2.5vw, 1.6rem);
+        right: clamp(0.9rem, 2.5vw, 1.6rem);
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        box-shadow: var(--shadow);
+        padding: 0.5rem 0.95rem;
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        color: var(--ink);
+        font-variant-numeric: tabular-nums;
+      }
+
       /* Status pill — echoes the selected item's provenance. */
       .readout {
         bottom: clamp(0.9rem, 2.5vw, 1.6rem);
@@ -275,6 +290,8 @@
         </p>
       </div>
     </header>
+
+    <div class="chrome presence" id="presence" role="status">1 in room</div>
 
     <div class="chrome readout">
       <span class="dot" aria-hidden="true"></span>

@@ -19,7 +19,6 @@ import {
   BackSide,
   BoxGeometry,
   BufferGeometry,
-  CapsuleGeometry,
   Color,
   CylinderGeometry,
   DirectionalLight,
@@ -41,6 +40,7 @@ import {
   PerspectiveCamera,
   PlaneGeometry,
   PointLight,
+  Quaternion,
   Raycaster,
   RingGeometry,
   Scene,
@@ -52,16 +52,13 @@ import {
   WebGLRenderer,
 } from 'three';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
+import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
 import { XRInteraction, type Grabbable } from './xr-interaction.js';
 import { COLLECTION, DASHBOARD, type CollectedItem } from './collection.js';
-import {
-  dashboardTexture,
-  nameplateTexture,
-  presenceTexture,
-  provenanceTexture,
-  PALETTE,
-} from './labels.js';
+import { dashboardTexture, nameplateTexture, provenanceTexture, PALETTE } from './labels.js';
 import { windowTexture, woodFloorTexture } from './textures.js';
+import { RoomSession, type LocalPose } from './session.js';
+import { RemoteAvatars } from './avatars.js';
 
 const ROOM = { width: 8, depth: 8, height: 3.2 };
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -413,40 +410,10 @@ portal.position.set(2.55, 2.2, -ROOM.depth / 2 + 0.07);
 scene.add(portal);
 scene.add(pinLight(new Vector3(2.55, 2.2, -3.2), '#ffe4b8', 0.6));
 
-// ── remote participant ──────────────────────────────────────────────────────────
-// Presence is half the product; an empty room would sell it short.
-const friend = new Group();
-friend.position.set(-1.55, 0, -3.05);
-{
-  const body = new Mesh(
-    new CapsuleGeometry(0.17, 0.5, 6, 16),
-    new MeshStandardMaterial({
-      color: new Color('#8fbe97'),
-      roughness: 0.6,
-      emissive: new Color(PALETTE.greenBright),
-      emissiveIntensity: 0.06,
-    }),
-  );
-  body.position.y = 1.02;
-  body.castShadow = true;
-
-  const head = new Mesh(
-    new IcosahedronGeometry(0.13, 1),
-    new MeshStandardMaterial({ color: new Color('#dcd4c0'), roughness: 0.55 }),
-  );
-  head.position.y = 1.48;
-  head.castShadow = true;
-
-  const plate = new Mesh(
-    new PlaneGeometry(0.56, 0.153),
-    new MeshBasicMaterial({ map: presenceTexture('@sam', 'in your room'), transparent: true }),
-  );
-  plate.position.y = 1.78;
-
-  friend.add(body, head, plate);
-  friend.userData.plate = plate;
-}
-scene.add(friend);
+// ── remote participants ─────────────────────────────────────────────────────────
+// Presence is half the product. Avatars are driven by the session: real peers over a
+// server URL, or the in-page simulated session otherwise (see session.ts).
+const remoteAvatars = new RemoteAvatars(scene);
 
 // ── provenance card ─────────────────────────────────────────────────────────────
 const card = new Mesh(
@@ -580,16 +547,124 @@ const xr = new XRInteraction({
   camera,
   rig,
   grabbables,
+  // Items someone else is holding cannot be grabbed; the server would deny it anyway,
+  // but refusing locally keeps the hand honest.
+  canGrab: (id) => {
+    const index = objectIndexOf(id);
+    return index === null || !session.isHeldRemotely(index);
+  },
   onSelect: (id) => select(placed.find((p) => p.item.id === id) ?? null),
   onGrabChange: (id) => {
+    const previous = heldId;
     heldId = id;
     if (id) {
       // Picking something up selects it: you are already looking at it, and the
-      // provenance is the reason to pick it up at all.
+      // provenance is the reason to pick it up at all. The grab is optimistic — the
+      // server's grant (or denial) arrives next.
       select(placed.find((p) => p.item.id === id) ?? null);
+      const index = objectIndexOf(id);
+      if (index !== null) session.requestOwnership(index);
+    } else if (previous) {
+      const index = objectIndexOf(previous);
+      const item = placed.find((p) => p.item.id === previous);
+      if (index !== null && item) {
+        session.releaseOwnership(index, item.pivot.position, {
+          x: item.mesh.quaternion.x,
+          y: item.mesh.quaternion.y,
+          z: item.mesh.quaternion.z,
+          w: item.mesh.quaternion.w,
+        });
+      }
     }
   },
 });
+
+// ── multiplayer session ─────────────────────────────────────────────────────────
+// `?server=ws://host:7777/rooms/demo` joins a live room-server; otherwise the real
+// authoritative room runs in-page with two scripted peers (see session.ts).
+function objectIndexOf(id: string): number | null {
+  return session.objectIndexById.get(id) ?? null;
+}
+
+function itemByIndex(index: number): (typeof placed)[number] | undefined {
+  for (const [id, i] of session.objectIndexById) {
+    if (i === index) return placed.find((p) => p.item.id === id);
+  }
+  return undefined;
+}
+
+function setPresence(count: number, simulated: boolean): void {
+  const el = document.getElementById('presence');
+  if (el) el.textContent = `${count} in room · ${simulated ? 'simulated' : 'live'}`;
+}
+
+const sessionCallbacks = {
+  onPresence: setPresence,
+  onRemoteJoin: (index: number, handle: string) => remoteAvatars.add(index, handle),
+  onRemoteLeave: (index: number) => remoteAvatars.remove(index),
+  onObjectTransform: (index: number, pos: { x: number; y: number; z: number }) => {
+    const item = itemByIndex(index);
+    if (item && heldId !== item.item.id) item.pivot.position.set(pos.x, pos.y, pos.z);
+  },
+  onObjectGrant: () => {},
+  onObjectRelease: (index: number) => {
+    const item = itemByIndex(index);
+    if (item) xr.springHome(item.item.id);
+  },
+  onOwnershipDenied: (index: number) => {
+    // The server said no — undo the optimistic grab and let the item spring back.
+    const item = itemByIndex(index);
+    if (item) xr.forceRelease(item.item.id);
+  },
+};
+
+const serverUrl = new URLSearchParams(window.location.search).get('server');
+let session: RoomSession;
+if (serverUrl) {
+  session = await RoomSession.connect(serverUrl, sessionCallbacks).catch((err) => {
+    console.error('[session] live connection failed, falling back to simulation:', err);
+    return RoomSession.simulatedSession(simObjects(), sessionCallbacks);
+  });
+} else {
+  session = RoomSession.simulatedSession(simObjects(), sessionCallbacks);
+}
+
+function simObjects() {
+  return placed.map((p) => ({
+    id: p.item.id,
+    position: { x: p.pivot.position.x, y: p.baseY, z: p.pivot.position.z },
+    rotation: { x: 0, y: 0, z: 0, w: 1 },
+  }));
+}
+
+/** Local avatar pose: camera head; controller grips as hands when presenting. */
+const gripL = renderer.xr.getControllerGrip(0);
+const gripR = renderer.xr.getControllerGrip(1);
+const poseScratch = { p: new Vector3(), q: new Quaternion() };
+
+function sampleLocalPose(): LocalPose {
+  camera.getWorldPosition(poseScratch.p);
+  camera.getWorldQuaternion(poseScratch.q);
+  const head = {
+    position: { x: poseScratch.p.x, y: poseScratch.p.y, z: poseScratch.p.z },
+    rotation: { x: poseScratch.q.x, y: poseScratch.q.y, z: poseScratch.q.z, w: poseScratch.q.w },
+  };
+  const presenting = renderer.xr.isPresenting;
+  const hand = (grip: Group) => {
+    grip.getWorldPosition(poseScratch.p);
+    grip.getWorldQuaternion(poseScratch.q);
+    return {
+      position: { x: poseScratch.p.x, y: poseScratch.p.y, z: poseScratch.p.z },
+      rotation: { x: poseScratch.q.x, y: poseScratch.q.y, z: poseScratch.q.z, w: poseScratch.q.w },
+    };
+  };
+  return {
+    head,
+    leftHand: presenting ? hand(gripL) : head,
+    rightHand: presenting ? hand(gripR) : head,
+    handsValid: presenting,
+  };
+}
 
 // ── chrome ──────────────────────────────────────────────────────────────────────
 function setStatus(text: string): void {
@@ -606,6 +681,30 @@ void navigator.xr?.isSessionSupported?.('immersive-vr').then((supported) => {
 const vrButton = VRButton.createButton(renderer);
 vrButton.classList.add('gb-vr-button');
 document.getElementById('vr-slot')?.appendChild(vrButton);
+
+// AR: the same room graph in passthrough (docs/gearbox/01-architecture.md §1.4 — AR
+// is a client mode, not a second product). The shell hides; the collection, hub and
+// panels anchor into the real room.
+void navigator.xr?.isSessionSupported?.('immersive-ar').then((supported) => {
+  if (!supported) return;
+  const arButton = ARButton.createButton(renderer);
+  arButton.classList.add('gb-vr-button');
+  document.getElementById('vr-slot')?.appendChild(arButton);
+});
+
+renderer.xr.addEventListener('sessionstart', () => {
+  const session3 = renderer.xr.getSession();
+  const passthrough = session3?.environmentBlendMode !== 'opaque';
+  if (passthrough) {
+    shell.visible = false;
+    scene.background = null;
+    rig.position.set(0, 0, 1.4);
+  }
+});
+renderer.xr.addEventListener('sessionend', () => {
+  shell.visible = true;
+  scene.background = new Color(PALETTE.cream);
+});
 
 renderer.xr.addEventListener('sessionstart', () => {
   document.body.classList.add('in-vr');
@@ -636,6 +735,24 @@ renderer.setAnimationLoop((time) => {
   xr.update(dt);
   if (renderer.xr.isPresenting) xr.clampToRoom(ROOM.width / 2, ROOM.depth / 2);
 
+  session.update(dt * 1000, time, sampleLocalPose());
+  if (heldId) {
+    const index = objectIndexOf(heldId);
+    const item = placed.find((p) => p.item.id === heldId);
+    if (index !== null && item) {
+      session.sendHeldTransform(
+        index,
+        { x: item.pivot.position.x, y: item.pivot.position.y, z: item.pivot.position.z },
+        {
+          x: item.mesh.quaternion.x,
+          y: item.mesh.quaternion.y,
+          z: item.mesh.quaternion.z,
+          w: item.mesh.quaternion.w,
+        },
+      );
+    }
+  }
+
   if (!reduceMotion) {
     hubCube.rotation.y += dt * 0.6;
     hubEdges.rotation.y = hubCube.rotation.y;
@@ -658,9 +775,8 @@ renderer.setAnimationLoop((time) => {
       ((isSelected ? 2.6 : 1.5) - mat.emissiveIntensity) * Math.min(dt * 6, 1);
   }
 
-  // Billboards face the viewer, in both desktop and VR.
   camera.getWorldPosition(cameraWorld);
-  (friend.userData.plate as Mesh).lookAt(cameraWorld);
+  remoteAvatars.update((i) => session.sampleRemote(i, time), cameraWorld);
 
   // While holding something, bring the card to the hand rather than leaving it
   // across the room — in VR you read it where you are looking.

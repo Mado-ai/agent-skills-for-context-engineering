@@ -52,6 +52,8 @@ export interface XRInteractionOptions {
   grabbables: readonly Grabbable[];
   onSelect: (id: string | null) => void;
   onGrabChange: (id: string | null) => void;
+  /** Veto grabbing (e.g. an item someone else is holding). Defaults to always-yes. */
+  canGrab?: (id: string) => boolean;
   moveSpeed?: number;
   snapTurnDegrees?: number;
 }
@@ -88,6 +90,7 @@ export class XRInteraction {
     this.opts = {
       moveSpeed: 1.9,
       snapTurnDegrees: 30,
+      canGrab: () => true,
       ...options,
     };
     this.meshes = options.grabbables.map((g) => g.mesh);
@@ -188,6 +191,11 @@ export class XRInteraction {
   private grab(state: ControllerState): void {
     const target = state.hovered;
     if (!target || target.pivot.userData.heldBy !== undefined) return;
+    if (!this.opts.canGrab(target.id)) {
+      // A short flat buzz reads as "no" without any UI.
+      this.pulse(state.index, 0.15, 60);
+      return;
+    }
 
     // Steal from the other hand rather than tugging in two directions at once.
     for (const other of this.controllers) {
@@ -223,6 +231,19 @@ export class XRInteraction {
   /** True while any controller is holding something. */
   get heldItem(): Grabbable | null {
     return this.controllers.find((c) => c.held)?.held ?? null;
+  }
+
+  /** Server refused the grab: undo the optimistic hold as if the grip opened. */
+  forceRelease(id: string): void {
+    const holder = this.controllers.find((c) => c.held?.id === id);
+    if (holder) this.release(holder);
+  }
+
+  /** Animate an item from wherever it is back to its home (remote release). */
+  springHome(id: string): void {
+    const target = this.opts.grabbables.find((g) => g.id === id);
+    if (!target || target.pivot.userData.heldBy !== undefined) return;
+    this.returning.set(id, { from: target.pivot.position.clone(), t: 0 });
   }
 
   update(dt: number): void {

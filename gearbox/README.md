@@ -84,14 +84,25 @@ unset. A silently skipped test is worse than no test.
   Ed25519 device registration and assertion, audit events
 - Postgres schema + generated migration; Drizzle and in-memory adapters
 - Fastify app with RFC 9457 Problem Details error handling
+- **Realtime multiplayer core**: `packages/room-core` (authoritative room — ownership
+  leases with epochs, snapshots/late-join, server-stamped identity, pose plausibility,
+  realtime authz), `services/room-server` (dev WebSocket host; run with
+  `pnpm --filter @gearbox/room-server dev`), `packages/networking-sdk` (client link +
+  interpolation buffer), all bot-tested over real sockets
+- **Multi-user room view** (`apps/xr-viewer`): remote avatars, shared-object grabbing
+  through leases, VR + AR passthrough modes. `?server=ws://host:7777/rooms/demo`
+  joins a live server; without it the real room runs in-page with two simulated peers
 - Local dev stack, CI pipeline, boundary lint rules, 5 ADRs
 
 **Not built yet** (next in `docs/gearbox/11-geospatial-mvp.md` §11.15):
 
-- Everything Unity beyond the protocol layer — no app, no scenes, no AR
+- The Unity client (the web viewer is the demo surface; Unity remains the plan of
+  record for phones + headsets)
+- Voice (LiveKit SFU integration), the LiveKit ITransport implementation, and
+  session minting via `POST /sessions` — the room-server currently accepts
+  handle+role on the query string, dev-only by declared design
 - Place pipeline (OSM ingest, H3, curation), location service, anti-cheat
-- Realtime room server, LiveKit transport, sessions
-- The game loop and the room bridge
+- The game loop and the room bridge persistence
 
 **Verified how:** `pnpm build`, `pnpm lint`, `pnpm format:check`, `pnpm test` (74
 passing) and `pnpm codegen:check` were all run green. `pnpm test:integration` has

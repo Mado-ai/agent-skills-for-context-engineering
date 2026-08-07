@@ -14,7 +14,10 @@
     "smoke": "node scripts/smoke.mjs dist/index.html dist/room.png"
   },
   "dependencies": {
-    "three": "^0.172.0"
+    "three": "^0.172.0",
+    "@gearbox/networking-sdk": "workspace:*",
+    "@gearbox/protocol": "workspace:*",
+    "@gearbox/room-core": "workspace:*"
   },
   "devDependencies": {
     "@types/three": "^0.172.0",

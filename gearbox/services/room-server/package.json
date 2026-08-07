@@ -1,0 +1,27 @@
+{
+  "name": "@gearbox/room-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:integration": "echo \"covered by test (real sockets, in-process)\""
+  },
+  "dependencies": {
+    "@gearbox/protocol": "workspace:*",
+    "@gearbox/room-core": "workspace:*",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.13",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}

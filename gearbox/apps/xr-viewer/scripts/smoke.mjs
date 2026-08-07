@@ -52,11 +52,12 @@ const vrButton = await page.evaluate(() => {
 await page.mouse.click(908, 450);
 await page.waitForTimeout(900);
 const statusAfterClick = await page.textContent('#status');
+const presence = await page.textContent('#presence');
 
 await page.screenshot({ path: shot });
 await browser.close();
 
-const result = { initialStatus, statusAfterClick, hasCanvas, webgl, vrButton, errors };
+const result = { initialStatus, statusAfterClick, presence, hasCanvas, webgl, vrButton, errors };
 console.log(JSON.stringify(result, null, 2));
 
 const failures = [];
@@ -64,6 +65,7 @@ if (!hasCanvas) failures.push('no canvas was created');
 if (!webgl) failures.push('canvas has no WebGL context');
 if (initialStatus === statusAfterClick) failures.push('clicking an item did not change selection');
 if (errors.length > 0) failures.push(`${errors.length} runtime error(s)`);
+if (!presence || !presence.includes('in room')) failures.push('presence pill missing or empty');
 
 if (failures.length > 0) {
   console.error(`[smoke] FAILED: ${failures.join('; ')}`);
