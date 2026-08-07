@@ -35,7 +35,7 @@ export const COLLECTION: readonly CollectedItem[] = [
     id: '018f-lantern',
     name: 'Harbour Lantern',
     form: 'lantern',
-    light: 0xe2a44a,
+    light: 0xe39a33,
     provenance: {
       place: 'Nyhavn Quayside',
       area: 'Indre By',
@@ -50,7 +50,7 @@ export const COLLECTION: readonly CollectedItem[] = [
     id: '018f-echo',
     name: 'Cistern Echo',
     form: 'echo',
-    light: 0x5fa8a0,
+    light: 0x5aa7d6,
     provenance: {
       place: 'Cisternerne',
       area: 'Frederiksberg',
@@ -65,7 +65,7 @@ export const COLLECTION: readonly CollectedItem[] = [
     id: '018f-compass',
     name: 'Round Tower Compass',
     form: 'compass',
-    light: 0xe2a44a,
+    light: 0x46a758,
     provenance: {
       place: 'Rundetaarn',
       area: 'Indre By',
@@ -80,7 +80,7 @@ export const COLLECTION: readonly CollectedItem[] = [
     id: '018f-charm',
     name: 'Kayak Charm',
     form: 'charm',
-    light: 0x5fa8a0,
+    light: 0xe39a33,
     provenance: {
       place: 'Islands Brygge Harbour Bath',
       area: 'Amager Vest',
@@ -95,7 +95,7 @@ export const COLLECTION: readonly CollectedItem[] = [
     id: '018f-prism',
     name: 'Observatory Prism',
     form: 'prism',
-    light: 0xbfc9d6,
+    light: 0x8fc1e3,
     provenance: {
       place: 'Østervold Observatory',
       area: 'Indre By',

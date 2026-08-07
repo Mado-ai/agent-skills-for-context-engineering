@@ -3,23 +3,30 @@
  *
  * All type in the scene is drawn here rather than by a text-mesh library: it keeps the
  * bundle small, stays crisp at the distances people actually read from in VR, and lets
- * the provenance card use a genuine field-log layout — monospace data under a grotesk
- * heading, which is the typographic idea the whole piece is built on.
+ * the provenance card keep a genuine field-log layout — a friendly rounded heading
+ * over a monospace record.
+ *
+ * Restyled to the GearBox brand: white rounded cards on a warm room, ink text, the
+ * green as the one accent — the same card language as the dashboard mocks.
  */
 
 import { CanvasTexture, LinearFilter, SRGBColorSpace } from 'three';
 
 export const PALETTE = {
-  navy: '#0e1626',
-  slate: '#39424e',
-  brass: '#e2a44a',
-  seaGlass: '#5fa8a0',
-  bone: '#ede9e2',
-  boneDim: 'rgba(237, 233, 226, 0.62)',
-  boneFaint: 'rgba(237, 233, 226, 0.34)',
+  cream: '#f0ece3',
+  card: 'rgba(251, 250, 246, 0.97)',
+  ink: '#232a20',
+  muted: '#6d7365',
+  faint: '#a4a998',
+  green: '#3d9c50',
+  greenBright: '#46a758',
+  greenTint: '#e5f2e6',
+  amber: '#e39a33',
+  border: 'rgba(35, 42, 32, 0.14)',
 } as const;
 
-const DISPLAY = '600 {size}px ui-sans-serif, "Helvetica Neue", Helvetica, Arial, sans-serif';
+const DISPLAY =
+  '600 {size}px ui-rounded, "SF Pro Rounded", ui-sans-serif, "Helvetica Neue", Arial, sans-serif';
 const MONO = '{weight} {size}px ui-monospace, "SF Mono", Menlo, Consolas, monospace';
 
 function font(spec: string, size: number, weight = 400): string {
@@ -61,18 +68,39 @@ function roundRect(
   ctx.closePath();
 }
 
+/** White card base shared by every panel — the brand's one card language. */
+function cardBase(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  r: number,
+  borderColor: string = PALETTE.border,
+): void {
+  ctx.fillStyle = PALETTE.card;
+  roundRect(ctx, 0, 0, w, h, r);
+  ctx.fill();
+  ctx.strokeStyle = borderColor;
+  ctx.lineWidth = 3;
+  roundRect(ctx, 1.5, 1.5, w - 3, h - 3, r);
+  ctx.stroke();
+}
+
 /** Small plinth nameplate. Reads at ~1.5 m. */
 export function nameplateTexture(name: string, place: string): CanvasTexture {
   const [canvas, ctx] = makeCanvas(512, 160);
+  cardBase(ctx, 512, 160, 26);
+
+  ctx.textBaseline = 'top';
 
   ctx.font = font(DISPLAY, 44);
-  ctx.fillStyle = PALETTE.bone;
-  ctx.textBaseline = 'top';
-  ctx.fillText(name, 24, 26);
+  ctx.fillStyle = PALETTE.ink;
+  ctx.fillText(name, 30, 28);
 
-  ctx.font = font(MONO, 26, 400);
-  ctx.fillStyle = PALETTE.boneDim;
-  ctx.fillText(place.toUpperCase(), 24, 88);
+  ctx.font = font(MONO, 24, 500);
+  ctx.fillStyle = PALETTE.green;
+  ctx.letterSpacing = '2px';
+  ctx.fillText(place.toUpperCase(), 30, 92);
+  ctx.letterSpacing = '0px';
 
   return toTexture(canvas);
 }
@@ -90,37 +118,33 @@ export interface ProvenanceContent {
 
 /**
  * The provenance card — the thesis of the whole scene made legible.
- * Laid out as a field-log entry: grotesk heading, monospace record beneath.
+ * A field-log entry on a friendly white card: rounded heading, monospace record.
  */
 export function provenanceTexture(c: ProvenanceContent): CanvasTexture {
   const W = 900;
   const H = 620;
   const [canvas, ctx] = makeCanvas(W, H);
-
-  ctx.fillStyle = 'rgba(14, 22, 38, 0.94)';
-  roundRect(ctx, 0, 0, W, H, 28);
-  ctx.fill();
-
-  ctx.strokeStyle = 'rgba(226, 164, 74, 0.5)';
-  ctx.lineWidth = 3;
-  roundRect(ctx, 1.5, 1.5, W - 3, H - 3, 28);
-  ctx.stroke();
-
-  // Brass rule — the only ornament, and it marks the split between name and record.
-  ctx.fillStyle = PALETTE.brass;
-  ctx.fillRect(48, 150, 120, 4);
+  cardBase(ctx, W, H, 32, 'rgba(61, 156, 80, 0.4)');
 
   ctx.textBaseline = 'top';
 
-  ctx.font = font(MONO, 24, 500);
-  ctx.fillStyle = PALETTE.brass;
+  // Green pill eyebrow, matching the dashboard chips.
+  ctx.fillStyle = PALETTE.greenTint;
+  roundRect(ctx, 48, 40, 268, 46, 23);
+  ctx.fill();
+  ctx.font = font(MONO, 23, 600);
+  ctx.fillStyle = PALETTE.green;
   ctx.letterSpacing = '3px';
-  ctx.fillText('COLLECTED ITEM', 48, 46);
+  ctx.fillText('COLLECTED ITEM', 72, 52);
   ctx.letterSpacing = '0px';
 
   ctx.font = font(DISPLAY, 58);
-  ctx.fillStyle = PALETTE.bone;
-  ctx.fillText(c.name, 48, 84);
+  ctx.fillStyle = PALETTE.ink;
+  ctx.fillText(c.name, 48, 104);
+
+  // Green rule marks the split between name and record.
+  ctx.fillStyle = PALETTE.greenBright;
+  ctx.fillRect(48, 178, 120, 5);
 
   const rows: Array<[string, string]> = [
     ['place', c.place],
@@ -131,22 +155,22 @@ export function provenanceTexture(c: ProvenanceContent): CanvasTexture {
     ['with', c.withUsers.length > 0 ? c.withUsers.join('  ') : '— alone'],
   ];
 
-  let y = 196;
+  let y = 212;
   for (const [label, value] of rows) {
-    ctx.font = font(MONO, 26, 400);
-    ctx.fillStyle = PALETTE.boneFaint;
+    ctx.font = font(MONO, 25, 400);
+    ctx.fillStyle = PALETTE.faint;
     ctx.fillText(label.toUpperCase(), 48, y);
 
     ctx.font = font(MONO, 30, 500);
-    ctx.fillStyle = label === 'with' && c.withUsers.length > 0 ? PALETTE.seaGlass : PALETTE.bone;
+    ctx.fillStyle = label === 'with' && c.withUsers.length > 0 ? PALETTE.green : PALETTE.ink;
     ctx.fillText(value, 300, y - 2);
 
-    y += 62;
+    y += 58;
   }
 
-  ctx.font = font(MONO, 22, 400);
-  ctx.fillStyle = PALETTE.boneFaint;
-  ctx.fillText('© OpenStreetMap contributors', 48, H - 62);
+  ctx.font = font(MONO, 21, 400);
+  ctx.fillStyle = PALETTE.faint;
+  ctx.fillText('© OpenStreetMap contributors', 48, H - 56);
 
   return toTexture(canvas);
 }
@@ -157,56 +181,57 @@ export interface DashboardContent {
   footnote: string;
 }
 
-/** Wall-mounted spatial app. Deliberately reads as software, not as a poster. */
+/** Wall-mounted spatial app — the brand's white stat card, hung in the room. */
 export function dashboardTexture(d: DashboardContent): CanvasTexture {
   const W = 1024;
   const H = 640;
   const [canvas, ctx] = makeCanvas(W, H);
-
-  ctx.fillStyle = 'rgba(12, 19, 32, 0.96)';
-  roundRect(ctx, 0, 0, W, H, 20);
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(95, 168, 160, 0.45)';
-  ctx.lineWidth = 3;
-  roundRect(ctx, 1.5, 1.5, W - 3, H - 3, 20);
-  ctx.stroke();
+  cardBase(ctx, W, H, 28);
 
   ctx.textBaseline = 'top';
 
-  ctx.font = font(MONO, 24, 500);
-  ctx.fillStyle = PALETTE.seaGlass;
+  ctx.fillStyle = PALETTE.greenTint;
+  roundRect(ctx, 56, 44, 224, 44, 22);
+  ctx.fill();
+  ctx.font = font(MONO, 22, 600);
+  ctx.fillStyle = PALETTE.green;
   ctx.letterSpacing = '4px';
-  ctx.fillText('SPATIAL APP', 56, 48);
+  ctx.fillText('SPATIAL APP', 82, 55);
   ctx.letterSpacing = '0px';
 
-  ctx.font = font(DISPLAY, 62);
-  ctx.fillStyle = PALETTE.bone;
-  ctx.fillText(d.title, 56, 86);
+  ctx.font = font(DISPLAY, 60);
+  ctx.fillStyle = PALETTE.ink;
+  ctx.fillText(d.title, 56, 104);
 
   // Two-column stat grid. Tabular figures matter: these line up.
   const colX = [56, 552];
-  const rowY = [212, 384];
+  const rowY = [222, 388];
   d.stats.forEach((stat, i) => {
     const x = colX[i % 2] as number;
     const y = rowY[Math.floor(i / 2)] as number;
 
-    ctx.font = font(MONO, 84, 600);
-    ctx.fillStyle = PALETTE.bone;
+    ctx.font = font(MONO, 80, 600);
+    ctx.fillStyle = PALETTE.ink;
     ctx.fillText(stat.value, x, y);
 
-    ctx.font = font(MONO, 24, 400);
-    ctx.fillStyle = PALETTE.boneFaint;
+    ctx.font = font(MONO, 23, 500);
+    ctx.fillStyle = PALETTE.muted;
     ctx.letterSpacing = '2px';
-    ctx.fillText(stat.label.toUpperCase(), x, y + 100);
+    ctx.fillText(stat.label.toUpperCase(), x, y + 96);
     ctx.letterSpacing = '0px';
   });
 
-  ctx.fillStyle = 'rgba(95, 168, 160, 0.28)';
-  ctx.fillRect(56, H - 108, W - 112, 2);
+  ctx.fillStyle = 'rgba(35, 42, 32, 0.1)';
+  ctx.fillRect(56, H - 104, W - 112, 2);
 
-  ctx.font = font(MONO, 24, 400);
-  ctx.fillStyle = PALETTE.boneDim;
-  ctx.fillText(d.footnote, 56, H - 82);
+  // Green status dot before the footnote — state encoded in form, not just words.
+  ctx.fillStyle = PALETTE.greenBright;
+  ctx.beginPath();
+  ctx.arc(66, H - 62, 8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.font = font(MONO, 23, 400);
+  ctx.fillStyle = PALETTE.muted;
+  ctx.fillText(d.footnote, 88, H - 74);
 
   return toTexture(canvas);
 }
@@ -214,23 +239,20 @@ export function dashboardTexture(d: DashboardContent): CanvasTexture {
 /** Floating nameplate above a remote participant. */
 export function presenceTexture(handle: string, status: string): CanvasTexture {
   const [canvas, ctx] = makeCanvas(512, 140);
-
-  ctx.fillStyle = 'rgba(14, 22, 38, 0.88)';
-  roundRect(ctx, 0, 0, 512, 140, 20);
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(95, 168, 160, 0.5)';
-  ctx.lineWidth = 3;
-  roundRect(ctx, 1.5, 1.5, 509, 137, 20);
-  ctx.stroke();
+  cardBase(ctx, 512, 140, 28, 'rgba(61, 156, 80, 0.35)');
 
   ctx.textBaseline = 'top';
   ctx.font = font(DISPLAY, 42);
-  ctx.fillStyle = PALETTE.bone;
-  ctx.fillText(handle, 28, 24);
+  ctx.fillStyle = PALETTE.ink;
+  ctx.fillText(handle, 30, 24);
 
-  ctx.font = font(MONO, 24, 400);
-  ctx.fillStyle = PALETTE.seaGlass;
-  ctx.fillText(status.toUpperCase(), 28, 82);
+  ctx.fillStyle = PALETTE.greenBright;
+  ctx.beginPath();
+  ctx.arc(38, 96, 7, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.font = font(MONO, 23, 500);
+  ctx.fillStyle = PALETTE.green;
+  ctx.fillText(status.toUpperCase(), 56, 84);
 
   return toTexture(canvas);
 }

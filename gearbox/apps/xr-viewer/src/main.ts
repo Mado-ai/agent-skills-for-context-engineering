@@ -8,27 +8,31 @@
  * This is a *view*, not the client. There is no networking, no auth, no anchors — the
  * point is to make the bridge tangible enough to judge before sprint 6 builds it.
  *
- * The room is lit almost entirely by the collected items themselves. That is the one
- * deliberate idea in the lighting: your collection is what makes the place yours.
+ * Styled to the GearBox brand: a warm, daylit home — cream plaster, oak floor, cove
+ * light, white rounded cards — anchored by the green hub cube from the brand's home
+ * screen. The collected items glow as accents inside that warmth.
  */
 
 import {
   ACESFilmicToneMapping,
   AdditiveBlending,
-  AmbientLight,
   BackSide,
   BoxGeometry,
   BufferGeometry,
   CapsuleGeometry,
   Color,
   CylinderGeometry,
+  DirectionalLight,
   DodecahedronGeometry,
   DoubleSide,
+  EdgesGeometry,
   Float32BufferAttribute,
   Group,
+  HemisphereLight,
   IcosahedronGeometry,
   Line,
   LineBasicMaterial,
+  LineSegments,
   Mesh,
   MeshBasicMaterial,
   MeshStandardMaterial,
@@ -57,6 +61,7 @@ import {
   provenanceTexture,
   PALETTE,
 } from './labels.js';
+import { windowTexture, woodFloorTexture } from './textures.js';
 
 const ROOM = { width: 8, depth: 8, height: 3.2 };
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -74,7 +79,7 @@ renderer.xr.enabled = true;
 document.getElementById('stage')?.appendChild(renderer.domElement);
 
 const scene = new Scene();
-scene.background = new Color(PALETTE.navy);
+scene.background = new Color(PALETTE.cream);
 
 const camera = new PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.05, 60);
 camera.position.set(0, 1.55, 2.45);
@@ -89,7 +94,7 @@ const shell = new Group();
 scene.add(shell);
 
 const plasterMat = new MeshStandardMaterial({
-  color: new Color(PALETTE.slate),
+  color: new Color('#e9e3d6'),
   roughness: 0.94,
   metalness: 0,
   side: BackSide,
@@ -101,7 +106,7 @@ shell.add(room);
 
 const floor = new Mesh(
   new PlaneGeometry(ROOM.width, ROOM.depth),
-  new MeshStandardMaterial({ color: new Color('#222b36'), roughness: 0.82, metalness: 0.04 }),
+  new MeshStandardMaterial({ map: woodFloorTexture(), roughness: 0.72, metalness: 0.02 }),
 );
 floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
@@ -127,15 +132,139 @@ function buildBoundary(): Line {
   geo.setAttribute('position', new Float32BufferAttribute(pts.flat(), 3));
   return new Line(
     geo,
-    new LineBasicMaterial({ color: new Color(PALETTE.seaGlass), transparent: true, opacity: 0.34 }),
+    new LineBasicMaterial({
+      color: new Color(PALETTE.greenBright),
+      transparent: true,
+      opacity: 0.3,
+    }),
   );
 }
 shell.add(buildBoundary());
 
+// Arched windows on the west wall. Warm daylight is most of what makes the room read
+// as a home rather than a gallery.
+const windowMat = new MeshBasicMaterial({ map: windowTexture(), toneMapped: false });
+for (const z of [-1.35, 1.05]) {
+  const win = new Mesh(new PlaneGeometry(1.15, 1.72), windowMat);
+  win.position.set(-ROOM.width / 2 + 0.03, 1.78, z);
+  win.rotation.y = Math.PI / 2;
+  shell.add(win);
+}
+
+// Warm LED cove where the walls meet the ceiling — straight out of the brand's home.
+const coveMat = new MeshBasicMaterial({ color: new Color('#ffdca6'), toneMapped: false });
+const coveY = ROOM.height - 0.09;
+const coveNorth = new Mesh(new BoxGeometry(ROOM.width - 0.5, 0.035, 0.05), coveMat);
+coveNorth.position.set(0, coveY, -ROOM.depth / 2 + 0.09);
+const coveSouth = coveNorth.clone();
+coveSouth.position.z = ROOM.depth / 2 - 0.09;
+const coveWest = new Mesh(new BoxGeometry(0.05, 0.035, ROOM.depth - 0.5), coveMat);
+coveWest.position.set(-ROOM.width / 2 + 0.09, coveY, 0);
+const coveEast = coveWest.clone();
+coveEast.position.x = ROOM.width / 2 - 0.09;
+shell.add(coveNorth, coveSouth, coveWest, coveEast);
+
+// ── the hub ─────────────────────────────────────────────────────────────────────
+// The centrepiece from the brand's home screen: a low platform, a warm floor ring,
+// and the green holographic GearBox cube. It anchors the room the way the logo
+// anchors the UI.
+let hubCube!: Mesh;
+let hubEdges!: LineSegments;
+{
+  const hub = new Group();
+  hub.position.set(0, 0, -0.3);
+
+  const base = new Mesh(
+    new CylinderGeometry(0.58, 0.62, 0.1, 48),
+    new MeshStandardMaterial({ color: new Color('#efe9db'), roughness: 0.8 }),
+  );
+  base.position.y = 0.05;
+  base.receiveShadow = true;
+
+  const warmRing = new Mesh(
+    new RingGeometry(0.63, 0.71, 64),
+    new MeshBasicMaterial({
+      color: new Color('#ffdca6'),
+      transparent: true,
+      opacity: 0.85,
+      side: DoubleSide,
+      toneMapped: false,
+    }),
+  );
+  warmRing.rotation.x = -Math.PI / 2;
+  warmRing.position.y = 0.006;
+
+  const greenGlow = new Mesh(
+    new RingGeometry(0.28, 0.4, 48),
+    new MeshBasicMaterial({
+      color: new Color(PALETTE.greenBright),
+      transparent: true,
+      opacity: 0.45,
+      side: DoubleSide,
+      blending: AdditiveBlending,
+      depthWrite: false,
+    }),
+  );
+  greenGlow.rotation.x = -Math.PI / 2;
+  greenGlow.position.y = 0.106;
+
+  hubCube = new Mesh(
+    new BoxGeometry(0.17, 0.17, 0.17),
+    new MeshStandardMaterial({
+      color: new Color(PALETTE.greenBright),
+      emissive: new Color(PALETTE.greenBright),
+      emissiveIntensity: 1.0,
+      transparent: true,
+      opacity: 0.82,
+      roughness: 0.3,
+      metalness: 0.1,
+    }),
+  );
+  hubCube.position.y = 0.62;
+
+  hubEdges = new LineSegments(
+    new EdgesGeometry(new BoxGeometry(0.23, 0.23, 0.23)),
+    new LineBasicMaterial({ color: new Color('#bff0c8'), transparent: true, opacity: 0.9 }),
+  );
+  hubEdges.position.y = 0.62;
+
+  const hubLight = new PointLight(new Color(PALETTE.greenBright), 1.1, 3.5, 2);
+  hubLight.position.y = 0.7;
+
+  // Soft projection beam from the platform up to the cube — it is what makes the
+  // cube read as a hologram rising from the hub rather than a box in mid-air.
+  const beam = new Mesh(
+    new CylinderGeometry(0.09, 0.3, 0.52, 32, 1, true),
+    new MeshBasicMaterial({
+      color: new Color(PALETTE.greenBright),
+      transparent: true,
+      opacity: 0.14,
+      side: DoubleSide,
+      depthWrite: false,
+    }),
+  );
+  beam.position.y = 0.36;
+
+  hub.add(base, warmRing, greenGlow, beam, hubCube, hubEdges, hubLight);
+  scene.add(hub);
+}
+
 // ── lighting ────────────────────────────────────────────────────────────────────
-// Deliberately almost nothing ambient. The items do the work.
-scene.add(new AmbientLight(new Color('#3a4a66'), 0.26));
-scene.add(pinLight(new Vector3(0, 3.0, 1.6), '#4a5f80', 1.5));
+// Warm daylight through the windows plus a soft sky/ground wash. The items and the
+// hub glow as accents inside that warmth, not as the only light in a dark room.
+scene.add(new HemisphereLight(new Color('#fff3e0'), new Color('#9a8a72'), 0.8));
+
+const sun = new DirectionalLight(new Color('#ffe9c2'), 1.6);
+sun.position.set(-4.2, 3.1, 0.7);
+sun.castShadow = true;
+sun.shadow.mapSize.set(1024, 1024);
+sun.shadow.camera.left = -6;
+sun.shadow.camera.right = 6;
+sun.shadow.camera.top = 5;
+sun.shadow.camera.bottom = -3;
+scene.add(sun);
+scene.add(sun.target);
+sun.target.position.set(1.6, 0.4, -1.2);
 
 // ── collected items ─────────────────────────────────────────────────────────────
 function formGeometry(form: CollectedItem['form']): BufferGeometry {
@@ -167,9 +296,9 @@ const itemsGroup = new Group();
 scene.add(itemsGroup);
 
 const plinthMat = new MeshStandardMaterial({
-  color: new Color('#2c3542'),
-  roughness: 0.7,
-  metalness: 0.12,
+  color: new Color('#f2eee2'),
+  roughness: 0.78,
+  metalness: 0.04,
 });
 
 // Arranged along a shallow arc so nothing occludes anything else from the entry point.
@@ -210,15 +339,14 @@ COLLECTION.forEach((item, i) => {
     new MeshBasicMaterial({
       color: colour,
       transparent: true,
-      opacity: 0.11,
+      opacity: 0.16,
       side: DoubleSide,
-      blending: AdditiveBlending,
       depthWrite: false,
     }),
   );
   pivot.add(halo);
 
-  const light = new PointLight(colour, 2.6, 5.5, 2);
+  const light = new PointLight(colour, 1.1, 4, 2);
   light.castShadow = i < 3; // shadow-casting lights are the expensive part; cap them
   if (light.shadow) light.shadow.mapSize.set(512, 512);
   pivot.add(light);
@@ -243,7 +371,7 @@ const dashboard = new Mesh(
 );
 dashboard.position.set(-2.5, 2.55, -ROOM.depth / 2 + 0.06);
 scene.add(dashboard);
-scene.add(pinLight(new Vector3(-2.5, 2.55, -3.2), PALETTE.seaGlass, 1.4));
+scene.add(pinLight(new Vector3(-2.5, 2.55, -3.2), '#ffe4b8', 0.6));
 
 // ── portal back to the map ──────────────────────────────────────────────────────
 // The loop closes here: the room is where you keep things, the map is where you go.
@@ -253,18 +381,18 @@ portal.position.set(2.55, 2.2, -ROOM.depth / 2 + 0.07);
   const disc = new Mesh(
     new RingGeometry(0.3, 0.36, 64),
     new MeshBasicMaterial({
-      color: new Color(PALETTE.seaGlass),
+      color: new Color(PALETTE.greenBright),
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.85,
       side: DoubleSide,
     }),
   );
   const fill = new Mesh(
     new PlaneGeometry(0.62, 0.62),
     new MeshBasicMaterial({
-      color: new Color('#0b2b33'),
+      color: new Color(PALETTE.greenTint),
       transparent: true,
-      opacity: 0.55,
+      opacity: 0.8,
       side: DoubleSide,
     }),
   );
@@ -283,7 +411,7 @@ portal.position.set(2.55, 2.2, -ROOM.depth / 2 + 0.07);
   portal.add(fill, disc, label);
 }
 scene.add(portal);
-scene.add(pinLight(new Vector3(2.55, 2.2, -3.2), PALETTE.seaGlass, 1.2));
+scene.add(pinLight(new Vector3(2.55, 2.2, -3.2), '#ffe4b8', 0.6));
 
 // ── remote participant ──────────────────────────────────────────────────────────
 // Presence is half the product; an empty room would sell it short.
@@ -293,10 +421,10 @@ friend.position.set(-1.55, 0, -3.05);
   const body = new Mesh(
     new CapsuleGeometry(0.17, 0.5, 6, 16),
     new MeshStandardMaterial({
-      color: new Color('#4d6070'),
+      color: new Color('#8fbe97'),
       roughness: 0.6,
-      emissive: new Color(PALETTE.seaGlass),
-      emissiveIntensity: 0.12,
+      emissive: new Color(PALETTE.greenBright),
+      emissiveIntensity: 0.06,
     }),
   );
   body.position.y = 1.02;
@@ -304,7 +432,7 @@ friend.position.set(-1.55, 0, -3.05);
 
   const head = new Mesh(
     new IcosahedronGeometry(0.13, 1),
-    new MeshStandardMaterial({ color: new Color('#6d8496'), roughness: 0.5 }),
+    new MeshStandardMaterial({ color: new Color('#dcd4c0'), roughness: 0.55 }),
   );
   head.position.y = 1.48;
   head.castShadow = true;
@@ -507,6 +635,13 @@ renderer.setAnimationLoop((time) => {
 
   xr.update(dt);
   if (renderer.xr.isPresenting) xr.clampToRoom(ROOM.width / 2, ROOM.depth / 2);
+
+  if (!reduceMotion) {
+    hubCube.rotation.y += dt * 0.6;
+    hubEdges.rotation.y = hubCube.rotation.y;
+    hubCube.position.y = 0.62 + Math.sin(t * 0.8) * 0.02;
+    hubEdges.position.y = hubCube.position.y;
+  }
 
   for (const p of placed) {
     const isSelected = selected === p;

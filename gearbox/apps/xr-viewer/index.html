@@ -5,19 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>GearBox — Room View</title>
     <style>
-      /* Single-theme by choice: this is a room at dusk, and a light mode would be a
-         different room. The chrome is deliberately quiet — the scene is the design. */
+      /* GearBox brand chrome: warm cream ground, white rounded cards, green as the one
+         accent, friendly rounded type. Light theme by identity — the brand's world is
+         a bright one, and the scene behind supplies the warmth. */
       :root {
-        --navy: #0e1626;
-        --slate: #39424e;
-        --brass: #e2a44a;
-        --sea-glass: #5fa8a0;
-        --bone: #ede9e2;
-        --bone-dim: rgba(237, 233, 226, 0.62);
-        --bone-faint: rgba(237, 233, 226, 0.34);
-        --display: 600 1rem/1.2 ui-sans-serif, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        --cream: #f0ece3;
+        --card: #fbfaf6;
+        --ink: #232a20;
+        --muted: #6d7365;
+        --faint: #a4a998;
+        --green: #3d9c50;
+        --green-bright: #46a758;
+        --green-deep: #2f8040;
+        --green-tint: #e5f2e6;
+        --amber: #e39a33;
+        --border: rgba(35, 42, 32, 0.12);
+        --shadow: 0 6px 24px rgba(35, 42, 32, 0.1);
+        --display: ui-rounded, 'SF Pro Rounded', ui-sans-serif, 'Helvetica Neue', Arial, sans-serif;
         --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-        color-scheme: dark;
+        color-scheme: light;
       }
 
       * {
@@ -29,9 +35,9 @@
         margin: 0;
         height: 100%;
         overflow: hidden;
-        background: var(--navy);
-        color: var(--bone);
-        font-family: ui-sans-serif, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: var(--display);
         -webkit-font-smoothing: antialiased;
       }
 
@@ -50,67 +56,94 @@
         pointer-events: none;
       }
 
-      /* Identity block. Small, top-left, out of the way of the scene. */
+      /* Identity card, top-left — the same white rounded card as everything else. */
       .masthead {
         top: clamp(0.9rem, 2.5vw, 1.6rem);
         left: clamp(0.9rem, 2.5vw, 1.6rem);
         display: flex;
+        gap: 0.8rem;
+        align-items: flex-start;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        padding: 0.95rem 1.15rem;
+        max-width: min(34ch, calc(100vw - 2rem));
+      }
+
+      .logo {
+        flex: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: var(--green-tint);
+        display: grid;
+        place-items: center;
+      }
+
+      .masthead-text {
+        display: flex;
         flex-direction: column;
-        gap: 0.35rem;
+        gap: 0.3rem;
       }
 
       .eyebrow {
         font-family: var(--mono);
-        font-size: 0.7rem;
-        font-weight: 500;
-        letter-spacing: 0.22em;
+        font-size: 0.66rem;
+        font-weight: 600;
+        letter-spacing: 0.2em;
         text-transform: uppercase;
-        color: var(--brass);
+        color: var(--green);
       }
 
       .masthead h1 {
-        font: var(--display);
-        font-size: clamp(1.15rem, 3.4vw, 1.5rem);
+        font-size: clamp(1.05rem, 3vw, 1.3rem);
+        font-weight: 700;
         margin: 0;
-        letter-spacing: -0.015em;
+        letter-spacing: -0.01em;
+        line-height: 1.25;
         text-wrap: balance;
       }
 
       .masthead p {
         margin: 0;
-        max-width: 30ch;
-        font-family: var(--mono);
-        font-size: 0.74rem;
-        line-height: 1.55;
-        color: var(--bone-dim);
+        font-size: 0.78rem;
+        line-height: 1.5;
+        color: var(--muted);
       }
 
-      /* Status line — echoes the selected item so the provenance reads even when the
-         in-world card is edge-on. */
+      /* Status pill — echoes the selected item's provenance. */
       .readout {
         bottom: clamp(0.9rem, 2.5vw, 1.6rem);
         left: clamp(0.9rem, 2.5vw, 1.6rem);
         display: flex;
-        align-items: baseline;
-        gap: 0.7rem;
-        max-width: min(46ch, calc(100vw - 2rem));
+        align-items: center;
+        gap: 0.6rem;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        box-shadow: var(--shadow);
+        padding: 0.55rem 1rem;
+        max-width: min(58ch, calc(100vw - 2rem));
       }
 
       .readout .dot {
-        width: 7px;
-        height: 7px;
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
-        background: var(--brass);
+        background: var(--green-bright);
         flex: none;
-        transform: translateY(-2px);
       }
 
       #status {
         font-family: var(--mono);
-        font-size: 0.78rem;
-        line-height: 1.5;
-        color: var(--bone);
+        font-size: 0.76rem;
+        line-height: 1.4;
+        color: var(--ink);
         font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .controls {
@@ -122,8 +155,15 @@
         gap: 0.75rem;
       }
 
-      /* Two hint sets: the desktop one until an XR device is present, the VR one
-         once the session can start. Swapped by a class on <body>. */
+      /* Two hint sets: desktop until an XR device is present, VR once one is. */
+      .hints {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.35rem 0.45rem;
+        max-width: 24rem;
+      }
+
       .hints[data-mode='vr'] {
         display: none;
       }
@@ -136,61 +176,54 @@
         display: flex;
       }
 
-      .hints {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        gap: 0.35rem 0.5rem;
-        max-width: 22rem;
-      }
-
       .hint {
         font-family: var(--mono);
-        font-size: 0.68rem;
-        letter-spacing: 0.04em;
-        color: var(--bone-dim);
-        border: 1px solid rgba(237, 233, 226, 0.16);
-        border-radius: 3px;
-        padding: 0.22rem 0.45rem;
+        font-size: 0.66rem;
+        letter-spacing: 0.03em;
+        color: var(--muted);
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 0.28rem 0.6rem;
         white-space: nowrap;
+        box-shadow: 0 2px 8px rgba(35, 42, 32, 0.06);
       }
 
       .hint b {
-        color: var(--bone);
-        font-weight: 500;
+        color: var(--ink);
+        font-weight: 600;
       }
 
       #vr-slot {
         pointer-events: auto;
       }
 
-      /* three's VRButton ships inline styles; override them into the palette. */
+      /* three's VRButton ships inline styles; override them into the brand. */
       #vr-slot .gb-vr-button {
         position: static !important;
         width: auto !important;
-        padding: 0.6rem 1.15rem !important;
-        border: 1px solid var(--brass) !important;
-        border-radius: 4px !important;
-        background: rgba(226, 164, 74, 0.1) !important;
-        color: var(--brass) !important;
-        font-family: var(--mono) !important;
-        font-size: 0.74rem !important;
-        letter-spacing: 0.14em !important;
+        padding: 0.65rem 1.3rem !important;
+        border: none !important;
+        border-radius: 999px !important;
+        background: var(--green-bright) !important;
+        color: #ffffff !important;
+        font-family: var(--display) !important;
+        font-size: 0.8rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.06em !important;
         text-transform: uppercase !important;
         opacity: 1 !important;
+        box-shadow: 0 4px 14px rgba(70, 167, 88, 0.35);
         cursor: pointer;
-        transition:
-          background 160ms ease,
-          color 160ms ease;
+        transition: background 160ms ease;
       }
 
       #vr-slot .gb-vr-button:hover {
-        background: var(--brass) !important;
-        color: var(--navy) !important;
+        background: var(--green-deep) !important;
       }
 
       #vr-slot .gb-vr-button:focus-visible {
-        outline: 2px solid var(--sea-glass);
+        outline: 2px solid var(--ink);
         outline-offset: 3px;
       }
 
@@ -208,7 +241,7 @@
 
       @media (max-width: 640px) {
         .hints {
-          display: none;
+          display: none !important;
         }
       }
     </style>
@@ -217,12 +250,30 @@
     <div id="stage"></div>
 
     <header class="chrome masthead">
-      <span class="eyebrow">GearBox · Room View</span>
-      <h1>Everything here was collected somewhere real</h1>
-      <p>
-        A design prototype of the bridge: game → collected item → your persistent room. Put on a
-        headset and pick something up.
-      </p>
+      <span class="logo" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M12 2.5 20.5 7.25v9.5L12 21.5 3.5 16.75v-9.5Z"
+            stroke="#3d9c50"
+            stroke-width="2.1"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M12 21.5V12m0 0L3.5 7.25M12 12l8.5-4.75"
+            stroke="#3d9c50"
+            stroke-width="2.1"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </span>
+      <div class="masthead-text">
+        <span class="eyebrow">GearBox · Room View</span>
+        <h1>Everything here was collected somewhere real</h1>
+        <p>
+          A design prototype of the bridge: game → collected item → your persistent room. Put on a
+          headset and pick something up.
+        </p>
+      </div>
     </header>
 
     <div class="chrome readout">

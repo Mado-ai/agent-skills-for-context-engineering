@@ -110,7 +110,7 @@ export class XRInteraction {
     rayGeo.setAttribute('position', new Float32BufferAttribute([0, 0, 0, 0, 0, -1], 3));
     const rayLine = new Line(
       rayGeo,
-      new LineBasicMaterial({ color: new Color('#ede9e2'), transparent: true, opacity: 0.5 }),
+      new LineBasicMaterial({ color: new Color('#ffffff'), transparent: true, opacity: 0.65 }),
     );
     rayLine.scale.z = 4;
     ray.add(rayLine);
@@ -119,7 +119,7 @@ export class XRInteraction {
     const cursor = new Mesh(
       new RingGeometry(0.012, 0.022, 24),
       new MeshBasicMaterial({
-        color: new Color('#e2a44a'),
+        color: new Color('#3d9c50'),
         transparent: true,
         opacity: 0.9,
         side: DoubleSide,
@@ -134,7 +134,7 @@ export class XRInteraction {
     // adds nothing here — what matters is knowing where your hand is.
     const wand = new Mesh(
       new ConeGeometry(0.018, 0.09, 12),
-      new MeshBasicMaterial({ color: new Color('#8fa2b5') }),
+      new MeshBasicMaterial({ color: new Color('#a9a294') }),
     );
     wand.rotation.x = -Math.PI / 2;
     grip.add(wand);
@@ -172,7 +172,7 @@ export class XRInteraction {
     const mesh = new Mesh(
       new RingGeometry(0.34, 1.6, 48),
       new MeshBasicMaterial({
-        color: new Color('#05080f'),
+        color: new Color('#161511'),
         transparent: true,
         opacity: 0,
         depthTest: false,

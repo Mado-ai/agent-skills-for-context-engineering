@@ -27,12 +27,12 @@ pnpm --filter @gearbox/xr-viewer smoke   # headless render check + screenshot
 
 Open the page in the headset browser over HTTPS and press **Enter VR**.
 
-| Control | Does |
-|---|---|
-| Left thumbstick | Move (head-relative) |
-| Right thumbstick | Snap turn, 30° per flick |
-| Trigger | Inspect — brings up the provenance card |
-| Grip | **Pick the item up** and hold it |
+| Control            | Does                                      |
+| ------------------ | ----------------------------------------- |
+| Left thumbstick    | Move (head-relative)                      |
+| Right thumbstick   | Snap turn, 30° per flick                  |
+| Trigger            | Inspect — brings up the provenance card   |
+| Grip               | **Pick the item up** and hold it          |
 | Physically walking | Works too; the rig is clamped to the room |
 
 Grabbing is the point. Pick a collected thing up, bring it to your face, and the
@@ -58,8 +58,10 @@ on-screen control hints switch to the VR set only when a headset is actually det
 | A remote participant            | Presence is half the product; an empty room would undersell it.                                                                                                   |
 | Portal back to the map          | Closes the loop: the room is where you keep things, the map is where you go.                                                                                      |
 
-**Lighting is the one deliberate idea:** the room is lit almost entirely by the
-collected items themselves. Your collection is what makes the place yours.
+**Styled to the GearBox brand:** a warm, daylit home — cream plaster, oak floor,
+arched windows, a warm LED cove at the ceiling — anchored by the green holographic
+hub cube from the brand's home screen. All in-world text sits on the same white
+rounded cards as the product UI, with green as the one accent.
 
 Place data is real Copenhagen geography, matching the launch-city assumption in
 `docs/gearbox/01-assumptions-risks.md` A18. © OpenStreetMap contributors.
@@ -69,8 +71,8 @@ Place data is real Copenhagen geography, matching the launch-city assumption in
 - Type is drawn to canvas textures rather than through a text-mesh library: smaller
   bundle, crisper at VR reading distance, and it lets the card use a real field-log
   layout.
-- Single visual theme by choice — this is a room at dusk, and a light mode would be a
-  different room.
+- Single light theme by identity — the brand's world is a bright one, and the scene
+  behind the chrome supplies the warmth.
 - **The VR paths are unverified on real hardware.** The smoke check runs every frame
   of the interaction layer in a headless browser, so the code is exercised and
   error-free, but locomotion, grab, haptics and comfort have not been felt on a
