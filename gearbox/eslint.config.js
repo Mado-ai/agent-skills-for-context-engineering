@@ -16,6 +16,7 @@
 
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import globals from 'globals';
 
 const PRIVATE_LAYERS = ['domain', 'application', 'infrastructure', 'http'];
 
@@ -87,6 +88,22 @@ export default tseslint.config(
         },
       ],
     },
+  },
+  {
+    // Node-side code: services, build scripts, config.
+    files: ['services/**/*.ts', 'packages/**/*.ts', '**/*.config.{ts,js}'],
+    languageOptions: { globals: { ...globals.node } },
+  },
+  {
+    // Build and smoke scripts run in Node, but page.evaluate() callbacks are shipped
+    // to the browser and legitimately reference DOM globals from inside this file.
+    files: ['**/scripts/**/*.mjs'],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+  },
+  {
+    // Client code runs in a browser and legitimately touches DOM and WebGL globals.
+    files: ['apps/**/src/**/*.ts'],
+    languageOptions: { globals: { ...globals.browser } },
   },
   {
     files: ['**/*.test.ts', '**/testing/**/*.ts'],

@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>GearBox — Room View</title>
+    <style>
+      /* Single-theme by choice: this is a room at dusk, and a light mode would be a
+         different room. The chrome is deliberately quiet — the scene is the design. */
+      :root {
+        --navy: #0e1626;
+        --slate: #39424e;
+        --brass: #e2a44a;
+        --sea-glass: #5fa8a0;
+        --bone: #ede9e2;
+        --bone-dim: rgba(237, 233, 226, 0.62);
+        --bone-faint: rgba(237, 233, 226, 0.34);
+        --display: 600 1rem/1.2 ui-sans-serif, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+        color-scheme: dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: var(--navy);
+        color: var(--bone);
+        font-family: ui-sans-serif, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      #stage {
+        position: fixed;
+        inset: 0;
+      }
+
+      #stage canvas {
+        display: block;
+      }
+
+      .chrome {
+        position: fixed;
+        z-index: 2;
+        pointer-events: none;
+      }
+
+      /* Identity block. Small, top-left, out of the way of the scene. */
+      .masthead {
+        top: clamp(0.9rem, 2.5vw, 1.6rem);
+        left: clamp(0.9rem, 2.5vw, 1.6rem);
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+
+      .eyebrow {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        font-weight: 500;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--brass);
+      }
+
+      .masthead h1 {
+        font: var(--display);
+        font-size: clamp(1.15rem, 3.4vw, 1.5rem);
+        margin: 0;
+        letter-spacing: -0.015em;
+        text-wrap: balance;
+      }
+
+      .masthead p {
+        margin: 0;
+        max-width: 30ch;
+        font-family: var(--mono);
+        font-size: 0.74rem;
+        line-height: 1.55;
+        color: var(--bone-dim);
+      }
+
+      /* Status line — echoes the selected item so the provenance reads even when the
+         in-world card is edge-on. */
+      .readout {
+        bottom: clamp(0.9rem, 2.5vw, 1.6rem);
+        left: clamp(0.9rem, 2.5vw, 1.6rem);
+        display: flex;
+        align-items: baseline;
+        gap: 0.7rem;
+        max-width: min(46ch, calc(100vw - 2rem));
+      }
+
+      .readout .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--brass);
+        flex: none;
+        transform: translateY(-2px);
+      }
+
+      #status {
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        line-height: 1.5;
+        color: var(--bone);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .controls {
+        bottom: clamp(0.9rem, 2.5vw, 1.6rem);
+        right: clamp(0.9rem, 2.5vw, 1.6rem);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.75rem;
+      }
+
+      .hints {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.35rem 0.5rem;
+        max-width: 22rem;
+      }
+
+      .hint {
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        letter-spacing: 0.04em;
+        color: var(--bone-dim);
+        border: 1px solid rgba(237, 233, 226, 0.16);
+        border-radius: 3px;
+        padding: 0.22rem 0.45rem;
+        white-space: nowrap;
+      }
+
+      .hint b {
+        color: var(--bone);
+        font-weight: 500;
+      }
+
+      #vr-slot {
+        pointer-events: auto;
+      }
+
+      /* three's VRButton ships inline styles; override them into the palette. */
+      #vr-slot .gb-vr-button {
+        position: static !important;
+        width: auto !important;
+        padding: 0.6rem 1.15rem !important;
+        border: 1px solid var(--brass) !important;
+        border-radius: 4px !important;
+        background: rgba(226, 164, 74, 0.1) !important;
+        color: var(--brass) !important;
+        font-family: var(--mono) !important;
+        font-size: 0.74rem !important;
+        letter-spacing: 0.14em !important;
+        text-transform: uppercase !important;
+        opacity: 1 !important;
+        cursor: pointer;
+        transition:
+          background 160ms ease,
+          color 160ms ease;
+      }
+
+      #vr-slot .gb-vr-button:hover {
+        background: var(--brass) !important;
+        color: var(--navy) !important;
+      }
+
+      #vr-slot .gb-vr-button:focus-visible {
+        outline: 2px solid var(--sea-glass);
+        outline-offset: 3px;
+      }
+
+      /* In an immersive session the DOM overlay is invisible anyway; hide it so it
+         cannot steal pointer events on exit. */
+      body.in-vr .chrome {
+        opacity: 0;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition-duration: 0.01ms !important;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .hints {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage"></div>
+
+    <header class="chrome masthead">
+      <span class="eyebrow">GearBox · Room View</span>
+      <h1>Everything here was collected somewhere real</h1>
+      <p>
+        A design prototype of the bridge: game → collected item → your persistent room. Not the
+        client — no networking, no anchors.
+      </p>
+    </header>
+
+    <div class="chrome readout">
+      <span class="dot" aria-hidden="true"></span>
+      <span id="status" role="status">Loading room…</span>
+    </div>
+
+    <div class="chrome controls">
+      <div class="hints">
+        <span class="hint"><b>drag</b> look</span>
+        <span class="hint"><b>W A S D</b> walk</span>
+        <span class="hint"><b>click</b> inspect</span>
+      </div>
+      <div id="vr-slot"></div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

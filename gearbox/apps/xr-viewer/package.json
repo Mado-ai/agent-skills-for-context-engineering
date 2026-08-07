@@ -1,0 +1,25 @@
+{
+  "name": "@gearbox/xr-viewer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build && node scripts/make-artifact.mjs",
+    "dev": "vite",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"no tests in @gearbox/xr-viewer\"",
+    "test:unit": "echo \"no tests in @gearbox/xr-viewer\"",
+    "test:integration": "echo \"no integration tests in @gearbox/xr-viewer\"",
+    "smoke": "node scripts/smoke.mjs dist/index.html dist/room.png"
+  },
+  "dependencies": {
+    "three": "^0.172.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.172.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7",
+    "vite-plugin-singlefile": "^2.1.0"
+  }
+}
