@@ -253,3 +253,51 @@ describe('not found', () => {
     expect(res.json().type).toContain('not-found');
   });
 });
+
+describe('POST /v1/sessions', () => {
+  it('mints a room-scoped token carrying the caller identity and role', async () => {
+    const { verifyRoomToken } = await import('@gearbox/auth-sdk');
+    const server = app();
+    const tokens = await registered(server);
+
+    const res = await server.inject({
+      method: 'POST',
+      url: '/v1/sessions',
+      headers: { authorization: `Bearer ${tokens.accessToken}` },
+      payload: { room: 'demo' },
+    });
+    expect(res.statusCode).toBe(201);
+    const body = res.json();
+    expect(body.url).toContain('/rooms/demo');
+
+    const claims = await verifyRoomToken(
+      'development-only-room-secret-do-not-use-in-prod-00',
+      body.token,
+    );
+    expect(claims.sub).toBe(tokens.userId);
+    expect(claims.handle).toBe('grace');
+    expect(claims.role).toBe('collaborator');
+    expect(claims.room).toBe('demo');
+  });
+
+  it('requires authentication', async () => {
+    const res = await app().inject({
+      method: 'POST',
+      url: '/v1/sessions',
+      payload: { room: 'demo' },
+    });
+    expect(res.statusCode).toBe(401);
+  });
+
+  it('rejects room names that could traverse paths', async () => {
+    const server = app();
+    const tokens = await registered(server);
+    const res = await server.inject({
+      method: 'POST',
+      url: '/v1/sessions',
+      headers: { authorization: `Bearer ${tokens.accessToken}` },
+      payload: { room: '../etc/passwd' },
+    });
+    expect(res.statusCode).toBe(400);
+  });
+});

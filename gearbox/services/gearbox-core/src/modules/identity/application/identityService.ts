@@ -203,6 +203,11 @@ export class IdentityService {
     return this.issueTokenPair(user.id, user.ageBand, record.deviceId, record.familyId);
   }
 
+  /** Profile lookup for other modules (e.g. session minting wants the handle). */
+  async profile(userId: string): Promise<ProfileRecord | null> {
+    return this.deps.users.getProfile(userId);
+  }
+
   async registerDevice(userId: string, input: RegisterDeviceRequest): Promise<DeviceRecord> {
     const { devices, audit, clock } = this.deps;
 

@@ -213,6 +213,39 @@
         pointer-events: auto;
       }
 
+      .mic-button {
+        pointer-events: auto;
+        padding: 0.6rem 1.15rem;
+        border: 1px solid var(--green);
+        border-radius: 999px;
+        background: var(--card);
+        color: var(--green);
+        font-family: var(--display);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        cursor: pointer;
+        box-shadow: var(--shadow);
+        transition:
+          background 160ms ease,
+          color 160ms ease;
+      }
+
+      .mic-button:hover {
+        background: var(--green-tint);
+      }
+
+      .mic-button.mic-live {
+        background: var(--green-bright);
+        color: #ffffff;
+      }
+
+      .mic-button:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 3px;
+      }
+
       /* three's VRButton ships inline styles; override them into the brand. */
       #vr-slot .gb-vr-button {
         position: static !important;
@@ -310,6 +343,7 @@
         <span class="hint"><b>trigger</b> inspect</span>
         <span class="hint"><b>grip</b> pick up</span>
       </div>
+      <button id="mic" class="mic-button" hidden>Unmute mic</button>
       <div id="vr-slot"></div>
     </div>
 

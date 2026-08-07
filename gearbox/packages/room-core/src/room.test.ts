@@ -303,3 +303,63 @@ describe('pose integrity', () => {
     expect(room.stats(a)!.malformedPackets).toBe(3);
   });
 });
+
+describe('rtc signaling relay', () => {
+  it('routes an rtc payload to exactly the addressed participant', () => {
+    const { room, joinAs } = setup();
+    const [a] = joinAs('ada');
+    const [b, connB] = joinAs('sam');
+    const [, connC] = joinAs('mira');
+
+    room.handleJson(a, { type: 'rtc', to: b, payload: { kind: 'offer', sdp: 'x' } });
+
+    const rtcB = connB.jsonByType('rtc');
+    expect(rtcB).toHaveLength(1);
+    expect(rtcB[0]).toMatchObject({ from: a, payload: { kind: 'offer', sdp: 'x' } });
+    expect(connC.jsonByType('rtc')).toHaveLength(0);
+  });
+
+  it('ignores rtc to an unknown participant', () => {
+    const { room, joinAs } = setup();
+    const [a] = joinAs('ada');
+    expect(() => room.handleJson(a, { type: 'rtc', to: 99, payload: {} })).not.toThrow();
+  });
+});
+
+describe('persistence hook', () => {
+  it('fires onSettled with final poses on release, lease expiry and disconnect', () => {
+    const settled: Array<ReturnType<typeof JSON.parse>> = [];
+    const clock = new TestClock();
+    const room = new AuthoritativeRoom(OBJECTS, clock.now, {
+      onSettled: (objects) => settled.push(JSON.parse(JSON.stringify(objects))),
+    });
+    const connA = new RecordingConn();
+    const a = room.join(connA, { handle: 'ada', role: 'collaborator' });
+
+    // Manual release.
+    room.handleBinary(a, encode('OwnershipRequest', { objectId: 0, intent: 0 }));
+    const epoch = room.objectState(0)!.epoch;
+    room.handleBinary(
+      a,
+      encode('OwnershipRelease', {
+        objectId: 0,
+        epoch,
+        finalPosition: { x: 2, y: 1, z: 0 },
+        finalRotation: identity,
+      }),
+    );
+    expect(settled).toHaveLength(1);
+    expect(settled[0][0].position.x).toBeCloseTo(2, 2);
+
+    // Lease expiry.
+    room.handleBinary(a, encode('OwnershipRequest', { objectId: 1, intent: 0 }));
+    clock.advance(6000);
+    room.tick();
+    expect(settled).toHaveLength(2);
+
+    // Disconnect while holding.
+    room.handleBinary(a, encode('OwnershipRequest', { objectId: 0, intent: 0 }));
+    room.leave(a);
+    expect(settled).toHaveLength(3);
+  });
+});

@@ -23,7 +23,9 @@ import type {
   ParticipantStats,
   RoomConnection,
   Role,
+  RoomOptions,
   ServerMessage,
+  SettledObject,
   SnapshotMessage,
 } from './types.js';
 
@@ -95,6 +97,7 @@ export class AuthoritativeRoom {
   constructor(
     objects: readonly ObjectSpec[],
     private readonly now: () => number = () => Date.now(),
+    private readonly opts: RoomOptions = {},
   ) {
     this.objects = objects.map((spec, index) => ({
       index,
@@ -150,9 +153,19 @@ export class AuthoritativeRoom {
   handleJson(index: number, message: unknown): void {
     const participant = this.participants.get(index);
     if (!participant) return;
-    const type = (message as { type?: string }).type;
-    if (type === 'resync') {
+    const msg = message as { type?: string; to?: number; payload?: unknown };
+
+    if (msg.type === 'resync') {
       participant.conn.sendJson(this.snapshot(index, 'snapshot'));
+      return;
+    }
+
+    // WebRTC signaling relay: the server never inspects the payload, it only routes
+    // it — voice is peer media, not room state (docs/gearbox/05-realtime.md §5.7).
+    if (msg.type === 'rtc' && typeof msg.to === 'number') {
+      if (!this.allowEvent(participant)) return;
+      const target = this.participants.get(msg.to);
+      target?.conn.sendJson({ type: 'rtc', from: index, payload: msg.payload });
     }
   }
 
@@ -208,6 +221,15 @@ export class AuthoritativeRoom {
         this.releaseObject(obj, obj.position, obj.rotation);
       }
     }
+  }
+
+  /** Current durable object state, for persistence at eviction time. */
+  settledObjects(): SettledObject[] {
+    return this.objects.map((o) => ({
+      id: o.id,
+      position: { ...o.position },
+      rotation: { ...o.rotation },
+    }));
   }
 
   stats(index: number): ParticipantStats | null {
@@ -326,6 +348,14 @@ export class AuthoritativeRoom {
         finalRotation: obj.rotation,
       }),
       null,
+    );
+
+    this.opts.onSettled?.(
+      this.objects.map((o) => ({
+        id: o.id,
+        position: { ...o.position },
+        rotation: { ...o.rotation },
+      })),
     );
   }
 

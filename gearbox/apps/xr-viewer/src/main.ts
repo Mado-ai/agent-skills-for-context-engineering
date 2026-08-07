@@ -59,6 +59,7 @@ import { dashboardTexture, nameplateTexture, provenanceTexture, PALETTE } from '
 import { windowTexture, woodFloorTexture } from './textures.js';
 import { RoomSession, type LocalPose } from './session.js';
 import { RemoteAvatars } from './avatars.js';
+import { VoiceMesh } from './voice.js';
 
 const ROOM = { width: 8, depth: 8, height: 3.2 };
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -600,8 +601,14 @@ function setPresence(count: number, simulated: boolean): void {
 
 const sessionCallbacks = {
   onPresence: setPresence,
-  onRemoteJoin: (index: number, handle: string) => remoteAvatars.add(index, handle),
-  onRemoteLeave: (index: number) => remoteAvatars.remove(index),
+  onRemoteJoin: (index: number, handle: string) => {
+    remoteAvatars.add(index, handle);
+    voice?.onPeerJoin(index);
+  },
+  onRemoteLeave: (index: number) => {
+    remoteAvatars.remove(index);
+    voice?.onPeerLeave(index);
+  },
   onObjectTransform: (index: number, pos: { x: number; y: number; z: number }) => {
     const item = itemByIndex(index);
     if (item && heldId !== item.item.id) item.pivot.position.set(pos.x, pos.y, pos.z);
@@ -616,9 +623,15 @@ const sessionCallbacks = {
     const item = itemByIndex(index);
     if (item) xr.forceRelease(item.item.id);
   },
+  onRtc: (from: number, payload: unknown) => voice?.onRtc(from, payload),
 };
 
-const serverUrl = new URLSearchParams(window.location.search).get('server');
+const query = new URLSearchParams(window.location.search);
+let serverUrl = query.get('server');
+const roomToken = query.get('token');
+if (serverUrl && roomToken) {
+  serverUrl += (serverUrl.includes('?') ? '&' : '?') + `token=${encodeURIComponent(roomToken)}`;
+}
 let session: RoomSession;
 if (serverUrl) {
   session = await RoomSession.connect(serverUrl, sessionCallbacks).catch((err) => {
@@ -627,6 +640,48 @@ if (serverUrl) {
   });
 } else {
   session = RoomSession.simulatedSession(simObjects(), sessionCallbacks);
+}
+
+// ── voice ───────────────────────────────────────────────────────────────────────
+// Spatial voice over a peer mesh, live sessions only: in the simulation there is
+// nobody to talk to, so the control stays hidden rather than pretending.
+let voice: VoiceMesh | null = null;
+if (!session.simulated) {
+  voice = new VoiceMesh(
+    session,
+    (index) => {
+      const pose = session.sampleRemote(index, performance.now());
+      return pose ? pose.head.position : null;
+    },
+    () => {
+      camera.getWorldPosition(poseScratch.p);
+      const forward = new Vector3(0, 0, -1).applyQuaternion(
+        camera.getWorldQuaternion(poseScratch.q),
+      );
+      return {
+        position: { x: poseScratch.p.x, y: poseScratch.p.y, z: poseScratch.p.z },
+        forward: { x: forward.x, y: forward.y, z: forward.z },
+      };
+    },
+  );
+
+  const micButton = document.getElementById('mic');
+  if (micButton) {
+    micButton.hidden = false;
+    micButton.addEventListener('click', () => {
+      void (async () => {
+        if (voice!.enabled) {
+          voice!.muteMicrophone();
+          micButton.textContent = 'Unmute mic';
+          micButton.classList.remove('mic-live');
+        } else {
+          const ok = await voice!.enableMicrophone();
+          micButton.textContent = ok ? 'Mute mic' : 'Mic unavailable';
+          micButton.classList.toggle('mic-live', ok);
+        }
+      })();
+    });
+  }
 }
 
 function simObjects() {
@@ -777,6 +832,7 @@ renderer.setAnimationLoop((time) => {
 
   camera.getWorldPosition(cameraWorld);
   remoteAvatars.update((i) => session.sampleRemote(i, time), cameraWorld);
+  voice?.updatePositions();
 
   // While holding something, bring the card to the hand rather than leaving it
   // across the room — in VR you read it where you are looking.

@@ -70,6 +70,19 @@ importers:
         specifier: ^2.1.0
         version: 2.3.3(rollup@4.62.4)(vite@6.4.3(@types/node@22.20.1)(tsx@4.23.9))
 
+  packages/auth-sdk:
+    dependencies:
+      jose:
+        specifier: ^5.9.6
+        version: 5.10.0
+    devDependencies:
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.1)
+
   packages/networking-sdk:
     dependencies:
       '@gearbox/protocol':
@@ -123,6 +136,9 @@ importers:
 
   services/gearbox-core:
     dependencies:
+      '@gearbox/auth-sdk':
+        specifier: workspace:*
+        version: link:../../packages/auth-sdk
       '@gearbox/protocol':
         specifier: workspace:*
         version: link:../../packages/protocol
@@ -135,6 +151,9 @@ importers:
       fastify:
         specifier: ^5.2.1
         version: 5.11.2
+      h3-js:
+        specifier: ^4.1.0
+        version: 4.5.0
       jose:
         specifier: ^5.9.6
         version: 5.10.0
@@ -169,6 +188,9 @@ importers:
 
   services/room-server:
     dependencies:
+      '@gearbox/auth-sdk':
+        specifier: workspace:*
+        version: link:../../packages/auth-sdk
       '@gearbox/protocol':
         specifier: workspace:*
         version: link:../../packages/protocol
@@ -1703,6 +1725,10 @@ packages:
   globals@17.9.0:
     resolution: {integrity: sha512-m/MvAW61QVU5VDNF1Vj8axt016h8w7L5TU1e9zlab7XIttAT2YAlCwl75K1fOqvMM9apmD7lbCIRhpfkhmxhCg==}
     engines: {node: '>=18'}
+
+  h3-js@4.5.0:
+    resolution: {integrity: sha512-uKmdPc+DuarnR+XqZxEuWOMw7KzzKROrx3MLeJpFnMOs78S9M5eZ+X5RieS9UcSFQqbeXzbfWuX/W9Pyajinqw==}
+    engines: {node: '>=4', npm: '>=3', yarn: '>=1.3.0'}
 
   has-flag@4.0.0:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
@@ -3397,6 +3423,8 @@ snapshots:
   globals@14.0.0: {}
 
   globals@17.9.0: {}
+
+  h3-js@4.5.0: {}
 
   has-flag@4.0.0: {}
 

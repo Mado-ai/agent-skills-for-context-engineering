@@ -65,9 +65,26 @@ export type ServerMessage =
       objectId: number;
       reason: 'role' | 'held' | 'unknown_object';
     }
+  | { type: 'rtc'; from: number; payload: unknown }
   | { type: 'error'; detail: string };
 
-export type ClientJsonMessage = { type: 'resync' };
+export type ClientJsonMessage = { type: 'resync' } | { type: 'rtc'; to: number; payload: unknown };
+
+/** Durable object state handed to the persistence hook on every release. */
+export interface SettledObject {
+  id: string;
+  position: Vec3;
+  rotation: Quat;
+}
+
+export interface RoomOptions {
+  /**
+   * Called whenever an object settles (manual release, lease expiry, disconnect).
+   * The room-server persists these so a room survives its last participant leaving
+   * (docs/gearbox/05-realtime.md §5.6 — final pose on release, never the stream).
+   */
+  onSettled?: (objects: readonly SettledObject[]) => void;
+}
 
 export interface ParticipantStats {
   poseViolations: number;

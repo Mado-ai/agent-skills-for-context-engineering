@@ -46,6 +46,8 @@ export interface SessionCallbacks {
   onObjectRelease(objectIndex: number, finalPosition: Vec3, finalRotation: Quat): void;
   /** The server refused our grab — undo the optimistic hold. */
   onOwnershipDenied(objectIndex: number): void;
+  /** WebRTC signaling from a peer (voice). */
+  onRtc?(fromIndex: number, payload: unknown): void;
 }
 
 const SEND_HZ = 20;
@@ -98,6 +100,18 @@ export class RoomSession {
     const link = directLink(room, 'you', 'owner');
     const session = new RoomSession(link, callbacks, true, new SimulatedPeers(room));
     return session;
+  }
+
+  get self(): number {
+    return this.selfIndex;
+  }
+
+  remoteIndices(): number[] {
+    return [...this.remotes.keys()];
+  }
+
+  sendRtc(to: number, payload: unknown): void {
+    this.link.sendJson({ type: 'rtc', to, payload });
   }
 
   isHeldRemotely(objectIndex: number): boolean {
@@ -189,6 +203,9 @@ export class RoomSession {
         break;
       case 'denied':
         if (message.action === 'ownership') this.callbacks.onOwnershipDenied(message.objectId);
+        break;
+      case 'rtc':
+        this.callbacks.onRtc?.(message.from, message.payload);
         break;
       case 'error':
         break;

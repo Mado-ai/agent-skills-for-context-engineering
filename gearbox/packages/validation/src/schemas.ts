@@ -146,3 +146,14 @@ export const locationFixSchema = z.object({
   isMock: z.boolean().optional(),
 });
 export type LocationFix = z.infer<typeof locationFixSchema>;
+
+/** Create a realtime session: mints a room-scoped token (docs/gearbox/06-api.md). */
+export const createSessionRequestSchema = z.object({
+  room: z
+    .string()
+    .trim()
+    .min(1)
+    .max(64)
+    .regex(/^[\w-]+$/, 'Room names may contain only letters, numbers, underscore and hyphen'),
+});
+export type CreateSessionRequest = z.infer<typeof createSessionRequestSchema>;

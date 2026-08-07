@@ -29,6 +29,12 @@ const envSchema = z.object({
     .positive()
     .default(60 * 60 * 24 * 30), // 30 days
 
+  /** Shared secret for room tokens (docs/gearbox/07-authz-security.md §7.3). */
+  ROOM_TOKEN_SECRET: z.string().min(32).optional(),
+  /** Public base URL of the room-server, returned by POST /v1/sessions. */
+  ROOM_SERVER_URL: z.string().default('ws://localhost:7777'),
+  ROOM_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(3600),
+
   LIVEKIT_URL: z.string().url().optional(),
   LIVEKIT_API_KEY: z.string().optional(),
   LIVEKIT_API_SECRET: z.string().optional(),
@@ -42,6 +48,7 @@ export interface Config extends Env {
 }
 
 const DEV_JWT_SECRET = 'development-only-secret-do-not-use-in-production-0000';
+const DEV_ROOM_SECRET = 'development-only-room-secret-do-not-use-in-prod-00';
 
 export function loadConfig(source: NodeJS.ProcessEnv = process.env): Config {
   const parsed = envSchema.safeParse(source);
@@ -57,6 +64,7 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): Config {
     const missing: string[] = [];
     if (!env.DATABASE_URL) missing.push('DATABASE_URL');
     if (!env.JWT_SECRET) missing.push('JWT_SECRET');
+    if (!env.ROOM_TOKEN_SECRET) missing.push('ROOM_TOKEN_SECRET');
     if (missing.length > 0) {
       throw new Error(`Missing required production configuration: ${missing.join(', ')}`);
     }
@@ -65,6 +73,7 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): Config {
   return {
     ...env,
     JWT_SECRET: env.JWT_SECRET ?? (isProduction ? undefined : DEV_JWT_SECRET),
+    ROOM_TOKEN_SECRET: env.ROOM_TOKEN_SECRET ?? (isProduction ? undefined : DEV_ROOM_SECRET),
     isProduction,
     isTest: env.NODE_ENV === 'test',
   } as Config;

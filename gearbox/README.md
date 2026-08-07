@@ -86,23 +86,41 @@ unset. A silently skipped test is worse than no test.
 - Fastify app with RFC 9457 Problem Details error handling
 - **Realtime multiplayer core**: `packages/room-core` (authoritative room — ownership
   leases with epochs, snapshots/late-join, server-stamped identity, pose plausibility,
-  realtime authz), `services/room-server` (dev WebSocket host; run with
-  `pnpm --filter @gearbox/room-server dev`), `packages/networking-sdk` (client link +
-  interpolation buffer), all bot-tested over real sockets
+  realtime authz, RTC signaling relay, persistence hook), `services/room-server`
+  (WebSocket host; run with `pnpm --filter @gearbox/room-server dev`),
+  `packages/networking-sdk` (client link + interpolation buffer), all bot-tested over
+  real sockets
+- **Real session auth**: `POST /v1/sessions` mints a room-scoped token
+  (`packages/auth-sdk`); with `ROOM_TOKEN_SECRET` set, the room-server takes handle,
+  role and room from the token's claims only — the query string cannot escalate.
+  Without the secret it runs in loudly-logged dev mode
+- **Room persistence**: object poses persist on release/lease-expiry/disconnect via a
+  debounced file store (`ROOM_DATA_DIR`), flushed at eviction — a moved object
+  survives everyone leaving and the room instance being destroyed (tested). The
+  Drizzle-backed store replaces the file store when the environments module lands
+- **Spatial voice** (live sessions): WebRTC peer mesh with signaling relayed through
+  the room, HRTF-panned per speaker from interpolated poses. Mic is strictly
+  push-to-enable; receiving needs no mic. Production path remains a bought SFU
+  (ADR 0002) past mesh scale
+- **Place pipeline seed**: `modules/place` — the §11.5 candidate filter (allow/deny/
+  hazard-buffer rules, war-memorial and worship exclusions, H3 r9+r6 assignment) as
+  pure tested logic plus a GeoJSON ingest CLI
 - **Multi-user room view** (`apps/xr-viewer`): remote avatars, shared-object grabbing
-  through leases, VR + AR passthrough modes. `?server=ws://host:7777/rooms/demo`
-  joins a live server; without it the real room runs in-page with two simulated peers
+  through leases, VR + AR passthrough modes, mic control in live sessions.
+  `?server=ws://host:7777/rooms/demo&token=…` joins a live server (token from
+  `POST /v1/sessions`); without a server the real room runs in-page with two
+  simulated peers
 - Local dev stack, CI pipeline, boundary lint rules, 5 ADRs
 
 **Not built yet** (next in `docs/gearbox/11-geospatial-mvp.md` §11.15):
 
 - The Unity client (the web viewer is the demo surface; Unity remains the plan of
   record for phones + headsets)
-- Voice (LiveKit SFU integration), the LiveKit ITransport implementation, and
-  session minting via `POST /sessions` — the room-server currently accepts
-  handle+role on the query string, dev-only by declared design
-- Place pipeline (OSM ingest, H3, curation), location service, anti-cheat
-- The game loop and the room bridge persistence
+- LiveKit SFU voice for >8-participant rooms (mesh is the current path; ADR 0002)
+- Role resolution from environment membership (sessions currently grant
+  'collaborator' to every authenticated user — a floor, never client-raisable)
+- PostGIS load + curation console for places; location service; anti-cheat scoring
+- The game loop (map, encounters, collection)
 
 **Verified how:** `pnpm build`, `pnpm lint`, `pnpm format:check`, `pnpm test` (74
 passing) and `pnpm codegen:check` were all run green. `pnpm test:integration` has

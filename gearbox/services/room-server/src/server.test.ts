@@ -66,6 +66,10 @@ class Bot {
     );
   }
 
+  sendJson(message: unknown): void {
+    this.ws.send(JSON.stringify(message));
+  }
+
   requestOwnership(objectId: number): void {
     this.ws.send(encode('OwnershipRequest', { objectId, intent: 0 }));
   }
@@ -231,6 +235,149 @@ describe('room-server over real sockets', () => {
     await b.waitForJson((m) => m.type === 'participant_leave');
 
     b.close();
+    await settle();
+  });
+});
+
+describe('room tokens', () => {
+  const SECRET = 'a-room-token-secret-that-is-long-enough!';
+  let secured: RunningRoomServer;
+
+  beforeAll(async () => {
+    secured = await startRoomServer({ port: 0, host: '127.0.0.1', tokenSecret: SECRET });
+  });
+
+  afterAll(async () => {
+    await secured.close();
+  });
+
+  async function joinWithToken(token: string | null, room = 'sec'): Promise<WebSocket> {
+    const q = token ? `?token=${encodeURIComponent(token)}` : '';
+    const ws = new WebSocket(`ws://127.0.0.1:${secured.port}/rooms/${room}${q}`);
+    await new Promise<void>((resolve, reject) => {
+      ws.once('open', resolve);
+      ws.once('error', reject);
+    });
+    return ws;
+  }
+
+  function closeCode(ws: WebSocket): Promise<number> {
+    return new Promise((resolve) => ws.once('close', (code) => resolve(code)));
+  }
+
+  it('admits a valid token and takes identity from its claims, not the query', async () => {
+    const { mintRoomToken } = await import('@gearbox/auth-sdk');
+    const token = await mintRoomToken(SECRET, {
+      sub: 'user-1',
+      handle: 'ada',
+      role: 'viewer',
+      room: 'sec',
+    });
+    // Note the query tries to claim collaborator; the token's viewer must win.
+    const ws = new WebSocket(
+      `ws://127.0.0.1:${secured.port}/rooms/sec?token=${encodeURIComponent(token)}&role=collaborator&handle=fake`,
+    );
+    const welcome = await new Promise<Record<string, unknown>>((resolve, reject) => {
+      ws.on('message', (data, isBinary) => {
+        if (!isBinary) {
+          const msg = JSON.parse(String(data));
+          if (msg.type === 'welcome') resolve(msg);
+        }
+      });
+      ws.once('error', reject);
+    });
+    const participants = welcome.participants as Array<{ handle: string; role: string }>;
+    const self = participants.find((p) => p.handle === 'ada');
+    expect(self).toBeDefined();
+    expect(self!.role).toBe('viewer');
+    expect(participants.some((p) => p.handle === 'fake')).toBe(false);
+    ws.close();
+    await settle();
+  });
+
+  it('rejects a missing token', async () => {
+    const ws = await joinWithToken(null);
+    expect(await closeCode(ws)).toBe(4401);
+  });
+
+  it('rejects a tampered token', async () => {
+    const { mintRoomToken } = await import('@gearbox/auth-sdk');
+    const token = await mintRoomToken(SECRET, {
+      sub: 'u',
+      handle: 'h',
+      role: 'owner',
+      room: 'sec',
+    });
+    const ws = await joinWithToken(token.slice(0, -4) + 'AAAA');
+    expect(await closeCode(ws)).toBe(4401);
+  });
+
+  it('rejects a token scoped to a different room', async () => {
+    const { mintRoomToken } = await import('@gearbox/auth-sdk');
+    const token = await mintRoomToken(SECRET, {
+      sub: 'u',
+      handle: 'h',
+      role: 'owner',
+      room: 'other-room',
+    });
+    const ws = await joinWithToken(token, 'sec');
+    expect(await closeCode(ws)).toBe(4403);
+  });
+});
+
+describe('persistence', () => {
+  it('a moved object survives everyone leaving and the room being evicted', async () => {
+    const { mkdtempSync } = await import('node:fs');
+    const { tmpdir } = await import('node:os');
+    const { join: joinPath } = await import('node:path');
+    const dir = mkdtempSync(joinPath(tmpdir(), 'gearbox-rooms-'));
+
+    const persisted = await startRoomServer({
+      port: 0,
+      host: '127.0.0.1',
+      dataDir: dir,
+      saveDebounceMs: 20,
+    });
+
+    // Session one: move an object and leave.
+    const a = await Bot.join(persisted.port, 'homeroom', 'ada', 'collaborator');
+    a.requestOwnership(1);
+    const grant = await a.waitForBinary((m) => m.name === 'OwnershipGrant');
+    const epoch = grant.body.epoch as number;
+    a.sendTransform(1, epoch, 3.1);
+    a.release(1, epoch, 3.1);
+    await settle();
+    a.close();
+    await settle(200); // eviction + flush
+
+    expect(persisted.room('homeroom')).toBeUndefined(); // room really was evicted
+
+    // Session two: a brand-new room instance loads the persisted state.
+    const b = await Bot.join(persisted.port, 'homeroom', 'sam', 'collaborator');
+    const objects = b.welcome.objects as Array<{ index: number; position: number[] }>;
+    expect(objects.find((o) => o.index === 1)!.position[0]).toBeCloseTo(3.1, 1);
+    b.close();
+    await settle();
+    await persisted.close();
+  });
+});
+
+describe('rtc relay over sockets', () => {
+  it('routes signaling to the addressed peer only', async () => {
+    const a = await Bot.join(server.port, 'rtc', 'ada', 'collaborator');
+    const b = await Bot.join(server.port, 'rtc', 'sam', 'collaborator');
+    const c = await Bot.join(server.port, 'rtc', 'mira', 'collaborator');
+
+    a.sendJson({ type: 'rtc', to: b.selfIndex, payload: { kind: 'offer', sdp: 'v=0' } });
+
+    const relayed = await b.waitForJson((m) => m.type === 'rtc');
+    expect(relayed.from).toBe(a.selfIndex);
+    expect((relayed.payload as { kind: string }).kind).toBe('offer');
+    expect(c.json.filter((m) => m.type === 'rtc')).toHaveLength(0);
+
+    a.close();
+    b.close();
+    c.close();
     await settle();
   });
 });

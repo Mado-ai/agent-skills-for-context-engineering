@@ -14,10 +14,12 @@ import Fastify, {
 } from 'fastify';
 import { AppError, ERROR_TYPES, parseOrThrow } from '@gearbox/validation';
 import {
+  createSessionRequestSchema,
   registerDeviceRequestSchema,
   registerRequestSchema,
   tokenRequestSchema,
 } from '@gearbox/validation';
+import { mintRoomToken } from '@gearbox/auth-sdk';
 import { PROTOCOL_VERSION } from '@gearbox/protocol';
 import type { IdentityService } from '../modules/identity/application/identityService.js';
 import type { AccessTokenIssuer } from '../modules/identity/domain/tokens.js';
@@ -148,6 +150,42 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
     // Unauthenticated by design: the challenge is useless without the private key,
     // and requiring a token here would defeat the purpose of the grant.
     return deps.identity.createDeviceChallenge(id);
+  });
+
+  // ── sessions ──────────────────────────────────────────────────────────────
+  // Mints a room-scoped token the room-server verifies. Role is 'collaborator' for
+  // everyone until the environments module lands and resolves membership
+  // (docs/gearbox/07-authz-security.md §7.2) — a deliberate floor, never a ceiling
+  // a client can raise.
+  app.post('/v1/sessions', async (request, reply) => {
+    const caller = await requireAuth(request);
+    const body = parseOrThrow(createSessionRequestSchema, request.body);
+
+    const secret = deps.config.ROOM_TOKEN_SECRET;
+    if (!secret) {
+      throw AppError.internal('ROOM_TOKEN_SECRET is not configured');
+    }
+
+    const profile = await deps.identity.profile(caller.userId);
+    const token = await mintRoomToken(
+      secret,
+      {
+        sub: caller.userId,
+        handle: profile?.handle ?? 'user',
+        role: 'collaborator',
+        room: body.room,
+      },
+      deps.config.ROOM_TOKEN_TTL_SECONDS,
+      deps.clock.now(),
+    );
+
+    return reply.status(201).send({
+      room: body.room,
+      role: 'collaborator',
+      url: `${deps.config.ROOM_SERVER_URL}/rooms/${body.room}`,
+      token,
+      expiresIn: deps.config.ROOM_TOKEN_TTL_SECONDS,
+    });
   });
 
   // ── me ────────────────────────────────────────────────────────────────────
