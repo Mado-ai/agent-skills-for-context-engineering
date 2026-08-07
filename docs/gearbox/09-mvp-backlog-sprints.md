@@ -2,6 +2,12 @@
 
 Required outputs #20 and #21.
 
+> **§9.1, §9.3 and §9.4 are superseded by [11 — Revised MVP](11-geospatial-mvp.md)
+> §11.14–11.15**, following the decision that the first users are location-based AR game
+> players. **§9.2 (definition of done), §9.5 (deferrals and their seams), and §9.6
+> (scaffolding order) still apply unchanged** and are referenced by doc 11. The epics
+> below are retained because doc 11's backlog carries several of them forward verbatim.
+
 ## 9.1 MVP scope statement
 
 > A signed-in user enters their persistent spatial room, opens and pins a dashboard,

@@ -1,9 +1,29 @@
 # GearBox Spatial Operating Platform — MVP architecture & implementation plan
 
-**Status: plan only. No production code has been written. Approval requested before scaffolding.**
+**Status: plan only. No production code has been written. Scope and stack decisions are
+locked (see below); scaffolding awaits a go.**
 
 This document set is the response to the GearBox Master Technical Prompt §32 (First
 Task) and delivers all 25 required outputs from §30.
+
+> ### ⚠️ Read [11 — Revised MVP: location-based AR entry product](11-geospatial-mvp.md) first
+>
+> The first user is now defined as **location-based AR game players** (Pokémon Go–style)
+> funnelling into the ecosystem. That makes **phone AR the lead client**, not the
+> companion, and adds geospatial data, GPS anti-cheat, and outdoor safety.
+> **Doc 11 supersedes the MVP definition and sprint plan in [09](09-mvp-backlog-sprints.md).**
+> Docs 02–08 remain valid; doc 11 collects the deltas they need.
+
+## 0. Locked decisions
+
+| # | Question | Answer | Consequence |
+|---|---|---|---|
+| 1 | Scope | **Vertical slice**, 16 weeks | [11](11-geospatial-mvp.md) §11.14–11.15 |
+| 2 | Engine | **Unity 6** | Confirmed — and *more* right after decision 4, since AR Foundation and OpenXR share one codebase |
+| 3 | Devices | **No restriction** | Architecture covers all; QA is staged by test burden — phones lead, Quest second ([11](11-geospatial-mvp.md) §11.3) |
+| 4 | First user | **Location-based AR game players → ecosystem** | The pivot. [11](11-geospatial-mvp.md) §11.2 |
+| 5 | Slice shape | **Game loop + bridge into a persistent room** | The bridge is the thesis ([11](11-geospatial-mvp.md) §11.4) |
+| 6 | Place data | **OpenStreetMap + own curation** | Free and hazard-aware; ODbL obligation handled by table separation ([11](11-geospatial-mvp.md) §11.5) |
 
 ---
 
@@ -16,16 +36,19 @@ network, or hybrid.
 
 The MVP proves exactly one claim:
 
-> **A persistent spatial room can hold multiple users, run spatial apps, synchronize
-> shared state and voice, and survive a restart — over the internet today and over a
-> LAN by architecture.**
+> **A player acquired by a real-world AR game will follow a collected thing into a
+> persistent spatial room — and stay for the room.**
 
-The plan below builds that as a single vertical slice (§32's twelve steps), on a
-deliberately small stack:
+That is the acquisition-to-ecosystem bridge, and it is the only claim that decides
+whether GearBox is a platform or a game. The full acceptance test is in
+[11](11-geospatial-mvp.md) §11.4.
 
-- **Unity 6 + OpenXR** for the XR client (reversing the WebXR recommendation made in
-  the earlier `docs/vr-ar-social-app` spec — see [02](02-stack.md) §2.2 for why the
-  constraints differ).
+The plan builds it as a single vertical slice on a deliberately small stack:
+
+- **Unity 6** — AR Foundation (ARKit + ARCore) for phones, OpenXR for headsets, one
+  codebase. This reverses the WebXR recommendation in the earlier
+  `docs/vr-ar-social-app` spec; see [02](02-stack.md) §2.2 for why the constraints
+  differ.
 - **One TypeScript modular monolith** (`gearbox-core`) for the entire control plane,
   with internal module boundaries drawn where services will later split.
 - **One TypeScript room-server process** for authoritative realtime state at 20 Hz.
@@ -38,19 +61,20 @@ Everything that looks like a microservice in the prompt's §22 tree exists as a 
 directory inside the monolith with an enforced import boundary. Splitting is a
 deployment decision deferred until a specific module's scaling profile diverges.
 
-### The one thing I want to flag before you read further
+### The three things that will decide this
 
-**§27's 30-item MVP is not an MVP.** Items 1–22 are roughly the vertical slice and are
-achievable; items 23–30 (desktop companion, mobile companion, local-node prototype,
-developer SDK, manifest, audit, network adaptation, dual auth) each carry a
-platform's worth of work. Delivered as written, the list is a 12–18 month build for a
-small team, and it front-loads the parts that prove nothing.
-
-The §32 vertical flow, by contrast, is a genuinely good MVP and is what
-[09](09-mvp-backlog-sprints.md) plans against: **16 weeks, 8 sprints, 3–5 engineers.**
-Where §27 items are deferred, [09](09-mvp-backlog-sprints.md) §9.5 says exactly which,
-why, and what architectural seam keeps them cheap to add later. **The scope call is
-yours** — say the word and I will plan the full 30.
+1. **The bridge, not the game.** Room return rate — players re-entering their room on a
+   later day *without* collecting first — is the single metric that separates a platform
+   from a game ([11](11-geospatial-mvp.md) §11.13). Build no flat inventory screen; the
+   room is the only place a collection lives, or nobody will visit it.
+2. **Anti-cheat ships in the MVP, not phase 2.** Once a spoofing tool exists for your
+   game it is permanent, and it destroys exactly the local-play fairness you acquired
+   users for ([11](11-geospatial-mvp.md) §11.6).
+3. **Outdoor safety is an architecture invariant, not a policy.** Hazard exclusion at
+   place-ingest, speed lock, map-only default, takedown flow at launch
+   ([11](11-geospatial-mvp.md) §11.7). §27's 30-item list is superseded by the slice;
+   every deferral and its seam is listed in [09](09-mvp-backlog-sprints.md) §9.5 and
+   [11](11-geospatial-mvp.md) §11.16.
 
 ## 2. Coverage of the 25 required outputs (§30)
 
@@ -75,8 +99,8 @@ yours** — say the word and I will plan the full 30.
 | 17 | Environment schema | [08](08-schemas.md) §8.3 |
 | 18 | Device capability schema | [08](08-schemas.md) §8.4 |
 | 19 | Threat model | [07](07-authz-security.md) §7.5 |
-| 20 | MVP backlog | [09 — Backlog & sprints](09-mvp-backlog-sprints.md) §9.1–9.3 |
-| 21 | Sprint plan | [09](09-mvp-backlog-sprints.md) §9.4 |
+| 20 | MVP backlog | **[11](11-geospatial-mvp.md) §11.14** (supersedes [09](09-mvp-backlog-sprints.md) §9.3) |
+| 21 | Sprint plan | **[11](11-geospatial-mvp.md) §11.15** (supersedes [09](09-mvp-backlog-sprints.md) §9.4) |
 | 22 | Test strategy | [10 — Quality & DevOps](10-quality-devops.md) §10.1 |
 | 23 | DevOps plan | [10](10-quality-devops.md) §10.2 |
 | 24 | Deployment strategy | [10](10-quality-devops.md) §10.3 |
@@ -96,18 +120,24 @@ What carries over unchanged, what is adapted, and what reverses:
 | Evidence/replay buffer in the netcode | **Deferred**, but the event log in [05](05-realtime.md) §5.6 is the same substrate. |
 | **WebXR-first client** | **Reversed.** GearBox needs native scene understanding, persistent anchors, passthrough, BLE/USB device access, and background sensor work — all native-only or badly exposed on the web. [02](02-stack.md) §2.2 makes the full argument. |
 
-## 4. Approval requested
+## 4. Status and what happens next
 
-Per §30, I am stopping here. To proceed I need a decision on:
+Scope, engine, device policy, first user, slice shape, and place-data source are
+**locked** (§0). The plan is complete and internally consistent.
 
-1. **Scope** — vertical slice (16 weeks, recommended) or the full §27 30-item list?
-2. **Stack** — confirm Unity 6 + OpenXR, TypeScript monolith, LiveKit. Any of these
-   can be swapped; §2 in [02](02-stack.md) states the reversal cost for each.
-3. **Headset** — Quest 3 as the single phase-1 target device? Multi-device from day
-   one roughly doubles client QA.
-4. **The five open questions** in [01](01-assumptions-risks.md) §1.3, which change the
-   data model if answered differently.
+**Still open, and not blocking the first sprints:**
 
-On approval I will scaffold in the order set out in [09](09-mvp-backlog-sprints.md)
-§9.6 — repo + CI + schema + auth first, one vertical feature at a time, each with the
-nine-part output required by §31.
+- **Business model** — determines whether devices (phase 7) or marketplace (phase 8)
+  comes first. Does not affect the slice.
+- **Organizations at MVP?** Assumed no. The `owner_scope_id` seam
+  ([04](04-data-model.md) §4.4) keeps this cheap either way.
+- **ODbL legal review** — needed before launch, not before sprint 1
+  ([11](11-geospatial-mvp.md) §11.5).
+- **Launch city** — pick it in sprint 0, and run the OSM filter over it before sprint 1
+  starts. What the filter actually produces in a specific place is the thing most likely
+  to surprise you.
+
+**On a go, scaffolding proceeds in the order in [09](09-mvp-backlog-sprints.md) §9.6** —
+repo, CI, Compose, migrations, protocol codegen, then a complete auth vertical before
+anything else starts — followed by the sprint plan in [11](11-geospatial-mvp.md) §11.15.
+Each feature ships with the nine-part output required by §31.

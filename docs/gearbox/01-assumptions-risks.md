@@ -1,5 +1,10 @@
 # 01 — Assumptions, risks, open questions
 
+> **Partly superseded.** Decisions 1–6 in [README](README.md) §0 have now been made.
+> A2 and A4 below are **replaced** (see §1.5), and the open questions in §1.3 are
+> **answered** (see §1.6). Everything else stands. New risks R11–R16 live in
+> [11](11-geospatial-mvp.md) §11.12.
+
 ## 1.1 Assumptions
 
 Stated explicitly because each one, if wrong, changes the plan. Grouped by how
@@ -178,3 +183,25 @@ Stated plainly, since the prompt asks for a lead architect's judgment:
 - **Retransmitting DRM-protected media in Watch Together.** Approved integrations
   only. This constrains the feature substantially and should be planned for as a
   limitation, not discovered late.
+
+## 1.5 Replaced assumptions
+
+| Was | Now |
+|---|---|
+| **A2** — Quest 3 is the single phase-1 device | **iOS + Android phones are the lead tier** (release-gated); Quest 3 is the second tier for the room half only; others best-effort or reserved. [11](11-geospatial-mvp.md) §11.3 |
+| **A4** — MVP is online-first, local mode is a reserved seam | Unchanged in effect but now obvious: an outdoor location game is inherently online. Local mode moves firmly to phase 4. |
+| **A8** — Boundary awareness via Quest Scene API | Applies to the **room** half only. The outdoor half uses GPS + H3 + OSM geometry ([11](11-geospatial-mvp.md) §11.5). |
+| **A15** — No under-13 users | Still holds, but the **teen band (13–17) is now in scope from day one** and gets tightened safety and location defaults ([11](11-geospatial-mvp.md) §11.7–11.8). Outdoor play by minors is not a hypothetical. |
+
+New assumption **A18**: the slice launches in **one city**, not one country. Density
+beats coverage in this genre ([11](11-geospatial-mvp.md) §11.12 R14).
+
+## 1.6 Open questions — answered
+
+| Q | Answer | Where it landed |
+|---|---|---|
+| 1. Who is the first user? | **Location-based AR game players**, funnelling into the ecosystem | [11](11-geospatial-mvp.md) — this answer was the pivot |
+| 2. Local mode: launch or roadmap? | **Roadmap** (phase 4) | §1.5 |
+| 3. Physical GearBox device? | Not in the slice; unchanged | [09](09-mvp-backlog-sprints.md) §9.5 |
+| 4. Organizations at MVP? | **No** — `owner_scope_id` seam retained | [04](04-data-model.md) §4.4 |
+| 5. Business model? | **Still open.** Does not block the slice; decides whether devices or marketplace comes next | [README](README.md) §4 |
