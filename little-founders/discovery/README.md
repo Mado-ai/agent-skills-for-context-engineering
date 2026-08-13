@@ -16,6 +16,46 @@ higher real-world stakes.
 
 ---
 
+## One game per book
+
+Each book has a companion game that drills its single hardest idea. They are built for the last ten
+minutes of a session — short enough to finish, hard enough to be worth replaying.
+
+| Game | Book | Ages | The idea it drills | File |
+|---|---|---|---|---|
+| 🧩 **Journey Jumble** | How Is It Made? | 5–7 | Making has an order, and the order is not obvious | [`game-journey-jumble.html`](game-journey-jumble.html) |
+| 🎯 **Focus First** | My Smart Plan | 8–10 | Urgent is not the same as important | [`game-focus-first.html`](game-focus-first.html) |
+| 🪜 **Question Ladder** | Reverse. Rethink. Rebuild. | 11–13 | A better question beats a faster answer | [`game-question-ladder.html`](game-question-ladder.html) |
+| 💰 **Margin Call** | GO OVERSEAS! | 14–17 | Every decision shows up in the cash | [`game-margin-call.html`](game-margin-call.html) |
+
+**How they work**
+
+- **Journey Jumble** — ten rounds, one per journey in Book 1. The stages arrive shuffled; tap them
+  into order. Three stars for a clean round, two for one or two mistakes, one for more. Thirty
+  stars in total. Ziggy the Fox reads every round aloud, so a child who cannot yet read can still
+  play.
+- **Focus First** — twelve scenario cards drawn from twenty-four, each sorted into one of the four
+  priority boxes. The timer starts at ten seconds and shrinks to four and a half, because deciding
+  under pressure is the actual skill. Every card explains itself afterwards, whether you got it
+  right or not. Streaks are worth more, so consistency beats luck.
+- **Question Ladder** — twelve questions in three kinds: pick the better question, sort a belief
+  into *known* or *guess*, and design the test. No timer at all — this one rewards thinking, and
+  every answer gets a written explanation including the ones you got right.
+- **Margin Call** — eight months of running a small brand, starting with $400, a $12 price and a $9
+  cost. Price rises, ad spend, a refund problem, a wholesale offer. After each decision the game
+  shows the arithmetic it just did, so the number is never magic. Finish above $1,200 and you get
+  the **Margin Master** certificate.
+
+**They use the same class list.** Each game reads the roster (it never changes it) and stores that
+student's personal best under their own name, so a shared device keeps thirty separate scores.
+Best scores appear per student in the [Class Hub](class-hub.html), and every book carries a
+**Play** link to its game in the top bar.
+
+Scores are a conversation starter, not an assessment. Nothing in the badge or certificate system
+depends on them.
+
+---
+
 ## Per-student use
 
 Every book keeps **a separate copy of the work for each student**, so one shared classroom device

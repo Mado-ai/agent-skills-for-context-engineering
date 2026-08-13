@@ -1,0 +1,357 @@
+<title>Focus First</title>
+<style>
+  :root{--ground:#F7F4EC;--paper:#FFF;--soft:#FBF9F3;--sunk:#F1EDE1;--ink:#0D1B3D;--ink-soft:#3E4E76;--ink-mute:#7B87A5;
+    --rule:#E3DCCA;--rule-hard:#D6CDB6;--sun:#FFC83D;--energy:#FF7A1A;--sky:#4DB6F2;--teal:#00B9A7;--purple:#7B5EA6;
+    --rose:#E0526E;--green:#5FA63F;--navy:#0D1B3D;
+    --shadow:0 1px 2px rgba(13,27,61,.04),0 10px 26px -16px rgba(13,27,61,.25);
+    --shadow-lg:0 3px 8px rgba(13,27,61,.07),0 28px 56px -28px rgba(13,27,61,.4);
+    --display:"Nunito",ui-rounded,"SF Pro Rounded","Segoe UI Variable Display",system-ui,sans-serif;
+    --body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#0A1730;--paper:#12234A;--soft:#16294F;--sunk:#1C3159;
+    --ink:#F4F1E8;--ink-soft:#C7D2EC;--ink-mute:#8E9CBE;--rule:#26375F;--rule-hard:#35497A;--sun:#FFD264;--energy:#FF9247;
+    --sky:#74C6F7;--teal:#1ACFBB;--purple:#A78BCE;--rose:#F0798F;--green:#7EC65C;--navy:#F4F1E8;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 28px -18px rgba(0,0,0,.8);--shadow-lg:0 3px 8px rgba(0,0,0,.45),0 30px 60px -30px rgba(0,0,0,.9)}}
+  :root[data-theme="dark"]{--ground:#0A1730;--paper:#12234A;--soft:#16294F;--sunk:#1C3159;--ink:#F4F1E8;--ink-soft:#C7D2EC;
+    --ink-mute:#8E9CBE;--rule:#26375F;--rule-hard:#35497A;--sun:#FFD264;--energy:#FF9247;--sky:#74C6F7;--teal:#1ACFBB;
+    --purple:#A78BCE;--rose:#F0798F;--green:#7EC65C;--navy:#F4F1E8;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 28px -18px rgba(0,0,0,.8);--shadow-lg:0 3px 8px rgba(0,0,0,.45),0 30px 60px -30px rgba(0,0,0,.9)}
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:1.02rem;line-height:1.6;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:var(--display);font-weight:800;margin:0;line-height:1.12;letter-spacing:-.02em;text-wrap:balance}
+  p{margin:0} button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;font-family:var(--display)}
+  :focus-visible{outline:4px solid var(--sky);outline-offset:3px;border-radius:12px}
+
+  .bar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;padding:.8rem clamp(1rem,3vw,2.2rem);
+    background:color-mix(in srgb,var(--ground) 92%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--rule)}
+  .logo{display:flex;align-items:center;gap:.55rem;margin-right:auto}
+  .logo svg{width:26px;height:40px}
+  .logo b{font-family:var(--display);font-weight:800;font-size:.95rem;line-height:1.05;display:block}
+  .logo span{font-size:.56rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--teal)}
+  .pill{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .8rem;border-radius:99px;border:2px solid var(--rule);
+    background:var(--paper);font-family:var(--display);font-weight:800;font-size:.86rem;font-variant-numeric:tabular-nums}
+  .pill.sun{border-color:var(--sun);background:color-mix(in srgb,var(--sun) 22%,var(--paper))}
+  .pill.hot{border-color:var(--energy);background:color-mix(in srgb,var(--energy) 18%,var(--paper))}
+
+  .page{max-width:54rem;margin:0 auto;padding:clamp(1.2rem,3vw,2.4rem) clamp(1rem,3vw,2.2rem) 4rem}
+  .eyebrow{font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
+  h1.big{font-size:clamp(2rem,6.5vw,3.2rem);margin-top:.5rem}
+  h1.big::after{content:"";display:block;width:4.5rem;height:6px;border-radius:99px;background:var(--sun);margin-top:.9rem}
+  .lede{color:var(--ink-soft);font-size:1.06rem;margin-top:1rem;max-width:52ch}
+  .card{background:var(--paper);border:1px solid var(--rule);border-radius:22px;padding:1.3rem 1.4rem;box-shadow:var(--shadow)}
+  .card+.card{margin-top:1rem}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.8rem 1.4rem;border-radius:16px;
+    font-weight:800;font-size:1rem;background:var(--energy);color:#fff;box-shadow:var(--shadow);transition:transform .12s ease,filter .12s ease}
+  .btn:hover{transform:translateY(-2px);filter:brightness(1.06)}
+  .btn.ghost{background:var(--paper);color:var(--ink);border:2px solid var(--rule-hard);box-shadow:none}
+  .btn.sm{padding:.45rem .9rem;font-size:.88rem;border-radius:12px}
+
+  .lf-div{display:flex;align-items:center;gap:.85rem;margin:1.8rem 0}
+  .lf-div::before,.lf-div::after{content:"";height:2px;flex:1;background:var(--sun);opacity:.55;border-radius:2px}
+  .lf-div span{color:var(--sun);font-size:1.1rem}
+
+  /* timer */
+  .timer{height:12px;border-radius:99px;background:var(--sunk);overflow:hidden;margin:1rem 0 1.2rem}
+  .timer i{display:block;height:100%;background:var(--teal);border-radius:99px;transition:width .1s linear}
+  .timer.warn i{background:var(--energy)}
+  .timer.gone i{background:var(--rose)}
+
+  /* the card in play */
+  .play{border:3px solid var(--rule);border-radius:24px;padding:1.6rem 1.4rem;background:var(--paper);text-align:center;
+    box-shadow:var(--shadow-lg);display:grid;gap:.7rem;justify-items:center;min-height:11rem;align-content:center}
+  .play .em{font-size:2.6rem;line-height:1}
+  .play h2{font-size:clamp(1.15rem,3.6vw,1.6rem);max-width:24ch}
+  .play .meta{font-size:.86rem;color:var(--ink-mute)}
+  .play.in{animation:slidein .3s cubic-bezier(.2,1.2,.4,1)}
+  @keyframes slidein{from{opacity:0;transform:translateY(14px) scale(.96)}}
+
+  .quads{display:grid;gap:.7rem;margin-top:1.1rem}
+  @media(min-width:42rem){.quads{grid-template-columns:1fr 1fr}}
+  .quad{border-radius:20px;padding:1rem;color:#fff;text-align:left;display:grid;gap:.25rem;
+    transition:transform .12s ease,filter .12s ease;min-height:5.4rem}
+  .quad:hover{transform:translateY(-3px);filter:brightness(1.08)}
+  .quad b{font-family:var(--display);font-weight:800;font-size:1rem;text-transform:uppercase;letter-spacing:.02em}
+  .quad span{font-size:.82rem;opacity:.92;line-height:1.35}
+  .quad:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+  .fb{border-radius:20px;padding:1.1rem 1.2rem;margin-top:1rem;line-height:1.55;display:grid;gap:.4rem}
+  .fb.right{background:color-mix(in srgb,var(--teal) 12%,var(--paper));border:2px solid color-mix(in srgb,var(--teal) 45%,var(--rule))}
+  .fb.wrong{background:color-mix(in srgb,var(--energy) 12%,var(--paper));border:2px solid color-mix(in srgb,var(--energy) 48%,var(--rule))}
+  .fb b{font-family:var(--display);font-weight:800;font-size:1.05rem}
+
+  .tally{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:1rem}
+  .dot{width:1.1rem;height:1.1rem;border-radius:50%;background:var(--sunk);border:2px solid var(--rule)}
+  .dot.ok{background:var(--teal);border-color:var(--teal)}
+  .dot.no{background:var(--energy);border-color:var(--energy)}
+  .dot.now{box-shadow:0 0 0 4px color-mix(in srgb,var(--sun) 45%,transparent)}
+
+  .results{display:grid;gap:.7rem;grid-template-columns:repeat(auto-fit,minmax(8rem,1fr));margin-top:1rem}
+  .res{border:2px solid var(--rule);border-radius:18px;padding:.9rem 1rem;background:var(--soft)}
+  .res b{display:block;font-family:var(--display);font-size:1.7rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+  .res span{font-size:.64rem;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-mute)}
+
+  .confetti{position:fixed;inset:0;pointer-events:none;z-index:90}
+  .confetti i{position:absolute;width:10px;height:14px;border-radius:2px;animation:fall 2.3s cubic-bezier(.3,.6,.5,1) forwards}
+  @keyframes fall{0%{transform:translateY(-10vh) rotate(0);opacity:1}100%{transform:translateY(105vh) rotate(720deg);opacity:0}}
+
+  .bandfoot{margin-top:2.6rem;background:var(--navy);border-radius:24px;padding:1.2rem 1.5rem;display:flex;gap:.7rem;
+    flex-wrap:wrap;justify-content:center;font-family:var(--display);font-weight:900;font-size:clamp(1rem,3.2vw,1.5rem)}
+  .bandfoot i{font-style:normal}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+</style>
+
+<div class="bar">
+  <div class="logo">
+    <svg viewBox="0 0 200 306" aria-hidden="true">
+      <g fill="none" stroke="#FFC83D" stroke-width="11" stroke-linecap="round"><path d="M100 20V3"/><path d="M148 34l9-14"/><path d="M52 34l-9-14"/><path d="M178 74l16-8"/><path d="M22 74L6 66"/></g>
+      <circle cx="100" cy="104" r="66" fill="#FFC83D"/><path d="M100 36l27 56H73z" fill="#FFF7E4"/><path d="M100 36l12 25H88z" fill="#0D1B3D"/>
+      <rect x="73" y="92" width="54" height="84" fill="#FF7A1A"/><rect x="73" y="92" width="18" height="84" fill="#FF9B4F"/>
+      <rect x="65" y="176" width="70" height="30" rx="5" fill="#0D1B3D"/><path d="M74 206h52l-7 44H81z" fill="#00B9A7"/>
+      <path d="M74 203c-24 12-42 33-48 63 20-4 36-14 48-29zM126 203c24 12 42 33 48 63-20-4-36-14-48-29z" fill="#00B9A7"/>
+      <path d="M100 252c12 15 17 29 0 51-17-22-12-36 0-51z" fill="#FF7A1A"/>
+    </svg>
+    <div><b>Focus First</b><span>My Smart Plan · 8–10</span></div>
+  </div>
+  <span class="pill" id="whoPill">—</span>
+  <span class="pill hot" id="streakPill">🔥 0</span>
+  <span class="pill sun" id="bestPill">Best 0</span>
+</div>
+
+<div class="page" id="page"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const QUADS = [
+    { id:"focus", em:"🎯", title:"Focus First", sub:"Important AND urgent — do it now", colour:"energy" },
+    { id:"plan",  em:"📅", title:"Important, not urgent", sub:"Put it in the calendar", colour:"teal" },
+    { id:"help",  em:"👥", title:"Delegate or get help", sub:"Urgent, but not yours alone", colour:"sky" },
+    { id:"drop",  em:"🗑", title:"Not important", sub:"Be honest — let it go", colour:"navy" }
+  ];
+
+  const CARDS = [
+    ["📚","Science project is due tomorrow morning","focus","Due tomorrow and it is yours. That is the definition of Focus First."],
+    ["🎸","You want to learn guitar one day","plan","It matters to you but nothing breaks today. Book it in, or it never happens."],
+    ["📖","Hand out the reading books to the class","help","It has to happen now, but anyone can do it. Ask."],
+    ["📱","Scrolling videos for another twenty minutes","drop","Not urgent, not important. Being honest about this is the hard part."],
+    ["🦷","Toothache that started last night","focus","Health that hurts now goes straight to the front."],
+    ["💰","Save up for the bike you want in the summer","plan","Months away, and only happens if you start now."],
+    ["🥤","Someone spilled juice near the door","help","Urgent, but it does not have to be you alone. Get help."],
+    ["🎮","Beat your high score again","drop","Fun, but it is not moving anything you care about."],
+    ["🎤","Practise your pitch — you present on Friday","plan","Friday is not today, but leaving it until Thursday night is how pitches go wrong."],
+    ["🧺","Bring in the washing before the rain","focus","Small, but it is urgent and it is on you."],
+    ["📧","Reply to a message that can wait a week","drop","It feels urgent because it pinged. It is not."],
+    ["🍰","Bake for the fair, and your cousin offered to help","help","You do not have to do all of it yourself."],
+    ["🚌","Missed the bus and school starts in ten minutes","focus","Right now, nothing else matters."],
+    ["🌱","Water the plant you are growing for the project","plan","Not today-or-never, but the plant dies if it keeps slipping."],
+    ["🧹","Tidy the craft table before the next group","help","It needs doing before they arrive, and the whole group can pitch in."],
+    ["📺","Re-watch a show you have already seen twice","drop","Nothing wrong with it. Just do not call it a priority."],
+    ["🎂","Make the card — the birthday is today","focus","Today. Nobody else can make your card."],
+    ["📓","Start reading the book before it is set","plan","Getting ahead is the whole point of this box."],
+    ["🖨","The printer is jammed and everyone is waiting","help","Urgent, but the teacher or the office fixes printers."],
+    ["🛍","Look at things online you are not buying","drop","Be honest. This is the box it belongs in."],
+    ["🧪","Finish the experiment write-up, due at 9am","focus","Deadline is hours away and it is yours alone."],
+    ["🏃","Train for the race that is in six weeks","plan","Six weeks of small sessions, or one week of panic. Choose now."],
+    ["📦","Carry the heavy box to the other room","help","Ask someone. That is not weakness, it is sense."],
+    ["🔔","Check if anyone posted anything new","drop","The notification is urgent-feeling. It is not important."]
+  ];
+
+  const ROUNDS = 12;
+  const TIME_START = 10000, TIME_MIN = 4500;
+
+  /* student-scoped best */
+  const RKEY="lf-roster-v1", AKEY="lf-active-student-v1", GKEY="lf-game-focus-first-v1";
+  let sid=null, sname="Player";
+  try{
+    const r=JSON.parse(localStorage.getItem(RKEY)||"[]")||[];
+    sid=localStorage.getItem(AKEY);
+    const me=r.filter(s=>s.id===sid)[0];
+    if(me&&me.name&&me.name.trim()) sname=me.name.trim();
+  }catch(e){}
+  if(!sid) sid="guest";
+  const key=()=>GKEY+"::"+sid;
+  let best=0;
+  try{ best=parseInt(localStorage.getItem(key())||"0",10)||0; }catch(e){}
+  const saveBest=()=>{ try{ localStorage.setItem(key(), String(best)); }catch(e){} };
+
+  const $=id=>document.getElementById(id);
+  const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+  const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const shuffle=a=>{const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;};
+  function confetti(){
+    if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const box=el("div","confetti"),cols=["#FFC83D","#FF7A1A","#4DB6F2","#00B9A7","#7B5EA6"];
+    for(let i=0;i<60;i++){const p=document.createElement("i");p.style.left=(Math.random()*100)+"vw";
+      p.style.background=cols[i%cols.length];p.style.animationDelay=(Math.random()*.5)+"s";box.appendChild(p);}
+    document.body.appendChild(box);setTimeout(()=>box.remove(),3100);
+  }
+  function band(host){
+    const b=el("div","bandfoot");
+    b.innerHTML=[["Dream It.","sun"],["Plan It.","teal"],["Do It.","energy"]]
+      .map(([w,c])=>'<i style="color:var(--'+c+')">'+w+'</i>').join(" ");
+    host.appendChild(b);
+  }
+  function paintBar(streak){
+    $("whoPill").textContent=sname;
+    $("streakPill").textContent="🔥 "+(streak||0);
+    $("bestPill").textContent="Best "+best;
+  }
+
+  /* ---------------- menu ---------------- */
+  function menu(){
+    const p=$("page"); p.innerHTML="";
+    p.appendChild(el("p","eyebrow","Little Founders · Game"));
+    const h=el("h1","big"); h.textContent="Focus First"; p.appendChild(h);
+    p.appendChild(el("p","lede","Twelve things land on your day. Sort each one into the right box before the timer runs out. The trap is putting everything in Focus First."));
+
+    p.appendChild(el("div","lf-div","<span>★</span>"));
+
+    const c=el("div","card");
+    c.innerHTML='<h2>The four boxes</h2>';
+    const g=el("div","quads");
+    QUADS.forEach(q=>{
+      const d=el("div","quad");
+      d.style.background="var(--"+q.colour+")";
+      d.innerHTML='<b>'+q.em+' '+esc(q.title)+'</b><span>'+esc(q.sub)+'</span>';
+      g.appendChild(d);
+    });
+    c.appendChild(g);
+    c.appendChild(el("p","lede","<b>Urgent</b> means it has a deadline. <b>Important</b> means it moves something you care about. They are not the same thing — and that is the whole game."));
+    c.lastChild.style.marginTop=".9rem";
+    p.appendChild(c);
+
+    const start=el("button","btn","▶ Start the day");
+    start.style.marginTop="1.2rem";
+    start.addEventListener("click",run);
+    p.appendChild(start);
+    band(p); paintBar(0);
+  }
+
+  /* ---------------- game ---------------- */
+  function run(){
+    const deck=shuffle(CARDS).slice(0,ROUNDS);
+    let i=0, score=0, streak=0, bestStreak=0, right=0, timer=null, deadline=0, answered=false;
+    const marks=[];
+
+    const p=$("page"); p.innerHTML="";
+    const head=el("div"); head.style.cssText="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap";
+    const quit=el("button","btn ghost sm","← Menu"); quit.addEventListener("click",()=>{clearInterval(timer);menu();});
+    head.appendChild(quit);
+    const round=el("h2"); round.style.marginLeft=".3rem"; head.appendChild(round);
+    p.appendChild(head);
+
+    const tally=el("div","tally"); p.appendChild(tally);
+    const tbar=el("div","timer",'<i style="width:100%"></i>'); p.appendChild(tbar);
+    const stage=el("div"); p.appendChild(stage);
+    band(p);
+
+    function paintTally(){
+      tally.innerHTML="";
+      for(let k=0;k<ROUNDS;k++){
+        const d=el("div","dot"+(marks[k]===1?" ok":marks[k]===0?" no":"")+(k===i?" now":""));
+        tally.appendChild(d);
+      }
+    }
+
+    function next(){
+      if(i>=ROUNDS) return end();
+      answered=false;
+      const c=deck[i];
+      round.textContent="Card "+(i+1)+" of "+ROUNDS;
+      paintTally();
+      stage.innerHTML="";
+
+      const card=el("div","play in");
+      card.innerHTML='<span class="em">'+c[0]+'</span><h2>'+esc(c[1])+'</h2><p class="meta">Which box does this go in?</p>';
+      stage.appendChild(card);
+
+      const g=el("div","quads");
+      QUADS.forEach(q=>{
+        const b=el("button","quad");
+        b.style.background="var(--"+q.colour+")";
+        b.innerHTML='<b>'+q.em+' '+esc(q.title)+'</b><span>'+esc(q.sub)+'</span>';
+        b.addEventListener("click",()=>answer(q.id,c,g));
+        g.appendChild(b);
+      });
+      stage.appendChild(g);
+
+      const dur = Math.max(TIME_MIN, TIME_START - i*450);
+      deadline = Date.now() + dur;
+      clearInterval(timer);
+      tbar.className="timer";
+      timer=setInterval(()=>{
+        const left = deadline - Date.now();
+        const pct = Math.max(0, left/dur*100);
+        tbar.firstChild.style.width = pct + "%";
+        if(pct<40) tbar.className="timer warn";
+        if(pct<15) tbar.className="timer gone";
+        if(left<=0){ clearInterval(timer); if(!answered) answer(null,c,g); }
+      },80);
+    }
+
+    function answer(choice,c,g){
+      if(answered) return;
+      answered=true;
+      clearInterval(timer);
+      Array.from(g.children).forEach(b=>b.disabled=true);
+      const correct = c[2], ok = choice===correct;
+      const cq = QUADS.filter(q=>q.id===correct)[0];
+
+      if(ok){ right++; streak++; bestStreak=Math.max(bestStreak,streak); score += 10 + Math.min(streak,5)*2; marks[i]=1; }
+      else { streak=0; marks[i]=0; }
+      paintTally(); paintBar(streak);
+
+      const fb=el("div","fb "+(ok?"right":"wrong"));
+      fb.innerHTML="<b>"+(ok ? (streak>=3 ? "Right — "+streak+" in a row!" : "Right!")
+        : choice===null ? "Time ran out." : "Not quite.")+"</b>" +
+        "<span>"+(ok?"":"It belongs in <b>"+esc(cq.em+" "+cq.title)+"</b>. ")+esc(c[3])+"</span>";
+      stage.appendChild(fb);
+
+      const go=el("button","btn sm", i+1<ROUNDS ? "Next card →" : "See my day");
+      go.style.marginTop=".9rem";
+      go.addEventListener("click",()=>{ i++; next(); });
+      stage.appendChild(go);
+      go.focus();
+    }
+
+    function end(){
+      clearInterval(timer);
+      stage.innerHTML="";
+      round.textContent="Day complete";
+      tbar.style.display="none";
+      const pct = Math.round(right/ROUNDS*100);
+      if(score>best){ best=score; saveBest(); confetti(); }
+      paintBar(0);
+
+      const c=el("div","card");
+      c.style.borderColor="var(--sun)";
+      c.innerHTML='<h2>'+(pct===100?"Perfect day.":pct>=75?"Good day's planning.":pct>=50?"Some clear calls, some to work on.":"Worth another go.")+'</h2>';
+      const r=el("div","results");
+      r.innerHTML='<div class="res"><b>'+score+'</b><span>Score</span></div>' +
+        '<div class="res"><b>'+right+'/'+ROUNDS+'</b><span>Right</span></div>' +
+        '<div class="res"><b>'+bestStreak+'</b><span>Best streak</span></div>' +
+        '<div class="res"><b>'+best+'</b><span>Your best ever</span></div>';
+      c.appendChild(r);
+      const note=el("p","lede");
+      note.style.marginTop="1rem";
+      note.innerHTML = pct>=75
+        ? "You are separating <b>urgent</b> from <b>important</b> — that is the skill almost every adult still gets wrong."
+        : "Most wrong answers come from treating <b>urgent</b> as <b>important</b>. If it has a deadline but changes nothing you care about, it is not Focus First.";
+      c.appendChild(note);
+      const row=el("div"); row.style.cssText="display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.1rem";
+      const again=el("button","btn","Play again"); again.addEventListener("click",run);
+      const back=el("button","btn ghost","Menu"); back.addEventListener("click",menu);
+      row.appendChild(again); row.appendChild(back);
+      c.appendChild(row);
+      stage.appendChild(c);
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+
+    paintBar(0);
+    next();
+  }
+
+  menu();
+})();
+</script>

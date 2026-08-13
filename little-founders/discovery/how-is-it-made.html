@@ -452,6 +452,15 @@
 
   /* ---- brand: drifting graphic elements ---- */
   .lf-deco { position: absolute; pointer-events: none; opacity: .5; }
+
+  /* Play-the-game link in the top bar */
+  .lf-play{display:inline-flex;align-items:center;gap:.42rem;text-decoration:none;cursor:pointer;
+    font:inherit;font-size:.78rem;font-weight:800;letter-spacing:.01em;
+    padding:.42rem .8rem;border-radius:999px;white-space:nowrap;
+    border:2px solid color-mix(in srgb,var(--sun) 60%,var(--rule,#DDD6C4));
+    background:color-mix(in srgb,var(--sun) 18%,var(--paper));color:var(--ink)}
+  .lf-play:hover{background:color-mix(in srgb,var(--sun) 34%,var(--paper))}
+  .lf-play em{font-style:normal;font-size:.95rem;line-height:1}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -559,6 +568,7 @@
   <button class="chipbtn" data-nav="words"><svg class="ic"><use href="#i-book"/></svg>Words</button>
   <button class="chipbtn" data-nav="card"><svg class="ic"><use href="#i-card"/></svg>My Card</button>
   <button class="chipbtn" data-nav="cert"><svg class="ic"><use href="#i-medal"/></svg>Award</button>
+  <a class="lf-play" href="https://claude.ai/code/artifact/c8457bf6-39d9-4f07-81de-83ba8ddf3a8a" target="_blank" rel="noopener" title="Play Journey Jumble"><em>🧩</em>Play Journey Jumble</a>
 </div>
 
 <div class="page" id="page"></div>

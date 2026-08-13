@@ -71,6 +71,19 @@ book keeps a separate copy of the work per student, and
 | 🚀 Young Founders | **Reverse. Rethink. Rebuild.** | Learn to question and improve | [Built](discovery/reverse-rethink-rebuild.html) |
 | 👑 Founder CEOs | **GO OVERSEAS!** | Build it, brand it, take it into the world | [Built](discovery/go-overseas.html) |
 
+## The games
+
+Each book has a companion game that drills its single hardest idea, sized for the last ten minutes
+of a session. They share the class list, keep a personal best per student, and report into the
+Class Hub. Scores are a conversation starter, not an assessment.
+
+| Game | Book | The idea it drills | Status |
+|---|---|---|---|
+| 🧩 **Journey Jumble** | How Is It Made? | Making has an order, and the order is not obvious | [Built](discovery/game-journey-jumble.html) |
+| 🎯 **Focus First** | My Smart Plan | Urgent is not the same as important | [Built](discovery/game-focus-first.html) |
+| 🪜 **Question Ladder** | Reverse. Rethink. Rebuild. | A better question beats a faster answer | [Built](discovery/game-question-ladder.html) |
+| 💰 **Margin Call** | GO OVERSEAS! | Every decision shows up in the cash | [Built](discovery/game-margin-call.html) |
+
 ## Events
 
 Three showcases per tier per year, plus mentorship at the two senior tiers:

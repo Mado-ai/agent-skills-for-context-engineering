@@ -376,6 +376,14 @@
     .app { display: block; }
     body { background: #fff; color: #111; background-image: none; }
   }
+
+  /* Play-the-game link in the topline */
+  .lf-play{display:inline-flex;align-items:center;gap:.42rem;text-decoration:none;cursor:pointer;
+    font:inherit;font-size:.74rem;font-weight:700;letter-spacing:.02em;
+    padding:.36rem .74rem;border-radius:999px;white-space:nowrap;
+    border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);color:var(--ink)}
+  .lf-play:hover{border-color:transparent;background:var(--grad);color:#060B16}
+  .lf-play em{font-style:normal;font-size:.9rem;line-height:1}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -418,6 +426,7 @@
       <span class="where" id="where">Start</span>
       <span class="hint" id="progLabel">0 / 10 stamps</span>
       <div class="prog"><i id="progBar" style="width:0%"></i></div>
+  <a class="lf-play" href="https://claude.ai/code/artifact/9d793c1f-25cf-4329-b385-cc7c3ea88160" target="_blank" rel="noopener" title="Play Margin Call"><em>💰</em>Play Margin Call</a>
     </div>
     <div class="view" id="view"></div>
   </main>

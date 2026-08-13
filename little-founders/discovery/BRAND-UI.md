@@ -127,9 +127,18 @@ Content breathes: never pack a card to its edges.
 
 ## Applied to each book
 
-| Book | Tier accent | Notes |
+| Book | Register | Tier accent | Notes |
+|---|---|---|---|
+| How Is It Made? | Light | Sunshine | Warmest, largest type, most decoration. Ages 5–7 |
+| My Smart Plan | Light | Teal | Goal rings, the weekly grid, the four-box priority board |
+| Reverse. Rethink. Rebuild. | Light | Purple + the four step colours (Sunshine → Energy → Sky → Teal) | Magnifier, question mark, bulb, rocket |
+| GO OVERSEAS! | **Dark** | Purple → blue → cyan gradient on near-black | The cover is deliberately dark and premium — match it. This is the *only* book in the dark register, and the shield-rocket mark replaces the bulb mark |
+
+The games follow their book's register exactly — same tokens, same mark, same footer band:
+
+| Game | Book | Register |
 |---|---|---|
-| How Is It Made? | Sunshine | Warmest, largest type, most decoration. Ages 5–8 |
-| Mission Control | Sky | Checklists and countdowns |
-| Reverse. Rethink. Rebuild. | Purple + the four step colours (Sunshine → Energy → Sky → Teal) | Magnifier, question mark, bulb, rocket |
-| GO OVERSEAS! | Energy | Most content per screen, but the same light treatment. Maturity comes from density of *thinking*, not from dark chrome |
+| Journey Jumble | How Is It Made? | Light · Sunshine |
+| Focus First | My Smart Plan | Light · Teal |
+| Question Ladder | Reverse. Rethink. Rebuild. | Light · Purple |
+| Margin Call | GO OVERSEAS! | **Dark** |

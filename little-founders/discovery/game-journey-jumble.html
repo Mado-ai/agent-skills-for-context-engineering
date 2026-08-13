@@ -1,0 +1,332 @@
+<title>Journey Jumble</title>
+<style>
+  :root{--ground:#F7F4EC;--paper:#FFF;--soft:#FBF9F3;--sunk:#F1EDE1;--ink:#0D1B3D;--ink-soft:#3E4E76;--ink-mute:#7B87A5;
+    --rule:#E3DCCA;--rule-hard:#D6CDB6;--sun:#FFC83D;--energy:#FF7A1A;--sky:#4DB6F2;--teal:#00B9A7;--purple:#7B5EA6;
+    --rose:#E0526E;--green:#5FA63F;--navy:#0D1B3D;
+    --shadow:0 1px 2px rgba(13,27,61,.04),0 10px 26px -16px rgba(13,27,61,.25);
+    --shadow-lg:0 3px 8px rgba(13,27,61,.07),0 28px 56px -28px rgba(13,27,61,.4);
+    --display:"Nunito",ui-rounded,"SF Pro Rounded","Segoe UI Variable Display",system-ui,sans-serif;
+    --body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#0A1730;--paper:#12234A;--soft:#16294F;--sunk:#1C3159;
+    --ink:#F4F1E8;--ink-soft:#C7D2EC;--ink-mute:#8E9CBE;--rule:#26375F;--rule-hard:#35497A;--sun:#FFD264;--energy:#FF9247;
+    --sky:#74C6F7;--teal:#1ACFBB;--purple:#A78BCE;--rose:#F0798F;--green:#7EC65C;--navy:#F4F1E8;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 28px -18px rgba(0,0,0,.8);--shadow-lg:0 3px 8px rgba(0,0,0,.45),0 30px 60px -30px rgba(0,0,0,.9)}}
+  :root[data-theme="dark"]{--ground:#0A1730;--paper:#12234A;--soft:#16294F;--sunk:#1C3159;--ink:#F4F1E8;--ink-soft:#C7D2EC;
+    --ink-mute:#8E9CBE;--rule:#26375F;--rule-hard:#35497A;--sun:#FFD264;--energy:#FF9247;--sky:#74C6F7;--teal:#1ACFBB;
+    --purple:#A78BCE;--rose:#F0798F;--green:#7EC65C;--navy:#F4F1E8;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 28px -18px rgba(0,0,0,.8);--shadow-lg:0 3px 8px rgba(0,0,0,.45),0 30px 60px -30px rgba(0,0,0,.9)}
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:1.05rem;line-height:1.6;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:var(--display);font-weight:800;margin:0;line-height:1.12;letter-spacing:-.02em;text-wrap:balance}
+  p{margin:0} button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;font-family:var(--display)}
+  :focus-visible{outline:4px solid var(--sky);outline-offset:3px;border-radius:12px}
+  .ic{width:1.2em;height:1.2em;flex:none}
+
+  .bar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;padding:.8rem clamp(1rem,3vw,2.2rem);
+    background:color-mix(in srgb,var(--ground) 92%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--rule)}
+  .logo{display:flex;align-items:center;gap:.55rem;margin-right:auto}
+  .logo svg{width:26px;height:40px}
+  .logo b{font-family:var(--display);font-weight:800;font-size:.95rem;line-height:1.05;display:block}
+  .logo span{font-size:.56rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--teal)}
+  .pill{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .8rem;border-radius:99px;border:2px solid var(--rule);
+    background:var(--paper);font-family:var(--display);font-weight:800;font-size:.86rem}
+  .pill.sun{border-color:var(--sun);background:color-mix(in srgb,var(--sun) 22%,var(--paper))}
+
+  .page{max-width:56rem;margin:0 auto;padding:clamp(1.2rem,3vw,2.4rem) clamp(1rem,3vw,2.2rem) 4rem}
+  .eyebrow{font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
+  h1.big{font-size:clamp(2rem,7vw,3.4rem);margin-top:.5rem}
+  h1.big::after{content:"";display:block;width:4.5rem;height:6px;border-radius:99px;background:var(--sun);margin-top:.9rem}
+  .lede{color:var(--ink-soft);font-size:1.1rem;margin-top:1rem;max-width:50ch}
+  .card{background:var(--paper);border:1px solid var(--rule);border-radius:24px;padding:1.4rem 1.5rem;box-shadow:var(--shadow)}
+  .card+.card{margin-top:1rem}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.9rem 1.6rem;border-radius:18px;
+    font-weight:800;font-size:1.1rem;background:var(--energy);color:#fff;box-shadow:var(--shadow);transition:transform .12s ease,filter .12s ease}
+  .btn:hover{transform:translateY(-2px);filter:brightness(1.06)}
+  .btn.ghost{background:var(--paper);color:var(--ink);border:2px solid var(--rule-hard);box-shadow:none}
+  .btn.sm{padding:.5rem 1rem;font-size:.9rem;border-radius:13px}
+
+  .lf-div{display:flex;align-items:center;gap:.85rem;margin:2rem 0}
+  .lf-div::before,.lf-div::after{content:"";height:2px;flex:1;background:var(--sun);opacity:.55;border-radius:2px}
+  .lf-div span{color:var(--sun);font-size:1.1rem}
+
+  /* ---- picker ---- */
+  .grid{display:grid;gap:.8rem;grid-template-columns:repeat(auto-fill,minmax(10rem,1fr))}
+  .pick{border:3px solid var(--rule);border-radius:22px;padding:1rem .8rem;background:var(--paper);display:grid;gap:.45rem;
+    justify-items:center;text-align:center;transition:transform .14s ease,box-shadow .14s ease;position:relative}
+  .pick:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+  .pick .em{font-size:2.4rem;line-height:1}
+  .pick b{font-family:var(--display);font-weight:800;font-size:.92rem;line-height:1.15}
+  .pick .stars{display:flex;gap:.1rem;font-size:.85rem;color:var(--sun)}
+  .pick.done{border-color:var(--sun)}
+
+  /* ---- board ---- */
+  .track{display:flex;flex-wrap:wrap;gap:.45rem;align-items:center;min-height:6.4rem;padding:.7rem;
+    border:3px dashed var(--rule-hard);border-radius:22px;background:var(--soft)}
+  .slot{width:5rem;display:grid;gap:.3rem;justify-items:center}
+  .puck{width:4rem;height:4rem;border-radius:50%;display:grid;place-items:center;font-size:1.9rem;box-shadow:var(--shadow)}
+  .puck.blank{background:var(--sunk);border:3px dashed var(--rule-hard);box-shadow:none;font-size:1.1rem;color:var(--ink-mute)}
+  .slot span{font-family:var(--display);font-weight:800;font-size:.72rem;text-align:center;line-height:1.15}
+  .arrow{color:var(--teal);font-size:1.2rem;font-weight:800;align-self:center;margin-bottom:1rem}
+  .pop{animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+  @keyframes pop{0%{transform:scale(.3) rotate(-14deg);opacity:0}100%{transform:none;opacity:1}}
+
+  .hand{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.2rem;justify-content:center}
+  .tile{border:3px solid var(--rule);border-radius:20px;padding:.7rem .5rem;background:var(--paper);width:5.4rem;
+    display:grid;gap:.35rem;justify-items:center;transition:transform .12s ease,box-shadow .12s ease}
+  .tile:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+  .tile .em{font-size:2rem;line-height:1}
+  .tile b{font-family:var(--display);font-weight:800;font-size:.74rem;text-align:center;line-height:1.15}
+  .tile.gone{opacity:0;pointer-events:none;transform:scale(.4)}
+  .tile.wrong{animation:shake .4s}
+  @keyframes shake{0%,100%{transform:none}20%{transform:translateX(-8px) rotate(-4deg)}40%{transform:translateX(8px) rotate(4deg)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+
+  .say{display:grid;grid-template-columns:auto minmax(0,1fr);gap:1rem;align-items:center;
+    background:linear-gradient(100deg,color-mix(in srgb,var(--sun) 24%,var(--paper)),var(--paper));
+    border:2px solid color-mix(in srgb,var(--sun) 45%,var(--rule));border-radius:22px;padding:1rem 1.2rem}
+  .say svg{width:58px;height:58px;flex:none}
+  .say p{font-family:var(--display);font-weight:800;font-size:1.1rem;line-height:1.35}
+  .speak{display:inline-flex;align-items:center;gap:.4rem;margin-top:.5rem;padding:.35rem .8rem;border-radius:99px;
+    font-size:.82rem;font-weight:800;background:var(--paper);border:2px solid var(--rule)}
+  .speak.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+
+  .scorebar{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin-top:1rem}
+  .big-stars{font-size:2.2rem;letter-spacing:.1rem;color:var(--sun)}
+  .confetti{position:fixed;inset:0;pointer-events:none;z-index:90}
+  .confetti i{position:absolute;width:10px;height:14px;border-radius:2px;animation:fall 2.3s cubic-bezier(.3,.6,.5,1) forwards}
+  @keyframes fall{0%{transform:translateY(-10vh) rotate(0);opacity:1}100%{transform:translateY(105vh) rotate(720deg);opacity:0}}
+
+  .bandfoot{margin-top:2.6rem;background:var(--navy);border-radius:24px;padding:1.2rem 1.5rem;display:flex;gap:.7rem;
+    flex-wrap:wrap;justify-content:center;font-family:var(--display);font-weight:900;font-size:clamp(1rem,3.2vw,1.5rem)}
+  .bandfoot i{font-style:normal}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+</style>
+
+<div class="bar">
+  <div class="logo">
+    <svg viewBox="0 0 200 306" aria-hidden="true">
+      <g fill="none" stroke="#FFC83D" stroke-width="11" stroke-linecap="round"><path d="M100 20V3"/><path d="M148 34l9-14"/><path d="M52 34l-9-14"/><path d="M178 74l16-8"/><path d="M22 74L6 66"/></g>
+      <circle cx="100" cy="104" r="66" fill="#FFC83D"/><path d="M100 36l27 56H73z" fill="#FFF7E4"/><path d="M100 36l12 25H88z" fill="#0D1B3D"/>
+      <rect x="73" y="92" width="54" height="84" fill="#FF7A1A"/><rect x="73" y="92" width="18" height="84" fill="#FF9B4F"/>
+      <rect x="65" y="176" width="70" height="30" rx="5" fill="#0D1B3D"/><path d="M74 206h52l-7 44H81z" fill="#00B9A7"/>
+      <path d="M74 203c-24 12-42 33-48 63 20-4 36-14 48-29zM126 203c24 12 42 33 48 63-20-4-36-14-48-29z" fill="#00B9A7"/>
+      <path d="M100 252c12 15 17 29 0 51-17-22-12-36 0-51z" fill="#FF7A1A"/>
+    </svg>
+    <div><b>Journey Jumble</b><span>How Is It Made? · 5–7</span></div>
+  </div>
+  <span class="pill" id="whoPill">—</span>
+  <span class="pill sun" id="starPill">★ 0 / 30</span>
+</div>
+
+<div class="page" id="page"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const ZIGGY = '<svg viewBox="0 0 100 100" aria-label="Ziggy the Fox">' +
+    '<path d="M14 20c0 0 2 14 8 22L14 20Z" fill="#E0526E"/><path d="M86 20c0 0-2 14-8 22L86 20Z" fill="#E0526E"/>' +
+    '<path d="M18 22c4-8 10-10 14-8l8 6h20l8-6c4-2 10 0 14 8 6 12 4 30-6 42-6 7-14 11-26 11s-20-4-26-11C14 52 12 34 18 22Z" fill="#FF7A1A"/>' +
+    '<path d="M32 60c4 9 10 13 18 13s14-4 18-13c-6 4-11 6-18 6s-12-2-18-6Z" fill="#FFF6EA"/>' +
+    '<ellipse cx="37" cy="47" rx="4.6" ry="5.4" fill="#16233F"/><ellipse cx="63" cy="47" rx="4.6" ry="5.4" fill="#16233F"/>' +
+    '<circle cx="38.6" cy="45" r="1.6" fill="#fff"/><circle cx="64.6" cy="45" r="1.6" fill="#fff"/>' +
+    '<path d="M50 62c-3.4 0-6-2.2-6-4.6 0-1.6 1.4-2.6 3-2.6h6c1.6 0 3 1 3 2.6 0 2.4-2.6 4.6-6 4.6Z" fill="#16233F"/></svg>';
+
+  const COLS = ["teal","sky","purple","energy","rose","green"];
+
+  const ROUNDS = [
+    { n:1, name:"Pencil", em:"✏️", stages:[["Tree","🌳"],["Wood","🪵"],["Graphite","⚫"],["Glue & shape","🧴"],["Paint","🎨"],["Pencil","✏️"]] },
+    { n:2, name:"Paper", em:"📄", stages:[["Tree","🌳"],["Wood chips","🪵"],["Pulp","🥣"],["Press & dry","🧻"],["Paper","📄"]] },
+    { n:3, name:"T-shirt", em:"👕", stages:[["Cotton","☁️"],["Yarn","🧶"],["Fabric","🧵"],["Dye","💧"],["Cut & sew","✂️"],["T-shirt","👕"]] },
+    { n:4, name:"Bread", em:"🍞", stages:[["Wheat","🌾"],["Flour","🍚"],["Dough","🫓"],["Rise","🎈"],["Bake","🔥"],["Bread","🍞"]] },
+    { n:5, name:"Juice", em:"🥤", stages:[["Fruit","🍊"],["Wash","🚿"],["Squeeze","🤏"],["Juice","🥤"],["Bottle","🍾"]] },
+    { n:6, name:"Toy", em:"🧸", stages:[["Design","📝"],["Beads","🔵"],["Melt","🌡️"],["Mould","🧊"],["Paint","🎨"],["Toy","🧸"]] },
+    { n:7, name:"Chocolate", em:"🍫", stages:[["Cacao pod","🥥"],["Beans","🫘"],["Roast","🔥"],["Grind","⚙️"],["Add sugar","🍬"],["Chocolate","🍫"]] },
+    { n:8, name:"Book", em:"📖", stages:[["Idea","💡"],["Write","✍️"],["Print","🖨️"],["Fold pages","📑"],["Add cover","📕"],["Book","📖"]] },
+    { n:9, name:"Chair", em:"🪑", stages:[["Tree","🌳"],["Wood pieces","🪵"],["Shape","🔨"],["Join","🔩"],["Finish","✨"],["Chair","🪑"]] },
+    { n:10, name:"Food to you", em:"🏠", stages:[["Farm","🚜"],["Harvest","🧺"],["Pack","📦"],["Truck","🚚"],["Store","🏪"],["Home","🏠"]] }
+  ];
+
+  /* ---- student-scoped save ---- */
+  const RKEY="lf-roster-v1", AKEY="lf-active-student-v1", GKEY="lf-game-journey-jumble-v1";
+  let sid=null, sname="Player";
+  try {
+    const r = JSON.parse(localStorage.getItem(RKEY)||"[]")||[];
+    sid = localStorage.getItem(AKEY);
+    const me = r.filter(s=>s.id===sid)[0];
+    if (me && me.name && me.name.trim()) sname = me.name.trim();
+  } catch(e){}
+  if (!sid) sid = "guest";
+  const key = () => GKEY + "::" + sid;
+  let best = {};
+  try { best = JSON.parse(localStorage.getItem(key())||"{}")||{}; } catch(e){ best={}; }
+  const saveBest = () => { try{ localStorage.setItem(key(), JSON.stringify(best)); }catch(e){} };
+  const totalStars = () => ROUNDS.reduce((a,r)=>a+(best[r.n]||0),0);
+
+  const $ = id=>document.getElementById(id);
+  const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+  const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const canSpeak = typeof speechSynthesis !== "undefined";
+  let speakingBtn=null;
+  function speak(text, btn){
+    if(!canSpeak) return;
+    speechSynthesis.cancel();
+    if(speakingBtn) speakingBtn.classList.remove("on");
+    if(speakingBtn===btn){speakingBtn=null;return;}
+    const u=new SpeechSynthesisUtterance(text); u.rate=.88; u.pitch=1.08;
+    u.onend=()=>{ if(btn) btn.classList.remove("on"); speakingBtn=null; };
+    if(btn){btn.classList.add("on");speakingBtn=btn;}
+    speechSynthesis.speak(u);
+  }
+  function confetti(){
+    if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const box=el("div","confetti"), cols=["#FFC83D","#FF7A1A","#4DB6F2","#00B9A7","#7B5EA6"];
+    for(let i=0;i<60;i++){const p=document.createElement("i");p.style.left=(Math.random()*100)+"vw";
+      p.style.background=cols[i%cols.length];p.style.animationDelay=(Math.random()*.5)+"s";box.appendChild(p);}
+    document.body.appendChild(box); setTimeout(()=>box.remove(),3100);
+  }
+  const shuffle = a => { const b=a.slice(); for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];} return b; };
+  const starStr = n => "★★★".slice(0,n) + "☆☆☆".slice(0,3-n);
+
+  function paintBar(){
+    $("whoPill").textContent = sname;
+    $("starPill").textContent = "★ " + totalStars() + " / 30";
+  }
+
+  function band(host){
+    const b=el("div","bandfoot");
+    b.innerHTML=[["Observe.","sun"],["Make.","energy"],["Learn.","sky"],["Improve.","teal"]]
+      .map(([w,c])=>'<i style="color:var(--'+c+')">'+w+'</i>').join(" ");
+    host.appendChild(b);
+  }
+
+  /* ---------------- menu ---------------- */
+  function menu(){
+    const p=$("page"); p.innerHTML="";
+    p.appendChild(el("p","eyebrow","Little Founders · Game"));
+    const h=el("h1","big"); h.textContent="Journey Jumble"; p.appendChild(h);
+    p.appendChild(el("p","lede","Everything is made in steps — but the steps got jumbled! Put them back in the right order."));
+
+    const say=el("div","say"); say.style.marginTop="1.4rem";
+    const line="Hello! I mixed up all the steps. Can you help me put them back in order?";
+    say.innerHTML=ZIGGY+'<div><p>'+esc(line)+'</p></div>';
+    if(canSpeak){
+      const b=el("button","speak","🔊 Read to me");
+      b.addEventListener("click",()=>speak(line,b));
+      say.querySelector("div").appendChild(b);
+    }
+    p.appendChild(say);
+
+    const d=el("div","lf-div","<span>★</span>"); p.appendChild(d);
+
+    const g=el("div","grid");
+    ROUNDS.forEach(r=>{
+      const st=best[r.n]||0;
+      const b=el("button","pick"+(st?" done":""));
+      b.innerHTML='<span class="em">'+r.em+'</span><b>'+esc(r.name)+'</b>' +
+        '<span class="stars">'+starStr(st)+'</span>';
+      b.addEventListener("click",()=>play(r));
+      g.appendChild(b);
+    });
+    p.appendChild(g);
+
+    if(totalStars()===30){
+      const c=el("div","card"); c.style.marginTop="1.2rem"; c.style.borderColor="var(--sun)";
+      c.innerHTML='<h2>🏆 All thirty stars!</h2><p style="margin-top:.5rem">You know how everything is made. Every single journey, in the right order.</p>';
+      p.appendChild(c);
+    }
+    band(p); paintBar();
+  }
+
+  /* ---------------- play ---------------- */
+  function play(r){
+    const p=$("page"); p.innerHTML="";
+    const order=r.stages, remaining=shuffle(order.map((s,i)=>i));
+    let next=0, wrong=0;
+
+    const top=el("div"); top.style.cssText="display:flex;gap:.7rem;align-items:center;flex-wrap:wrap";
+    const back=el("button","btn ghost sm","← All journeys");
+    back.addEventListener("click",menu);
+    top.appendChild(back);
+    const title=el("h2"); title.style.marginLeft=".3rem";
+    title.textContent=r.em+" How is "+r.name.toLowerCase()+" made?";
+    top.appendChild(title);
+    p.appendChild(top);
+
+    const line="How is "+r.name.toLowerCase()+" made? Tap the pictures in the right order. Start with the very first step.";
+    const say=el("div","say"); say.style.marginTop="1rem";
+    say.innerHTML=ZIGGY+'<div><p>Tap them in order. What comes first?</p></div>';
+    if(canSpeak){ const b=el("button","speak","🔊 Read to me"); b.addEventListener("click",()=>speak(line,b)); say.querySelector("div").appendChild(b); }
+    p.appendChild(say);
+
+    const track=el("div","track"); track.style.marginTop="1.1rem";
+    p.appendChild(track);
+    function paintTrack(){
+      track.innerHTML="";
+      order.forEach((s,i)=>{
+        if(i) { const a=el("div","arrow","→"); track.appendChild(a); }
+        const slot=el("div","slot");
+        if(i<next){
+          slot.innerHTML='<span class="puck pop" style="background:var(--'+COLS[i%COLS.length]+')">'+s[1]+'</span><span>'+esc(s[0])+'</span>';
+        } else {
+          slot.innerHTML='<span class="puck blank">'+(i+1)+'</span><span style="color:var(--ink-mute)">?</span>';
+        }
+        track.appendChild(slot);
+      });
+    }
+    paintTrack();
+
+    const hand=el("div","hand"); p.appendChild(hand);
+    function paintHand(){
+      hand.innerHTML="";
+      remaining.forEach(idx=>{
+        const s=order[idx];
+        const t=el("button","tile");
+        t.innerHTML='<span class="em">'+s[1]+'</span><b>'+esc(s[0])+'</b>';
+        t.addEventListener("click",()=>{
+          if(idx===next){
+            t.classList.add("gone");
+            remaining.splice(remaining.indexOf(idx),1);
+            next++;
+            speak(s[0],null);
+            setTimeout(()=>{ paintTrack(); paintHand(); if(next===order.length) win(); },160);
+          } else {
+            wrong++;
+            t.classList.remove("wrong"); void t.offsetWidth; t.classList.add("wrong");
+            speak("Not yet. Try another one.",null);
+          }
+        });
+        hand.appendChild(t);
+      });
+      if(!remaining.length) hand.innerHTML='<p class="lede" style="text-align:center">🎉</p>';
+    }
+    paintHand();
+
+    function win(){
+      const stars = wrong===0 ? 3 : wrong<=2 ? 2 : 1;
+      if((best[r.n]||0) < stars){ best[r.n]=stars; saveBest(); }
+      paintBar(); confetti();
+      const c=el("div","card"); c.style.marginTop="1.2rem"; c.style.borderColor="var(--sun)";
+      c.innerHTML='<div class="big-stars">'+starStr(stars)+'</div>' +
+        '<h2 style="margin-top:.4rem">'+(wrong===0?"Perfect!":wrong<=2?"Well done!":"You got there!")+'</h2>' +
+        '<p style="margin-top:.5rem">'+(wrong===0
+          ? "Every step in the right order, first try."
+          : "You made "+wrong+" wrong tap"+(wrong===1?"":"s")+". Play again to get all three stars.")+'</p>';
+      const row=el("div","scorebar");
+      const again=el("button","btn","Play again");
+      again.addEventListener("click",()=>play(r));
+      const nxt=el("button","btn ghost", r.n<10 ? "Next journey →" : "All journeys");
+      nxt.addEventListener("click",()=> r.n<10 ? play(ROUNDS[r.n]) : menu());
+      row.appendChild(again); row.appendChild(nxt);
+      c.appendChild(row);
+      p.appendChild(c);
+      speak(wrong===0?"Perfect! Three stars!":"Well done!",null);
+      window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
+    }
+
+    band(p); paintBar();
+  }
+
+  menu();
+})();
+</script>

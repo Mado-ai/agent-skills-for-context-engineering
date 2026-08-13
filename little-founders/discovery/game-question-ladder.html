@@ -1,0 +1,370 @@
+<title>Question Ladder</title>
+<style>
+  :root{--ground:#F7F4EC;--paper:#FFF;--soft:#FBF9F3;--sunk:#F1EDE1;--ink:#0D1B3D;--ink-soft:#3E4E76;--ink-mute:#7B87A5;
+    --rule:#E3DCCA;--rule-hard:#D6CDB6;--sun:#FFC83D;--energy:#FF7A1A;--sky:#4DB6F2;--teal:#00B9A7;--purple:#7B5EA6;
+    --rose:#E0526E;--green:#5FA63F;--navy:#0D1B3D;
+    --shadow:0 1px 2px rgba(13,27,61,.04),0 10px 26px -16px rgba(13,27,61,.25);
+    --shadow-lg:0 3px 8px rgba(13,27,61,.07),0 28px 56px -28px rgba(13,27,61,.4);
+    --display:"Nunito",ui-rounded,"SF Pro Rounded","Segoe UI Variable Display",system-ui,sans-serif;
+    --body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#0A1730;--paper:#12234A;--soft:#16294F;--sunk:#1C3159;
+    --ink:#F4F1E8;--ink-soft:#C7D2EC;--ink-mute:#8E9CBE;--rule:#26375F;--rule-hard:#35497A;--sun:#FFD264;--energy:#FF9247;
+    --sky:#74C6F7;--teal:#1ACFBB;--purple:#A78BCE;--rose:#F0798F;--green:#7EC65C;--navy:#F4F1E8;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 28px -18px rgba(0,0,0,.8);--shadow-lg:0 3px 8px rgba(0,0,0,.45),0 30px 60px -30px rgba(0,0,0,.9)}}
+  :root[data-theme="dark"]{--ground:#0A1730;--paper:#12234A;--soft:#16294F;--sunk:#1C3159;--ink:#F4F1E8;--ink-soft:#C7D2EC;
+    --ink-mute:#8E9CBE;--rule:#26375F;--rule-hard:#35497A;--sun:#FFD264;--energy:#FF9247;--sky:#74C6F7;--teal:#1ACFBB;
+    --purple:#A78BCE;--rose:#F0798F;--green:#7EC65C;--navy:#F4F1E8;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 28px -18px rgba(0,0,0,.8);--shadow-lg:0 3px 8px rgba(0,0,0,.45),0 30px 60px -30px rgba(0,0,0,.9)}
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:1rem;line-height:1.6;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:var(--display);font-weight:800;margin:0;line-height:1.12;letter-spacing:-.02em;text-wrap:balance}
+  p{margin:0} button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;font-family:var(--body)}
+  :focus-visible{outline:3px solid var(--sky);outline-offset:3px;border-radius:12px}
+
+  .bar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;padding:.8rem clamp(1rem,3vw,2.2rem);
+    background:color-mix(in srgb,var(--ground) 92%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--rule)}
+  .logo{display:flex;align-items:center;gap:.55rem;margin-right:auto}
+  .logo svg{width:26px;height:40px}
+  .logo b{font-family:var(--display);font-weight:800;font-size:.95rem;line-height:1.05;display:block}
+  .logo span{font-size:.56rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--teal)}
+  .pill{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .8rem;border-radius:99px;border:2px solid var(--rule);
+    background:var(--paper);font-family:var(--display);font-weight:800;font-size:.86rem;font-variant-numeric:tabular-nums}
+  .pill.sun{border-color:var(--sun);background:color-mix(in srgb,var(--sun) 22%,var(--paper))}
+
+  .page{max-width:54rem;margin:0 auto;padding:clamp(1.2rem,3vw,2.4rem) clamp(1rem,3vw,2.2rem) 4rem}
+  .eyebrow{font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
+  h1.big{font-size:clamp(2rem,6vw,3.2rem);margin-top:.5rem}
+  h1.big::after{content:"";display:block;width:4.5rem;height:6px;border-radius:99px;background:var(--sun);margin-top:.9rem}
+  .lede{color:var(--ink-soft);font-size:1.05rem;margin-top:1rem;max-width:56ch}
+  .card{background:var(--paper);border:1px solid var(--rule);border-radius:22px;padding:1.3rem 1.4rem;box-shadow:var(--shadow)}
+  .card+.card{margin-top:1rem}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem 1.35rem;border-radius:15px;
+    font-family:var(--display);font-weight:800;font-size:.98rem;background:var(--energy);color:#fff;box-shadow:var(--shadow);
+    transition:transform .12s ease,filter .12s ease}
+  .btn:hover{transform:translateY(-2px);filter:brightness(1.06)}
+  .btn.ghost{background:var(--paper);color:var(--ink);border:2px solid var(--rule-hard);box-shadow:none}
+  .btn.sm{padding:.45rem .9rem;font-size:.86rem;border-radius:12px}
+
+  .lf-div{display:flex;align-items:center;gap:.85rem;margin:1.8rem 0}
+  .lf-div::before,.lf-div::after{content:"";height:2px;flex:1;background:var(--sun);opacity:.55;border-radius:2px}
+  .lf-div span{color:var(--sun);font-size:1.1rem}
+
+  .kind{display:inline-flex;align-items:center;gap:.4rem;font-size:.68rem;font-weight:800;letter-spacing:.12em;
+    text-transform:uppercase;padding:.28rem .7rem;border-radius:99px;color:#fff}
+  .stem{border:3px solid var(--rule);border-radius:22px;padding:1.3rem 1.4rem;background:var(--paper);
+    box-shadow:var(--shadow-lg);display:grid;gap:.7rem;animation:slidein .3s cubic-bezier(.2,1.2,.4,1)}
+  @keyframes slidein{from{opacity:0;transform:translateY(14px) scale(.97)}}
+  .stem .ctx{color:var(--ink-mute);font-size:.9rem}
+  .stem h2{font-size:clamp(1.1rem,3.4vw,1.45rem)}
+
+  .opts{display:grid;gap:.6rem;margin-top:1rem}
+  .opt{border:2px solid var(--rule);border-radius:18px;padding:.9rem 1.05rem;background:var(--paper);text-align:left;
+    display:grid;grid-template-columns:1.9rem minmax(0,1fr);gap:.8rem;align-items:start;transition:transform .12s ease,border-color .12s ease}
+  .opt:hover:not(:disabled){transform:translateY(-2px);border-color:var(--purple)}
+  .opt .k{width:1.9rem;height:1.9rem;border-radius:50%;display:grid;place-items:center;background:var(--sunk);
+    font-family:var(--display);font-weight:800;font-size:.85rem}
+  .opt.right{border-color:var(--teal);background:color-mix(in srgb,var(--teal) 9%,var(--paper))}
+  .opt.right .k{background:var(--teal);color:#fff}
+  .opt.chosen-wrong{border-color:var(--energy);background:color-mix(in srgb,var(--energy) 9%,var(--paper))}
+  .opt.chosen-wrong .k{background:var(--energy);color:#fff}
+  .opt:disabled{cursor:default}
+  .opt b{font-family:var(--display);font-weight:700;display:block;line-height:1.4}
+  .opt .why{display:block;margin-top:.35rem;font-size:.85rem;color:var(--ink-mute);line-height:1.45}
+
+  .fb{border-radius:18px;padding:1rem 1.15rem;margin-top:1rem;line-height:1.55}
+  .fb.right{background:color-mix(in srgb,var(--teal) 12%,var(--paper));border:2px solid color-mix(in srgb,var(--teal) 45%,var(--rule))}
+  .fb.wrong{background:color-mix(in srgb,var(--energy) 12%,var(--paper));border:2px solid color-mix(in srgb,var(--energy) 45%,var(--rule))}
+  .fb b{font-family:var(--display);font-weight:800}
+
+  .tally{display:flex;gap:.35rem;flex-wrap:wrap;margin:1rem 0}
+  .dot{width:1rem;height:1rem;border-radius:50%;background:var(--sunk);border:2px solid var(--rule)}
+  .dot.ok{background:var(--teal);border-color:var(--teal)}
+  .dot.no{background:var(--energy);border-color:var(--energy)}
+  .dot.now{box-shadow:0 0 0 4px color-mix(in srgb,var(--sun) 45%,transparent)}
+
+  .results{display:grid;gap:.7rem;grid-template-columns:repeat(auto-fit,minmax(8rem,1fr));margin-top:1rem}
+  .res{border:2px solid var(--rule);border-radius:18px;padding:.9rem 1rem;background:var(--soft)}
+  .res b{display:block;font-family:var(--display);font-size:1.7rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+  .res span{font-size:.64rem;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-mute)}
+
+  .confetti{position:fixed;inset:0;pointer-events:none;z-index:90}
+  .confetti i{position:absolute;width:9px;height:13px;border-radius:2px;animation:fall 2.3s cubic-bezier(.3,.6,.5,1) forwards}
+  @keyframes fall{0%{transform:translateY(-10vh) rotate(0);opacity:1}100%{transform:translateY(105vh) rotate(720deg);opacity:0}}
+
+  .bandfoot{margin-top:2.6rem;background:var(--navy);border-radius:24px;padding:1.2rem 1.5rem;display:flex;gap:.7rem;
+    flex-wrap:wrap;justify-content:center;font-family:var(--display);font-weight:900;font-size:clamp(1rem,3.2vw,1.5rem)}
+  .bandfoot i{font-style:normal}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+</style>
+
+<div class="bar">
+  <div class="logo">
+    <svg viewBox="0 0 200 306" aria-hidden="true">
+      <g fill="none" stroke="#FFC83D" stroke-width="11" stroke-linecap="round"><path d="M100 20V3"/><path d="M148 34l9-14"/><path d="M52 34l-9-14"/><path d="M178 74l16-8"/><path d="M22 74L6 66"/></g>
+      <circle cx="100" cy="104" r="66" fill="#FFC83D"/><path d="M100 36l27 56H73z" fill="#FFF7E4"/><path d="M100 36l12 25H88z" fill="#0D1B3D"/>
+      <rect x="73" y="92" width="54" height="84" fill="#FF7A1A"/><rect x="73" y="92" width="18" height="84" fill="#FF9B4F"/>
+      <rect x="65" y="176" width="70" height="30" rx="5" fill="#0D1B3D"/><path d="M74 206h52l-7 44H81z" fill="#00B9A7"/>
+      <path d="M74 203c-24 12-42 33-48 63 20-4 36-14 48-29zM126 203c24 12 42 33 48 63-20-4-36-14-48-29z" fill="#00B9A7"/>
+      <path d="M100 252c12 15 17 29 0 51-17-22-12-36 0-51z" fill="#FF7A1A"/>
+    </svg>
+    <div><b>Question Ladder</b><span>Reverse. Rethink. Rebuild. · 11–13</span></div>
+  </div>
+  <span class="pill" id="whoPill">—</span>
+  <span class="pill sun" id="bestPill">Best 0</span>
+</div>
+
+<div class="page" id="page"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const KINDS = {
+    better: { label:"Better question", colour:"energy" },
+    sort:   { label:"Known or guess?", colour:"purple" },
+    test:   { label:"Design the test", colour:"sky" }
+  };
+
+  const Q = [
+    { k:"better", ctx:"You are taking apart a school backpack.",
+      stem:"Which question opens the most up?",
+      opts:[
+        ["Is the backpack comfortable?","One answer, yes or no, and it tells you nothing about what to change."],
+        ["Which five minutes of the day does this bag hurt, and what is happening then?","A specific moment gives you a specific thing to redesign."],
+        ["Do you like the colour?","Colour is the easiest thing to notice and the least useful thing to fix."]
+      ], a:1,
+      why:"A better question narrows to a moment. “When exactly?” beats “do you like it?” every time." },
+
+    { k:"sort", ctx:"You are building a lunchbox that keeps food cold.",
+      stem:"“Students would pay $5 more for a cold lunchbox.”",
+      opts:[["Known — I have evidence","Only if someone actually paid, or signed up."],["Guess — I have not checked","Nobody has handed you money yet."]],
+      a:1, why:"Anything about what people <i>would</i> do is a guess until they have done it. Wanting it to be true is not evidence." },
+
+    { k:"better", ctx:"A bus stop shelter is open on the windy side.",
+      stem:"Which question gets you furthest?",
+      opts:[
+        ["Why is the shelter facing that way?","Good — but it may just have an answer like “the pole was already there”."],
+        ["Who decided this, and what were they solving for?","Best. It finds the constraint you did not know about, which is what you have to design around."],
+        ["Should we move it?","A solution wearing a question mark."]
+      ], a:1,
+      why:"Behind every annoying design is a constraint somebody was solving for. Find it before you redesign." },
+
+    { k:"test", ctx:"You believe people would pick your redesigned water bottle over the old one.",
+      stem:"Which test would actually prove it?",
+      opts:[
+        ["Show ten people both and ask which they prefer","Preference is cheap. People are kind when nothing is at stake."],
+        ["Put both on a table and see which ten people pick up first, without being asked","Behaviour, not opinion. Nobody is being polite to a table."],
+        ["Ask your two best friends what they think","Friends confirm everything. Zero information."]
+      ], a:1,
+      why:"Watch what people <i>do</i>, not what they say. The moment a test involves being asked, politeness contaminates it." },
+
+    { k:"sort", ctx:"You are redesigning the lunch queue.",
+      stem:"“The queue is longest at 12:05.”",
+      opts:[["Known — I counted it","If you stood there and timed it, yes."],["Guess — it just feels that way","Only a guess if you never actually looked."]],
+      a:0, why:"This one <i>can</i> be known — you only have to stand there with a stopwatch. The cheapest facts are the ones nobody bothers to check." },
+
+    { k:"better", ctx:"Your idea is a phone case that never cracks.",
+      stem:"Which question is most likely to save you wasted work?",
+      opts:[
+        ["How can I make it stronger?","Assumes cracking is the problem worth solving. Maybe it is not."],
+        ["Who does the current case actually fail, and how often?","Finds out whether the problem is real before you spend a term on it."],
+        ["What colour should it be?","Not yet."]
+      ], a:1,
+      why:"Before “how do I fix it” comes “is it actually broken, and for whom?” That order saves months." },
+
+    { k:"test", ctx:"You think a homework app would help your year group.",
+      stem:"Cheapest test that could still prove you wrong?",
+      opts:[
+        ["Build the app over the holidays, then show people","Weeks of work before you learn anything. If you are wrong, you find out last."],
+        ["Put up a sign-up sheet and see how many of the year actually write their name","Costs a sheet of paper and tells you the one thing you need to know."],
+        ["Ask the class if it sounds like a good idea","Everyone says yes to a good-sounding idea. Costs nothing, proves nothing."]
+      ], a:1,
+      why:"A good test is cheap, fast, and <i>capable of failing</i>. If it cannot come back negative, it is not a test." },
+
+    { k:"sort", ctx:"You are designing a snack for after training.",
+      stem:"“My team-mates get hungry after practice.”",
+      opts:[["Known — I am on the team and I see it","You are there. You watch it happen twice a week."],["Guess — I am assuming","Not really a guess if it is your own team."]],
+      a:0, why:"Your own repeated observation counts as evidence. Be honest in both directions — under-claiming is as sloppy as over-claiming." },
+
+    { k:"better", ctx:"Everyone tells you your prototype looks great.",
+      stem:"What do you ask next?",
+      opts:[
+        ["Would you buy one?","People say yes and never buy. Hypothetical money is not money."],
+        ["When was the last time you needed something like this, and what did you do instead?","Sends them into a real memory instead of a polite prediction."],
+        ["What would you change?","Fine, but they will invent something to be helpful."]
+      ], a:1,
+      why:"Ask about the past, not the future. What someone <i>did</i> last Tuesday is real. What they <i>would</i> do is a story." },
+
+    { k:"test", ctx:"You claim your new poster gets more attention than the old one.",
+      stem:"You have one week. What do you do?",
+      opts:[
+        ["Put the new poster up and count how many people sign up","No comparison. You will not know if the number is good or bad."],
+        ["Put both up in similar spots for the same week, with separate sign-up sheets","Same time, same kind of place, one difference. Now the numbers mean something."],
+        ["Put the new one up in the busiest corridor","You changed two things at once. Now you cannot tell which caused it."]
+      ], a:1,
+      why:"Change one thing at a time, or the result cannot tell you anything. And write down the number that counts as a win <i>before</i> you look." },
+
+    { k:"sort", ctx:"Your friend says your price is too high.",
+      stem:"“My price is too high for most people at my school.”",
+      opts:[["Known — someone told me","One friend's opinion is not most people."],["Guess — one person said it once","Exactly. A sample of one, and they were being nice."]],
+      a:1, why:"One comment is an anecdote. It is worth testing, but it is not a fact yet — and treating it as one is how good ideas get killed early." },
+
+    { k:"better", ctx:"You have decided to redesign the school water fountain.",
+      stem:"Which question would change your mind if the answer surprised you?",
+      opts:[
+        ["How could the fountain look nicer?","Nothing about this answer could stop you. That makes it a weak question."],
+        ["Who avoids the fountain completely, and where do they get water instead?","If the answer is “nobody avoids it”, your project is over — which is exactly what a strong question can do."],
+        ["What material should it be made from?","Detail work. Too early."]
+      ], a:1,
+      why:"The strongest question is the one that could end your project. If no answer would change your plan, you are not really asking." }
+  ];
+
+  const RKEY="lf-roster-v1", AKEY="lf-active-student-v1", GKEY="lf-game-question-ladder-v1";
+  let sid=null, sname="Player";
+  try{ const r=JSON.parse(localStorage.getItem(RKEY)||"[]")||[]; sid=localStorage.getItem(AKEY);
+    const me=r.filter(s=>s.id===sid)[0]; if(me&&me.name&&me.name.trim()) sname=me.name.trim(); }catch(e){}
+  if(!sid) sid="guest";
+  const key=()=>GKEY+"::"+sid;
+  let best=0; try{ best=parseInt(localStorage.getItem(key())||"0",10)||0; }catch(e){}
+  const saveBest=()=>{ try{ localStorage.setItem(key(), String(best)); }catch(e){} };
+
+  const $=id=>document.getElementById(id);
+  const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+  const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const shuffle=a=>{const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;};
+  function confetti(){
+    if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const box=el("div","confetti"),cols=["#FFC83D","#FF7A1A","#4DB6F2","#00B9A7","#7B5EA6"];
+    for(let i=0;i<60;i++){const p=document.createElement("i");p.style.left=(Math.random()*100)+"vw";
+      p.style.background=cols[i%cols.length];p.style.animationDelay=(Math.random()*.5)+"s";box.appendChild(p);}
+    document.body.appendChild(box);setTimeout(()=>box.remove(),3100);
+  }
+  function band(host){
+    const b=el("div","bandfoot");
+    b.innerHTML=[["Question.","sun"],["Rethink.","energy"],["Improve.","sky"],["Create.","teal"]]
+      .map(([w,c])=>'<i style="color:var(--'+c+')">'+w+'</i>').join(" ");
+    host.appendChild(b);
+  }
+  function paintBar(){ $("whoPill").textContent=sname; $("bestPill").textContent="Best "+best+" / "+Q.length; }
+
+  function menu(){
+    const p=$("page"); p.innerHTML="";
+    p.appendChild(el("p","eyebrow","Little Founders · Game"));
+    const h=el("h1","big"); h.textContent="Question Ladder"; p.appendChild(h);
+    p.appendChild(el("p","lede","Twelve rounds of the one skill that separates a teardown from a guess: asking the question that could actually change your mind."));
+    p.appendChild(el("div","lf-div","<span>★</span>"));
+
+    const c=el("div","card");
+    c.innerHTML='<h2>Three kinds of round</h2>';
+    const g=el("div"); g.style.cssText="display:grid;gap:.6rem;margin-top:.9rem";
+    [["better","Pick the question that opens the most up."],
+     ["sort","Decide whether a statement is something you <i>know</i> or something you are <i>guessing</i>."],
+     ["test","Choose the test that could genuinely prove you wrong."]].forEach(([k,d])=>{
+      const row=el("div"); row.style.cssText="display:grid;grid-template-columns:auto minmax(0,1fr);gap:.8rem;align-items:start";
+      row.innerHTML='<span class="kind" style="background:var(--'+KINDS[k].colour+')">'+KINDS[k].label+'</span><span>'+d+'</span>';
+      g.appendChild(row);
+    });
+    c.appendChild(g);
+    const note=el("p","lede");
+    note.style.marginTop="1rem";
+    note.innerHTML="There is no timer. The point is thinking, not speed — and every answer explains itself afterwards, including the ones you got right.";
+    c.appendChild(note);
+    p.appendChild(c);
+
+    const s=el("button","btn","▶ Start"); s.style.marginTop="1.2rem"; s.addEventListener("click",run);
+    p.appendChild(s);
+    band(p); paintBar();
+  }
+
+  function run(){
+    const deck=shuffle(Q);
+    let i=0, right=0; const marks=[];
+    const p=$("page"); p.innerHTML="";
+    const head=el("div"); head.style.cssText="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap";
+    const quit=el("button","btn ghost sm","← Menu"); quit.addEventListener("click",menu); head.appendChild(quit);
+    const rl=el("h2"); rl.style.marginLeft=".3rem"; head.appendChild(rl);
+    p.appendChild(head);
+    const tally=el("div","tally"); p.appendChild(tally);
+    const stage=el("div"); p.appendChild(stage);
+    band(p);
+
+    function paintTally(){
+      tally.innerHTML="";
+      for(let k=0;k<deck.length;k++) tally.appendChild(el("div","dot"+(marks[k]===1?" ok":marks[k]===0?" no":"")+(k===i?" now":"")));
+    }
+
+    function next(){
+      if(i>=deck.length) return end();
+      const q=deck[i], kind=KINDS[q.k];
+      rl.textContent="Round "+(i+1)+" of "+deck.length;
+      paintTally();
+      stage.innerHTML="";
+
+      const box=el("div","stem");
+      box.innerHTML='<span class="kind" style="background:var(--'+kind.colour+');justify-self:start">'+kind.label+'</span>' +
+        '<p class="ctx">'+esc(q.ctx)+'</p><h2>'+q.stem+'</h2>';
+      stage.appendChild(box);
+
+      const opts=el("div","opts");
+      q.opts.forEach((o,oi)=>{
+        const b=el("button","opt");
+        b.innerHTML='<span class="k">'+"ABC"[oi]+'</span><span><b>'+o[0]+'</b></span>';
+        b.addEventListener("click",()=>answer(oi,q,opts));
+        opts.appendChild(b);
+      });
+      stage.appendChild(opts);
+    }
+
+    function answer(choice,q,opts){
+      const ok = choice===q.a;
+      if(ok) right++;
+      marks[i]=ok?1:0;
+      paintTally();
+      Array.from(opts.children).forEach((b,bi)=>{
+        b.disabled=true;
+        if(bi===q.a) b.classList.add("right");
+        else if(bi===choice) b.classList.add("chosen-wrong");
+        b.querySelector("span:last-child").innerHTML += '<span class="why">'+q.opts[bi][1]+'</span>';
+      });
+      const fb=el("div","fb "+(ok?"right":"wrong"));
+      fb.innerHTML="<b>"+(ok?"Right.":"Not this time.")+"</b> "+q.why;
+      stage.appendChild(fb);
+      const go=el("button","btn sm", i+1<deck.length?"Next round →":"See my result");
+      go.style.marginTop=".9rem";
+      go.addEventListener("click",()=>{ i++; next(); window.scrollTo({top:0,behavior:"smooth"}); });
+      stage.appendChild(go);
+      go.focus();
+    }
+
+    function end(){
+      stage.innerHTML=""; rl.textContent="Finished";
+      if(right>best){ best=right; saveBest(); confetti(); }
+      paintBar();
+      const pct=Math.round(right/deck.length*100);
+      const c=el("div","card"); c.style.borderColor="var(--sun)";
+      c.innerHTML='<h2>'+(pct===100?"Every one.":pct>=75?"Strong questioning.":pct>=50?"Getting there.":"Worth another climb.")+'</h2>';
+      const r=el("div","results");
+      r.innerHTML='<div class="res"><b>'+right+'/'+deck.length+'</b><span>This run</span></div>' +
+        '<div class="res"><b>'+pct+'%</b><span>Accuracy</span></div>' +
+        '<div class="res"><b>'+best+'</b><span>Your best</span></div>';
+      c.appendChild(r);
+      const n=el("p","lede"); n.style.marginTop="1rem";
+      n.innerHTML = pct>=75
+        ? "You are reaching for questions that could prove you wrong. That is the habit the whole book is built on."
+        : "Most wrong answers here pick the <b>polite</b> question or the <b>comfortable</b> test. Next run, ask yourself: could this answer stop my project? If not, push the question further.";
+      c.appendChild(n);
+      const row=el("div"); row.style.cssText="display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.1rem";
+      const again=el("button","btn","Play again"); again.addEventListener("click",run);
+      const back=el("button","btn ghost","Menu"); back.addEventListener("click",menu);
+      row.appendChild(again); row.appendChild(back); c.appendChild(row);
+      stage.appendChild(c);
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+
+    paintBar(); next();
+  }
+
+  menu();
+})();
+</script>

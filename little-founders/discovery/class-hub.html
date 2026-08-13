@@ -177,6 +177,31 @@
       pct:d => Object.keys((d && d.stamps) || {}).length / 10 * 100 }
   ];
 
+  /* One game per book. Each stores a personal best under "<id>::<studentId>". */
+  const GAMES = [
+    { id:"lf-game-journey-jumble-v1", em:"🧩", name:"Journey Jumble", book:"How Is It Made?", ages:"5–7",
+      blurb:"Put each maker journey back in order. Three stars for a clean run, thirty to collect.",
+      colour:"sun", dark:false,
+      url:"https://claude.ai/code/artifact/c8457bf6-39d9-4f07-81de-83ba8ddf3a8a",
+      read:raw => { let o={}; try{ o=JSON.parse(raw||"{}")||{}; }catch(e){}
+                    const n=Object.keys(o).reduce((a,k)=>a+(o[k]||0),0); return { n:n, label:n+" / 30 ★" }; } },
+    { id:"lf-game-focus-first-v1", em:"🎯", name:"Focus First", book:"My Smart Plan", ages:"8–10",
+      blurb:"Twelve situations, four priority boxes, and a timer that keeps shrinking.",
+      colour:"teal", dark:false,
+      url:"https://claude.ai/code/artifact/f0e0a6e2-9257-46dd-ba45-cf2c486fbe86",
+      read:raw => { const n=parseInt(raw||"0",10)||0; return { n:n, label:n+" pts" }; } },
+    { id:"lf-game-question-ladder-v1", em:"🪜", name:"Question Ladder", book:"Reverse. Rethink. Rebuild.", ages:"11–13",
+      blurb:"Twelve rungs of better questions, sorting what you know from what you are guessing.",
+      colour:"purple", dark:false,
+      url:"https://claude.ai/code/artifact/7fe45eae-a3a0-4f16-812e-e078dfee0b85",
+      read:raw => { const n=parseInt(raw||"0",10)||0; return { n:n, label:n+" / 12" }; } },
+    { id:"lf-game-margin-call-v1", em:"💰", name:"Margin Call", book:"GO OVERSEAS!", ages:"14–17",
+      blurb:"Eight months of running a brand. Every decision lands on the cash.",
+      colour:"sky", dark:true,
+      url:"https://claude.ai/code/artifact/9d793c1f-25cf-4329-b385-cc7c3ea88160",
+      read:raw => { const n=parseInt(raw||"0",10)||0; return { n:n, label:"$"+n.toLocaleString("en-CA") }; } }
+  ];
+
   const AVCOL = ["#FF7A1A","#00B9A7","#4DB6F2","#7B5EA6","#5FA63F","#E0526E","#FFC83D"];
 
   let roster = [], active = null;
@@ -235,6 +260,66 @@
       bg.appendChild(c);
     });
     p.appendChild(bg);
+
+    divider(p);
+
+    /* ---------- the four games ---------- */
+    const gh = el("h2"); gh.textContent = "The four games"; gh.style.marginBottom = ".4rem";
+    p.appendChild(gh);
+    p.appendChild(el("p","hint",
+      "One game per book, for the last ten minutes of a session. Each keeps a personal best for the student who is signed in, using the same class list."));
+
+    const gg = el("div","books"); gg.style.marginTop = "1rem";
+    GAMES.forEach(g => {
+      const c = el("div","book"+(g.dark?" dark":""));
+      c.innerHTML =
+        '<div class="top"><span class="circ" style="background:var(--'+g.colour+')">'+g.em+'</span>' +
+        '<div><h3>'+esc(g.name)+'</h3><span class="ages">'+esc(g.book)+' · Ages '+g.ages+'</span></div></div>' +
+        '<p>'+esc(g.blurb)+'</p>';
+      const a = el("a","btn sm", "Play"+ic("i-next"));
+      a.href = g.url; a.target = "_blank"; a.rel = "noopener";
+      a.style.justifySelf = "start";
+      c.appendChild(a);
+      gg.appendChild(c);
+    });
+    p.appendChild(gg);
+
+    if (roster.length) {
+      const gc = el("div","card"); gc.style.marginTop = "1.4rem";
+      const gt = el("h3"); gt.textContent = "Personal bests"; gt.style.margin = "0 0 .8rem";
+      gc.appendChild(gt);
+      const gw = el("div","scroll");
+      const gtab = document.createElement("table");
+      gtab.innerHTML = "<thead><tr><th>Student</th>" +
+        GAMES.map(g => "<th>"+esc(g.name)+"</th>").join("") + "</tr></thead>";
+      const gtb = el("tbody");
+      roster.forEach((s, i) => {
+        const tr = el("tr", s.id === active ? "me" : "");
+        const tdN = el("td");
+        const who = el("div","who");
+        const av = el("span","av", (s.name||"?").trim().charAt(0).toUpperCase() || "?");
+        av.style.background = AVCOL[i % AVCOL.length];
+        const nm = el("b"); nm.textContent = s.name || "Unnamed";
+        nm.style.fontWeight = "700";
+        who.appendChild(av); who.appendChild(nm);
+        tdN.appendChild(who);
+        tr.appendChild(tdN);
+        GAMES.forEach(g => {
+          let raw = null;
+          try { raw = localStorage.getItem(g.id + "::" + s.id); } catch (e) {}
+          const td = el("td");
+          if (raw == null) { td.innerHTML = '<span class="pct">—</span>'; }
+          else { td.innerHTML = '<span class="pct full">'+esc(g.read(raw).label)+'</span>'; }
+          tr.appendChild(td);
+        });
+        gtb.appendChild(tr);
+      });
+      gtab.appendChild(gtb);
+      gw.appendChild(gtab);
+      gc.appendChild(gw);
+      gc.appendChild(el("p","hint","A dash means the student has not played that game yet on this device."));
+      p.appendChild(gc);
+    }
 
     divider(p);
 

@@ -283,6 +283,15 @@
 
   /* ---- brand: drifting graphic elements ---- */
   .lf-deco { position: absolute; pointer-events: none; opacity: .5; }
+
+  /* Play-the-game link in the top bar */
+  .lf-play{display:inline-flex;align-items:center;gap:.42rem;text-decoration:none;cursor:pointer;
+    font:inherit;font-size:.78rem;font-weight:800;letter-spacing:.01em;
+    padding:.42rem .8rem;border-radius:999px;white-space:nowrap;
+    border:2px solid color-mix(in srgb,var(--sun) 60%,var(--rule,#DDD6C4));
+    background:color-mix(in srgb,var(--sun) 18%,var(--paper));color:var(--ink)}
+  .lf-play:hover{background:color-mix(in srgb,var(--sun) 34%,var(--paper))}
+  .lf-play em{font-style:normal;font-size:.95rem;line-height:1}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -325,6 +334,7 @@
   </div>
   <div class="stepdots" id="stepdots"></div>
   <button class="chipbtn" data-nav="report"><svg class="ic"><use href="#i-report"/></svg>My Report</button>
+  <a class="lf-play" href="https://claude.ai/code/artifact/7fe45eae-a3a0-4f16-812e-e078dfee0b85" target="_blank" rel="noopener" title="Play Question Ladder"><em>🪜</em>Play Question Ladder</a>
 </div>
 
 <div class="page" id="page"></div>

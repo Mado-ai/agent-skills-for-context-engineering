@@ -1,0 +1,457 @@
+<title>Margin Call</title>
+<style>
+  :root{--ground:#060B16;--paper:#0E1626;--soft:#131D31;--sunk:#1A2740;--ink:#EDF2FA;--ink-soft:#A9B8D4;--ink-mute:#6F80A0;
+    --rule:#1E2B45;--rule-hard:#2C3C5E;
+    --g1:#8B5CF6;--g2:#4C86F0;--g3:#22D3EE;--grad:linear-gradient(100deg,var(--g1),var(--g2) 55%,var(--g3));
+    --sun:#F0B429;--energy:#FF8A3D;--ok:#34D399;--bad:#FB7185;--warn:#FBBF24;
+    --glow:0 0 0 1px rgba(139,92,246,.35),0 0 22px -4px rgba(76,134,240,.55);
+    --shadow:0 1px 2px rgba(0,0,0,.5),0 14px 34px -18px rgba(0,0,0,.9);
+    --shadow-lg:0 3px 10px rgba(0,0,0,.55),0 34px 70px -30px rgba(0,0,0,1);
+    --display:"Nunito",ui-rounded,"SF Pro Rounded","Segoe UI Variable Display",system-ui,sans-serif;
+    --body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,"SF Mono","Cascadia Mono",Menlo,monospace}
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:1rem;line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(60rem 40rem at 78% -10%,rgba(76,134,240,.16),transparent 60%),
+      radial-gradient(48rem 34rem at 8% 8%,rgba(139,92,246,.14),transparent 60%);background-attachment:fixed}
+  h1,h2,h3{font-family:var(--display);font-weight:800;margin:0;line-height:1.12;letter-spacing:-.02em;text-wrap:balance}
+  p{margin:0} button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;font-family:var(--body)}
+  :focus-visible{outline:2px solid var(--g3);outline-offset:3px;border-radius:10px}
+  .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  .bar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;padding:.8rem clamp(1rem,3vw,2.2rem);
+    background:rgba(6,11,22,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--rule)}
+  .logo{display:flex;align-items:center;gap:.55rem;margin-right:auto}
+  .logo svg{width:26px;height:40px}
+  .logo b{font-family:var(--display);font-weight:800;font-size:.95rem;line-height:1.05;display:block}
+  .logo span{font-size:.56rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--g3)}
+  .pill{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .85rem;border-radius:99px;border:1px solid var(--rule-hard);
+    background:var(--paper);font-family:var(--display);font-weight:800;font-size:.86rem;font-variant-numeric:tabular-nums}
+  .pill.cash{border-color:transparent;box-shadow:var(--glow)}
+  .pill.up{color:var(--ok)} .pill.down{color:var(--bad)}
+
+  .page{max-width:54rem;margin:0 auto;padding:clamp(1.2rem,3vw,2.6rem) clamp(1rem,3vw,2.2rem) 4rem}
+  .eyebrow{font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--g3)}
+  h1.big{font-size:clamp(2.1rem,6.5vw,3.4rem);margin-top:.5rem}
+  h1.big::after{content:"";display:block;width:4.5rem;height:4px;border-radius:99px;background:var(--grad);margin-top:1rem}
+  .lede{color:var(--ink-soft);font-size:1.05rem;margin-top:1rem;max-width:56ch}
+  .card{background:var(--paper);border:1px solid var(--rule);border-radius:20px;padding:1.3rem 1.4rem;box-shadow:var(--shadow)}
+  .card+.card{margin-top:1rem}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem 1.4rem;border-radius:12px;
+    font-family:var(--display);font-weight:800;font-size:.98rem;background:var(--grad);color:#fff;
+    box-shadow:0 8px 24px -10px rgba(76,134,240,.8);transition:transform .12s ease,filter .12s ease}
+  .btn:hover{transform:translateY(-2px);filter:brightness(1.1)}
+  .btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--rule-hard);box-shadow:none}
+  .btn.sm{padding:.45rem .9rem;font-size:.86rem;border-radius:10px}
+
+  .hud{display:grid;gap:.6rem;grid-template-columns:repeat(auto-fit,minmax(7.5rem,1fr));margin:1.2rem 0}
+  .h{border:1px solid var(--rule-hard);border-radius:14px;padding:.7rem .85rem;background:var(--soft)}
+  .h b{display:block;font-family:var(--display);font-size:1.35rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+  .h span{font-size:.6rem;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-mute)}
+  .h.good b{color:var(--ok)} .h.bad b{color:var(--bad)}
+
+  .scene{border:1px solid var(--rule-hard);border-radius:20px;padding:1.4rem;background:linear-gradient(150deg,#0F1728,#0A1120);
+    box-shadow:var(--shadow-lg);display:grid;gap:.8rem;animation:slidein .3s cubic-bezier(.2,1.2,.4,1)}
+  @keyframes slidein{from{opacity:0;transform:translateY(14px) scale(.97)}}
+  .scene .q{font-size:.7rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--g3)}
+  .scene h2{font-size:clamp(1.1rem,3.4vw,1.45rem)}
+  .scene .body{color:var(--ink-soft)}
+  .nums{font-family:var(--mono);font-size:.86rem;background:rgba(255,255,255,.04);border:1px solid var(--rule);
+    border-radius:12px;padding:.8rem 1rem;line-height:1.9}
+
+  .opts{display:grid;gap:.6rem;margin-top:1rem}
+  .opt{border:1px solid var(--rule-hard);border-radius:16px;padding:.9rem 1.05rem;background:var(--paper);text-align:left;
+    display:grid;gap:.25rem;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease}
+  .opt:hover:not(:disabled){transform:translateY(-2px);border-color:var(--g2);box-shadow:var(--glow)}
+  .opt b{font-family:var(--display);font-weight:800}
+  .opt span{font-size:.85rem;color:var(--ink-mute)}
+  .opt:disabled{cursor:default;opacity:.55}
+  .opt.taken{opacity:1;border-color:var(--g2);box-shadow:var(--glow)}
+
+  .fb{border-radius:16px;padding:1.1rem 1.2rem;margin-top:1rem;line-height:1.6;display:grid;gap:.7rem}
+  .fb.good{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.35)}
+  .fb.bad{background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.35)}
+  .fb b{font-family:var(--display);font-weight:800;font-size:1.05rem}
+  .delta{font-family:var(--mono);font-size:1.05rem;font-weight:700}
+  .delta.up{color:var(--ok)} .delta.down{color:var(--bad)}
+
+  .track{display:flex;gap:.3rem;flex-wrap:wrap;margin:1rem 0}
+  .tk{width:1rem;height:1rem;border-radius:50%;background:var(--sunk);border:1px solid var(--rule-hard)}
+  .tk.up{background:var(--ok);border-color:var(--ok)} .tk.down{background:var(--bad);border-color:var(--bad)}
+  .tk.now{box-shadow:0 0 0 4px rgba(139,92,246,.35)}
+
+  .cert{background:linear-gradient(160deg,#0F1728,#0A1120);border:2px solid var(--sun);border-radius:22px;
+    padding:clamp(1.5rem,4vw,2.6rem);text-align:center;display:grid;gap:.8rem;justify-items:center;margin-top:1.2rem;
+    box-shadow:0 0 40px -12px rgba(240,180,41,.4),var(--shadow-lg)}
+  .cert .ey{font-size:.66rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--sun)}
+  .cert h2{font-size:clamp(1.6rem,5vw,2.4rem)}
+
+  .confetti{position:fixed;inset:0;pointer-events:none;z-index:90}
+  .confetti i{position:absolute;width:9px;height:13px;border-radius:2px;animation:fall 2.3s cubic-bezier(.3,.6,.5,1) forwards}
+  @keyframes fall{0%{transform:translateY(-10vh) rotate(0);opacity:1}100%{transform:translateY(105vh) rotate(720deg);opacity:0}}
+
+  .bandfoot{margin-top:2.8rem;border-top:1px solid var(--rule);padding:1.5rem 1rem 0;display:flex;gap:.7rem;flex-wrap:wrap;
+    justify-content:center;font-family:var(--display);font-weight:900;font-size:clamp(1rem,3.2vw,1.5rem)}
+  .bandfoot i{font-style:normal}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+</style>
+
+<div class="bar">
+  <div class="logo">
+    <svg viewBox="0 0 200 306" aria-hidden="true">
+      <path d="M100 8 176 38v96c0 62-38 104-76 122-38-18-76-60-76-122V38L100 8Z" fill="none" stroke="#FF8A3D" stroke-width="11" stroke-linejoin="round"/>
+      <path d="M100 74c17 15 24 35 24 55l-12 15H88l-12-15c0-20 7-40 24-55Z" fill="#EDF2FA"/>
+      <circle cx="100" cy="118" r="9" fill="#0E1626"/>
+      <path d="M100 172c6 8 8 16 0 27-8-11-6-19 0-27Z" fill="#FF8A3D"/>
+      <path d="M100 44l4.5 9.5 10 1.4-7.3 7.1 1.8 10.2-9-4.8-9 4.8 1.8-10.2-7.3-7.1 10-1.4L100 44Z" fill="#FFC83D"/>
+    </svg>
+    <div><b>Margin Call</b><span>GO OVERSEAS! · 14–17</span></div>
+  </div>
+  <span class="pill" id="whoPill">—</span>
+  <span class="pill cash" id="cashPill">$0</span>
+  <span class="pill" id="bestPill">Best $0</span>
+</div>
+
+<div class="page" id="page"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const money = n => (n<0?"−$":"$") + Math.abs(Math.round(n)).toLocaleString();
+  const pct = n => (n*100).toFixed(0) + "%";
+
+  /* Each round: the state going in is shown, each option applies a deterministic
+     change and explains the arithmetic. Cash carried forward is the score. */
+  const ROUNDS = [
+    { q:"Month 1", title:"Your margin is thin",
+      body:"You sell a hand-printed tote for $12. Each one costs you $9 to make. Last month 40 people bought one.",
+      state:{price:12,cost:9,units:40},
+      opts:[
+        { b:"Raise the price to $15", s:"You expect to lose some buyers.",
+          run:st=>{ const u=Math.round(st.units*0.7); return {units:u,price:15,
+            note:"You lost 12 buyers and made more money anyway. 28 × $6 = $168, against 40 × $3 = $120. A thin margin means every extra sale is barely worth making.",
+            good:true}; } },
+        { b:"Cut the cost to $7 with cheaper fabric", s:"Same price, cheaper materials.",
+          run:st=>{ return {cost:7,units:Math.round(st.units*0.8),refundRate:.15,
+            note:"Cheaper fabric meant complaints. You kept 32 buyers and 15% asked for their money back. Cutting cost is real, but not when the cost <i>is</i> the product.",
+            good:false}; } },
+        { b:"Change nothing and sell harder", s:"Push for more volume at $12.",
+          run:st=>{ return {units:Math.round(st.units*1.25),
+            note:"You sold 10 more — and made $30 more. At $3 a unit you have to work enormously hard for very little. Volume does not fix a thin margin.",
+            good:false}; } }
+      ] },
+
+    { q:"Month 2", title:"Somebody offers you ads",
+      body:"You can spend $200 on ads. Based on last time, that brings about 20 new customers.",
+      state:{},
+      opts:[
+        { b:"Spend the $200", s:"Twenty new customers.",
+          run:st=>{ const cpa=200/20, gp=st.price-st.cost;
+            return {units:st.units+20, spend:200, good:gp>cpa,
+              note:"Cost per customer = $200 ÷ 20 = <b>$10</b>. Gross profit per customer = "+money(gp)+"." +
+                (gp>cpa ? " You keep "+money(gp-cpa)+" on each one. Worth doing again."
+                        : " You lose "+money(cpa-gp)+" on every customer the ad brings. Spending more makes the hole bigger.") }; } },
+        { b:"Spend nothing this month", s:"Keep the cash.",
+          run:st=>({ note:"Nothing gained, nothing lost. Sometimes correct — but you also learned nothing about whether ads work for you.", good:null }) },
+        { b:"Spend $50 as a test first", s:"Five customers, same rate.",
+          run:st=>{ const gp=st.price-st.cost;
+            return {units:st.units+5, spend:50, good:true,
+              note:"You paid $10 a customer to find out whether $10 a customer is affordable — for a quarter of the risk. Small tests before big spends is the whole discipline." }; } }
+      ] },
+
+    { q:"Month 3", title:"A bulk deal",
+      body:"Your supplier will drop your unit cost by $2 — but only if you buy 300 units up front.",
+      state:{},
+      opts:[
+        { b:"Take the deal", s:"Pay for 300 units now.",
+          run:st=>{ const outlay=300*(st.cost-2);
+            return { cost:st.cost-2, spend:outlay, good: st.units>=45,
+              note:"Cost per unit drops to "+money(st.cost-2)+", but "+money(outlay)+" of your cash is now sitting in a cupboard as stock. " +
+                (st.units>=45 ? "At your volume you will sell through it. Fine." : "At "+st.units+" units a month that is "+Math.ceil(300/Math.max(st.units,1))+" months of stock. That is not a saving, it is a loan to your supplier.") }; } },
+        { b:"Negotiate for 100 units instead", s:"Smaller commitment, smaller discount.",
+          run:st=>{ const outlay=100*(st.cost-1);
+            return { cost:st.cost-1, spend:outlay, good:true,
+              note:"You got $1 off instead of $2 and tied up "+money(outlay)+" instead of "+money(300*(st.cost-2))+". Asking for a smaller version of the deal is almost always available, and almost nobody asks." }; } },
+        { b:"Decline", s:"Keep buying as you go.",
+          run:st=>({ note:"You kept your cash flexible and your cost the same. Defensible — cash you still have is cash you can still use.", good:null }) }
+      ] },
+
+    { q:"Month 4", title:"A big order, at a discount",
+      body:"A local shop wants 60 units, but only at $9 each.",
+      state:{},
+      opts:[
+        { b:"Accept the order", s:"60 units at $9.",
+          run:st=>{ const marginEach=9-st.cost;
+            return { spend: marginEach<0 ? Math.abs(marginEach)*60 : 0, extra: marginEach>0 ? marginEach*60 : 0,
+              good: marginEach>0,
+              note:"Your cost is "+money(st.cost)+". At $9 you make "+money(marginEach)+" per unit" +
+                (marginEach>0 ? ", so 60 units adds "+money(marginEach*60)+". A smaller margin can still be worth it at volume — as long as it is above zero."
+                              : ". That is below cost. You would pay "+money(Math.abs(marginEach)*60)+" for the privilege of doing the work. Big orders that lose money are still orders that lose money.") }; } },
+        { b:"Counter at $11", s:"Risk losing the order.",
+          run:st=>({ extra:(11-st.cost)*45, good:true,
+            note:"They came back and took 45 instead of 60. You made "+money((11-st.cost)*45)+" instead of "+money((9-st.cost)*60)+". Countering costs you nothing but nerve." }) },
+        { b:"Decline politely", s:"Hold your price.",
+          run:st=>({ note:"You protected your price, which protects every other customer's price. No money either way this month.", good:null }) }
+      ] },
+
+    { q:"Month 5", title:"Refunds are climbing",
+      body:"One in eight orders is coming back. Customers say the print fades.",
+      state:{},
+      opts:[
+        { b:"Ignore it — most people keep theirs", s:"Carry on.",
+          run:st=>({ refundRate:.2, good:false,
+            note:"Refunds rose from 1 in 8 to 1 in 5. Unhappy customers do not stay quiet; they tell the next customer. This is the option that looks cheapest and is not." }) },
+        { b:"Find out why, then fix the print", s:"Costs $80 and $1 more per unit.",
+          run:st=>({ cost:st.cost+1, spend:80, refundRate:0, good:true,
+            note:"$80 and $1 a unit to stop losing one order in eight. If a refund costs you the whole "+money(st.price)+", the fix pays for itself almost immediately." }) },
+        { b:"Offer a discount to anyone who complains", s:"Cheaper than fixing it.",
+          run:st=>({ refundRate:.08, spend:60, good:false,
+            note:"You paid people to be less annoyed about a problem you still have. It buys quiet, not a solution — and you will pay again next month." }) }
+      ] },
+
+    { q:"Month 6", title:"A competitor undercuts you",
+      body:"Someone starts selling something similar for $10.",
+      state:{},
+      opts:[
+        { b:"Match them at $10", s:"Protect your volume.",
+          run:st=>({ price:10, good:false,
+            note:"You now make "+money(10-st.cost)+" a unit. A price war is won by whoever has the lowest cost — and against a stranger you cannot see, you do not know if that is you." }) },
+        { b:"Hold your price and show your proof", s:"Photos, reviews, the fade fix.",
+          run:st=>({ units:Math.round(st.units*0.9), good:true,
+            note:"You lost about 10% of buyers and kept your margin. People pay more when they can see why. The customers who leave over $2 were never going to stay anyway." }) },
+        { b:"Drop to $11 and add a guarantee", s:"Split the difference.",
+          run:st=>({ price:11, spend:40, good:true,
+            note:"A small move plus a reason to trust you. Costs you "+money(st.price-11)+" a unit and $40 to honour the guarantee — and you gave buyers something the cheap option does not have." }) }
+      ] },
+
+    { q:"Month 7", title:"They want thirty days to pay",
+      body:"A gift shop will take 80 units — and pay you in 30 days. Your supplier wants paying in 7.",
+      state:{},
+      opts:[
+        { b:"Take it and pay the supplier on time", s:"You will be short for three weeks.",
+          run:st=>({ spend:80*st.cost, extra:80*st.price, delayed:true, good:true,
+            note:"You paid "+money(80*st.cost)+" now and collect "+money(80*st.price)+" in a month. Profitable — and for three weeks you are the one lending money. This is exactly how businesses go under while showing a profit." }) },
+        { b:"Ask for half up front", s:"Risk them saying no.",
+          run:st=>({ spend:80*st.cost, extra:80*st.price, good:true,
+            note:"They agreed. Most buyers will, if asked plainly. You did the same order without the cash gap — the best answer here was a question." }) },
+        { b:"Decline — you cannot fund it", s:"Keep it simple.",
+          run:st=>({ note:"Honest and safe. You gave up "+money(80*(st.price-st.cost))+" of profit, but you also did not gamble money you did not have.", good:null }) }
+      ] },
+
+    { q:"Month 8", title:"What now?",
+      body:"You have got this far. One last call.",
+      state:{},
+      opts:[
+        { b:"Put every dollar back into stock and ads", s:"Grow as fast as possible.",
+          run:st=>({ spendAll:true, good:false,
+            note:"You bought growth with your whole buffer. It works right up until one bad month, and then there is nothing to absorb it." }) },
+        { b:"Reinvest half, hold half", s:"Grow, but keep a buffer.",
+          run:st=>({ spendHalf:true, extraPct:.25, good:true,
+            note:"You grew and kept a cushion. Boring, and it is what keeps small businesses alive through the month everything goes wrong." }) },
+        { b:"Bank all of it and stop here", s:"Take the profit.",
+          run:st=>({ good:null, note:"You stopped with money in hand. Stopping deliberately, with a reason, is a real founder decision — not a failure." }) }
+      ] }
+  ];
+
+  const RKEY="lf-roster-v1", AKEY="lf-active-student-v1", GKEY="lf-game-margin-call-v1";
+  let sid=null, sname="Player";
+  try{ const r=JSON.parse(localStorage.getItem(RKEY)||"[]")||[]; sid=localStorage.getItem(AKEY);
+    const me=r.filter(s=>s.id===sid)[0]; if(me&&me.name&&me.name.trim()) sname=me.name.trim(); }catch(e){}
+  if(!sid) sid="guest";
+  const key=()=>GKEY+"::"+sid;
+  let best=0; try{ best=parseInt(localStorage.getItem(key())||"0",10)||0; }catch(e){}
+  const saveBest=()=>{ try{ localStorage.setItem(key(), String(best)); }catch(e){} };
+
+  const $=id=>document.getElementById(id);
+  const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+  const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  function confetti(){
+    if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const box=el("div","confetti"),cols=["#8B5CF6","#4C86F0","#22D3EE","#F0B429","#34D399"];
+    for(let i=0;i<60;i++){const p=document.createElement("i");p.style.left=(Math.random()*100)+"vw";
+      p.style.background=cols[i%cols.length];p.style.animationDelay=(Math.random()*.5)+"s";box.appendChild(p);}
+    document.body.appendChild(box);setTimeout(()=>box.remove(),3100);
+  }
+  function band(host){
+    const b=el("div","bandfoot");
+    b.innerHTML=[["Brand it.","g1"],["Price it.","g2"],["Launch it.","g3"]]
+      .map(([w,c])=>'<i style="color:var(--'+c+')">'+w+'</i>').join(" ");
+    host.appendChild(b);
+  }
+
+  let S = null;
+  function paintBar(){
+    $("whoPill").textContent=sname;
+    const c=$("cashPill");
+    c.textContent = S ? money(S.cash) : "$0";
+    c.className = "pill cash " + (S && S.cash<0 ? "down" : "up");
+    $("bestPill").textContent="Best "+money(best);
+  }
+
+  function menu(){
+    S=null; paintBar();
+    const p=$("page"); p.innerHTML="";
+    p.appendChild(el("p","eyebrow","Little Founders · Game"));
+    const h=el("h1","big"); h.innerHTML='<span class="grad">Margin</span> Call'; p.appendChild(h);
+    p.appendChild(el("p","lede","Eight months. Eight decisions. Every one moves real numbers, and the game shows you the arithmetic afterwards — including when you were wrong for a reason that sounded right."));
+
+    const c=el("div","card"); c.style.marginTop="1.4rem";
+    c.innerHTML='<h2>How it works</h2>' +
+      '<p style="margin-top:.6rem;color:var(--ink-soft)">You start with $400 cash, a tote that sells for $12 and costs $9, and 40 customers a month. ' +
+      'Each round changes something. Your score is the cash you finish with.</p>' +
+      '<div class="nums" style="margin-top:1rem">' +
+      'Gross profit per unit = price − cost<br>' +
+      'Month profit &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= (units × gross profit) − spend − refunds<br>' +
+      'Cost per customer &nbsp;= ad spend ÷ customers won' +
+      '</div>' +
+      '<p style="margin-top:1rem;color:var(--ink-mute);font-size:.9rem">There is no single right path. There are decisions that survive a bad month and decisions that do not.</p>';
+    p.appendChild(c);
+
+    const s=el("button","btn","▶ Start month 1"); s.style.marginTop="1.2rem"; s.addEventListener("click",run);
+    p.appendChild(s);
+    band(p);
+  }
+
+  function run(){
+    S = { cash:400, price:12, cost:9, units:40, refundRate:0, history:[] };
+    let i=0;
+    const p=$("page"); p.innerHTML="";
+    const head=el("div"); head.style.cssText="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap";
+    const quit=el("button","btn ghost sm","← Menu"); quit.addEventListener("click",menu); head.appendChild(quit);
+    const rl=el("h2"); rl.style.marginLeft=".3rem"; head.appendChild(rl);
+    p.appendChild(head);
+    const hud=el("div","hud"); p.appendChild(hud);
+    const track=el("div","track"); p.appendChild(track);
+    const stage=el("div"); p.appendChild(stage);
+    band(p);
+
+    function paintHUD(){
+      const gp=S.price-S.cost, margin=S.price>0?gp/S.price:0;
+      hud.innerHTML =
+        '<div class="h '+(S.cash>=400?"good":S.cash<0?"bad":"")+'"><b>'+money(S.cash)+'</b><span>Cash</span></div>' +
+        '<div class="h"><b>'+money(S.price)+'</b><span>Price</span></div>' +
+        '<div class="h"><b>'+money(S.cost)+'</b><span>Unit cost</span></div>' +
+        '<div class="h '+(gp<=0?"bad":margin>=.3?"good":"")+'"><b>'+money(gp)+'</b><span>Gross profit</span></div>' +
+        '<div class="h '+(margin>=.3?"good":margin<=0?"bad":"")+'"><b>'+pct(margin)+'</b><span>Margin</span></div>' +
+        '<div class="h"><b>'+S.units+'</b><span>Customers</span></div>';
+      track.innerHTML="";
+      for(let k=0;k<ROUNDS.length;k++){
+        const v=S.history[k];
+        track.appendChild(el("div","tk"+(v===1?" up":v===0?" down":"")+(k===i?" now":"")));
+      }
+      paintBar();
+    }
+
+    function next(){
+      if(i>=ROUNDS.length) return end();
+      const r=ROUNDS[i];
+      rl.textContent = r.q + " of " + ROUNDS.length;
+      paintHUD();
+      stage.innerHTML="";
+
+      const sc=el("div","scene");
+      sc.innerHTML='<span class="q">'+esc(r.q)+'</span><h2>'+esc(r.title)+'</h2><p class="body">'+esc(r.body)+'</p>';
+      stage.appendChild(sc);
+
+      const opts=el("div","opts");
+      r.opts.forEach((o,oi)=>{
+        const b=el("button","opt");
+        b.innerHTML='<b>'+esc(o.b)+'</b><span>'+esc(o.s)+'</span>';
+        b.addEventListener("click",()=>choose(oi,r,opts));
+        opts.appendChild(b);
+      });
+      stage.appendChild(opts);
+    }
+
+    function choose(oi,r,opts){
+      const before = Object.assign({}, S);
+      const res = r.opts[oi].run(S) || {};
+
+      if(res.price!=null) S.price=res.price;
+      if(res.cost!=null) S.cost=res.cost;
+      if(res.units!=null) S.units=res.units;
+      if(res.refundRate!=null) S.refundRate=res.refundRate;
+
+      let spend = res.spend||0, extra = res.extra||0;
+      if(res.spendAll){ spend = S.cash; extra = S.cash*0.15; }
+      if(res.spendHalf){ spend = Math.round(S.cash/2); extra = spend*(res.extraPct||0); }
+
+      const gp = S.price - S.cost;
+      const gross = S.units * gp;
+      const refunds = Math.round(S.units * (S.refundRate||0) * S.price);
+      const month = gross - spend + extra - refunds;
+      S.cash += month;
+      S.history[i] = res.good===true ? 1 : res.good===false ? 0 : 2;
+
+      Array.from(opts.children).forEach((b,bi)=>{ b.disabled=true; if(bi===oi) b.classList.add("taken"); });
+      paintHUD();
+
+      const fb=el("div","fb "+(month>=0?"good":"bad"));
+      fb.innerHTML =
+        '<b>'+(res.good===true?"Good call.":res.good===false?"That one cost you.":"A reasonable call.")+'</b>' +
+        '<span>'+res.note+'</span>' +
+        '<div class="nums">' +
+          S.units+' customers × '+money(gp)+' gross profit = '+money(gross)+'<br>' +
+          (spend?('minus spend '+money(spend)+'<br>'):'') +
+          (extra?('plus one-off '+money(extra)+'<br>'):'') +
+          (refunds?('minus refunds '+money(refunds)+'<br>'):'') +
+          'Month result = <span class="delta '+(month>=0?"up":"down")+'">'+money(month)+'</span><br>' +
+          'Cash now = <b>'+money(S.cash)+'</b>' +
+        '</div>';
+      stage.appendChild(fb);
+
+      const go=el("button","btn sm", i+1<ROUNDS.length ? "Next month →" : "Close the year");
+      go.style.marginTop=".9rem";
+      go.addEventListener("click",()=>{ i++; next(); window.scrollTo({top:0,behavior:"smooth"}); });
+      stage.appendChild(go);
+      go.focus();
+    }
+
+    function end(){
+      stage.innerHTML=""; rl.textContent="Year closed";
+      paintHUD();
+      const finalCash = Math.round(S.cash);
+      const grew = finalCash > 400;
+      if(finalCash>best){ best=finalCash; saveBest(); confetti(); }
+      paintBar();
+
+      const c=el("div","card");
+      c.innerHTML='<h2>'+(finalCash>=1200?"Strong year.":grew?"You finished up.":finalCash>=0?"You survived, but did not grow.":"You ran out of money.")+'</h2>';
+      const hudEnd=el("div","hud");
+      hudEnd.innerHTML =
+        '<div class="h '+(grew?"good":"bad")+'"><b>'+money(finalCash)+'</b><span>Final cash</span></div>' +
+        '<div class="h '+(finalCash-400>=0?"good":"bad")+'"><b>'+money(finalCash-400)+'</b><span>Profit for the year</span></div>' +
+        '<div class="h"><b>'+pct((S.price-S.cost)/Math.max(S.price,1))+'</b><span>Final margin</span></div>' +
+        '<div class="h"><b>'+money(best)+'</b><span>Your best</span></div>';
+      c.appendChild(hudEnd);
+      const n=el("p"); n.style.cssText="margin-top:1rem;color:var(--ink-soft)";
+      n.innerHTML = finalCash>=1200
+        ? "You protected your margin, tested before you spent, and kept a buffer. That is the whole job."
+        : grew
+          ? "You made money. Look back at the red dots — those are the months where the option that sounded most active was the one that cost you."
+          : "The classic pattern: chasing volume on a thin margin, spending on ads that cost more than a customer is worth, and tying cash up in stock. Every one of those felt like doing something.";
+      c.appendChild(n);
+      const row=el("div"); row.style.cssText="display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.2rem";
+      const again=el("button","btn","Play again"); again.addEventListener("click",run);
+      const back=el("button","btn ghost","Menu"); back.addEventListener("click",menu);
+      row.appendChild(again); row.appendChild(back); c.appendChild(row);
+      stage.appendChild(c);
+
+      if(finalCash>=1200){
+        const cert=el("div","cert");
+        cert.innerHTML='<p class="ey">Little Founders · Founder CEO</p><h2>💰 Margin Master</h2>' +
+          '<p>Awarded to <b>'+esc(sname)+'</b> for finishing the year on '+money(finalCash)+' — and knowing why.</p>';
+        stage.appendChild(cert);
+      }
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+
+    paintHUD(); next();
+  }
+
+  menu();
+})();
+</script>
