@@ -1,0 +1,372 @@
+<title>Little Founders Class Hub</title>
+<style>
+  :root {
+    --ground:#F7F4EC; --paper:#FFFFFF; --soft:#FBF9F3; --sunk:#F1EDE1;
+    --ink:#0D1B3D; --ink-soft:#3E4E76; --ink-mute:#7B87A5;
+    --rule:#E3DCCA; --rule-hard:#D6CDB6;
+    --sun:#FFC83D; --energy:#FF7A1A; --sky:#4DB6F2; --teal:#00B9A7;
+    --purple:#7B5EA6; --rose:#E0526E; --green:#5FA63F; --navy:#0D1B3D;
+    --shadow:0 1px 2px rgba(13,27,61,.04), 0 10px 26px -16px rgba(13,27,61,.25);
+    --shadow-lg:0 3px 8px rgba(13,27,61,.07), 0 28px 56px -28px rgba(13,27,61,.4);
+    --display:"Nunito", ui-rounded, "SF Pro Rounded", "Segoe UI Variable Display", system-ui, sans-serif;
+    --body:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#0A1730; --paper:#12234A; --soft:#16294F; --sunk:#1C3159;
+      --ink:#F4F1E8; --ink-soft:#C7D2EC; --ink-mute:#8E9CBE; --rule:#26375F; --rule-hard:#35497A;
+      --sun:#FFD264; --energy:#FF9247; --sky:#74C6F7; --teal:#1ACFBB;
+      --purple:#A78BCE; --rose:#F0798F; --green:#7EC65C; --navy:#F4F1E8;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 28px -18px rgba(0,0,0,.8);
+      --shadow-lg:0 3px 8px rgba(0,0,0,.45), 0 30px 60px -30px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#0A1730; --paper:#12234A; --soft:#16294F; --sunk:#1C3159;
+    --ink:#F4F1E8; --ink-soft:#C7D2EC; --ink-mute:#8E9CBE; --rule:#26375F; --rule-hard:#35497A;
+    --sun:#FFD264; --energy:#FF9247; --sky:#74C6F7; --teal:#1ACFBB;
+    --purple:#A78BCE; --rose:#F0798F; --green:#7EC65C; --navy:#F4F1E8;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 28px -18px rgba(0,0,0,.8);
+    --shadow-lg:0 3px 8px rgba(0,0,0,.45), 0 30px 60px -30px rgba(0,0,0,.9);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:1rem;line-height:1.6;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:var(--display);font-weight:800;margin:0;line-height:1.12;letter-spacing:-.02em;text-wrap:balance}
+  p{margin:0} ul{list-style:none;margin:0;padding:0}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;font-family:var(--body)}
+  input{font:inherit;color:inherit}
+  a{color:inherit}
+  :focus-visible{outline:3px solid var(--sky);outline-offset:3px;border-radius:10px}
+  .ic{width:1.2em;height:1.2em;flex:none}
+
+  .bar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;
+    padding:.85rem clamp(1rem,3vw,2.4rem);background:color-mix(in srgb,var(--ground) 92%,transparent);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--rule)}
+  .logo{display:flex;align-items:center;gap:.55rem;margin-right:auto}
+  .logo svg{width:28px;height:43px}
+  .logo b{font-family:var(--display);font-weight:800;font-size:.95rem;line-height:1.05;display:block}
+  .logo span{font-size:.56rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--teal)}
+
+  .page{max-width:64rem;margin:0 auto;padding:clamp(1.4rem,3.4vw,2.8rem) clamp(1rem,3vw,2.4rem) 4rem}
+  .eyebrow{font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
+  h1.big{font-size:clamp(2rem,6vw,3.2rem);margin-top:.6rem}
+  h1.big::after{content:"";display:block;width:4.5rem;height:6px;border-radius:99px;background:var(--sun);margin-top:1rem}
+  .lede{color:var(--ink-soft);font-size:1.06rem;margin-top:1rem;max-width:58ch}
+
+  .lf-div{display:flex;align-items:center;gap:.85rem;margin:2.2rem 0}
+  .lf-div::before,.lf-div::after{content:"";height:2px;flex:1;background:var(--sun);opacity:.55;border-radius:2px}
+  .lf-div svg{width:1.05rem;height:1.05rem;color:var(--sun);flex:none}
+
+  .card{background:var(--paper);border:1px solid var(--rule);border-radius:22px;padding:1.4rem 1.5rem;box-shadow:var(--shadow)}
+  .card+.card{margin-top:1rem}
+  .lbl{display:block;font-family:var(--display);font-weight:800;font-size:1rem;margin-bottom:.3rem}
+  .hint{color:var(--ink-mute);font-size:.86rem}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.68rem 1.25rem;border-radius:14px;
+    font-family:var(--display);font-weight:800;font-size:.95rem;background:var(--energy);color:#fff;box-shadow:var(--shadow);
+    transition:transform .12s ease,filter .12s ease;text-decoration:none}
+  .btn:hover{transform:translateY(-2px);filter:brightness(1.06)}
+  .btn.ghost{background:var(--paper);color:var(--ink);border:2px solid var(--rule-hard);box-shadow:none}
+  .btn.sm{padding:.42rem .85rem;font-size:.85rem;border-radius:11px}
+
+  /* book cards */
+  .books{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr))}
+  .book{border:2px solid var(--rule);border-radius:20px;padding:1.1rem;background:var(--paper);display:grid;gap:.7rem;align-content:start}
+  .book .top{display:flex;align-items:center;gap:.8rem}
+  .book .circ{width:3.2rem;height:3.2rem;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:1.4rem;flex:none}
+  .book h3{font-size:1.05rem}
+  .book .ages{font-size:.74rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-mute)}
+  .book p{font-size:.86rem;color:var(--ink-soft)}
+  .book.dark{background:#0B1526;border-color:#26375F;color:#EDF2FA}
+  .book.dark p{color:#A9B8D4}
+  .book.dark .ages{color:#7E8DAE}
+
+  /* roster table */
+  .scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:40rem}
+  th{text-align:left;font-size:.64rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);padding:.6rem .5rem}
+  td{padding:.5rem;border-top:1px solid var(--rule);vertical-align:middle}
+  tr.me{background:color-mix(in srgb,var(--sun) 12%,transparent)}
+  .who{display:flex;align-items:center;gap:.6rem}
+  .av{width:2.3rem;height:2.3rem;border-radius:50%;display:grid;place-items:center;color:#fff;
+    font-family:var(--display);font-weight:800;font-size:.9rem;flex:none}
+  .who input{border:0;background:none;font-family:var(--display);font-weight:800;padding:.2rem 0;width:100%;min-width:6rem}
+  .who input:focus{outline:none;border-bottom:2px solid var(--teal)}
+
+  .bar-cell{display:flex;align-items:center;gap:.5rem}
+  .pbar{width:4.2rem;height:8px;border-radius:99px;background:var(--sunk);overflow:hidden;flex:none}
+  .pbar i{display:block;height:100%;border-radius:99px}
+  .pct{font-size:.76rem;color:var(--ink-mute);font-variant-numeric:tabular-nums;min-width:2.6rem}
+  .pct.full{color:var(--teal);font-weight:800}
+
+  .x{width:2rem;height:2rem;border-radius:50%;border:2px solid var(--rule);display:grid;place-items:center;color:var(--ink-mute)}
+  .x:hover{color:var(--rose);border-color:var(--rose)}
+
+  .summary{display:grid;gap:.7rem;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr))}
+  .sm{border:2px solid var(--rule);border-radius:18px;padding:.9rem 1rem;background:var(--soft)}
+  .sm b{display:block;font-family:var(--display);font-size:1.7rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+  .sm span{font-size:.64rem;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-mute)}
+
+  .verdict{border-radius:18px;padding:1rem 1.15rem;display:flex;gap:.7rem;align-items:flex-start;line-height:1.55}
+  .verdict.idle{background:var(--soft);border:2px solid var(--rule);color:var(--ink-mute)}
+  .verdict.warn{background:color-mix(in srgb,var(--energy) 12%,var(--paper));border:2px solid color-mix(in srgb,var(--energy) 45%,var(--rule))}
+
+  .bandfoot{margin-top:3rem;background:var(--navy);border-radius:24px;padding:1.3rem 1.6rem;display:flex;align-items:center;
+    gap:.7rem;flex-wrap:wrap;justify-content:center;font-family:var(--display);font-weight:900;font-size:clamp(1.1rem,3.4vw,1.7rem)}
+  .bandfoot i{font-style:normal}
+
+  @media print{.bar,.noprint,.bandfoot{display:none!important}body{background:#fff}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <g id="lf-star4"><path fill="currentColor" d="m12 2.6 2.95 6 6.6.96-4.78 4.65 1.13 6.58L12 17.48 6.1 20.6l1.13-6.58L2.45 9.36l6.6-.96L12 2.6Z"/></g>
+  <g id="i-plus" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></g>
+  <g id="i-x" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></g>
+  <g id="i-print" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V4h10v5M7 18H5a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M7 14h10v6H7v-6Z"/></g>
+  <g id="i-next" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></g>
+</defs></svg>
+
+<div class="bar">
+  <div class="logo">
+    <svg viewBox="0 0 200 306" aria-hidden="true">
+      <g fill="none" stroke="#FFC83D" stroke-width="11" stroke-linecap="round">
+        <path d="M100 20V3"/><path d="M148 34l9-14"/><path d="M52 34l-9-14"/><path d="M178 74l16-8"/><path d="M22 74L6 66"/>
+      </g>
+      <circle cx="100" cy="104" r="66" fill="#FFC83D"/>
+      <path d="M100 36l27 56H73z" fill="#FFF7E4"/><path d="M100 36l12 25H88z" fill="#0D1B3D"/>
+      <rect x="73" y="92" width="54" height="84" fill="#FF7A1A"/><rect x="73" y="92" width="18" height="84" fill="#FF9B4F"/>
+      <rect x="65" y="176" width="70" height="30" rx="5" fill="#0D1B3D"/>
+      <path d="M74 206h52l-7 44H81z" fill="#00B9A7"/>
+      <path d="M74 203c-24 12-42 33-48 63 20-4 36-14 48-29zM126 203c24 12 42 33 48 63-20-4-36-14-48-29z" fill="#00B9A7"/>
+      <path d="M100 252c12 15 17 29 0 51-17-22-12-36 0-51z" fill="#FF7A1A"/>
+    </svg>
+    <div><b>Class Hub</b><span>Guide view</span></div>
+  </div>
+  <button class="btn ghost sm noprint" id="printBtn"><svg class="ic"><use href="#i-print"/></svg>Print class list</button>
+</div>
+
+<div class="page" id="page"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const RKEY = "lf-roster-v1", AKEY = "lf-active-student-v1";
+
+  const BOOKS = [
+    { id:"lf-how-is-it-made-v1", em:"🦊", name:"How Is It Made?", ages:"5–7",
+      blurb:"Ten journeys, Maker Stars, and a founder drawing on every page.",
+      colour:"sun", dark:false, max:10,
+      url:"https://claude.ai/code/artifact/df0fdc02-b58d-4b79-8849-e1ef7da61ffa",
+      pct:d => Object.keys((d && d.stars) || {}).length / 10 * 100 },
+    { id:"lf-my-smart-plan-v1", em:"📋", name:"My Smart Plan", ages:"8–10",
+      blurb:"Goals, tasks, a weekly planner, and the four-box priority board.",
+      colour:"teal", dark:false, max:4,
+      url:"https://claude.ai/code/artifact/62383005-21e1-454a-9096-44d6220afdde",
+      pct:d => Object.keys((d && d.stamps) || {}).length / 4 * 100 },
+    { id:"lf-reverse-rethink-rebuild-v1", em:"🔎", name:"Reverse. Rethink. Rebuild.", ages:"11–13",
+      blurb:"Observe, ask better questions, rethink, and rebuild one real object.",
+      colour:"purple", dark:false, max:4,
+      url:"https://claude.ai/code/artifact/2e35ec46-19a8-465d-bcfb-ac9b429e9ab4",
+      pct:d => Object.keys((d && d.stamps) || {}).length / 4 * 100 },
+    { id:"lf-go-overseas-v1", em:"🌎", name:"GO OVERSEAS!", ages:"14–17",
+      blurb:"Build a whole brand, price it, market it, and earn ten passport stamps.",
+      colour:"sky", dark:true, max:10,
+      url:"https://claude.ai/code/artifact/5baac151-89c7-4cda-8e03-765754e9725e",
+      pct:d => Object.keys((d && d.stamps) || {}).length / 10 * 100 }
+  ];
+
+  const AVCOL = ["#FF7A1A","#00B9A7","#4DB6F2","#7B5EA6","#5FA63F","#E0526E","#FFC83D"];
+
+  let roster = [], active = null;
+  const uid = () => "s" + Math.random().toString(36).slice(2, 9);
+
+  function load() {
+    try { roster = JSON.parse(localStorage.getItem(RKEY) || "[]") || []; } catch (e) { roster = []; }
+    if (!Array.isArray(roster)) roster = [];
+    try { active = localStorage.getItem(AKEY); } catch (e) {}
+  }
+  function persist() {
+    try { localStorage.setItem(RKEY, JSON.stringify(roster)); if (active) localStorage.setItem(AKEY, active); } catch (e) {}
+  }
+
+  const $ = id => document.getElementById(id);
+  const el = (t,c,h) => { const e=document.createElement(t); if(c) e.className=c; if(h!=null) e.innerHTML=h; return e; };
+  const ic = id => '<svg class="ic" aria-hidden="true"><use href="#'+id+'"/></svg>';
+  const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+  function progress(bookId, studentId, fn) {
+    try {
+      const raw = localStorage.getItem(bookId + "::" + studentId);
+      if (!raw) return 0;
+      return Math.max(0, Math.min(100, Math.round(fn(JSON.parse(raw)) || 0)));
+    } catch (e) { return 0; }
+  }
+
+  function divider(host) {
+    host.appendChild(el("div","lf-div",'<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lf-star4"/></svg>'));
+  }
+
+  function render() {
+    const p = $("page");
+    p.innerHTML = "";
+
+    p.appendChild(el("p","eyebrow","Little Founders · Guide view"));
+    const h = el("h1","big"); h.textContent = "Class Hub"; p.appendChild(h);
+    p.appendChild(el("p","lede",
+      "Every book keeps a separate copy of the work for each student on this device. Add your class once here and the names appear in all four books."));
+    divider(p);
+
+    /* ---------- the four books ---------- */
+    const bh = el("h2"); bh.textContent = "The four books"; bh.style.marginBottom = ".9rem";
+    p.appendChild(bh);
+    const bg = el("div","books");
+    BOOKS.forEach(b => {
+      const c = el("div","book"+(b.dark?" dark":""));
+      c.innerHTML =
+        '<div class="top"><span class="circ" style="background:var(--'+b.colour+')">'+b.em+'</span>' +
+        '<div><h3>'+esc(b.name)+'</h3><span class="ages">Ages '+b.ages+'</span></div></div>' +
+        '<p>'+esc(b.blurb)+'</p>';
+      const a = el("a","btn sm", "Open book"+ic("i-next"));
+      a.href = b.url; a.target = "_blank"; a.rel = "noopener";
+      a.style.justifySelf = "start";
+      c.appendChild(a);
+      bg.appendChild(c);
+    });
+    p.appendChild(bg);
+
+    divider(p);
+
+    /* ---------- roster ---------- */
+    const rh = el("h2"); rh.textContent = "My students"; rh.style.marginBottom = ".4rem";
+    p.appendChild(rh);
+    p.appendChild(el("p","hint","Type a name to rename. Progress updates when you come back from a book."));
+
+    const card = el("div","card");
+    card.style.marginTop = "1rem";
+
+    if (!roster.length) {
+      const v = el("div","verdict idle");
+      v.innerHTML = "<span>No students yet. Add your first one below — or open any book and add them there. The list is shared.</span>";
+      card.appendChild(v);
+    } else {
+      const wrap = el("div","scroll");
+      const t = document.createElement("table");
+      t.innerHTML = "<thead><tr><th>Student</th>" +
+        BOOKS.map(b => "<th>"+esc(b.name)+"</th>").join("") +
+        "<th>Overall</th><th></th></tr></thead>";
+      const tb = el("tbody");
+      roster.forEach((s, i) => {
+        const tr = el("tr", s.id === active ? "me" : "");
+        const td0 = el("td");
+        const who = el("div","who");
+        const av = el("span","av", (s.name||"?").trim().charAt(0).toUpperCase() || "?");
+        av.style.background = AVCOL[i % AVCOL.length];
+        const inp = document.createElement("input");
+        inp.type = "text"; inp.value = s.name || ""; inp.placeholder = "Student name";
+        inp.setAttribute("aria-label","Student name");
+        inp.addEventListener("input", () => {
+          s.name = inp.value.slice(0,40); persist();
+          av.textContent = (s.name||"?").trim().charAt(0).toUpperCase() || "?";
+        });
+        who.appendChild(av); who.appendChild(inp);
+        td0.appendChild(who); tr.appendChild(td0);
+
+        let total = 0;
+        BOOKS.forEach(b => {
+          const pc = progress(b.id, s.id, b.pct);
+          total += pc;
+          const td = el("td");
+          td.innerHTML = '<div class="bar-cell"><span class="pbar"><i style="width:'+pc+'%;background:var(--'+b.colour+')"></i></span>' +
+            '<span class="pct'+(pc===100?" full":"")+'">'+pc+'%</span></div>';
+          tr.appendChild(td);
+        });
+        const avg = Math.round(total / BOOKS.length);
+        const tdA = el("td");
+        tdA.innerHTML = '<div class="bar-cell"><span class="pbar"><i style="width:'+avg+'%;background:var(--teal)"></i></span>' +
+          '<span class="pct'+(avg===100?" full":"")+'">'+avg+'%</span></div>';
+        tr.appendChild(tdA);
+
+        const tdX = el("td");
+        const x = el("button","x noprint", ic("i-x"));
+        x.setAttribute("aria-label","Remove "+(s.name||"student"));
+        x.addEventListener("click", () => {
+          if (!confirm("Remove "+(s.name||"this student")+"? Their saved work in every book is deleted and cannot be recovered.")) return;
+          try {
+            for (let k = localStorage.length - 1; k >= 0; k--) {
+              const kk = localStorage.key(k);
+              if (kk && kk.indexOf("::"+s.id) > -1) localStorage.removeItem(kk);
+            }
+          } catch (e) {}
+          roster = roster.filter(r => r.id !== s.id);
+          if (active === s.id) active = roster.length ? roster[0].id : null;
+          persist(); render();
+        });
+        tdX.appendChild(x); tr.appendChild(tdX);
+        tb.appendChild(tr);
+      });
+      t.appendChild(tb); wrap.appendChild(t);
+      card.appendChild(wrap);
+    }
+
+    const add = el("button","btn noprint", ic("i-plus")+"Add a student");
+    add.style.marginTop = "1rem";
+    add.addEventListener("click", () => {
+      const id = uid();
+      roster.push({ id, name:"" });
+      if (!active) active = id;
+      persist(); render();
+      const inputs = document.querySelectorAll(".who input");
+      if (inputs.length) inputs[inputs.length-1].focus();
+    });
+    card.appendChild(add);
+    p.appendChild(card);
+
+    /* ---------- class summary ---------- */
+    if (roster.length) {
+      divider(p);
+      const sh = el("h2"); sh.textContent = "Where the class is"; sh.style.marginBottom = ".9rem";
+      p.appendChild(sh);
+      const sum = el("div","summary");
+      let started = 0, finished = 0;
+      const perBook = BOOKS.map(b => {
+        let sumPct = 0, done = 0;
+        roster.forEach(s => { const v = progress(b.id, s.id, b.pct); sumPct += v; if (v === 100) done++; if (v > 0) started++; });
+        finished += done;
+        return { b, avg: Math.round(sumPct / roster.length), done };
+      });
+      sum.innerHTML =
+        '<div class="sm"><b>'+roster.length+'</b><span>Students</span></div>' +
+        perBook.map(x => '<div class="sm"><b>'+x.avg+'%</b><span>'+esc(x.b.name)+'</span></div>').join("") +
+        '<div class="sm"><b>'+finished+'</b><span>Books completed</span></div>';
+      p.appendChild(sum);
+
+      const stuck = perBook.filter(x => x.avg > 0 && x.avg < 40);
+      if (stuck.length) {
+        const v = el("div","verdict warn");
+        v.style.marginTop = "1rem";
+        v.innerHTML = "<span><b>Worth a look:</b> " + stuck.map(x => esc(x.b.name) + " is averaging " + x.avg + "%" ).join(", ") +
+          ". A book that stalls early is usually a session that needed more time, not a class that lost interest.</span>";
+        p.appendChild(v);
+      }
+    }
+
+    const note = el("p","hint");
+    note.style.marginTop = "1.4rem";
+    note.textContent = "Work is saved in this browser only. It does not follow a student to another device, and clearing browsing data erases it — print a student's report from inside each book before the end of term.";
+    p.appendChild(note);
+
+    const band = el("div","bandfoot");
+    band.innerHTML = [["Discover.","sun"],["Plan.","teal"],["Question.","sky"],["Build.","energy"]]
+      .map(([w,c]) => '<i style="color:var(--'+c+')">'+w+'</i>').join(" ");
+    p.appendChild(band);
+  }
+
+  $("printBtn").addEventListener("click", () => window.print());
+  window.addEventListener("focus", () => { load(); render(); });
+
+  load();
+  render();
+})();
+</script>

@@ -16,6 +16,30 @@ higher real-world stakes.
 
 ---
 
+## Per-student use
+
+Every book keeps **a separate copy of the work for each student**, so one shared classroom device
+carries a whole class.
+
+- A **Who is using this?** chip sits in the top bar of all four books. Tap it to add students,
+  rename them, switch between them, or remove one.
+- The **class list is shared across all four books** — a student added in one appears in the
+  others with the same name.
+- Switching students reloads that student's saved work instantly; nothing bleeds between them.
+- Removing a student deletes their work in every book, and asks first.
+
+**[Class Hub](class-hub.html)** is the Guide view: add the class once, then see every student's
+progress across all four books in one table, with a class average per book and a print-friendly
+register. It flags any book averaging under 40% — *a book that stalls early is usually a session
+that needed more time, not a class that lost interest.*
+
+**The limit, stated plainly.** Work is saved in the browser, on that device. It does not follow a
+student to another computer, and clearing browsing data erases it. Print each student's report or
+certificate from inside the book before the end of term. A real multi-device deployment would
+need accounts and a server, which is a different piece of work.
+
+---
+
 ## Book 1 — How Is It Made?
 
 **Little Sprouts · Ages 5–7 · Discovery Series**

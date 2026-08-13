@@ -59,7 +59,9 @@ with more independence and higher real-world stakes. That is the spiral.
 
 ## The book series
 
-Each tier has a learner-facing book — the thing a student holds, fills in, and takes home. See
+Each tier has a learner-facing book — the thing a student holds, fills in, and takes home. Every
+book keeps a separate copy of the work per student, and
+**[Class Hub](discovery/class-hub.html)** shows a Guide the whole class across all four. See
 [discovery/README.md](discovery/README.md).
 
 | Tier | Book | Teaches | Status |

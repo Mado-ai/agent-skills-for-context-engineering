@@ -426,6 +426,265 @@
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
 <script>
+/* ===================================================================
+   Little Founders — student layer
+   Every book stores one saved copy per student, so a shared classroom
+   device carries a whole class. The roster is shared between books.
+   =================================================================== */
+window.LF = (function () {
+  "use strict";
+
+  var RKEY = "lf-roster-v1", AKEY = "lf-active-student-v1";
+  var roster = [], active = null;
+  var cfg = { book: "book", title: "This book", onSwitch: null, progress: null };
+
+  function uid() { return "s" + Math.random().toString(36).slice(2, 9); }
+
+  function readAll() {
+    try { roster = JSON.parse(localStorage.getItem(RKEY) || "[]") || []; } catch (e) { roster = []; }
+    if (!Array.isArray(roster)) roster = [];
+    try { active = localStorage.getItem(AKEY); } catch (e) { active = null; }
+    if (!roster.length) { var id = uid(); roster = [{ id: id, name: "" }]; active = id; persist(); }
+    if (!roster.some(function (s) { return s.id === active; })) { active = roster[0].id; persist(); }
+  }
+  function persist() {
+    try {
+      localStorage.setItem(RKEY, JSON.stringify(roster));
+      localStorage.setItem(AKEY, active);
+    } catch (e) {}
+  }
+
+  function current() { return roster.filter(function (s) { return s.id === active; })[0] || roster[0]; }
+  function label() { var s = current(); return (s && s.name && s.name.trim()) || "Unnamed student"; }
+  function key(base) { return base + "::" + active; }
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  /* progress for one student in this book, 0–100 */
+  function pctFor(id) {
+    if (!cfg.progress) return null;
+    try {
+      var raw = localStorage.getItem(cfg.book + "::" + id);
+      if (!raw) return 0;
+      var v = cfg.progress(JSON.parse(raw));
+      return Math.max(0, Math.min(100, Math.round(v || 0)));
+    } catch (e) { return 0; }
+  }
+
+  /* ------------------------------------------------------------- styles */
+  function injectCSS() {
+    if (document.getElementById("lf-student-css")) return;
+    var css = document.createElement("style");
+    css.id = "lf-student-css";
+    css.textContent = [
+      ".lf-who{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem .55rem .4rem .4rem;border-radius:99px;",
+      "border:2px solid var(--rule,#E3DCCA);background:var(--paper,#fff);font-family:var(--display,system-ui);",
+      "font-weight:800;font-size:.86rem;cursor:pointer;transition:transform .12s ease}",
+      ".lf-who:hover{transform:translateY(-1px)}",
+      ".lf-who .lf-av{width:1.7rem;height:1.7rem;border-radius:50%;display:grid;place-items:center;",
+      "background:var(--energy,#FF7A1A);color:#fff;font-size:.8rem;flex:none}",
+      ".lf-who .lf-caret{opacity:.5;font-size:.7rem}",
+      ".lf-scrim{position:fixed;inset:0;background:rgba(13,27,61,.55);z-index:200;display:grid;place-items:center;padding:1rem;",
+      "animation:lfFade .2s ease}",
+      "@keyframes lfFade{from{opacity:0}}",
+      ".lf-panel{background:var(--paper,#fff);color:var(--ink,#0D1B3D);border-radius:22px;max-width:34rem;width:100%;",
+      "max-height:86vh;overflow:auto;padding:1.4rem 1.5rem;box-shadow:0 30px 70px -30px rgba(0,0,0,.7);",
+      "border:1px solid var(--rule,#E3DCCA);font-family:var(--body,system-ui)}",
+      ".lf-panel h2{font-family:var(--display,system-ui);font-weight:800;font-size:1.3rem;margin:0 0 .2rem}",
+      ".lf-panel .lf-sub{color:var(--ink-mute,#7B87A5);font-size:.86rem;margin-bottom:1.1rem}",
+      ".lf-row{display:grid;grid-template-columns:2.2rem minmax(0,1fr) auto auto;gap:.6rem;align-items:center;",
+      "padding:.5rem;border-radius:14px;border:2px solid var(--rule,#E3DCCA);margin-bottom:.45rem}",
+      ".lf-row.on{border-color:var(--teal,#00B9A7);background:color-mix(in srgb,var(--teal,#00B9A7) 8%,transparent)}",
+      ".lf-row .lf-av{width:2.2rem;height:2.2rem;border-radius:50%;display:grid;place-items:center;color:#fff;",
+      "font-family:var(--display,system-ui);font-weight:800;font-size:.9rem}",
+      ".lf-row input{width:100%;border:0;background:none;font:inherit;font-family:var(--display,system-ui);font-weight:700;",
+      "color:inherit;padding:.2rem 0}",
+      ".lf-row input:focus{outline:none;border-bottom:2px solid var(--teal,#00B9A7)}",
+      ".lf-bar{width:4.5rem;height:8px;border-radius:99px;background:var(--sunk,#EEE9DA);overflow:hidden;flex:none}",
+      ".lf-bar i{display:block;height:100%;background:var(--teal,#00B9A7);border-radius:99px}",
+      ".lf-pct{font-size:.72rem;color:var(--ink-mute,#7B87A5);font-variant-numeric:tabular-nums;min-width:2.4rem;text-align:right}",
+      ".lf-mini{display:flex;align-items:center;gap:.4rem}",
+      ".lf-x{width:1.9rem;height:1.9rem;border-radius:50%;border:2px solid var(--rule,#E3DCCA);display:grid;place-items:center;",
+      "background:none;cursor:pointer;color:var(--ink-mute,#7B87A5);font-size:.9rem;line-height:1}",
+      ".lf-x:hover{color:#D0455C;border-color:#D0455C}",
+      ".lf-acts{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}",
+      ".lf-btn{padding:.6rem 1.1rem;border-radius:13px;font-family:var(--display,system-ui);font-weight:800;font-size:.9rem;",
+      "border:0;cursor:pointer;background:var(--energy,#FF7A1A);color:#fff}",
+      ".lf-btn.ghost{background:transparent;color:inherit;border:2px solid var(--rule,#E3DCCA)}",
+      ".lf-note{font-size:.8rem;color:var(--ink-mute,#7B87A5);margin-top:1rem;line-height:1.5}"
+    ].join("");
+    document.head.appendChild(css);
+  }
+
+  /* ------------------------------------------------------------- chip */
+  var chip;
+  function paintChip() {
+    if (!chip) return;
+    var n = label();
+    chip.innerHTML = '<span class="lf-av">' + esc(n.trim().charAt(0).toUpperCase() || "?") + "</span>" +
+      "<span>" + esc(n) + '</span><span class="lf-caret">▾</span>';
+    chip.setAttribute("aria-label", "Current student: " + n + ". Change student.");
+  }
+  function mountChip() {
+    var host = document.querySelector(".bar, .topline");
+    if (!host) return;
+    chip = document.createElement("button");
+    chip.className = "lf-who";
+    chip.type = "button";
+    chip.addEventListener("click", openPanel);
+    host.appendChild(chip);
+    paintChip();
+  }
+
+  /* ------------------------------------------------------------- panel */
+  function openPanel() {
+    var scrim = document.createElement("div");
+    scrim.className = "lf-scrim";
+    var panel = document.createElement("div");
+    panel.className = "lf-panel";
+    panel.setAttribute("role", "dialog");
+    panel.setAttribute("aria-label", "Choose student");
+    scrim.appendChild(panel);
+
+    function draw() {
+      var cols = ["#FF7A1A", "#00B9A7", "#4DB6F2", "#7B5EA6", "#5FA63F", "#E0526E", "#FFC83D"];
+      panel.innerHTML = "<h2>Who is using this?</h2>" +
+        '<p class="lf-sub">' + esc(cfg.title) + " keeps a separate copy of the work for every student on this device.</p>";
+
+      roster.forEach(function (s, i) {
+        var row = document.createElement("div");
+        row.className = "lf-row" + (s.id === active ? " on" : "");
+
+        var av = document.createElement("span");
+        av.className = "lf-av";
+        av.style.background = cols[i % cols.length];
+        av.textContent = (s.name || "?").trim().charAt(0).toUpperCase() || "?";
+        row.appendChild(av);
+
+        var nameWrap = document.createElement("div");
+        var input = document.createElement("input");
+        input.type = "text";
+        input.value = s.name || "";
+        input.placeholder = "Student name";
+        input.setAttribute("aria-label", "Student name");
+        input.addEventListener("input", function () {
+          s.name = input.value.slice(0, 40); persist(); paintChip();
+          av.textContent = (s.name || "?").trim().charAt(0).toUpperCase() || "?";
+        });
+        nameWrap.appendChild(input);
+        row.appendChild(nameWrap);
+
+        var pct = pctFor(s.id);
+        var mini = document.createElement("div");
+        mini.className = "lf-mini";
+        if (pct !== null) {
+          mini.innerHTML = '<span class="lf-bar"><i style="width:' + pct + '%"></i></span>' +
+            '<span class="lf-pct">' + pct + "%</span>";
+        }
+        row.appendChild(mini);
+
+        var right = document.createElement("div");
+        right.className = "lf-mini";
+        if (s.id !== active) {
+          var use = document.createElement("button");
+          use.className = "lf-btn ghost";
+          use.style.padding = ".35rem .8rem";
+          use.style.fontSize = ".8rem";
+          use.textContent = "Use";
+          use.addEventListener("click", function () {
+            active = s.id; persist(); paintChip();
+            if (cfg.onSwitch) cfg.onSwitch();
+            close();
+          });
+          right.appendChild(use);
+        }
+        if (roster.length > 1) {
+          var del = document.createElement("button");
+          del.className = "lf-x";
+          del.type = "button";
+          del.innerHTML = "✕";
+          del.setAttribute("aria-label", "Remove " + (s.name || "student") + " and their work");
+          del.addEventListener("click", function () {
+            if (!confirm("Remove " + (s.name || "this student") + "? Their saved work in every book is deleted and cannot be recovered.")) return;
+            try {
+              for (var k = localStorage.length - 1; k >= 0; k--) {
+                var kk = localStorage.key(k);
+                if (kk && kk.indexOf("::" + s.id) > -1) localStorage.removeItem(kk);
+              }
+            } catch (e) {}
+            roster = roster.filter(function (x) { return x.id !== s.id; });
+            if (active === s.id) { active = roster[0].id; if (cfg.onSwitch) cfg.onSwitch(); }
+            persist(); paintChip(); draw();
+          });
+          right.appendChild(del);
+        }
+        row.appendChild(right);
+        panel.appendChild(row);
+      });
+
+      var acts = document.createElement("div");
+      acts.className = "lf-acts";
+      var add = document.createElement("button");
+      add.className = "lf-btn";
+      add.textContent = "+ Add a student";
+      add.addEventListener("click", function () {
+        var id = uid();
+        roster.push({ id: id, name: "" });
+        active = id; persist(); paintChip();
+        if (cfg.onSwitch) cfg.onSwitch();
+        draw();
+      });
+      var done = document.createElement("button");
+      done.className = "lf-btn ghost";
+      done.textContent = "Done";
+      done.addEventListener("click", close);
+      acts.appendChild(add); acts.appendChild(done);
+      panel.appendChild(acts);
+
+      var note = document.createElement("p");
+      note.className = "lf-note";
+      note.textContent = "The class list is shared across all four Little Founders books, so a student keeps the same name everywhere. " +
+        "Work is saved in this browser only — it does not follow a student to another device.";
+      panel.appendChild(note);
+    }
+
+    function close() { scrim.remove(); document.removeEventListener("keydown", onKey); }
+    function onKey(e) { if (e.key === "Escape") close(); }
+    scrim.addEventListener("click", function (e) { if (e.target === scrim) close(); });
+    document.addEventListener("keydown", onKey);
+
+    draw();
+    document.body.appendChild(scrim);
+    var f = panel.querySelector("input");
+    if (f && !f.value) f.focus();
+  }
+
+  /* ------------------------------------------------------------- api */
+  function init(options) {
+    cfg = Object.assign(cfg, options || {});
+    readAll();
+    injectCSS();
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mountChip);
+    else mountChip();
+  }
+
+  return {
+    init: init,
+    key: key,
+    name: label,
+    activeId: function () { return active; },
+    roster: function () { return roster.slice(); },
+    open: openPanel,
+    refresh: function () { paintChip(); }
+  };
+})();
+</script>
+
+<script>
 (() => {
   "use strict";
 
@@ -563,10 +822,10 @@
   });
   let B = fresh();
 
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(B)); } catch (e) {} }
+  function save() { try { localStorage.setItem(LF.key(KEY), JSON.stringify(B)); } catch (e) {} }
   function load() {
     try {
-      const raw = localStorage.getItem(KEY);
+      const raw = localStorage.getItem(LF.key(KEY));
       if (raw) B = Object.assign(fresh(), JSON.parse(raw));
     } catch (e) {}
   }
@@ -1766,6 +2025,8 @@
     document.body.appendChild(sc);
   });
 
+  LF.init({book:KEY,title:"GO OVERSEAS!",progress:function(d){var s=Object.keys(d.stamps||{}).length;return s/10*100;},
+    onSwitch:function(){ B = fresh(); load(); refreshStamps(true); go("start"); }});
   load();
   refreshStamps(true);
   go("start");
