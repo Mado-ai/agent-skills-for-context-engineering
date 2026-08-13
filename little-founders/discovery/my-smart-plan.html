@@ -1,0 +1,712 @@
+<title>My Smart Plan</title>
+<style>
+  :root {
+    --ground: #F7F4EC;
+    --paper: #FFFFFF;
+    --soft: #FBF9F3;
+    --sunk: #F1EDE1;
+    --ink: #0D1B3D;
+    --ink-soft: #3E4E76;
+    --ink-mute: #7B87A5;
+    --rule: #E3DCCA;
+    --rule-hard: #D6CDB6;
+
+    --sun: #FFC83D;
+    --energy: #FF7A1A;
+    --sky: #4DB6F2;
+    --teal: #00B9A7;
+    --purple: #7B5EA6;
+    --rose: #E0526E;
+    --green: #5FA63F;
+    --navy: #0D1B3D;
+
+    --shadow: 0 1px 2px rgba(13,27,61,.04), 0 10px 26px -16px rgba(13,27,61,.25);
+    --shadow-lg: 0 3px 8px rgba(13,27,61,.07), 0 28px 56px -28px rgba(13,27,61,.4);
+
+    --display: "Nunito", ui-rounded, "SF Pro Rounded", "Segoe UI Variable Display", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0A1730; --paper: #12234A; --soft: #16294F; --sunk: #1C3159;
+      --ink: #F4F1E8; --ink-soft: #C7D2EC; --ink-mute: #8E9CBE;
+      --rule: #26375F; --rule-hard: #35497A;
+      --sun: #FFD264; --energy: #FF9247; --sky: #74C6F7; --teal: #1ACFBB;
+      --purple: #A78BCE; --rose: #F0798F; --green: #7EC65C; --navy: #F4F1E8;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 28px -18px rgba(0,0,0,.8);
+      --shadow-lg: 0 3px 8px rgba(0,0,0,.45), 0 30px 60px -30px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0A1730; --paper: #12234A; --soft: #16294F; --sunk: #1C3159;
+    --ink: #F4F1E8; --ink-soft: #C7D2EC; --ink-mute: #8E9CBE;
+    --rule: #26375F; --rule-hard: #35497A;
+    --sun: #FFD264; --energy: #FF9247; --sky: #74C6F7; --teal: #1ACFBB;
+    --purple: #A78BCE; --rose: #F0798F; --green: #7EC65C; --navy: #F4F1E8;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 28px -18px rgba(0,0,0,.8);
+    --shadow-lg: 0 3px 8px rgba(0,0,0,.45), 0 30px 60px -30px rgba(0,0,0,.9);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--body); font-size:1.02rem; line-height:1.6; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3 { font-family:var(--display); font-weight:800; margin:0; line-height:1.12; letter-spacing:-.02em; text-wrap:balance; }
+  p { margin:0; } ul { list-style:none; margin:0; padding:0; }
+  button { font:inherit; color:inherit; background:none; border:0; cursor:pointer; font-family:var(--body); }
+  input, textarea, select { font:inherit; color:inherit; }
+  :focus-visible { outline:3px solid var(--sky); outline-offset:3px; border-radius:10px; }
+  .ic { width:1.2em; height:1.2em; flex:none; }
+
+  .bar {
+    position:sticky; top:0; z-index:40; display:flex; align-items:center; gap:.7rem; flex-wrap:wrap;
+    padding:.8rem clamp(1rem,3vw,2.2rem);
+    background:color-mix(in srgb, var(--ground) 92%, transparent); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--rule);
+  }
+  .logo { display:flex; align-items:center; gap:.55rem; margin-right:auto; }
+  .logo svg { width:28px; height:43px; }
+  .logo b { font-family:var(--display); font-weight:800; font-size:.95rem; line-height:1.05; display:block; }
+  .logo span { font-size:.56rem; font-weight:800; letter-spacing:.13em; text-transform:uppercase; color:var(--teal); }
+
+  .stampstrip { display:flex; gap:.4rem; }
+  .st {
+    width:2.4rem; height:2.4rem; border-radius:50%; display:grid; place-items:center;
+    border:2px dashed var(--rule-hard); background:var(--paper); color:var(--ink-mute);
+    transition:transform .35s cubic-bezier(.3,1.5,.5,1), border-color .25s ease, background .25s ease;
+  }
+  .st .ic { width:1.15rem; height:1.15rem; }
+  .st.on { border-style:solid; color:#fff; }
+  .st.here { transform:scale(1.14); box-shadow:0 0 0 4px color-mix(in srgb, var(--sun) 42%, transparent); }
+
+  .page { max-width:60rem; margin:0 auto; padding:clamp(1.4rem,3.4vw,2.8rem) clamp(1rem,3vw,2.2rem) 4rem; }
+  .eyebrow { font-size:.72rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--teal); }
+  h1.big { font-size:clamp(2rem,6.5vw,3.5rem); margin-top:.6rem; }
+  h1.big::after { content:""; display:block; width:4.5rem; height:6px; border-radius:99px; background:var(--sun); margin-top:1rem; }
+  .lede { color:var(--ink-soft); font-size:1.08rem; margin-top:1rem; max-width:54ch; }
+
+  .card { background:var(--paper); border:1px solid var(--rule); border-radius:22px; padding:1.4rem 1.5rem; box-shadow:var(--shadow); }
+  .card + .card { margin-top:1rem; }
+  .lbl { display:block; font-family:var(--display); font-weight:800; font-size:1.02rem; margin-bottom:.3rem; }
+  .hint { color:var(--ink-mute); font-size:.88rem; }
+  .fld { display:grid; gap:.35rem; }
+  .fld + .fld { margin-top:1rem; }
+  input[type=text], textarea { width:100%; padding:.72rem .9rem; border-radius:13px; border:2px solid var(--rule); background:var(--paper); transition:border-color .15s ease; }
+  input:focus, textarea:focus { border-color:var(--teal); outline:none; }
+
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; padding:.75rem 1.35rem; border-radius:14px;
+    font-family:var(--display); font-weight:800; font-size:1rem; background:var(--energy); color:#fff; box-shadow:var(--shadow);
+    transition:transform .12s ease, filter .12s ease; }
+  .btn:hover { transform:translateY(-2px); filter:brightness(1.06); }
+  .btn.ghost { background:var(--paper); color:var(--ink); border:2px solid var(--rule-hard); box-shadow:none; }
+  .btn.sm { padding:.45rem .9rem; font-size:.88rem; border-radius:11px; }
+  .pagenav { display:flex; gap:.8rem; justify-content:space-between; margin-top:2.6rem; flex-wrap:wrap; }
+
+  .lf-div { display:flex; align-items:center; gap:.85rem; margin:2.2rem 0; }
+  .lf-div::before, .lf-div::after { content:""; height:2px; flex:1; background:var(--sun); opacity:.55; border-radius:2px; }
+  .lf-div svg { width:1.05rem; height:1.05rem; color:var(--sun); flex:none; }
+
+  /* four-step rail */
+  .steps4 { display:grid; gap:.6rem; grid-template-columns:repeat(auto-fit,minmax(11rem,1fr)); }
+  .s4 { display:grid; gap:.55rem; justify-items:center; text-align:center; position:relative; }
+  .s4 .circ { width:4.4rem; height:4.4rem; border-radius:50%; display:grid; place-items:center; color:#fff; box-shadow:var(--shadow); position:relative; }
+  .s4 .circ .ic { width:2.1rem; height:2.1rem; }
+  .s4 .pip { position:absolute; bottom:-.2rem; right:-.2rem; width:1.6rem; height:1.6rem; border-radius:50%;
+    background:var(--paper); color:var(--ink); border:2px solid var(--rule); display:grid; place-items:center;
+    font-family:var(--display); font-weight:800; font-size:.74rem; }
+  .s4 b { font-family:var(--display); font-weight:800; font-size:1rem; text-transform:uppercase; letter-spacing:.02em; }
+  .s4 span { font-size:.86rem; color:var(--ink-soft); line-height:1.4; }
+  .s4 .dash { position:absolute; top:2.1rem; left:calc(50% + 3rem); width:calc(100% - 6rem); border-top:3px dashed var(--teal); opacity:.65; }
+  @media (max-width:43.9rem) { .s4 .dash { display:none } }
+
+  /* sticky note */
+  .sticky {
+    background:color-mix(in srgb, var(--sun) 32%, var(--paper));
+    border:1px solid color-mix(in srgb, var(--sun) 55%, var(--rule));
+    border-radius:6px 18px 6px 6px; padding:1.1rem 1.2rem; transform:rotate(-1.2deg);
+    font-family:var(--display); font-weight:800; font-size:1.15rem; line-height:1.35; box-shadow:var(--shadow);
+  }
+
+  /* goals */
+  .goal { border:2px solid var(--rule); border-radius:20px; padding:1.1rem; display:grid; gap:.7rem; background:var(--paper); }
+  .goal + .goal { margin-top:.8rem; }
+  .goalhead { display:grid; grid-template-columns:2.8rem minmax(0,1fr) 2.2rem; gap:.8rem; align-items:center; }
+  .goalhead .num { width:2.8rem; height:2.8rem; border-radius:50%; display:grid; place-items:center; color:#fff; font-family:var(--display); font-weight:800; }
+  .two { display:grid; gap:.7rem; }
+  @media (min-width:44rem) { .two { grid-template-columns:1fr 1fr } }
+  .stepline { display:grid; grid-template-columns:1.7rem minmax(0,1fr); gap:.6rem; align-items:center; }
+  .tick { width:1.7rem; height:1.7rem; border-radius:50%; border:2px solid var(--rule-hard); display:grid; place-items:center; color:transparent; }
+  .tick[aria-pressed="true"] { background:var(--green); border-color:var(--green); color:#fff; }
+  .ring { width:3.2rem; height:3.2rem; }
+  .ring circle { fill:none; stroke-width:9; }
+  .ring .bg { stroke:var(--sunk); }
+  .ring .fg { stroke:var(--green); stroke-linecap:round; transition:stroke-dasharray .5s cubic-bezier(.3,.9,.3,1); }
+  .ring text { font-family:var(--display); font-weight:800; font-size:30px; fill:var(--ink); }
+
+  /* tasks */
+  .task { display:grid; grid-template-columns:1.8rem minmax(0,1fr) 2rem 2rem; gap:.6rem; align-items:center;
+    border:2px solid var(--rule); border-radius:16px; padding:.6rem .8rem; background:var(--paper); }
+  .task + .task { margin-top:.4rem; }
+  .task.done input { text-decoration:line-through; color:var(--ink-mute); }
+  .task input[type=text] { border:0; padding:.2rem 0; background:none; }
+  .task input[type=text]:focus { border:0; box-shadow:none }
+  .starbtn { width:2rem; height:2rem; border-radius:50%; display:grid; place-items:center; border:2px solid var(--rule); color:var(--rule-hard); }
+  .starbtn[aria-pressed="true"] { background:var(--sun); border-color:var(--sun); color:var(--navy); }
+  .icon-btn { width:2rem; height:2rem; border-radius:50%; display:grid; place-items:center; border:2px solid var(--rule); color:var(--ink-mute); }
+  .icon-btn:hover { color:var(--rose); border-color:var(--rose); }
+
+  /* week grid */
+  .weekwrap { overflow-x:auto; }
+  .week { display:grid; grid-template-columns:5.2rem repeat(7, minmax(5.4rem,1fr)); gap:.3rem; min-width:44rem; }
+  .wh { font-family:var(--display); font-weight:800; font-size:.78rem; text-align:center; padding:.4rem 0; color:var(--ink-mute);
+    text-transform:uppercase; letter-spacing:.06em; }
+  .wr { font-family:var(--display); font-weight:800; font-size:.76rem; display:grid; place-items:center; color:var(--ink-mute); }
+  .cell { border:2px dashed var(--rule); border-radius:12px; min-height:3.1rem; display:grid; place-items:center;
+    font-family:var(--display); font-weight:800; font-size:.74rem; color:var(--ink-mute); text-align:center; padding:.2rem; line-height:1.15; }
+  .cell.set { border-style:solid; color:#fff; }
+  .palette { display:flex; flex-wrap:wrap; gap:.4rem; margin-bottom:.9rem; }
+  .pchip { padding:.42rem .9rem; border-radius:99px; border:2px solid var(--rule); background:var(--paper);
+    font-family:var(--display); font-weight:800; font-size:.85rem; }
+  .pchip[aria-pressed="true"] { color:#fff; border-color:transparent; }
+
+  /* quadrants */
+  .quads { display:grid; gap:.7rem; }
+  @media (min-width:44rem) { .quads { grid-template-columns:1fr 1fr } }
+  .quad { border-radius:20px; padding:1rem; display:grid; gap:.6rem; align-content:start; min-height:9rem; color:#fff; }
+  .quad h3 { font-size:.95rem; text-transform:uppercase; letter-spacing:.03em; }
+  .quad .qsub { font-size:.78rem; opacity:.9; }
+  .qitem { background:rgba(255,255,255,.18); border-radius:10px; padding:.4rem .65rem; font-size:.88rem;
+    display:flex; justify-content:space-between; gap:.5rem; align-items:center; }
+  .qitem button { color:#fff; opacity:.7; }
+  .qempty { font-size:.82rem; opacity:.75; font-style:italic; }
+  .unplaced { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .uchip { padding:.4rem .85rem; border-radius:99px; border:2px solid var(--rule-hard); background:var(--paper); font-size:.88rem; font-weight:600; }
+  .uchip[aria-pressed="true"] { background:var(--navy); color:var(--ground); border-color:var(--navy); }
+
+  .verdict { border-radius:18px; padding:1rem 1.15rem; display:flex; gap:.7rem; align-items:flex-start; line-height:1.55; }
+  .verdict.good { background:color-mix(in srgb, var(--teal) 12%, var(--paper)); border:2px solid color-mix(in srgb, var(--teal) 40%, var(--rule)); }
+  .verdict.warn { background:color-mix(in srgb, var(--energy) 12%, var(--paper)); border:2px solid color-mix(in srgb, var(--energy) 45%, var(--rule)); }
+  .verdict.idle { background:var(--soft); border:2px solid var(--rule); color:var(--ink-mute); }
+
+  .certificate { background:var(--paper); border:8px solid var(--sun); border-radius:28px; padding:clamp(1.8rem,5vw,3.2rem);
+    text-align:center; display:grid; gap:1rem; justify-items:center; box-shadow:var(--shadow-lg); margin-top:1.4rem; }
+  .certificate .who { font-family:var(--display); font-weight:900; font-size:clamp(1.4rem,5vw,2.2rem); color:var(--energy);
+    border-bottom:3px dotted var(--rule-hard); padding:.1rem 2rem .35rem; }
+  .certificate .sig { display:flex; gap:2.5rem; flex-wrap:wrap; justify-content:center; margin-top:.8rem; }
+  .certificate .sig hr { border:0; border-top:2px solid var(--ink); margin:0 0 .25rem; }
+  .certificate .sig span { font-family:var(--display); font-weight:800; font-size:.82rem; }
+
+  .bandfoot { margin-top:3rem; background:var(--navy); border-radius:24px; padding:1.3rem 1.6rem;
+    display:flex; align-items:center; gap:.7rem; flex-wrap:wrap; justify-content:center;
+    font-family:var(--display); font-weight:900; font-size:clamp(1.1rem,3.4vw,1.7rem); }
+  .bandfoot i { font-style:normal; }
+
+  .toasts { position:fixed; right:1rem; bottom:1rem; display:grid; gap:.5rem; z-index:80; }
+  .toast { background:var(--paper); border:2px solid var(--rule); border-left:6px solid var(--sun); border-radius:16px;
+    padding:.75rem 1rem; box-shadow:var(--shadow-lg); max-width:20rem; animation:slide .3s cubic-bezier(.2,.9,.3,1); }
+  .toast b { display:block; font-family:var(--display); font-weight:800; font-size:.92rem; }
+  .toast span { font-size:.78rem; color:var(--ink-mute); }
+  @keyframes slide { from { opacity:0; transform:translateX(16px) } }
+  .confetti { position:fixed; inset:0; pointer-events:none; z-index:90; }
+  .confetti i { position:absolute; width:9px; height:13px; border-radius:2px; animation:fall 2.4s cubic-bezier(.3,.6,.5,1) forwards; }
+  @keyframes fall { 0%{transform:translateY(-10vh) rotate(0);opacity:1} 100%{transform:translateY(105vh) rotate(720deg);opacity:0} }
+
+  @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration:.001ms !important; transition-duration:.001ms !important } }
+  @media print { .bar,.pagenav,.noprint,.bandfoot { display:none !important } body { background:#fff } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <g id="i-goal" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></g>
+  <g id="i-task" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 2.5h6v3H9zM8.5 11l2 2 4-4M8.5 16.5h5"/></g>
+  <g id="i-time" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12.5" r="8.5"/><path d="M12 8v5l3 2M9 2.5h6"/></g>
+  <g id="i-prio" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5h18M6 12h12M10 18.5h4"/></g>
+  <g id="i-people" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 5.6a3 3 0 0 1 0 5.8M17.5 13.6A5.5 5.5 0 0 1 20.5 19"/></g>
+  <g id="i-cal" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></g>
+  <g id="i-trash" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5h16M9.5 6.5V4.8h5V6.5M6.5 6.5 7.4 20h9.2l.9-13.5"/></g>
+  <g id="i-check" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></g>
+  <g id="i-plus" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></g>
+  <g id="i-x" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></g>
+  <g id="i-next" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></g>
+  <g id="i-prev" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m6-6-6 6 6 6"/></g>
+  <g id="i-print" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V4h10v5M7 18H5a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M7 14h10v6H7v-6Z"/></g>
+  <g id="lf-star4"><path fill="currentColor" d="m12 2.6 2.95 6 6.6.96-4.78 4.65 1.13 6.58L12 17.48 6.1 20.6l1.13-6.58L2.45 9.36l6.6-.96L12 2.6Z"/></g>
+</defs></svg>
+
+<div class="bar">
+  <div class="logo">
+    <svg viewBox="0 0 200 306" aria-hidden="true">
+      <g fill="none" stroke="#FFC83D" stroke-width="11" stroke-linecap="round">
+        <path d="M100 20V3"/><path d="M148 34l9-14"/><path d="M52 34l-9-14"/><path d="M178 74l16-8"/><path d="M22 74L6 66"/>
+      </g>
+      <circle cx="100" cy="104" r="66" fill="#FFC83D"/>
+      <path d="M100 36l27 56H73z" fill="#FFF7E4"/><path d="M100 36l12 25H88z" fill="#0D1B3D"/>
+      <rect x="73" y="92" width="54" height="84" fill="#FF7A1A"/><rect x="73" y="92" width="18" height="84" fill="#FF9B4F"/>
+      <rect x="65" y="176" width="70" height="30" rx="5" fill="#0D1B3D"/>
+      <path d="M74 206h52l-7 44H81z" fill="#00B9A7"/>
+      <path d="M74 203c-24 12-42 33-48 63 20-4 36-14 48-29zM126 203c24 12 42 33 48 63-20-4-36-14-48-29z" fill="#00B9A7"/>
+      <path d="M100 252c12 15 17 29 0 51-17-22-12-36 0-51z" fill="#FF7A1A"/>
+    </svg>
+    <div><b>My Smart Plan</b><span>Junior Builders · 8–10</span></div>
+  </div>
+  <div class="stampstrip" id="stampstrip"></div>
+  <button class="btn ghost sm" data-nav="award"><svg class="ic"><use href="#lf-star4"/></svg>My Award</button>
+</div>
+
+<div class="page" id="page"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const STEPS = [
+    { id:"goals", n:1, icon:"i-goal", colour:"energy", title:"Goals",
+      short:"Pick what matters. Say when.", long:"A goal is not a wish. It has a number and a day it is finished by." },
+    { id:"tasks", n:2, icon:"i-task", colour:"teal", title:"Tasks",
+      short:"Break it into today.", long:"A goal you cannot start today is still a wish. Turn it into things you can tick off." },
+    { id:"time", n:3, icon:"i-time", colour:"sky", title:"Time",
+      short:"Give every job a slot.", long:"You have the same hours as everyone else. Planning is deciding what goes in them." },
+    { id:"prio", n:4, icon:"i-prio", colour:"purple", title:"Priorities",
+      short:"Do first things first.", long:"When everything is important, nothing is. Sort your tasks into four boxes and find out." }
+  ];
+
+  const ACTIVITIES = [
+    ["Study", "sky"], ["Project work", "energy"], ["Practice pitch", "green"],
+    ["Read", "teal"], ["Launch idea", "purple"], ["Outdoors", "sun"], ["Plan next week", "rose"]
+  ];
+  const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  const SLOTS = ["Morning","After school","Evening"];
+
+  const QUADS = [
+    { id:"focus", title:"Focus First", sub:"Important and urgent — do it now", colour:"energy", icon:"i-goal" },
+    { id:"plan",  title:"Important, not urgent", sub:"Put it in the calendar", colour:"teal", icon:"i-cal" },
+    { id:"help",  title:"Delegate or get help", sub:"Urgent, but not yours alone", colour:"sky", icon:"i-people" },
+    { id:"drop",  title:"Not important", sub:"Be honest. Let it go", colour:"navy", icon:"i-trash" }
+  ];
+
+  const KEY = "lf-my-smart-plan-v1";
+  const fresh = () => ({ name:"", goals:[], tasks:[], week:{}, placed:{}, stamps:{} });
+  let P = fresh();
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) {} };
+  const load = () => { try { const r = localStorage.getItem(KEY); if (r) P = Object.assign(fresh(), JSON.parse(r)); } catch (e) {} };
+
+  const $ = id => document.getElementById(id);
+  const el = (t,c,h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+  const ic = id => '<svg class="ic" aria-hidden="true"><use href="#' + id + '"/></svg>';
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+  const filled = s => String(s || "").trim().length > 1;
+  const paint = c => "background:var(--" + c + ")";
+
+  function toast(t,b) {
+    const n = el("div","toast","<b>"+esc(t)+"</b><span>"+esc(b)+"</span>");
+    $("toasts").appendChild(n);
+    setTimeout(() => { n.style.transition="opacity .3s"; n.style.opacity="0"; setTimeout(()=>n.remove(),320); }, 3600);
+  }
+  function confetti() {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const box = el("div","confetti"), cols = ["#FFC83D","#FF7A1A","#4DB6F2","#00B9A7","#7B5EA6"];
+    for (let i=0;i<60;i++){ const p=document.createElement("i"); p.style.left=(Math.random()*100)+"vw";
+      p.style.background=cols[i%cols.length]; p.style.animationDelay=(Math.random()*.5)+"s"; box.appendChild(p); }
+    document.body.appendChild(box); setTimeout(()=>box.remove(),3200);
+  }
+  function bind(node,get,set){ node.value=get()||""; node.addEventListener("input",()=>{ set(node.value); save(); check(); }); return node; }
+  function field(label,hint,get,set,opts){
+    opts=opts||{}; const f=el("div","fld"); const id="f"+Math.random().toString(36).slice(2,8);
+    f.innerHTML='<label class="lbl" for="'+id+'">'+esc(label)+'</label>'+(hint?'<span class="hint">'+esc(hint)+'</span>':"");
+    const i=document.createElement(opts.area?"textarea":"input"); i.id=id;
+    if(opts.area) i.rows=opts.rows||2; else i.type="text";
+    if(opts.placeholder) i.placeholder=opts.placeholder;
+    bind(i,get,set); f.appendChild(i); return f;
+  }
+
+  /* ---- stamps ---- */
+  function state() {
+    const goalsOk = P.goals.filter(g => filled(g.what) && filled(g.when)).length >= 2 &&
+                    P.goals.some(g => (g.steps||[]).filter(s => filled(s.text)).length >= 2);
+    const tasksOk = P.tasks.filter(t => filled(t.text)).length >= 4 && P.tasks.some(t => t.star);
+    const timeOk  = Object.keys(P.week).length >= 7;
+    const named   = P.tasks.filter(t => filled(t.text)).map(t => t.id);
+    const prioOk  = named.length > 0 && named.every(id => P.placed[id]) &&
+                    new Set(named.map(id => P.placed[id])).size >= 2;
+    return { goals:goalsOk, tasks:tasksOk, time:timeOk, prio:prioOk };
+  }
+  function check() {
+    const s = state(); let gained = null;
+    STEPS.forEach(st => {
+      if (s[st.id] && !P.stamps[st.id]) { P.stamps[st.id] = 1; gained = st.title; }
+      if (!s[st.id] && P.stamps[st.id]) delete P.stamps[st.id];
+    });
+    save(); paintStamps();
+    if (gained) { toast(gained + " stamp earned!", "Keep going."); confetti(); }
+  }
+  function paintStamps() {
+    const h = $("stampstrip"); h.innerHTML = "";
+    STEPS.forEach(st => {
+      const d = el("div","st"+(P.stamps[st.id]?" on":"")+(cur===st.id?" here":""), ic(st.icon));
+      if (P.stamps[st.id]) { d.style.background="var(--"+st.colour+")"; d.style.borderColor="var(--"+st.colour+")"; }
+      d.title = st.title; h.appendChild(d);
+    });
+  }
+
+  /* ---- nav ---- */
+  const ORDER = ["start","goals","tasks","time","prio","award"];
+  let cur = "start";
+  const go = id => { cur = id; paintStamps(); render(); window.scrollTo({top:0}); };
+
+  function divider(host) {
+    const d = el("div","lf-div",'<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lf-star4"/></svg>');
+    host.appendChild(d);
+  }
+  function pagenav(host) {
+    const i = ORDER.indexOf(cur), L = { start:"Start", goals:"Goals", tasks:"Tasks", time:"Time", prio:"Priorities", award:"My Award" };
+    const nav = el("div","pagenav");
+    if (i>0) { const b=el("button","btn ghost",ic("i-prev")+L[ORDER[i-1]]); b.addEventListener("click",()=>go(ORDER[i-1])); nav.appendChild(b); }
+    else nav.appendChild(el("span"));
+    if (i<ORDER.length-1) { const b=el("button","btn",L[ORDER[i+1]]+ic("i-next")); b.addEventListener("click",()=>go(ORDER[i+1])); nav.appendChild(b); }
+    host.appendChild(nav);
+    const band = el("div","bandfoot");
+    band.innerHTML = [["Dream It.","sun"],["Plan It.","teal"],["Do It.","energy"]]
+      .map(([w,c]) => '<i style="color:var(--'+c+')">'+w+'</i>').join(" ");
+    host.appendChild(band);
+  }
+  function stepHead(host, st) {
+    host.appendChild(el("p","eyebrow","Part " + st.n + " of 4"));
+    const h = el("h1","big"); h.textContent = st.title; host.appendChild(h);
+    host.appendChild(el("p","lede", st.long));
+    divider(host);
+  }
+
+  /* ---- start ---- */
+  function vStart(p) {
+    p.appendChild(el("p","eyebrow","Junior Builders · Ages 8–10 · Book 2"));
+    const h = el("h1","big");
+    h.innerHTML = 'My <span style="color:var(--teal)">Smart</span> Plan';
+    p.appendChild(h);
+    p.appendChild(el("p","lede","Goals · Tasks · Time · Priorities. Four parts, and by the end you will have a real plan you can actually follow."));
+    const s = el("div","sticky");
+    s.style.margin = "1.4rem 0";
+    s.innerHTML = 'Plan Smart.<br>Focus First.<br>Get It Done!';
+    p.appendChild(s);
+    divider(p);
+
+    const c = el("div","card");
+    const rail = el("div","steps4");
+    STEPS.forEach((st,i) => {
+      const b = el("div","s4");
+      b.innerHTML = '<span class="circ" style="'+paint(st.colour)+'">'+ic(st.icon)+'<span class="pip">'+st.n+'</span></span>' +
+        '<b>'+esc(st.title)+'</b><span>'+esc(st.short)+'</span>' + (i<3?'<span class="dash"></span>':"");
+      rail.appendChild(b);
+    });
+    c.appendChild(rail);
+    p.appendChild(c);
+
+    const n = el("div","card");
+    n.appendChild(field("My name","Goes on the certificate at the end.",()=>P.name,x=>P.name=x.slice(0,60),{placeholder:"Your name"}));
+    p.appendChild(n);
+
+    const go1 = el("button","btn","Start with Goals"+ic("i-next"));
+    go1.style.marginTop = "1.4rem";
+    go1.addEventListener("click",()=>go("goals"));
+    p.appendChild(go1);
+  }
+
+  /* ---- goals ---- */
+  function vGoals(p) {
+    stepHead(p, STEPS[0]);
+    const ex = el("div","verdict idle");
+    ex.innerHTML = "<span><b>Not a goal:</b> “Get better at reading.” &nbsp;<b>A goal:</b> “Read 6 books by June 30.” The second one you can check.</span>";
+    p.appendChild(ex);
+
+    const list = el("div");
+    list.style.marginTop = "1rem";
+    P.goals.forEach((g,i) => {
+      g.steps = g.steps || [];
+      const box = el("div","goal");
+      const head = el("div","goalhead");
+      const num = el("span","num", String(i+1));
+      num.style.cssText = paint(["energy","teal","sky"][i%3]);
+      const nameIn = document.createElement("input");
+      nameIn.type="text"; nameIn.placeholder="My goal is…";
+      bind(nameIn,()=>g.what,x=>g.what=x.slice(0,90));
+      const del = el("button","icon-btn",ic("i-x"));
+      del.setAttribute("aria-label","Remove goal");
+      del.addEventListener("click",()=>{ P.goals.splice(i,1); save(); render(); });
+      head.appendChild(num); head.appendChild(nameIn); head.appendChild(del);
+      box.appendChild(head);
+
+      const two = el("div","two");
+      two.appendChild(field("Finished by","A real day.",()=>g.when,x=>g.when=x.slice(0,40),{placeholder:"Friday 20 June"}));
+      two.appendChild(field("Why it matters","",()=>g.why,x=>g.why=x.slice(0,120),{placeholder:"Because…"}));
+      box.appendChild(two);
+
+      const sl = el("div");
+      sl.style.marginTop = ".4rem";
+      sl.appendChild(el("span","lbl","Steps to get there"));
+      const done = g.steps.filter(s=>s.done).length;
+      g.steps.forEach((s,si) => {
+        const r = el("div","stepline");
+        r.style.marginTop = ".35rem";
+        const t = el("button","tick",ic("i-check"));
+        t.setAttribute("aria-pressed",String(!!s.done));
+        t.setAttribute("aria-label","Mark step done");
+        t.addEventListener("click",()=>{ s.done=!s.done; save(); render(); });
+        const inp = document.createElement("input");
+        inp.type="text"; inp.placeholder="Step "+(si+1);
+        bind(inp,()=>s.text,x=>s.text=x.slice(0,90));
+        r.appendChild(t); r.appendChild(inp);
+        sl.appendChild(r);
+      });
+      const addS = el("button","btn ghost sm",ic("i-plus")+"Add a step");
+      addS.style.marginTop=".5rem";
+      addS.addEventListener("click",()=>{ g.steps.push({text:"",done:false}); save(); render(); });
+      sl.appendChild(addS);
+      box.appendChild(sl);
+
+      if (g.steps.length) {
+        const pct = Math.round(done / g.steps.length * 100), c = 2*Math.PI*40;
+        const ring = el("div");
+        ring.style.cssText = "display:flex;align-items:center;gap:.7rem;margin-top:.4rem";
+        ring.innerHTML = '<svg class="ring" viewBox="0 0 100 100" role="img" aria-label="'+pct+' percent of steps done">' +
+          '<circle class="bg" cx="50" cy="50" r="40"/><circle class="fg" cx="50" cy="50" r="40" transform="rotate(-90 50 50)" stroke-dasharray="'+(c*pct/100)+' '+c+'"/>' +
+          '<text x="50" y="61" text-anchor="middle">'+pct+'</text></svg>' +
+          '<span class="hint">'+done+' of '+g.steps.length+' steps done</span>';
+        box.appendChild(ring);
+      }
+      list.appendChild(box);
+    });
+    p.appendChild(list);
+
+    const add = el("button","btn ghost",ic("i-plus")+"Add a goal");
+    add.style.marginTop = ".9rem";
+    add.addEventListener("click",()=>{ P.goals.push({what:"",when:"",why:"",steps:[{text:"",done:false}]}); save(); render(); });
+    p.appendChild(add);
+    if (P.goals.length > 3) p.appendChild(el("p","hint","More than three goals at once and none of them move. Three is plenty."));
+
+    const s = state();
+    const v = el("div","verdict "+(s.goals?"good":"idle"));
+    v.style.marginTop = "1rem";
+    v.innerHTML = "<span>"+(s.goals ? "<b>Goals stamp earned.</b> You have real goals with real dates and steps."
+      : "To earn this stamp: write two goals with a finish day, and give one of them at least two steps.")+"</span>";
+    p.appendChild(v);
+  }
+
+  /* ---- tasks ---- */
+  function vTasks(p) {
+    stepHead(p, STEPS[1]);
+    const c = el("div","card");
+    c.innerHTML = '<span class="lbl">Today\'s Plan</span><p class="hint">Write what you will actually do today. Tick them as you go. Then press the star on the ONE that matters most — that is your Focus First.</p>';
+    const list = el("div");
+    list.style.marginTop = ".9rem";
+    P.tasks.forEach((t,i) => {
+      const r = el("div","task"+(t.done?" done":""));
+      const tick = el("button","tick",ic("i-check"));
+      tick.setAttribute("aria-pressed",String(!!t.done));
+      tick.setAttribute("aria-label","Mark task done");
+      tick.addEventListener("click",()=>{ t.done=!t.done; save(); render(); });
+      const inp = document.createElement("input");
+      inp.type="text"; inp.placeholder="Something I will do today";
+      bind(inp,()=>t.text,x=>t.text=x.slice(0,90));
+      const star = el("button","starbtn",'<svg class="ic"><use href="#lf-star4"/></svg>');
+      star.setAttribute("aria-pressed",String(!!t.star));
+      star.setAttribute("aria-label","Make this my Focus First");
+      star.addEventListener("click",()=>{ P.tasks.forEach(x=>x.star=false); t.star=true; save(); check(); render(); });
+      const del = el("button","icon-btn",ic("i-x"));
+      del.setAttribute("aria-label","Remove task");
+      del.addEventListener("click",()=>{ P.tasks.splice(i,1); delete P.placed[t.id]; save(); render(); });
+      r.appendChild(tick); r.appendChild(inp); r.appendChild(star); r.appendChild(del);
+      list.appendChild(r);
+    });
+    c.appendChild(list);
+    const add = el("button","btn ghost sm",ic("i-plus")+"Add a task");
+    add.style.marginTop = ".8rem";
+    add.addEventListener("click",()=>{ P.tasks.push({id:"t"+Date.now()+Math.floor(Math.random()*999),text:"",done:false,star:false}); save(); render(); });
+    c.appendChild(add);
+    p.appendChild(c);
+
+    const starred = P.tasks.find(t=>t.star && filled(t.text));
+    const v = el("div","verdict "+(starred?"good":"idle"));
+    v.style.marginTop = "1rem";
+    v.innerHTML = "<span>"+(starred
+      ? "<b>Focus First: “"+esc(starred.text)+"”.</b> If today goes wrong and you only finish one thing, finish that one."
+      : "Star one task. Founders decide what matters most <i>before</i> the day gets busy, not after.")+"</span>";
+    p.appendChild(v);
+
+    const s = state();
+    const v2 = el("div","verdict "+(s.tasks?"good":"idle"));
+    v2.style.marginTop = ".8rem";
+    v2.innerHTML = "<span>"+(s.tasks ? "<b>Tasks stamp earned.</b>" : "To earn this stamp: write four tasks and star one of them.")+"</span>";
+    p.appendChild(v2);
+  }
+
+  /* ---- time ---- */
+  let brush = 0;
+  function vTime(p) {
+    stepHead(p, STEPS[2]);
+    const c = el("div","card");
+    c.innerHTML = '<span class="lbl">My weekly plan</span><p class="hint">Pick an activity below, then tap the squares where it goes. Tap a filled square again to clear it.</p>';
+    const pal = el("div","palette");
+    pal.style.marginTop = ".9rem";
+    ACTIVITIES.forEach((a,i) => {
+      const b = el("button","pchip");
+      b.textContent = a[0];
+      b.setAttribute("aria-pressed", String(brush===i));
+      if (brush===i) b.style.background = "var(--"+a[1]+")";
+      b.addEventListener("click",()=>{ brush=i; render(); });
+      pal.appendChild(b);
+    });
+    c.appendChild(pal);
+
+    const wrap = el("div","weekwrap");
+    const grid = el("div","week");
+    grid.appendChild(el("div","wh",""));
+    DAYS.forEach(d => grid.appendChild(el("div","wh",d)));
+    SLOTS.forEach((slot,si) => {
+      grid.appendChild(el("div","wr",slot));
+      DAYS.forEach((d,di) => {
+        const key = di+"-"+si, val = P.week[key];
+        const cell = el("button","cell"+(val!=null?" set":""));
+        if (val!=null) { cell.style.background="var(--"+ACTIVITIES[val][1]+")"; cell.textContent=ACTIVITIES[val][0]; }
+        else cell.textContent = "+";
+        cell.setAttribute("aria-label", d+" "+slot+(val!=null?": "+ACTIVITIES[val][0]:", empty"));
+        cell.addEventListener("click",()=>{
+          if (P.week[key]===brush) delete P.week[key]; else P.week[key]=brush;
+          save(); check(); render();
+        });
+        grid.appendChild(cell);
+      });
+    });
+    wrap.appendChild(grid);
+    c.appendChild(wrap);
+    p.appendChild(c);
+
+    const used = Object.keys(P.week).length, total = DAYS.length*SLOTS.length;
+    const rest = Object.values(P.week).filter(v => ACTIVITIES[v][0]==="Outdoors").length;
+    const v = el("div","verdict "+(used>=7 ? (rest? "good":"warn") : "idle"));
+    v.style.marginTop = "1rem";
+    v.innerHTML = "<span>"+(used < 7
+      ? "Fill at least seven squares to earn the Time stamp. " + used + " so far."
+      : rest === 0
+        ? "<b>"+used+" of "+total+" squares planned — but no time outdoors.</b> A plan with no rest in it is a plan you will stop following by Wednesday. Add one."
+        : "<b>"+used+" of "+total+" squares planned, including time outdoors.</b> That is a week you can actually keep.")+"</span>";
+    p.appendChild(v);
+  }
+
+  /* ---- priorities ---- */
+  let picked = null;
+  function vPrio(p) {
+    stepHead(p, STEPS[3]);
+    const named = P.tasks.filter(t => filled(t.text));
+    const c = el("div","card");
+    c.innerHTML = '<span class="lbl">Sort your tasks</span><p class="hint">Tap a task, then tap the box it belongs in. Every task goes somewhere — including the ones you should let go of.</p>';
+    const un = el("div","unplaced");
+    un.style.marginTop = ".9rem";
+    const left = named.filter(t => !P.placed[t.id]);
+    if (!left.length) un.appendChild(el("span","hint", named.length ? "All sorted." : "Add some tasks in Part 2 first."));
+    left.forEach(t => {
+      const b = el("button","uchip");
+      b.textContent = t.text;
+      b.setAttribute("aria-pressed", String(picked===t.id));
+      b.addEventListener("click",()=>{ picked = picked===t.id ? null : t.id; render(); });
+      un.appendChild(b);
+    });
+    c.appendChild(un);
+    p.appendChild(c);
+
+    const q = el("div","quads");
+    q.style.marginTop = "1rem";
+    QUADS.forEach(qd => {
+      const box = el("div","quad");
+      box.style.background = "var(--"+qd.colour+")";
+      box.innerHTML = '<h3>'+ic(qd.icon)+" "+esc(qd.title)+'</h3><p class="qsub">'+esc(qd.sub)+'</p>';
+      const items = named.filter(t => P.placed[t.id]===qd.id);
+      if (!items.length) box.appendChild(el("p","qempty","Nothing here yet"));
+      items.forEach(t => {
+        const it = el("div","qitem");
+        it.innerHTML = "<span>"+esc(t.text)+"</span>";
+        const x = el("button",null,ic("i-x"));
+        x.setAttribute("aria-label","Take out of this box");
+        x.addEventListener("click",()=>{ delete P.placed[t.id]; save(); check(); render(); });
+        it.appendChild(x);
+        box.appendChild(it);
+      });
+      box.addEventListener("click", e => {
+        if (e.target.closest("button")) return;
+        if (!picked) return;
+        P.placed[picked] = qd.id; picked = null; save(); check(); render();
+      });
+      q.appendChild(box);
+    });
+    p.appendChild(q);
+
+    const focus = named.filter(t => P.placed[t.id]==="focus").length;
+    const v = el("div","verdict "+(focus>3 ? "warn" : focus>0 ? "good" : "idle"));
+    v.style.marginTop = "1rem";
+    v.innerHTML = "<span>"+(focus===0
+      ? "Sort your tasks into the four boxes."
+      : focus>3
+        ? "<b>"+focus+" things in Focus First.</b> That is the trap. When everything is first, nothing is. Move all but two or three somewhere else — that choice is the whole skill."
+        : "<b>"+focus+" in Focus First.</b> Good — that is a real morning, not a wish list.")+"</span>";
+    p.appendChild(v);
+
+    const s = state();
+    const v2 = el("div","verdict "+(s.prio?"good":"idle"));
+    v2.style.marginTop = ".8rem";
+    v2.innerHTML = "<span>"+(s.prio ? "<b>Priorities stamp earned.</b> Every task sorted, into more than one box."
+      : "To earn this stamp: place every task, using at least two different boxes.")+"</span>";
+    p.appendChild(v2);
+  }
+
+  /* ---- award ---- */
+  function vAward(p) {
+    p.appendChild(el("p","eyebrow","My achievement stamps"));
+    const h = el("h1","big"); h.textContent = "My Award"; p.appendChild(h);
+    divider(p);
+
+    const c = el("div","card");
+    const rail = el("div","steps4");
+    STEPS.forEach(st => {
+      const got = !!P.stamps[st.id];
+      const b = el("div","s4");
+      b.innerHTML = '<span class="circ" style="'+(got?paint(st.colour):"background:var(--sunk);color:var(--ink-mute)")+'">'+ic(st.icon)+'</span>' +
+        '<b>'+esc(st.title)+'</b><span>'+(got?"Earned":"Not yet")+'</span>';
+      if (!got) { b.style.cursor="pointer"; b.addEventListener("click",()=>go(st.id)); }
+      rail.appendChild(b);
+    });
+    c.appendChild(rail);
+    p.appendChild(c);
+
+    const all = STEPS.every(st => P.stamps[st.id]);
+    if (all) {
+      const today = new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
+      const cert = el("div","certificate");
+      cert.innerHTML =
+        '<p class="eyebrow">Little Founders · Junior Builders · Ages 8–10</p>' +
+        '<h2 style="font-size:clamp(1.8rem,6vw,2.8rem)">Plan Like a Founder!</h2>' +
+        '<p>This certifies that</p><p class="who">'+esc(P.name || "…………………")+'</p>' +
+        '<p>has completed <b>My Smart Plan</b> — setting real goals with real dates, turning them into tasks, giving every job a slot in the week, and deciding what comes first.</p>' +
+        '<div class="sig"><div><hr><span>Guide</span></div><div><hr><span>'+esc(today)+'</span></div></div>';
+      p.appendChild(cert);
+      const pr = el("button","btn noprint",ic("i-print")+"Print my certificate");
+      pr.style.marginTop = "1.2rem";
+      pr.addEventListener("click",()=>window.print());
+      p.appendChild(pr);
+    } else {
+      const v = el("div","verdict idle");
+      v.style.marginTop = "1rem";
+      v.innerHTML = "<span>Earn all four stamps to unlock your <b>Plan Like a Founder!</b> certificate. Tap any grey circle above to go and finish it.</span>";
+      p.appendChild(v);
+    }
+  }
+
+  function render() {
+    const p = $("page"); p.innerHTML = "";
+    ({ start:vStart, goals:vGoals, tasks:vTasks, time:vTime, prio:vPrio, award:vAward }[cur] || vStart)(p);
+    pagenav(p);
+  }
+
+  document.addEventListener("click", e => {
+    const n = e.target.closest("[data-nav]");
+    if (n) go(n.dataset.nav);
+  });
+
+  load(); paintStamps(); render();
+})();
+</script>

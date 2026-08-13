@@ -868,7 +868,7 @@
     p.innerHTML = "";
     ({ home:vHome, topic:vTopic, words:vWords, card:vCard, cert:vCert }[view.name] || vHome)(p);
     const band = el("div", "bandfoot");
-    band.innerHTML = [["Look.", "sun"], ["Ask.", "sky"], ["Make.", "energy"], ["Make it better.", "teal"]]
+    band.innerHTML = [["Observe.", "teal"], ["Make.", "energy"], ["Learn.", "sky"], ["Improve.", "green"]]
       .map(([w, c]) => '<i style="color:var(--' + c + ')">' + w + '</i>').join(" ");
     p.appendChild(band);
   }
@@ -878,9 +878,9 @@
   function vHome(p) {
     const cover = el("div", "cover");
     cover.innerHTML =
-      '<span class="band">' + ic("i-star") + 'Discovery Series · Ages 5–8</span>' +
+      '<span class="band">' + ic("i-star") + 'Discovery Series · Ages 5–7</span>' +
       '<h1>HOW IS<br>IT MADE?</h1>' +
-      '<p class="sub">A Little Founders Discovery Book</p>' +
+      '<p class="sub">Discover where things come from.</p>' +
       ZIGGY.replace('class="zig"', 'class="ziggy-hero"');
     p.appendChild(cover);
 

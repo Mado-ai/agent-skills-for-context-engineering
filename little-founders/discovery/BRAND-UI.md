@@ -3,6 +3,21 @@
 Every Little Founders screen must look like it came off the same press as the posters. This is the
 canonical spec. If a build drifts from it, this file wins.
 
+## Two registers, split by age
+
+The brand has **two visual worlds**, and the book covers are the authority on which is which.
+
+| Register | Books | Look |
+|---|---|---|
+| **Light** | How Is It Made? (5–7), My Smart Plan (8–10), Reverse. Rethink. Rebuild. (11–13) | Cream ground, navy Nunito, bulb-rocket mark, doodles, circular badges, gold star dividers |
+| **Dark** | GO OVERSEAS! (14–17) | Near-black navy, purple→cyan neon gradient, shield-rocket mark, glowing ring icons, gold laurel certificate |
+
+The dark register is not a dark mode of the light one — it is a deliberate step up in maturity
+for the oldest tier, and its cover proves it. Do not flatten the two into one treatment. Book 4
+commits to its world and does not follow the viewer's light/dark preference.
+
+Everything below describes the **light** register unless stated.
+
 ## The look, in one line
 
 **Light, airy, rounded and friendly** — cream ground, navy type, one bright accent per element,

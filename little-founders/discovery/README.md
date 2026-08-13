@@ -5,8 +5,8 @@ the thing a student actually holds, fills in, and takes home.
 
 | Tier | Ages | Book | What it teaches | Status |
 |---|---|---|---|---|
-| 🌱 Little Sprouts | 5–7 | **How Is It Made?** | Discover the world | ✅ Built — [`how-is-it-made.html`](how-is-it-made.html) |
-| 🔨 Junior Builders | 8–10 | **Mission Control** | Learn to plan and organize | Planned |
+| 🌱 Little Sprouts | 5–7 | **How Is It Made?** | Discover where things come from | ✅ Built — [`how-is-it-made.html`](how-is-it-made.html) |
+| 🔨 Junior Builders | 8–10 | **My Smart Plan** | Goals · Tasks · Time · Priorities | ✅ Built — [`my-smart-plan.html`](my-smart-plan.html) |
 | 🚀 Young Founders | 11–13 | **Reverse. Rethink. Rebuild.** | Learn to question and improve | ✅ Built — [`reverse-rethink-rebuild.html`](reverse-rethink-rebuild.html) |
 | 👑 Founder CEOs | 14–17 | **GO OVERSEAS!** | Build it, brand it, take it into the world | ✅ Built — [`go-overseas.html`](go-overseas.html) |
 
@@ -124,16 +124,33 @@ professional before trading. The Canadian operating checks in
 
 ---
 
-## Book 2 — planned
+## Book 2 — My Smart Plan
 
-**Mission Control** (8–10) — *Learn to plan and organize.* Junior Builders make and sell real
-things, so this book should be the mission planner: choosing the job, listing what you need,
-sequencing the work, assigning the crew, tracking the countdown, and running the launch. The
-natural interactive spine is a mission board with a checklist, a supply manifest, a crew roster,
-and a countdown to Market Day.
+**Junior Builders · Ages 8–10 · Goals · Tasks · Time · Priorities**
 
-It follows the same rules as the built books: one repeating pattern taught by repetition, every
-screen ends with something the learner made, and the certificate is criterion-based.
+> Plan Smart. Focus First. Get It Done!
+
+| Part | | What it teaches |
+|---|---|---|
+| 1 | **Goals** | A goal is not a wish. It has a number and a day it is finished by |
+| 2 | **Tasks** | Break the goal into things you can tick off today |
+| 3 | **Time** | You have the same hours as everyone. Planning is deciding what goes in them |
+| 4 | **Priorities** | When everything is important, nothing is |
+
+**In the digital version**
+
+- **Goal cards** with a finish date, a reason, and steps — each with a live completion ring
+- **Today's Plan** task list with one **Focus First** star: *if today goes wrong and you only
+  finish one thing, finish that one*
+- **Weekly planner** — 7 days × 3 slots, painted from an activity palette. It checks for rest:
+  a week with no time outdoors gets told so, because *a plan with no rest in it is a plan you
+  will stop following by Wednesday*
+- **Priority board** — the four boxes (Focus First / Important not urgent / Delegate or get help
+  / Not important). Tasks move across by tap. Put more than three things in Focus First and it
+  says so — naming the trap is the whole lesson
+- Four achievement stamps and the **Plan Like a Founder!** certificate
+
+Footer: *Dream It. Plan It. Do It.*
 
 ---
 

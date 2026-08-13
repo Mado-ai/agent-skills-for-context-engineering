@@ -65,7 +65,7 @@ Each tier has a learner-facing book — the thing a student holds, fills in, and
 | Tier | Book | Teaches | Status |
 |---|---|---|---|
 | 🌱 Little Sprouts | **How Is It Made?** | Discover the world | [Built](discovery/how-is-it-made.html) |
-| 🔨 Junior Builders | **Mission Control** | Learn to plan and organize | Planned |
+| 🔨 Junior Builders | **My Smart Plan** | Goals · Tasks · Time · Priorities | [Built](discovery/my-smart-plan.html) |
 | 🚀 Young Founders | **Reverse. Rethink. Rebuild.** | Learn to question and improve | [Built](discovery/reverse-rethink-rebuild.html) |
 | 👑 Founder CEOs | **GO OVERSEAS!** | Build it, brand it, take it into the world | [Built](discovery/go-overseas.html) |
 

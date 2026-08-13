@@ -1006,10 +1006,11 @@
       const today = new Date().toLocaleDateString(undefined, { year:"numeric", month:"long", day:"numeric" });
       cert.innerHTML =
         '<p class="eyebrow">Little Founders · Young Founders · Ages 11–13</p>' +
-        '<h2>🔎 Reverse Thinker</h2>' +
+        '<p class="eyebrow" style="letter-spacing:.2em">Certificate of</p><h2>Idea Builder</h2>' +
         '<p>Awarded to</p><p class="who">' + esc(D.name || "…………………") + '</p>' +
         '<p>who took ' + esc(D.object || "something ordinary") + ' apart, asked a question nobody had bothered to ask, tested a belief against a number set in advance, and rebuilt it better.</p>' +
         '<div class="sig"><div><hr><span>Guide</span></div><div><hr><span>' + esc(today) + '</span></div></div>' +
+        '<p style="font-family:var(--display);font-weight:800">Proud of your curiosity. Ready to build a better future.</p>' +
         '<p class="align">Question. Rethink. Improve. Create.</p>';
       p.appendChild(cert);
     } else {
