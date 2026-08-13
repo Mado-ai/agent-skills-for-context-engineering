@@ -1,4 +1,4 @@
-<title>Little Founders Curriculum</title>
+<title>Little Founders Program Guide</title>
 <style>
   :root {
     --ground: #F7F4EC;
@@ -15,11 +15,16 @@
     --sky: #4DB6F2;
     --teal: #00B9A7;
     --navy: #0D1B3D;
+    --green: #5FA63F;
+    --purple: #7B5EA6;
 
     --on-sunshine: #0D1B3D;
     --on-energy: #FFFFFF;
     --on-sky: #0D1B3D;
     --on-teal: #FFFFFF;
+    --on-navy: #F7F4EC;
+    --on-green: #FFFFFF;
+    --on-purple: #FFFFFF;
 
     --shadow: 0 1px 2px rgba(13, 27, 61, .05), 0 8px 24px -12px rgba(13, 27, 61, .18);
 
@@ -49,10 +54,16 @@
       --energy: #FF8F3D;
       --sky: #6EC4F7;
       --teal: #17CDBA;
+      --navy: #B9C7EC;
+      --green: #7EC65C;
+      --purple: #A489CD;
       --on-sunshine: #0D1B3D;
       --on-energy: #23150A;
       --on-sky: #08122A;
       --on-teal: #04231F;
+      --on-navy: #08122A;
+      --on-green: #06210B;
+      --on-purple: #180F28;
       --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 30px -14px rgba(0, 0, 0, .7);
     }
   }
@@ -70,10 +81,16 @@
     --energy: #FF8F3D;
     --sky: #6EC4F7;
     --teal: #17CDBA;
+    --navy: #B9C7EC;
+    --green: #7EC65C;
+    --purple: #A489CD;
     --on-sunshine: #0D1B3D;
     --on-energy: #23150A;
     --on-sky: #08122A;
     --on-teal: #04231F;
+    --on-navy: #08122A;
+    --on-green: #06210B;
+    --on-purple: #180F28;
     --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 30px -14px rgba(0, 0, 0, .7);
   }
 
@@ -89,293 +106,67 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  .wrap {
-    max-width: 68rem;
-    margin: 0 auto;
-    padding: 0 clamp(1.1rem, 4vw, 3rem);
-  }
+  .wrap { max-width: 70rem; margin: 0 auto; padding: 0 clamp(1.1rem, 4vw, 3rem); }
 
   h1, h2, h3, h4 {
-    font-family: var(--display);
-    font-weight: 800;
-    letter-spacing: -.02em;
-    text-wrap: balance;
-    margin: 0;
-    line-height: 1.1;
+    font-family: var(--display); font-weight: 800;
+    letter-spacing: -.02em; text-wrap: balance; margin: 0; line-height: 1.1;
   }
 
-  p { margin: 0; max-width: 62ch; }
-
-  a { color: inherit; }
+  p { margin: 0; max-width: 64ch; }
+  ul { list-style: none; margin: 0; padding: 0; }
 
   .eyebrow {
-    font-family: var(--body);
-    font-size: var(--step--1);
-    font-weight: 600;
-    letter-spacing: .16em;
-    text-transform: uppercase;
-    color: var(--ink-mute);
-    margin: 0;
+    font-family: var(--body); font-size: var(--step--1); font-weight: 600;
+    letter-spacing: .16em; text-transform: uppercase; color: var(--ink-mute); margin: 0;
   }
 
   /* ---------- hero ---------- */
 
-  .hero {
-    padding: clamp(3rem, 8vw, 6rem) 0 clamp(2.5rem, 5vw, 4rem);
-    border-bottom: 1px solid var(--rule);
-  }
-
-  .lockup {
-    display: flex;
-    align-items: center;
-    gap: clamp(1rem, 3vw, 2rem);
-    flex-wrap: wrap;
-  }
-
+  .hero { padding: clamp(3rem, 8vw, 6rem) 0 clamp(2.5rem, 5vw, 4rem); border-bottom: 1px solid var(--rule); }
+  .lockup { display: flex; align-items: center; gap: clamp(1rem, 3vw, 2rem); flex-wrap: wrap; }
   .mark { flex: none; width: clamp(64px, 12vw, 104px); height: auto; }
 
-  h1 {
-    font-size: var(--step-4);
-    line-height: .92;
-  }
+  h1 { font-size: var(--step-4); line-height: .92; }
 
   .hero .sub {
-    display: block;
-    font-family: var(--body);
-    font-size: var(--step--1);
-    font-weight: 600;
-    letter-spacing: .22em;
-    text-transform: uppercase;
-    color: var(--teal);
-    margin-top: .7em;
+    display: block; font-family: var(--body); font-size: var(--step--1); font-weight: 600;
+    letter-spacing: .2em; text-transform: uppercase; color: var(--energy); margin-top: .7em;
   }
 
   .tagline {
-    font-family: var(--display);
-    font-weight: 700;
-    font-size: var(--step-2);
-    line-height: 1.25;
-    margin-top: clamp(1.5rem, 4vw, 2.4rem);
-    max-width: 24ch;
+    font-family: var(--display); font-weight: 800; font-size: var(--step-2);
+    line-height: 1.2; margin-top: clamp(1.5rem, 4vw, 2.4rem); max-width: 20ch;
   }
+  .tagline em { font-style: normal; color: var(--energy); }
 
   .lede { margin-top: 1.1rem; color: var(--ink-soft); font-size: var(--step-1); line-height: 1.5; }
 
   .stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
-    gap: 1px;
-    margin-top: clamp(2rem, 5vw, 3.2rem);
-    background: var(--rule);
-    border: 1px solid var(--rule);
-    border-radius: 14px;
-    overflow: hidden;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+    gap: 1px; margin-top: clamp(2rem, 5vw, 3.2rem);
+    background: var(--rule); border: 1px solid var(--rule); border-radius: 14px; overflow: hidden;
   }
-
   .stat { background: var(--surface); padding: 1.1rem 1.2rem; }
-
   .stat b {
-    display: block;
-    font-family: var(--display);
-    font-weight: 800;
-    font-size: var(--step-2);
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
+    display: block; font-family: var(--display); font-weight: 800;
+    font-size: var(--step-2); line-height: 1; font-variant-numeric: tabular-nums;
   }
-
-  .stat span {
-    display: block;
-    margin-top: .4rem;
-    font-size: var(--step--1);
-    color: var(--ink-mute);
-    letter-spacing: .04em;
-  }
+  .stat span { display: block; margin-top: .4rem; font-size: var(--step--1); color: var(--ink-mute); letter-spacing: .04em; }
 
   /* ---------- sections ---------- */
 
   section { padding: clamp(3rem, 7vw, 5rem) 0; border-bottom: 1px solid var(--rule); }
-
   .sec-head { display: flex; flex-direction: column; gap: .8rem; margin-bottom: clamp(1.8rem, 4vw, 2.6rem); }
   .sec-head h2 { font-size: var(--step-3); }
   .sec-head p { color: var(--ink-soft); }
 
   /* ---------- cycle ---------- */
 
-  .cycle {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: clamp(1.5rem, 4vw, 3rem);
-    align-items: center;
-  }
-
+  .cycle { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3rem); align-items: center; }
   @media (min-width: 60rem) { .cycle { grid-template-columns: 22rem minmax(0, 1fr); } }
 
   .cycle-svg { width: 100%; height: auto; }
-
-  .beats { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; }
-
-  .beat { background: var(--surface); padding: 1rem 1.2rem; display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); gap: 1rem; align-items: baseline; }
-
-  .beat dt { font-family: var(--display); font-weight: 800; letter-spacing: .02em; }
-  .beat dd { margin: 0; color: var(--ink-soft); font-size: var(--step--1); line-height: 1.5; }
-
-  .beat:nth-child(1) dt { color: var(--energy); }
-  .beat:nth-child(2) dt { color: var(--teal); }
-  .beat:nth-child(3) dt { color: var(--sky); }
-  .beat:nth-child(4) dt { color: var(--energy); }
-
-  @media (max-width: 30rem) { .beat { grid-template-columns: minmax(0, 1fr); gap: .25rem; } }
-
-  /* ---------- tiers ---------- */
-
-  .tiers { display: grid; gap: 1.2rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
-
-  .tier {
-    background: var(--surface);
-    border: 1px solid var(--rule);
-    border-radius: 16px;
-    padding: 1.4rem 1.4rem 1.5rem;
-    box-shadow: var(--shadow);
-    display: flex;
-    flex-direction: column;
-    gap: .9rem;
-  }
-
-  .tier-top { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
-  .tier h3 { font-size: var(--step-2); }
-  .tier .age { font-family: var(--mono); font-size: var(--step--1); color: var(--ink-mute); font-variant-numeric: tabular-nums; }
-  .tier .q { font-family: var(--display); font-weight: 700; color: var(--ink-soft); line-height: 1.35; }
-  .tier ul { margin: 0; padding: 0; list-style: none; display: grid; gap: .5rem; font-size: var(--step--1); color: var(--ink-soft); }
-  .tier li { display: grid; grid-template-columns: 5.2rem minmax(0, 1fr); gap: .6rem; }
-  .tier li b { color: var(--ink); font-weight: 600; }
-  .tier-rule { height: 5px; border-radius: 99px; }
-  .t-spark .tier-rule { background: var(--sunshine); }
-  .t-builder .tier-rule { background: var(--sky); }
-  .t-founder .tier-rule { background: var(--teal); }
-
-  /* ---------- module track ---------- */
-
-  .track { display: grid; gap: .9rem; }
-
-  .mod {
-    display: grid;
-    grid-template-columns: 3.2rem minmax(0, 1fr);
-    gap: 1.1rem;
-    background: var(--surface);
-    border: 1px solid var(--rule);
-    border-radius: 16px;
-    padding: 1.1rem 1.2rem;
-  }
-
-  .mod-num {
-    width: 3.2rem; height: 3.2rem;
-    border-radius: 50%;
-    display: grid; place-items: center;
-    font-family: var(--display); font-weight: 800; font-size: var(--step-1);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .c-sun { background: var(--sunshine); color: var(--on-sunshine); }
-  .c-nav { background: var(--navy); color: #F7F4EC; }
-  .c-tea { background: var(--teal); color: var(--on-teal); }
-  .c-ene { background: var(--energy); color: var(--on-energy); }
-  .c-sky { background: var(--sky); color: var(--on-sky); }
-
-  .mod-head { display: flex; align-items: baseline; gap: .7rem; flex-wrap: wrap; }
-  .mod-head h3 { font-size: var(--step-1); }
-  .mod-head .idea { color: var(--ink-mute); font-size: var(--step--1); }
-
-  .badge-pill {
-    font-family: var(--body); font-size: .72rem; font-weight: 600;
-    letter-spacing: .06em; text-transform: uppercase;
-    padding: .25rem .6rem; border-radius: 99px;
-    border: 1px solid var(--rule); color: var(--ink-soft);
-    background: var(--surface-2);
-    white-space: nowrap;
-  }
-
-  .mod-tiers { display: grid; gap: .55rem; margin-top: .85rem; font-size: var(--step--1); }
-  @media (min-width: 52rem) { .mod-tiers { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.1rem; } }
-
-  .mt { display: grid; grid-template-columns: 4.2rem minmax(0, 1fr); gap: .6rem; color: var(--ink-soft); }
-  @media (min-width: 52rem) { .mt { grid-template-columns: minmax(0, 1fr); gap: .2rem; } }
-  .mt span { font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-  .mt-s span { color: var(--sunshine); }
-  .mt-b span { color: var(--sky); }
-  .mt-f span { color: var(--teal); }
-
-  .gate {
-    display: flex; gap: .7rem; align-items: flex-start;
-    margin-top: 1.4rem; padding: .9rem 1.1rem;
-    border: 1px dashed var(--rule);
-    border-radius: 12px;
-    background: var(--surface-2);
-    font-size: var(--step--1);
-    color: var(--ink-soft);
-  }
-  .gate b { color: var(--ink); }
-
-  /* ---------- tables ---------- */
-
-  .scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: 14px; background: var(--surface); }
-
-  table { border-collapse: collapse; width: 100%; font-size: var(--step--1); }
-  caption { text-align: left; padding: 0 0 .8rem; color: var(--ink-mute); font-size: var(--step--1); }
-  th, td { text-align: left; padding: .75rem 1rem; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
-  thead th {
-    font-size: .7rem; letter-spacing: .12em; text-transform: uppercase;
-    color: var(--ink-mute); font-weight: 700; white-space: nowrap;
-    border-bottom: 1px solid var(--rule);
-  }
-  tbody tr:last-child td { border-bottom: 0; }
-  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
-  td b, th b { font-weight: 600; }
-
-  /* ---------- badges ---------- */
-
-  .badge-groups { display: grid; gap: 1.6rem; }
-  .badge-group h3 { font-size: var(--step-1); margin-bottom: .8rem; }
-  .badge-group h3 small { font-family: var(--body); font-weight: 500; font-size: var(--step--1); color: var(--ink-mute); letter-spacing: 0; margin-left: .5rem; }
-  .chips { display: flex; flex-wrap: wrap; gap: .5rem; }
-
-  .chip {
-    font-family: var(--display); font-weight: 700; font-size: .88rem;
-    padding: .4rem .85rem; border-radius: 99px;
-    border: 1px solid var(--rule); background: var(--surface); color: var(--ink);
-  }
-  .chip.core { border-color: transparent; }
-  .chip.core.c-sun, .chip.core.c-nav, .chip.core.c-tea, .chip.core.c-ene, .chip.core.c-sky { border: 0; }
-
-  .two-col { display: grid; gap: clamp(1.5rem, 4vw, 2.5rem); }
-  @media (min-width: 56rem) { .two-col { grid-template-columns: 1.15fr 1fr; align-items: start; } }
-
-  /* ---------- docs ---------- */
-
-  .docs { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; }
-  .doc { background: var(--surface); padding: .95rem 1.2rem; display: grid; grid-template-columns: minmax(0, 15rem) minmax(0, 1fr); gap: 1rem; align-items: baseline; }
-  .doc code { font-family: var(--mono); font-size: .82rem; color: var(--ink); }
-  .doc span { color: var(--ink-soft); font-size: var(--step--1); }
-  @media (max-width: 40rem) { .doc { grid-template-columns: minmax(0, 1fr); gap: .2rem; } }
-
-  /* ---------- footer ---------- */
-
-  footer { padding: clamp(2.5rem, 6vw, 4rem) 0 clamp(3rem, 7vw, 5rem); }
-  .signoff { font-family: var(--display); font-weight: 800; font-size: var(--step-2); }
-  .signoff em { font-style: normal; color: var(--energy); }
-  footer p { color: var(--ink-mute); font-size: var(--step--1); margin-top: .8rem; }
-
-  .note { color: var(--ink-mute); font-size: var(--step--1); margin-top: 1rem; }
-
-  /* ---------- svg fills (var() is unreliable in presentation attributes) ---------- */
-
-  .f-sun { fill: var(--sunshine); }
-  .f-ene { fill: var(--energy); }
-  .f-tea { fill: var(--teal); }
-  .f-nav { fill: var(--navy); }
-  .f-glass { fill: #FFF3D0; }
-  .s-sun { stroke: var(--sunshine); }
-  .mark .rays { stroke-width: 5; stroke-linecap: round; fill: none; }
-
   .cycle-svg .ring { fill: none; stroke: var(--rule); stroke-width: 2; }
   .cycle-svg .arc { fill: none; stroke-width: 10; stroke-linecap: round; }
   .cycle-svg .a1 { stroke: var(--sunshine); }
@@ -386,6 +177,124 @@
   .cycle-svg text { font-family: var(--display); font-weight: 800; }
   .cycle-svg .lbl { font-size: 19px; fill: var(--ink); }
   .cycle-svg .mid { font-size: 15px; fill: var(--ink-mute); }
+
+  .beats { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; }
+  .beat { background: var(--surface); padding: 1rem 1.2rem; display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); gap: 1rem; align-items: baseline; }
+  .beat dt { font-family: var(--display); font-weight: 800; }
+  .beat dd { margin: 0; color: var(--ink-soft); font-size: var(--step--1); line-height: 1.5; }
+  .beat:nth-child(1) dt { color: var(--sunshine); }
+  .beat:nth-child(2) dt { color: var(--energy); }
+  .beat:nth-child(3) dt { color: var(--sky); }
+  .beat:nth-child(4) dt { color: var(--teal); }
+  @media (max-width: 30rem) { .beat { grid-template-columns: minmax(0, 1fr); gap: .25rem; } }
+
+  /* ---------- tiers ---------- */
+
+  .tiers { display: grid; gap: 1.1rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+  .tier {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 18px;
+    padding: 1.3rem; box-shadow: var(--shadow);
+    display: flex; flex-direction: column; gap: .8rem;
+  }
+  .tier-rule { height: 6px; border-radius: 99px; }
+  .tier-top { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; }
+  .tier h3 { font-size: var(--step-1); }
+  .tier .age { font-family: var(--mono); font-size: var(--step--1); color: var(--ink-mute); font-variant-numeric: tabular-nums; }
+  .tier .promise { font-family: var(--display); font-weight: 700; color: var(--ink-soft); line-height: 1.3; font-size: .96rem; }
+  .tier ul { display: grid; gap: .4rem; font-size: var(--step--1); color: var(--ink-soft); }
+  .tier li { display: grid; grid-template-columns: 4.6rem minmax(0, 1fr); gap: .5rem; }
+  .tier li b { color: var(--ink); font-weight: 600; }
+  .cert-tag {
+    margin-top: auto; display: inline-flex; align-items: center; gap: .4rem;
+    font-family: var(--display); font-weight: 800; font-size: .82rem;
+    padding: .4rem .75rem; border-radius: 99px; align-self: flex-start;
+  }
+
+  /* ---------- course track ---------- */
+
+  .track { display: grid; gap: .85rem; }
+  .mod {
+    display: grid; grid-template-columns: 3.2rem minmax(0, 1fr); gap: 1.1rem;
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 16px; padding: 1.05rem 1.2rem;
+  }
+  .mod-num {
+    width: 3.2rem; height: 3.2rem; border-radius: 50%; display: grid; place-items: center;
+    font-family: var(--display); font-weight: 800; font-size: var(--step-1); font-variant-numeric: tabular-nums;
+  }
+  .mod-head { display: flex; align-items: baseline; gap: .7rem; flex-wrap: wrap; }
+  .mod-head h3 { font-size: var(--step-1); }
+  .mod-head .idea { color: var(--ink-mute); font-size: var(--step--1); }
+  .badge-pill {
+    font-family: var(--body); font-size: .7rem; font-weight: 600;
+    letter-spacing: .06em; text-transform: uppercase; padding: .22rem .58rem; border-radius: 99px;
+    border: 1px solid var(--rule); color: var(--ink-soft); background: var(--surface-2); white-space: nowrap;
+  }
+  .mod-tiers { display: grid; gap: .5rem; margin-top: .8rem; font-size: var(--step--1); }
+  @media (min-width: 56rem) { .mod-tiers { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; } }
+  .mt { display: grid; grid-template-columns: 4.6rem minmax(0, 1fr); gap: .55rem; color: var(--ink-soft); }
+  @media (min-width: 56rem) { .mt { grid-template-columns: minmax(0, 1fr); gap: .18rem; } }
+  .mt span { font-size: .66rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .mt-1 span { color: var(--green); }
+  .mt-2 span { color: var(--sunshine); }
+  .mt-3 span { color: var(--purple); }
+  .mt-4 span { color: var(--sky); }
+
+  .gate {
+    display: flex; gap: .7rem; align-items: flex-start; margin-top: 1.4rem;
+    padding: .9rem 1.1rem; border: 1px dashed var(--rule); border-radius: 12px;
+    background: var(--surface-2); font-size: var(--step--1); color: var(--ink-soft);
+  }
+  .gate b { color: var(--ink); }
+
+  /* ---------- tables ---------- */
+
+  .scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: 14px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: var(--step--1); }
+  th, td { text-align: left; padding: .72rem 1rem; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+  thead th {
+    font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-mute); font-weight: 700; white-space: nowrap; border-bottom: 1px solid var(--rule);
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* ---------- badges ---------- */
+
+  .badge-groups { display: grid; gap: 1.5rem; }
+  .badge-group h3 { font-size: var(--step-1); margin-bottom: .7rem; }
+  .badge-group h3 small { font-family: var(--body); font-weight: 500; font-size: var(--step--1); color: var(--ink-mute); letter-spacing: 0; margin-left: .5rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: .45rem; }
+  .chip {
+    font-family: var(--display); font-weight: 700; font-size: .86rem;
+    padding: .35rem .8rem; border-radius: 99px;
+    border: 1px solid var(--rule); background: var(--surface); color: var(--ink);
+  }
+  .chip.core { border-color: transparent; }
+
+  .two-col { display: grid; gap: clamp(1.5rem, 4vw, 2.5rem); }
+  @media (min-width: 58rem) { .two-col { grid-template-columns: 1.15fr 1fr; align-items: start; } }
+
+  /* ---------- docs ---------- */
+
+  .docs { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; }
+  .doc { background: var(--surface); padding: .9rem 1.2rem; display: grid; grid-template-columns: minmax(0, 15rem) minmax(0, 1fr); gap: 1rem; align-items: baseline; }
+  .doc code { font-family: var(--mono); font-size: .8rem; color: var(--ink); }
+  .doc span { color: var(--ink-soft); font-size: var(--step--1); }
+  @media (max-width: 40rem) { .doc { grid-template-columns: minmax(0, 1fr); gap: .2rem; } }
+
+  footer { padding: clamp(2.5rem, 6vw, 4rem) 0 clamp(3rem, 7vw, 5rem); }
+  .signoff { font-family: var(--display); font-weight: 800; font-size: var(--step-2); }
+  .signoff em { font-style: normal; color: var(--energy); }
+  footer p { color: var(--ink-mute); font-size: var(--step--1); margin-top: .8rem; }
+
+  .note { color: var(--ink-mute); font-size: var(--step--1); margin-top: 1rem; }
+
+  .f-sun { fill: var(--sunshine); }
+  .f-ene { fill: var(--energy); }
+  .f-tea { fill: var(--teal); }
+  .f-nav { fill: #0D1B3D; }
+  .f-glass { fill: #FFF3D0; }
+  .mark .rays { stroke: var(--sunshine); stroke-width: 5; stroke-linecap: round; fill: none; }
 </style>
 
 <div class="wrap">
@@ -394,9 +303,7 @@
     <div class="lockup">
       <svg class="mark" viewBox="0 0 100 140" role="img" aria-label="Little Founders lightbulb rocket mark">
         <circle class="f-sun" cx="50" cy="46" r="34"/>
-        <g class="rays s-sun">
-          <path d="M50 8V2M22 20l-4-4M78 20l4-4M14 46H8M92 46h-6"/>
-        </g>
+        <g class="rays"><path d="M50 8V2M22 20l-4-4M78 20l4-4M14 46H8M92 46h-6"/></g>
         <path class="f-glass" d="M50 20 L62 52 H38 Z"/>
         <rect class="f-ene" x="38" y="52" width="24" height="26"/>
         <rect class="f-nav" x="34" y="78" width="32" height="14" rx="3"/>
@@ -409,17 +316,18 @@
       </div>
     </div>
 
-    <p class="tagline">Where young ideas grow into big businesses.</p>
-    <p class="lede">A complete entrepreneurship curriculum for ages 6&ndash;16. Ten modules, three
-      age tiers, one repeated cycle &mdash; notice a real problem, make something rough, show it to
-      someone who is not you, and change it.</p>
+    <p class="tagline">Big ideas <em>start young.</em></p>
+    <p class="lede">A complete entrepreneurship curriculum for ages 5&ndash;17. Ten core courses,
+      four age tiers, 42 sessions per tier, and a certification at the end of each &mdash; built
+      around one repeated cycle: notice a real problem, make something rough, show it to someone
+      who is not you, and change it.</p>
 
     <div class="stats">
-      <div class="stat"><b>3</b><span>Age tiers</span></div>
-      <div class="stat"><b>10</b><span>Modules</span></div>
+      <div class="stat"><b>4</b><span>Age tiers</span></div>
+      <div class="stat"><b>10</b><span>Core courses</span></div>
       <div class="stat"><b>42</b><span>Sessions per tier</span></div>
       <div class="stat"><b>28</b><span>Badges</span></div>
-      <div class="stat"><b>1</b><span>Demo Day</span></div>
+      <div class="stat"><b>3</b><span>Showcase events</span></div>
     </div>
   </header>
 
@@ -427,7 +335,7 @@
     <div class="sec-head">
       <p class="eyebrow">The learning model</p>
       <h2>One cycle, run ten times</h2>
-      <p>Every module at every tier runs the same four beats, one per session. Learners meet the
+      <p>Every course at every tier runs the same four beats, one per session. Learners meet the
         content ten times &mdash; but they learn the <em>shape</em> of entrepreneurial work by
         repetition.</p>
     </div>
@@ -446,10 +354,8 @@
           <text x="28" y="156">CHANGE</text>
         </g>
         <g class="node">
-          <circle cx="150" cy="46" r="9"/>
-          <circle cx="254" cy="150" r="9"/>
-          <circle cx="150" cy="254" r="9"/>
-          <circle cx="46" cy="150" r="9"/>
+          <circle cx="150" cy="46" r="9"/><circle cx="254" cy="150" r="9"/>
+          <circle cx="150" cy="254" r="9"/><circle cx="46" cy="150" r="9"/>
         </g>
         <g class="mid" text-anchor="middle">
           <text x="150" y="145">Dream. Plan.</text>
@@ -468,220 +374,213 @@
 
   <section>
     <div class="sec-head">
-      <p class="eyebrow">Tiers</p>
-      <h2>Same ten modules, three real levels</h2>
-      <p>Tiers are not the same lesson made easier. Each one changes what the learner is
-        responsible for, what counts as evidence, and how much of the work is theirs alone.</p>
+      <p class="eyebrow">A journey that grows with them</p>
+      <h2>Four tiers, four certifications</h2>
+      <p>The same ten courses run at every tier, and each pass raises what the learner is
+        responsible for. Nothing is finished at a tier &mdash; it comes back harder. That is the
+        spiral.</p>
     </div>
 
     <div class="tiers">
-      <article class="tier t-spark">
-        <div class="tier-rule"></div>
-        <div class="tier-top"><h3>Spark</h3><span class="age">Ages 6&ndash;8</span></div>
-        <p class="q">&ldquo;What would make things better?&rdquo;</p>
+      <article class="tier">
+        <div class="tier-rule" style="background:var(--green)"></div>
+        <div class="tier-top"><h3>Little Sprouts</h3><span class="age">Ages 5&ndash;7</span></div>
+        <p class="promise">Explore ideas, creativity and yourself.</p>
         <ul>
-          <li><b>Session</b><span>45 min, movement every 12&ndash;15</span></li>
-          <li><b>Money</b><span>Play money only, never real</span></li>
+          <li><b>Session</b><span>45 min</span></li>
+          <li><b>Money</b><span>Play money only</span></li>
           <li><b>Customer</b><span>Classmates and family</span></li>
           <li><b>Evidence</b><span>Drawings and scribed sentences</span></li>
-          <li><b>Ratio</b><span>1 adult per 6 learners</span></li>
+          <li><b>Ratio</b><span>1 adult per 6</span></li>
         </ul>
+        <span class="cert-tag" style="background:var(--green);color:var(--on-green)">Junior Founder</span>
       </article>
 
-      <article class="tier t-builder">
-        <div class="tier-rule"></div>
-        <div class="tier-top"><h3>Builder</h3><span class="age">Ages 9&ndash;12</span></div>
-        <p class="q">&ldquo;Who is it for, and does it work?&rdquo;</p>
+      <article class="tier">
+        <div class="tier-rule" style="background:var(--sunshine)"></div>
+        <div class="tier-top"><h3>Junior Builders</h3><span class="age">Ages 8&ndash;10</span></div>
+        <p class="promise">Build, make and sell real products.</p>
         <ul>
           <li><b>Session</b><span>60 min</span></li>
-          <li><b>Money</b><span>Real, capped at a $50 team float</span></li>
+          <li><b>Money</b><span>Real, $50 team float</span></li>
           <li><b>Customer</b><span>Other classes, staff, families</span></li>
-          <li><b>Evidence</b><span>One-page plan, cost sheet, prototype</span></li>
-          <li><b>Ratio</b><span>1 adult per 8 learners</span></li>
+          <li><b>Evidence</b><span>Cost sheets, prototypes, sales tally</span></li>
+          <li><b>Ratio</b><span>1 adult per 8</span></li>
         </ul>
+        <span class="cert-tag" style="background:var(--sunshine);color:var(--on-sunshine)">Certified Builder</span>
       </article>
 
-      <article class="tier t-founder">
-        <div class="tier-rule"></div>
-        <div class="tier-top"><h3>Founder</h3><span class="age">Ages 13&ndash;16</span></div>
-        <p class="q">&ldquo;Is this a business, and can I run it?&rdquo;</p>
+      <article class="tier">
+        <div class="tier-rule" style="background:var(--purple)"></div>
+        <div class="tier-top"><h3>Young Founders</h3><span class="age">Ages 11&ndash;13</span></div>
+        <p class="promise">Plan, validate and pitch your business.</p>
+        <ul>
+          <li><b>Session</b><span>75 min</span></li>
+          <li><b>Money</b><span>Real, $100, tracked</span></li>
+          <li><b>Customer</b><span>The public at Market Day</span></li>
+          <li><b>Evidence</b><span>One-page plan, validation data, pitch</span></li>
+          <li><b>Ratio</b><span>1 adult per 10</span></li>
+        </ul>
+        <span class="cert-tag" style="background:var(--purple);color:var(--on-purple)">Certified Young Founder</span>
+      </article>
+
+      <article class="tier">
+        <div class="tier-rule" style="background:var(--sky)"></div>
+        <div class="tier-top"><h3>Founder CEOs</h3><span class="age">Ages 14&ndash;17</span></div>
+        <p class="promise">Launch, lead and make an impact.</p>
         <ul>
           <li><b>Session</b><span>90 min</span></li>
-          <li><b>Money</b><span>Real, with a ledger and unit economics</span></li>
-          <li><b>Customer</b><span>Strangers and the public</span></li>
-          <li><b>Evidence</b><span>Canvas, financial model, pitch on video</span></li>
-          <li><b>Ratio</b><span>1 adult per 12 learners</span></li>
+          <li><b>Money</b><span>Real, $150, full ledger</span></li>
+          <li><b>Customer</b><span>Strangers, online, businesses</span></li>
+          <li><b>Evidence</b><span>Canvas, financial model, venture report</span></li>
+          <li><b>Ratio</b><span>1 adult per 12</span></li>
         </ul>
+        <span class="cert-tag" style="background:var(--sky);color:var(--on-sky)">Certified Young Entrepreneur</span>
       </article>
     </div>
+
+    <p class="note"><b>The pair most often blurred:</b> Junior Builders make things and sell them —
+      the learning is in production, pricing, and the moment a stranger hands over money. Young
+      Founders must show that someone wants it <em>before</em> they build much of it. If a Young
+      Founders cohort is building first and asking later, that is the signal to slow down.</p>
   </section>
 
   <section>
     <div class="sec-head">
       <p class="eyebrow">The learning map</p>
-      <h2>Ten modules, in order</h2>
-      <p>Modules 1&ndash;5 are open from day one. The rest unlock in sequence, so nobody prices
+      <h2>Ten core courses, in order</h2>
+      <p>Courses 1&ndash;5 are open from day one. The rest unlock in sequence, so nobody prices
         something before Money Smarts or sells to strangers before Pitch Like a Pro.</p>
     </div>
 
     <div class="track">
 
       <article class="mod">
-        <div class="mod-num c-sun">1</div>
+        <div class="mod-num" style="background:var(--sunshine);color:var(--on-sunshine)">1</div>
         <div>
-          <div class="mod-head">
-            <h3>Idea Starter</h3>
-            <span class="idea">Ideas come from problems you notice</span>
-            <span class="badge-pill">Big Ideas</span>
-          </div>
+          <div class="mod-head"><h3>Idea Starter</h3><span class="idea">Ideas come from problems you notice</span><span class="badge-pill">Big Ideas</span></div>
           <div class="mod-tiers">
-            <div class="mt mt-s"><span>Spark</span>Notice ten annoying things; draw a fix</div>
-            <div class="mt mt-b"><span>Builder</span>Problem hunt; pick one with three named sufferers</div>
-            <div class="mt mt-f"><span>Founder</span>Interview five strangers; write a problem statement</div>
+            <div class="mt mt-1"><span>Sprouts</span>Notice ten annoying things; draw a fix</div>
+            <div class="mt mt-2"><span>Builders</span>Problem hunt; pick one with three named sufferers</div>
+            <div class="mt mt-3"><span>Founders</span>Interview eight people; validated problem statement</div>
+            <div class="mt mt-4"><span>CEOs</span>Interview strangers; separate problem from solution</div>
           </div>
         </div>
       </article>
 
       <article class="mod">
-        <div class="mod-num c-nav">2</div>
+        <div class="mod-num" style="background:var(--navy);color:var(--on-navy)">2</div>
         <div>
-          <div class="mod-head">
-            <h3>Business Basics</h3>
-            <span class="idea">A business trades value for value</span>
-            <span class="badge-pill">Business Brain</span>
-          </div>
+          <div class="mod-head"><h3>Business Basics</h3><span class="idea">A business trades value for value</span><span class="badge-pill">Business Brain</span></div>
           <div class="mod-tiers">
-            <div class="mt mt-s"><span>Spark</span>Trading game: gives and gets</div>
-            <div class="mt mt-b"><span>Builder</span>One-page plan; product vs. business</div>
-            <div class="mt mt-f"><span>Founder</span>Canvas, competitor scan, test one assumption</div>
+            <div class="mt mt-1"><span>Sprouts</span>Trading game: what do people want?</div>
+            <div class="mt mt-2"><span>Builders</span>Gives and gets; what we need to make twenty</div>
+            <div class="mt mt-3"><span>Founders</span>One-page plan; competitor scan; test a claim</div>
+            <div class="mt mt-4"><span>CEOs</span>Canvas; positioning; test the riskiest assumption</div>
           </div>
         </div>
       </article>
 
       <article class="mod">
-        <div class="mod-num c-tea">3</div>
+        <div class="mod-num" style="background:var(--teal);color:var(--on-teal)">3</div>
         <div>
-          <div class="mod-head">
-            <h3>Money Smarts</h3>
-            <span class="idea">Money in, money out, money kept</span>
-            <span class="badge-pill">Money Smart</span>
-          </div>
+          <div class="mod-head"><h3>Money Smarts</h3><span class="idea">Money in, money out, money kept</span><span class="badge-pill">Money Smart</span></div>
           <div class="mod-tiers">
-            <div class="mt mt-s"><span>Spark</span>Coins, jars, spend &middot; save &middot; share</div>
-            <div class="mt mt-b"><span>Builder</span>Cost per unit, price, defend the number</div>
-            <div class="mt mt-f"><span>Founder</span>Unit economics, break-even, a real ledger</div>
+            <div class="mt mt-1"><span>Sprouts</span>Coins, jars, spend &middot; save &middot; share</div>
+            <div class="mt mt-2"><span>Builders</span>Cost of one, set a price, count the takings</div>
+            <div class="mt mt-3"><span>Founders</span>Margin, forecast, and a real price test</div>
+            <div class="mt mt-4"><span>CEOs</span>Unit economics, break-even, ledger, cash flow</div>
           </div>
         </div>
       </article>
 
       <article class="mod">
-        <div class="mod-num c-ene">4</div>
+        <div class="mod-num" style="background:var(--energy);color:var(--on-energy)">4</div>
         <div>
-          <div class="mod-head">
-            <h3>Marketing Magic</h3>
-            <span class="idea">Marketing is being useful, out loud</span>
-            <span class="badge-pill">Marketing Magician</span>
-          </div>
+          <div class="mod-head"><h3>Marketing Magic</h3><span class="idea">Marketing is being useful, out loud</span><span class="badge-pill">Marketing Magician</span></div>
           <div class="mod-tiers">
-            <div class="mt mt-s"><span>Spark</span>Make a sign someone understands in 3 seconds</div>
-            <div class="mt mt-b"><span>Builder</span>Customer sketch, message, name, poster</div>
-            <div class="mt mt-f"><span>Founder</span>Positioning, channel test, response rate</div>
+            <div class="mt mt-1"><span>Sprouts</span>Make a sign someone understands in 3 seconds</div>
+            <div class="mt mt-2"><span>Builders</span>Customer sketch, message, name, poster</div>
+            <div class="mt mt-3"><span>Founders</span>Positioning, two channels, response rate</div>
+            <div class="mt mt-4"><span>CEOs</span>Segment insight, A/B test, cost per customer</div>
           </div>
         </div>
       </article>
 
       <article class="mod">
-        <div class="mod-num c-ene">5</div>
+        <div class="mod-num" style="background:var(--energy);color:var(--on-energy)">5</div>
         <div>
-          <div class="mod-head">
-            <h3>Pitch Like a Pro</h3>
-            <span class="idea">A pitch is a clear promise</span>
-            <span class="badge-pill">I Can Pitch!</span>
-          </div>
+          <div class="mod-head"><h3>Pitch Like a Pro</h3><span class="idea">A pitch is a clear promise</span><span class="badge-pill">I Can Pitch!</span></div>
           <div class="mod-tiers">
-            <div class="mt mt-s"><span>Spark</span>Three sentences to a friendly grown-up</div>
-            <div class="mt mt-b"><span>Builder</span>90 seconds with a prop, to another class</div>
-            <div class="mt mt-f"><span>Founder</span>Five minutes plus Q&amp;A, to outside judges</div>
+            <div class="mt mt-1"><span>Sprouts</span>Three sentences to a friendly grown-up</div>
+            <div class="mt mt-2"><span>Builders</span>60 seconds with a prop, to another class</div>
+            <div class="mt mt-3"><span>Founders</span>3 minutes with proof, to a visiting panel</div>
+            <div class="mt mt-4"><span>CEOs</span>5 minutes plus Q&amp;A, to outside judges</div>
           </div>
         </div>
       </article>
 
       <article class="mod">
-        <div class="mod-num c-nav">6</div>
+        <div class="mod-num" style="background:var(--sky);color:var(--on-sky)">6</div>
         <div>
-          <div class="mod-head">
-            <h3>Leadership Lab</h3>
-            <span class="idea">Leaders make others stronger</span>
-            <span class="badge-pill">Future Leader</span>
-          </div>
+          <div class="mod-head"><h3>Leadership Lab</h3><span class="idea">Leaders make others stronger</span><span class="badge-pill">Future Leader</span></div>
           <div class="mod-tiers">
-            <div class="mt mt-s"><span>Spark</span>Taking turns, jobs on a team, kind and true words</div>
-            <div class="mt mt-b"><span>Builder</span>Roles, a team agreement, running a stand-up</div>
-            <div class="mt mt-f"><span>Founder</span>Delegation, conflict, decision rights</div>
+            <div class="mt mt-1"><span>Sprouts</span>Taking turns, jobs on a team, kind words</div>
+            <div class="mt mt-2"><span>Builders</span>Roles, team agreement, running a stand-up</div>
+            <div class="mt mt-3"><span>Founders</span>Rotating leadership, conflict, real conversations</div>
+            <div class="mt mt-4"><span>CEOs</span>Delegation, decision rights, hard feedback</div>
           </div>
         </div>
       </article>
 
       <article class="mod">
-        <div class="mod-num c-tea">7</div>
+        <div class="mod-num" style="background:var(--teal);color:var(--on-teal)">7</div>
         <div>
-          <div class="mod-head">
-            <h3>Young CEO</h3>
-            <span class="idea">Running it is a skill of its own</span>
-            <span class="badge-pill">Young CEO</span>
-          </div>
+          <div class="mod-head"><h3>Young CEO</h3><span class="idea">Running it is a skill of its own</span><span class="badge-pill">Young CEO</span></div>
           <div class="mod-tiers">
-            <div class="mt mt-s"><span>Spark</span>The person who decides and checks</div>
-            <div class="mt mt-b"><span>Builder</span>Track three numbers; decide from data</div>
-            <div class="mt mt-f"><span>Founder</span>Dashboard, weekly review, add / cut / keep</div>
+            <div class="mt mt-1"><span>Sprouts</span>The person who decides and checks</div>
+            <div class="mt mt-2"><span>Builders</span>Track three numbers weekly</div>
+            <div class="mt mt-3"><span>Founders</span>Goals, dashboard, one decision from data</div>
+            <div class="mt mt-4"><span>CEOs</span>Metrics that matter, weekly review, add/cut/keep</div>
           </div>
         </div>
       </article>
 
       <article class="mod">
-        <div class="mod-num c-sky">8</div>
+        <div class="mod-num" style="background:var(--sky);color:var(--on-sky)">8</div>
         <div>
-          <div class="mod-head">
-            <h3>Community Builder</h3>
-            <span class="idea">A business is a neighbour, not a stranger</span>
-            <span class="badge-pill">Community Builder</span>
-          </div>
+          <div class="mod-head"><h3>Community Builder</h3><span class="idea">A business is a neighbour, not a stranger</span><span class="badge-pill">Community Builder</span></div>
           <div class="mod-tiers">
-            <div class="mt mt-s"><span>Spark</span>Who helps us? Say a real thank you</div>
-            <div class="mt mt-b"><span>Builder</span>Stakeholder map; one real partnership</div>
-            <div class="mt mt-f"><span>Founder</span>Externalities, ethics, negotiated terms</div>
+            <div class="mt mt-1"><span>Sprouts</span>Who helps us? Say a real thank you</div>
+            <div class="mt mt-2"><span>Builders</span>Stakeholder map; one real partnership</div>
+            <div class="mt mt-3"><span>Founders</span>Power and interest; negotiated terms; give-back</div>
+            <div class="mt mt-4"><span>CEOs</span>Externalities, ethics, impact reporting</div>
           </div>
         </div>
       </article>
 
       <article class="mod">
-        <div class="mod-num c-ene">9</div>
+        <div class="mod-num" style="background:var(--energy);color:var(--on-energy)">9</div>
         <div>
-          <div class="mod-head">
-            <h3>Startup Challenge</h3>
-            <span class="idea">Build it, sell it, learn from it &mdash; six sessions</span>
-            <span class="badge-pill">Launch Crew</span>
-          </div>
+          <div class="mod-head"><h3>Startup Challenge</h3><span class="idea">Build it, sell it, learn from it &mdash; six sessions</span><span class="badge-pill">Launch Crew</span></div>
           <div class="mod-tiers">
-            <div class="mt mt-s"><span>Spark</span>Class shop for one afternoon</div>
-            <div class="mt mt-b"><span>Builder</span>Market Day stall with a $50 float</div>
-            <div class="mt mt-f"><span>Founder</span>A real venture, real customers, real ledger</div>
+            <div class="mt mt-1"><span>Sprouts</span>Class shop for one afternoon</div>
+            <div class="mt mt-2"><span>Builders</span>Market Day stall with a $50 float</div>
+            <div class="mt mt-3"><span>Founders</span>Validated venture against a public target</div>
+            <div class="mt mt-4"><span>CEOs</span>Two-week venture, real customers, full ledger</div>
           </div>
         </div>
       </article>
 
       <article class="mod">
-        <div class="mod-num c-sun">10</div>
+        <div class="mod-num" style="background:var(--sunshine);color:var(--on-sunshine)">10</div>
         <div>
-          <div class="mod-head">
-            <h3>Future Founder Mastery</h3>
-            <span class="idea">Your story, your evidence, your next step</span>
-            <span class="badge-pill">Future Founder</span>
-          </div>
+          <div class="mod-head"><h3>Future Founder Mastery</h3><span class="idea">Your story, your evidence, your next step</span><span class="badge-pill">Future Founder</span></div>
           <div class="mod-tiers">
-            <div class="mt mt-s"><span>Spark</span>Show what I made; what I want to try next</div>
-            <div class="mt mt-b"><span>Builder</span>Portfolio and a three-minute Demo Day talk</div>
-            <div class="mt mt-f"><span>Founder</span>Retro, continue / pivot / stop, 90-day plan</div>
+            <div class="mt mt-1"><span>Sprouts</span>Show what I made; what I want to try next</div>
+            <div class="mt mt-2"><span>Builders</span>Portfolio and a Demo Day talk</div>
+            <div class="mt mt-3"><span>Founders</span>Retro, portfolio, next-term plan</div>
+            <div class="mt mt-4"><span>CEOs</span>Continue / pivot / stop, and a 90-day plan</div>
           </div>
         </div>
       </article>
@@ -689,10 +588,10 @@
     </div>
 
     <p class="gate"><span aria-hidden="true">🔒</span>
-      <span><b>Leadership Lab</b> unlocks at 250 Little Points with Modules 1&ndash;5 complete.
-        <b>Startup Challenge</b> additionally requires the Money Smart and I Can Pitch! badges &mdash;
-        no learner handles money or sells to the public without having demonstrated pricing and
-        pitching first.</span>
+      <span><b>Leadership Lab</b> unlocks at 250 Little Points with Courses 1&ndash;5 complete.
+        <b>Startup Challenge</b> additionally requires the Money Smart and I Can Pitch! badges
+        &mdash; no learner handles money or sells to the public without having demonstrated pricing
+        and pitching first.</span>
     </p>
   </section>
 
@@ -708,13 +607,13 @@
     <div class="scroll">
       <table>
         <thead>
-          <tr><th>Block</th><th>Spark</th><th>Builder</th><th>Founder</th><th>Purpose</th></tr>
+          <tr><th>Block</th><th>Sprouts</th><th>Builders</th><th>Founders</th><th>CEOs</th><th>Purpose</th></tr>
         </thead>
         <tbody>
-          <tr><td><b>Warm-Up</b></td><td class="num">5 min</td><td class="num">5 min</td><td class="num">10 min</td><td>A game that plants today's idea before it is named</td></tr>
-          <tr><td><b>Mini-Lesson</b></td><td class="num">7 min</td><td class="num">10 min</td><td class="num">15 min</td><td>Hard cap. If it runs long, cut it &mdash; not the Work</td></tr>
-          <tr><td><b>Work</b></td><td class="num">25 min</td><td class="num">35 min</td><td class="num">50 min</td><td>Make, test, calculate, or interview. The centre of the session</td></tr>
-          <tr><td><b>Close</b></td><td class="num">8 min</td><td class="num">10 min</td><td class="num">15 min</td><td>Share one thing, log it, award points, name what comes next</td></tr>
+          <tr><td><b>Warm-Up</b></td><td class="num">5 min</td><td class="num">5 min</td><td class="num">8 min</td><td class="num">10 min</td><td>A game that plants today's idea before it is named</td></tr>
+          <tr><td><b>Mini-Lesson</b></td><td class="num">7 min</td><td class="num">10 min</td><td class="num">12 min</td><td class="num">15 min</td><td>Hard cap. If it runs long, cut it &mdash; not the Work</td></tr>
+          <tr><td><b>Work</b></td><td class="num">25 min</td><td class="num">35 min</td><td class="num">42 min</td><td class="num">50 min</td><td>Make, test, calculate, or interview. The centre of the session</td></tr>
+          <tr><td><b>Close</b></td><td class="num">8 min</td><td class="num">10 min</td><td class="num">13 min</td><td class="num">15 min</td><td>Share one thing, log it, award points, name what comes next</td></tr>
         </tbody>
       </table>
     </div>
@@ -724,55 +623,47 @@
     <div class="sec-head">
       <p class="eyebrow">Assessment</p>
       <h2>28 badges, no tests, no ranking</h2>
-      <p>Every badge is criterion-referenced, so every learner can earn every badge. Several can
-        only be earned after something went wrong &mdash; which is the point.</p>
+      <p>Every badge is criterion-referenced, so every learner can earn every one. Several can only
+        be earned after something went wrong &mdash; which is the point.</p>
     </div>
 
     <div class="two-col">
       <div class="badge-groups">
         <div class="badge-group">
-          <h3>Module badges <small>one per module</small></h3>
+          <h3>Course badges <small>one per course</small></h3>
           <div class="chips">
-            <span class="chip core c-sun">Big Ideas</span>
-            <span class="chip core c-nav">Business Brain</span>
-            <span class="chip core c-tea">Money Smart</span>
-            <span class="chip core c-ene">Marketing Magician</span>
-            <span class="chip core c-ene">I Can Pitch!</span>
-            <span class="chip core c-nav">Future Leader</span>
-            <span class="chip core c-tea">Young CEO</span>
-            <span class="chip core c-sky">Community Builder</span>
-            <span class="chip core c-ene">Launch Crew</span>
-            <span class="chip core c-sun">Future Founder</span>
+            <span class="chip core" style="background:var(--sunshine);color:var(--on-sunshine)">Big Ideas</span>
+            <span class="chip core" style="background:var(--navy);color:var(--on-navy)">Business Brain</span>
+            <span class="chip core" style="background:var(--teal);color:var(--on-teal)">Money Smart</span>
+            <span class="chip core" style="background:var(--energy);color:var(--on-energy)">Marketing Magician</span>
+            <span class="chip core" style="background:var(--energy);color:var(--on-energy)">I Can Pitch!</span>
+            <span class="chip core" style="background:var(--sky);color:var(--on-sky)">Future Leader</span>
+            <span class="chip core" style="background:var(--teal);color:var(--on-teal)">Young CEO</span>
+            <span class="chip core" style="background:var(--sky);color:var(--on-sky)">Community Builder</span>
+            <span class="chip core" style="background:var(--energy);color:var(--on-energy)">Launch Crew</span>
+            <span class="chip core" style="background:var(--sunshine);color:var(--on-sunshine)">Future Founder</span>
           </div>
         </div>
 
         <div class="badge-group">
           <h3>Skill badges <small>earned wherever the skill appears</small></h3>
           <div class="chips">
-            <span class="chip">Problem Solver</span>
-            <span class="chip">Customer Listener</span>
-            <span class="chip">Idea Lab</span>
-            <span class="chip">Prototype Pro</span>
-            <span class="chip">Number Cruncher</span>
-            <span class="chip">Storyteller</span>
-            <span class="chip">Design Eye</span>
-            <span class="chip">Team Player</span>
-            <span class="chip">Helping Hand</span>
-            <span class="chip">Deal Maker</span>
-            <span class="chip">Kind Business</span>
-            <span class="chip">Green Founder</span>
+            <span class="chip">Problem Solver</span><span class="chip">Customer Listener</span>
+            <span class="chip">Idea Lab</span><span class="chip">Prototype Pro</span>
+            <span class="chip">Number Cruncher</span><span class="chip">Storyteller</span>
+            <span class="chip">Design Eye</span><span class="chip">Team Player</span>
+            <span class="chip">Helping Hand</span><span class="chip">Deal Maker</span>
+            <span class="chip">Kind Business</span><span class="chip">Green Founder</span>
           </div>
         </div>
 
         <div class="badge-group">
-          <h3>Journey badges <small>habits and milestones</small></h3>
+          <h3>Journey badges <small>habits, milestones, and the certification</small></h3>
           <div class="chips">
-            <span class="chip">Keep Building</span>
-            <span class="chip">Idea Machine</span>
-            <span class="chip">Show &amp; Tell</span>
-            <span class="chip">Streak Star</span>
+            <span class="chip">Keep Building</span><span class="chip">Idea Machine</span>
+            <span class="chip">Show &amp; Tell</span><span class="chip">Streak Star</span>
             <span class="chip">Digital Safe</span>
-            <span class="chip">Little Founder</span>
+            <span class="chip core" style="background:var(--green);color:var(--on-green)">Tier Certification</span>
           </div>
         </div>
       </div>
@@ -784,10 +675,10 @@
             <tbody>
               <tr><td>Complete a session</td><td class="num">10</td></tr>
               <tr><td>Earn any badge</td><td class="num">25</td></tr>
-              <tr><td>Earn Little Founder</td><td class="num">50</td></tr>
+              <tr><td>Tier certification</td><td class="num">50</td></tr>
               <tr><td>Market Day</td><td class="num">50</td></tr>
               <tr><td>Demo Day</td><td class="num">50</td></tr>
-              <tr><td><b>Full-program maximum</b></td><td class="num"><b>1,245</b></td></tr>
+              <tr><td><b>Full-tier maximum</b></td><td class="num"><b>1,245</b></td></tr>
             </tbody>
           </table>
         </div>
@@ -808,17 +699,48 @@
       <table>
         <thead><tr><th>Format</th><th>Cadence</th><th>Duration</th><th>Notes</th></tr></thead>
         <tbody>
-          <tr><td><b>Weekly club</b></td><td>1 session/week</td><td class="num">~42 weeks</td><td>Default. Fits a school year with holidays</td></tr>
+          <tr><td><b>Weekly club</b></td><td>1 session/week</td><td class="num">~42 weeks</td><td>Default. Fits a Canadian school year with breaks</td></tr>
           <tr><td><b>Semester course</b></td><td>2 sessions/week</td><td class="num">21 weeks</td><td>Keep Startup Challenge inside one week</td></tr>
-          <tr><td><b>Camp intensive</b></td><td>3 sessions/day</td><td class="num">14 days</td><td>Modules 1&ndash;5 in week one, 6&ndash;10 in week two</td></tr>
-          <tr><td><b>Single-module taster</b></td><td>4 sessions</td><td class="num">4 weeks</td><td>Modules 1 or 5 stand alone. Modules 3, 7, 9 do not</td></tr>
+          <tr><td><b>March Break / summer camp</b></td><td>3 sessions/day</td><td class="num">14 days</td><td>Courses 1&ndash;5 in week one, 6&ndash;10 in week two</td></tr>
+          <tr><td><b>Single-course taster</b></td><td>4 sessions</td><td class="num">4 weeks</td><td>Courses 1 or 5 stand alone. Courses 3, 7, 9 do not</td></tr>
         </tbody>
       </table>
     </div>
 
-    <p class="note">Never compress Startup Challenge below five sessions. The build&ndash;sell&ndash;learn
-      loop is the part learners remember, and the dry run is where every Market Day failure shows
-      up first.</p>
+    <p class="note">Never compress Startup Challenge below five sessions. The
+      build&ndash;sell&ndash;learn loop is the part learners remember, and the dry run is where
+      every Market Day failure shows up first.</p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <p class="eyebrow">Running it in Canada</p>
+      <h2>What has to be checked before you trade</h2>
+      <p>Education, child protection, food safety, and privacy are largely provincial, and boards
+        add their own rules. These checks belong in Startup Challenge Session 1 &mdash; not in
+        Market Day week.</p>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Check</th><th>Why it matters</th></tr></thead>
+        <tbody>
+          <tr><td><b>Permission to trade</b></td><td>Many boards require written approval for any sale to the public</td></tr>
+          <tr><td><b>Municipal stall permit</b></td><td>A market, park, or sidewalk stall may need one even for a school group</td></tr>
+          <tr><td><b>Food handling</b></td><td>Home-prepared food is prohibited for public sale in most jurisdictions. This can end a venture concept &mdash; check early</td></tr>
+          <tr><td><b>Screening</b></td><td>Police record checks including vulnerable sector checks for every adult, before contact</td></tr>
+          <tr><td><b>Privacy</b></td><td>PIPEDA plus provincial law (Quebec Law 25, BC and Alberta PIPA) and board student-records rules</td></tr>
+          <tr><td><b>CASL</b></td><td>Marketing email and texts are regulated. Posters and in-person selling are the simplest compliant path</td></tr>
+          <tr><td><b>Sales tax</b></td><td>GST/HST registration is not required below the $30,000 small-supplier threshold. Provincial rules on the goods still apply</td></tr>
+          <tr><td><b>Contracts</b></td><td>Minors cannot enter binding contracts. Partnership agreements here are learning agreements, countersigned by an adult</td></tr>
+          <tr><td><b>French-language requirements</b></td><td>In Quebec, public signage and communications are subject to the Charter of the French Language</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="note">This is guidance, not legal advice. Confirm with your board, municipality, and
+      insurer before any public trading. The program also runs fully in English, in French, or
+      bilingually &mdash; fixed terms carry both names on every learner-facing surface.</p>
   </section>
 
   <section>
@@ -829,19 +751,20 @@
 
     <div class="docs">
       <div class="doc"><code>README.md</code><span>Program index and quick start</span></div>
-      <div class="doc"><code>01-program-overview.md</code><span>Philosophy, learning model, outcomes, delivery formats, roles</span></div>
-      <div class="doc"><code>02-brand-and-voice.md</code><span>Brand system in the classroom, fixed terms, feedback language</span></div>
-      <div class="doc"><code>03-scope-and-sequence.md</code><span>Session budget, the 10 &times; 3 matrix, unlocks, spiral map, year and camp plans</span></div>
-      <div class="doc"><code>modules/01&ndash;10</code><span>Ten module files &mdash; objectives, vocabulary, session-by-session plans for all three tiers, rubrics, watch-outs, home extensions</span></div>
-      <div class="doc"><code>04-assessment-and-badges.md</code><span>Rubric scale, portfolio, all 28 badges, Little Points economy, moderation</span></div>
-      <div class="doc"><code>05-standards-and-safeguarding.md</code><span>Standards alignment, ratios, money handling, trading checks, inclusion</span></div>
-      <div class="doc"><code>06-materials-list.md</code><span>Core kit, templates, per-module additions, budget, substitutions</span></div>
+      <div class="doc"><code>01-program-overview.md</code><span>Philosophy, learning model, the four tiers, outcomes, delivery formats, roles, bilingual delivery</span></div>
+      <div class="doc"><code>02-brand-and-voice.md</code><span>Brand system in the classroom, tier colours, fixed terms, feedback language, French glossary</span></div>
+      <div class="doc"><code>03-scope-and-sequence.md</code><span>Session budget, the 10 &times; 4 matrix, unlocks, spiral map, year and camp plans</span></div>
+      <div class="doc"><code>modules/01&ndash;10</code><span>Ten course files &mdash; objectives, vocabulary, session-by-session plans for all four tiers, rubrics, watch-outs, home extensions</span></div>
+      <div class="doc"><code>04-assessment-and-badges.md</code><span>Rubric scale, portfolio, 28 badges, the four certifications, Little Points, moderation</span></div>
+      <div class="doc"><code>05-standards-and-safeguarding.md</code><span>Canadian standards alignment, ratios, money handling, provincial trading checks, inclusion</span></div>
+      <div class="doc"><code>06-materials-list.md</code><span>Core kit, templates, per-course additions, CAD budget, substitutions</span></div>
+      <div class="doc"><code>platform.html</code><span>The learner platform &mdash; learning map, courses, progress, badges, certification</span></div>
     </div>
   </section>
 
   <footer>
-    <p class="signoff">Little moments. <em>Big impact.</em></p>
-    <p>Empowering kids with entrepreneurial skills, confidence, and a mindset to build the future.</p>
+    <p class="signoff">We teach more than lessons. <em>We build founders.</em></p>
+    <p>Little minds. Big futures. &middot; littlefounders.ca</p>
   </footer>
 
 </div>

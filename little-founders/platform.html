@@ -1,0 +1,1241 @@
+<title>Little Founders Learning Map</title>
+<style>
+  :root {
+    --ground: #F7F4EC;
+    --surface: #FFFFFF;
+    --surface-2: #F3EFE3;
+    --surface-3: #EAE4D4;
+    --ink: #0D1B3D;
+    --ink-soft: #43537D;
+    --ink-mute: #7A86A8;
+    --rule: #E2DBC9;
+    --rule-soft: #EDE7D9;
+
+    --sunshine: #FFC83D;
+    --energy: #FF7A1A;
+    --sky: #4DB6F2;
+    --teal: #00B9A7;
+    --navy: #0D1B3D;
+    --green: #5FA63F;
+    --purple: #7B5EA6;
+
+    --on-sunshine: #0D1B3D;
+    --on-energy: #FFFFFF;
+    --on-sky: #0D1B3D;
+    --on-teal: #FFFFFF;
+    --on-navy: #F7F4EC;
+    --on-green: #FFFFFF;
+    --on-purple: #FFFFFF;
+
+    --locked: #C9C2B0;
+    --locked-ink: #8A8371;
+
+    --shadow-1: 0 1px 2px rgba(13,27,61,.06), 0 6px 18px -10px rgba(13,27,61,.18);
+    --shadow-2: 0 2px 6px rgba(13,27,61,.08), 0 18px 40px -18px rgba(13,27,61,.35);
+
+    --display: "Nunito", ui-rounded, "SF Pro Rounded", "Segoe UI Variable Display", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
+
+    --r-md: 16px;
+    --r-lg: 22px;
+    --sidebar: 15.5rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #071022;
+      --surface: #0F1C3C;
+      --surface-2: #16244A;
+      --surface-3: #1E2E5A;
+      --ink: #F2EFE6;
+      --ink-soft: #C4CDE5;
+      --ink-mute: #8D9ABC;
+      --rule: #253461;
+      --rule-soft: #1B294F;
+      --sunshine: #FFD264;
+      --energy: #FF8F3D;
+      --sky: #6EC4F7;
+      --teal: #17CDBA;
+      --navy: #B9C7EC;
+      --green: #7EC65C;
+      --purple: #A489CD;
+      --on-sunshine: #0D1B3D;
+      --on-energy: #26160A;
+      --on-sky: #071022;
+      --on-teal: #03231F;
+      --on-navy: #071022;
+      --on-green: #06210B;
+      --on-purple: #180F28;
+      --locked: #2B3763;
+      --locked-ink: #6B78A0;
+      --shadow-1: 0 1px 2px rgba(0,0,0,.35), 0 8px 22px -12px rgba(0,0,0,.7);
+      --shadow-2: 0 2px 8px rgba(0,0,0,.4), 0 22px 50px -20px rgba(0,0,0,.85);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #071022;
+    --surface: #0F1C3C;
+    --surface-2: #16244A;
+    --surface-3: #1E2E5A;
+    --ink: #F2EFE6;
+    --ink-soft: #C4CDE5;
+    --ink-mute: #8D9ABC;
+    --rule: #253461;
+    --rule-soft: #1B294F;
+    --sunshine: #FFD264;
+    --energy: #FF8F3D;
+    --sky: #6EC4F7;
+    --teal: #17CDBA;
+    --navy: #B9C7EC;
+    --green: #7EC65C;
+    --purple: #A489CD;
+    --on-sunshine: #0D1B3D;
+    --on-energy: #26160A;
+    --on-sky: #071022;
+    --on-teal: #03231F;
+    --on-navy: #071022;
+    --on-green: #06210B;
+    --on-purple: #180F28;
+    --locked: #2B3763;
+    --locked-ink: #6B78A0;
+    --shadow-1: 0 1px 2px rgba(0,0,0,.35), 0 8px 22px -12px rgba(0,0,0,.7);
+    --shadow-2: 0 2px 8px rgba(0,0,0,.4), 0 22px 50px -20px rgba(0,0,0,.85);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: .95rem;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 { font-family: var(--display); font-weight: 800; letter-spacing: -.015em; margin: 0; line-height: 1.15; text-wrap: balance; }
+  p { margin: 0; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--sky); outline-offset: 2px; border-radius: 6px; }
+
+  .icon { width: 1.25em; height: 1.25em; flex: none; }
+
+  /* ================= shell ================= */
+
+  .app { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); min-height: 100vh; }
+
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--rule);
+    padding: 1.4rem 1rem;
+    display: flex; flex-direction: column; gap: 1.3rem;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+
+  .brand { display: flex; align-items: center; gap: .6rem; padding: 0 .4rem; }
+  .brand svg { width: 32px; height: 44px; flex: none; }
+  .brand-name { font-family: var(--display); font-weight: 800; font-size: 1.1rem; line-height: 1.05; }
+  .brand-sub { display: block; font-family: var(--body); font-size: .6rem; font-weight: 600; letter-spacing: .11em; text-transform: uppercase; color: var(--energy); margin-top: .3rem; }
+
+  nav { display: grid; gap: .15rem; }
+  .nav-btn {
+    display: flex; align-items: center; gap: .7rem;
+    padding: .58rem .7rem; border-radius: 12px;
+    color: var(--ink-soft); font-weight: 500; text-align: left; width: 100%;
+  }
+  .nav-btn:hover { background: var(--surface-2); color: var(--ink); }
+  .nav-btn[aria-current="page"] { background: var(--surface-3); color: var(--ink); font-weight: 700; }
+  .nav-btn[aria-current="page"] .icon { color: var(--energy); }
+
+  .tier-pick { margin-top: auto; display: grid; gap: .45rem; }
+  .tier-pick > span { font-size: .6rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--ink-mute); padding: 0 .4rem; }
+  .tier-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: .3rem; }
+  .tier-btn {
+    display: grid; gap: .1rem; justify-items: start;
+    padding: .5rem .55rem; border-radius: 12px; text-align: left;
+    border: 1px solid var(--rule); background: var(--surface-2);
+    font-family: var(--display); font-weight: 700; font-size: .76rem; color: var(--ink-mute);
+    line-height: 1.15;
+  }
+  .tier-btn:hover { color: var(--ink); }
+  .tier-btn[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-1); }
+  .tier-btn[aria-pressed="true"] .tier-dot { transform: scale(1.35); }
+  .tier-top-row { display: flex; align-items: center; gap: .35rem; }
+  .tier-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; transition: transform .15s ease; }
+  .tier-age { font-family: var(--body); font-size: .62rem; font-weight: 500; color: var(--ink-mute); }
+
+  /* ================= topbar ================= */
+
+  main { min-width: 0; display: flex; flex-direction: column; }
+
+  .topbar {
+    display: flex; align-items: center; gap: .8rem;
+    padding: .85rem clamp(1rem, 3vw, 2rem);
+    border-bottom: 1px solid var(--rule);
+    background: var(--ground);
+    position: sticky; top: 0; z-index: 20;
+    flex-wrap: wrap;
+  }
+  .menu-btn { display: none; padding: .4rem; border-radius: 10px; }
+  .topbar h1 { font-size: 1.05rem; margin-right: auto; }
+
+  .meter {
+    display: flex; align-items: center; gap: .4rem;
+    background: var(--surface); border: 1px solid var(--rule);
+    padding: .32rem .7rem; border-radius: 99px; font-weight: 700;
+    font-family: var(--display); font-variant-numeric: tabular-nums;
+    box-shadow: var(--shadow-1); white-space: nowrap;
+  }
+  .meter .icon { color: var(--sunshine); width: 1.05rem; height: 1.05rem; }
+  .meter.streak .icon { color: var(--energy); }
+  .meter small { font-family: var(--body); font-size: .66rem; font-weight: 600; color: var(--ink-mute); letter-spacing: .03em; text-transform: uppercase; }
+  .meter.bump { animation: bump .45s ease; }
+  @keyframes bump { 0%{transform:scale(1)} 35%{transform:scale(1.14)} 100%{transform:scale(1)} }
+
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%; flex: none;
+    background: var(--sunshine); color: var(--on-sunshine);
+    display: grid; place-items: center; font-family: var(--display); font-weight: 800; font-size: .88rem;
+  }
+
+  .view { padding: clamp(1.1rem, 3vw, 2rem); display: grid; gap: 1.1rem; align-content: start; }
+
+  /* ================= cards ================= */
+
+  .card {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: var(--r-lg); padding: 1.2rem 1.3rem;
+    box-shadow: var(--shadow-1);
+  }
+  .card > header { display: flex; align-items: baseline; justify-content: space-between; gap: .8rem; margin-bottom: 1rem; }
+  .card h2 { font-size: 1.02rem; }
+  .card h3 { font-size: .95rem; }
+  .muted { color: var(--ink-mute); font-size: .8rem; }
+
+  .grid { display: grid; gap: 1.1rem; }
+  @media (min-width: 64rem) {
+    .g-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .g-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  /* hero */
+  .hero {
+    border: 1px solid var(--rule); border-radius: var(--r-lg);
+    padding: 1.4rem; display: flex; gap: 1.2rem; align-items: center; flex-wrap: wrap;
+    background: var(--surface-2);
+  }
+  .hero .big-avatar {
+    width: 72px; height: 72px; border-radius: 50%; flex: none;
+    display: grid; place-items: center; font-family: var(--display); font-weight: 800; font-size: 1.8rem;
+    border: 3px solid var(--surface); box-shadow: var(--shadow-1);
+  }
+  .hero h2 { font-size: clamp(1.45rem, 3vw, 2rem); }
+  .hero p { color: var(--ink-soft); margin-top: .25rem; }
+  .facts { display: flex; gap: .45rem; flex-wrap: wrap; margin-top: .85rem; }
+  .fact {
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 12px;
+    padding: .35rem .7rem; font-size: .74rem;
+  }
+  .fact b { display: block; font-family: var(--display); font-size: .88rem; }
+  .fact span { color: var(--ink-mute); font-size: .63rem; letter-spacing: .07em; text-transform: uppercase; }
+
+  .tier-chip {
+    display: inline-flex; align-items: center; gap: .4rem;
+    padding: .3rem .7rem; border-radius: 99px;
+    font-family: var(--display); font-weight: 800; font-size: .78rem;
+  }
+  .tier-chip .icon { width: 1rem; height: 1rem; }
+
+  /* progress ring */
+  .ring-wrap { display: flex; align-items: center; gap: 1rem; }
+  .ring { width: 88px; height: 88px; flex: none; }
+  .ring circle { fill: none; stroke-width: 10; }
+  .ring .bg { stroke: var(--surface-3); }
+  .ring .fg { stroke: var(--teal); stroke-linecap: round; transition: stroke-dasharray .6s cubic-bezier(.3,.9,.3,1); }
+  .ring text { font-family: var(--display); font-weight: 800; font-size: 21px; fill: var(--ink); }
+
+  /* bars */
+  .bars { display: grid; gap: .65rem; }
+  .bar-row { display: grid; grid-template-columns: 1.3rem minmax(0,1fr) 2.5rem; gap: .55rem; align-items: center; font-size: .82rem; }
+  .bar-row .icon { color: var(--ink-mute); }
+  .bar-label { display: grid; gap: .28rem; min-width: 0; }
+  .bar-label b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar { height: 7px; border-radius: 99px; background: var(--surface-3); overflow: hidden; }
+  .bar i { display: block; height: 100%; border-radius: 99px; transition: width .5s cubic-bezier(.3,.9,.3,1); }
+  .bar-row em { font-style: normal; font-variant-numeric: tabular-nums; color: var(--ink-mute); font-size: .76rem; text-align: right; }
+
+  /* streak */
+  .days { display: flex; gap: .28rem; margin-top: .8rem; }
+  .day { flex: 1; display: grid; gap: .3rem; justify-items: center; font-size: .6rem; color: var(--ink-mute); }
+  .dot { width: 100%; aspect-ratio: 1; max-width: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-3); color: var(--ink-mute); }
+  .dot.on { background: var(--teal); color: var(--on-teal); }
+  .streak-num { font-family: var(--display); font-weight: 800; font-size: 2rem; line-height: 1; display: flex; align-items: center; gap: .4rem; }
+  .streak-num .icon { width: 1.4rem; height: 1.4rem; color: var(--energy); }
+
+  /* ================= learning map ================= */
+
+  .map-layout { display: grid; gap: 1.1rem; }
+  @media (min-width: 70rem) { .map-layout { grid-template-columns: minmax(0, 1fr) 20rem; align-items: start; } }
+
+  .map {
+    position: relative; border-radius: var(--r-lg);
+    border: 1px solid var(--rule); background: var(--surface);
+    overflow: hidden; box-shadow: var(--shadow-1);
+    aspect-ratio: 16 / 10; min-height: 25rem;
+  }
+  .map-bg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .map-path { fill: none; stroke: var(--surface-3); stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+  .map-path.done { stroke: var(--teal); }
+
+  .node {
+    position: absolute; transform: translate(-50%, -50%);
+    display: grid; justify-items: center; gap: .3rem; width: 8.5rem;
+  }
+  .node-btn {
+    width: 3.3rem; height: 3.3rem; border-radius: 50%;
+    display: grid; place-items: center; position: relative;
+    border: 3px solid var(--surface); box-shadow: var(--shadow-1);
+    background: var(--locked); color: var(--locked-ink);
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .node-btn:hover, .node-btn:focus-visible { transform: translateY(-3px) scale(1.06); box-shadow: var(--shadow-2); }
+  .node-btn .icon { width: 1.45rem; height: 1.45rem; }
+  .node-num {
+    position: absolute; top: -.35rem; left: -.35rem;
+    width: 1.3rem; height: 1.3rem; border-radius: 50%;
+    background: var(--surface); color: var(--ink); border: 1px solid var(--rule);
+    font-family: var(--display); font-weight: 800; font-size: .66rem;
+    display: grid; place-items: center;
+  }
+  .node-name { font-family: var(--display); font-weight: 700; font-size: .7rem; text-align: center; line-height: 1.2;
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: .18rem .4rem; }
+  .node.is-locked .node-name { color: var(--ink-mute); }
+  .node.is-current .node-btn { animation: pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: var(--shadow-1); } 50% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--energy) 22%, transparent); } }
+  .node-stars { display: flex; gap: .08rem; }
+  .node-stars .icon { width: .7rem; height: .7rem; color: var(--sunshine); }
+
+  @media (max-width: 47.99rem) {
+    .map { aspect-ratio: auto; min-height: 0; display: grid; gap: .45rem; padding: .9rem; }
+    .map-bg { display: none; }
+    .node { position: static; transform: none; width: auto; grid-template-columns: 3.3rem minmax(0,1fr); justify-items: start; align-items: center; gap: .8rem; }
+    .node-name { text-align: left; border: 0; background: none; padding: 0; font-size: .88rem; }
+    .node-stars { grid-column: 2; }
+  }
+
+  /* panel */
+  .panel { display: grid; gap: .9rem; }
+  .panel-head { border-radius: var(--r-md); padding: 1rem 1.1rem; display: grid; gap: .25rem; }
+  .panel-head .kicker { font-size: .64rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; opacity: .85; }
+  .panel-head h2 { font-size: 1.3rem; }
+  .panel-head p { font-size: .8rem; opacity: .92; }
+
+  .req { display: grid; gap: .4rem; }
+  .req li { display: flex; align-items: center; gap: .6rem; font-size: .82rem; padding: .38rem .6rem; border-radius: 10px; background: var(--surface-2); }
+  .req .icon { width: 1rem; height: 1rem; flex: none; }
+  .req .met { color: var(--teal); }
+  .req .unmet { color: var(--ink-mute); }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    padding: .62rem 1.05rem; border-radius: 12px;
+    font-family: var(--display); font-weight: 800; font-size: .88rem;
+    background: var(--energy); color: var(--on-energy);
+    transition: transform .12s ease, filter .12s ease;
+  }
+  .btn:hover { filter: brightness(1.06); transform: translateY(-1px); }
+  .btn:disabled { background: var(--surface-3); color: var(--ink-mute); cursor: not-allowed; transform: none; filter: none; }
+  .btn.ghost { background: var(--surface-2); color: var(--ink); border: 1px solid var(--rule); }
+  .btn.small { padding: .36rem .75rem; font-size: .78rem; border-radius: 10px; }
+
+  /* ================= sessions ================= */
+
+  .sessions { display: grid; gap: .45rem; }
+  .session {
+    display: grid; grid-template-columns: 2.3rem minmax(0,1fr) auto; gap: .85rem; align-items: center;
+    background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-md);
+    padding: .75rem .9rem;
+  }
+  .session.done { background: var(--surface-2); }
+  .s-beat {
+    width: 2.3rem; height: 2.3rem; border-radius: 10px; display: grid; place-items: center;
+    font-family: var(--display); font-weight: 800; font-size: .66rem;
+  }
+  .beat-Notice { background: color-mix(in srgb, var(--sunshine) 30%, var(--surface)); color: var(--ink); }
+  .beat-Make { background: color-mix(in srgb, var(--energy) 26%, var(--surface)); color: var(--ink); }
+  .beat-Show { background: color-mix(in srgb, var(--sky) 30%, var(--surface)); color: var(--ink); }
+  .beat-Change { background: color-mix(in srgb, var(--teal) 28%, var(--surface)); color: var(--ink); }
+  .s-body { min-width: 0; }
+  .s-body b { display: block; font-weight: 600; }
+  .s-body span { font-size: .78rem; color: var(--ink-mute); }
+  .session.done .s-body b { text-decoration: line-through; text-decoration-color: var(--ink-mute); color: var(--ink-mute); }
+
+  .check {
+    width: 1.55rem; height: 1.55rem; border-radius: 50%; border: 2px solid var(--rule);
+    display: grid; place-items: center; color: transparent; flex: none;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .check:hover { border-color: var(--teal); }
+  .session.done .check { background: var(--teal); border-color: var(--teal); color: var(--on-teal); }
+  .check .icon { width: .88rem; height: .88rem; }
+
+  .milestone {
+    display: flex; align-items: center; gap: .6rem; justify-content: center;
+    padding: .65rem; border-radius: var(--r-md);
+    background: color-mix(in srgb, var(--energy) 14%, var(--surface));
+    border: 1px dashed var(--energy);
+    font-family: var(--display); font-weight: 800; letter-spacing: .03em;
+  }
+  .milestone .icon { color: var(--energy); }
+
+  /* ================= badges ================= */
+
+  .badge-grid { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr)); }
+  .badge {
+    border: 1px solid var(--rule); border-radius: var(--r-md); padding: .85rem;
+    background: var(--surface); display: grid; gap: .45rem; justify-items: center; text-align: center;
+  }
+  .badge-medal {
+    width: 2.9rem; height: 2.9rem; border-radius: 14px; display: grid; place-items: center;
+    background: var(--surface-3); color: var(--locked-ink);
+  }
+  .badge.earned .badge-medal { background: var(--sunshine); color: var(--on-sunshine); }
+  .badge.earned.core .badge-medal { background: var(--energy); color: var(--on-energy); }
+  .badge b { font-family: var(--display); font-size: .84rem; }
+  .badge p { font-size: .7rem; color: var(--ink-mute); line-height: 1.35; }
+  .badge:not(.earned) b { color: var(--ink-mute); }
+
+  /* certification */
+  .cert { display: grid; gap: .8rem; justify-items: center; text-align: center; padding: .4rem 0; }
+  .cert-seal {
+    width: 4.6rem; height: 4.6rem; border-radius: 50%; display: grid; place-items: center;
+    border: 3px dashed var(--rule); color: var(--ink-mute);
+  }
+  .cert-seal .icon { width: 2rem; height: 2rem; }
+  .cert.earned .cert-seal { border-style: solid; }
+  .cert b { font-family: var(--display); font-size: 1.05rem; }
+
+  /* toast */
+  .toasts { position: fixed; right: 1rem; bottom: 1rem; display: grid; gap: .5rem; z-index: 60; }
+  .toast {
+    display: flex; align-items: center; gap: .7rem;
+    background: var(--surface); border: 1px solid var(--rule); border-left: 5px solid var(--sunshine);
+    border-radius: 12px; padding: .65rem .9rem; box-shadow: var(--shadow-2);
+    animation: slide .3s cubic-bezier(.2,.9,.3,1); max-width: 20rem;
+  }
+  .toast b { font-family: var(--display); font-size: .86rem; display: block; }
+  .toast span { font-size: .72rem; color: var(--ink-mute); }
+  .toast .icon { color: var(--sunshine); width: 1.35rem; height: 1.35rem; }
+  @keyframes slide { from { opacity: 0; transform: translateX(18px); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  }
+
+  @media (max-width: 62rem) {
+    .app { grid-template-columns: minmax(0, 1fr); }
+    .sidebar {
+      position: fixed; inset: 0 auto 0 0; width: 16.5rem; z-index: 50;
+      transform: translateX(-101%); transition: transform .25s ease;
+      box-shadow: var(--shadow-2);
+    }
+    .sidebar.open { transform: none; }
+    .menu-btn { display: grid; place-items: center; }
+    .scrim { position: fixed; inset: 0; background: rgba(7,16,34,.5); z-index: 45; }
+  }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="i-bulb" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 17h6M10 20h4M12 3a6 6 0 0 0-3.5 10.9c.4.3.5.7.5 1.1h6c0-.4.1-.8.5-1.1A6 6 0 0 0 12 3Z"/>
+    </g>
+    <g id="i-briefcase" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3 12h18"/>
+    </g>
+    <g id="i-chart" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 20V10M10 20V5M16 20v-7M22 20H2"/>
+    </g>
+    <g id="i-megaphone" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 10v4a1 1 0 0 0 1 1h2l9 4V5L7 9H5a1 1 0 0 0-1 1ZM7 15v4h3M19 9a4 4 0 0 1 0 6"/>
+    </g>
+    <g id="i-mic" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M9 21h6"/>
+    </g>
+    <g id="i-people" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="9" cy="8" r="3.2"/><path d="M3 19a6 6 0 0 1 12 0M16.5 5.4a3.2 3.2 0 0 1 0 5.9M18 13.6a6 6 0 0 1 3 5.4"/>
+    </g>
+    <g id="i-crown" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 8l3.5 3L12 5l5.5 6L21 8l-1.6 10H4.6L3 8Z"/>
+    </g>
+    <g id="i-handshake" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 12l4-4 4 2 2-2 2 2 4-2 4 4-4 5-3-2-3 3-3-3-3 2-4-5Z"/>
+    </g>
+    <g id="i-rocket" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2c3.5 3 5 7 5 11l-2.5 3h-5L7 13c0-4 1.5-8 5-11ZM9.5 19c-1 2-3.5 3-3.5 3s0-3 1.5-4.5M14.5 19c1 2 3.5 3 3.5 3s0-3-1.5-4.5"/><circle cx="12" cy="10" r="1.7"/>
+    </g>
+    <g id="i-trophy" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 4h10v5a5 5 0 0 1-10 0V4ZM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M10 14v3M14 14v3M8 20h8"/>
+    </g>
+    <g id="i-sprout" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 21v-8M12 13C12 9 9 6.5 5 6.5c0 4 3 6.5 7 6.5ZM12 13c0-3.3 2.5-5.5 6-5.5 0 3.3-2.5 5.5-6 5.5Z"/>
+    </g>
+    <g id="i-hammer" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 8.5 8.5 4l3 3 2-2 5 5-2 2 3 3-4.5 4.5-3-3-6-6-2-2Z"/><path d="m10 12-6 6"/>
+    </g>
+    <g id="i-lock" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4.5" y="10" width="15" height="10" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+    </g>
+    <g id="i-check" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4.5 12.5 9.5 17.5 19.5 6.5"/>
+    </g>
+    <g id="i-star"><path fill="currentColor" d="m12 2.6 2.9 5.9 6.5.9-4.7 4.6 1.1 6.4L12 17.4l-5.8 3 1.1-6.4L2.6 9.4l6.5-.9L12 2.6Z"/></g>
+    <g id="i-gem"><path fill="currentColor" d="M7 3h10l4 6-9 12L3 9l4-6Z"/></g>
+    <g id="i-flame"><path fill="currentColor" d="M12 2c1 4-3 5-3 9a3 3 0 0 0 6 0c0-1.2-.4-2-.4-2 2.4 1.3 3.4 3.3 3.4 5.2A6 6 0 0 1 6 14.2C6 9 10.5 7 12 2Z"/></g>
+    <g id="i-map" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/>
+    </g>
+    <g id="i-home" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-9.5Z"/>
+    </g>
+    <g id="i-book" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 4.5h6a2.5 2.5 0 0 1 2 1 2.5 2.5 0 0 1 2-1h6V18h-6a2.5 2.5 0 0 0-2 1 2.5 2.5 0 0 0-2-1H4V4.5ZM12 5.5V19"/>
+    </g>
+    <g id="i-medal" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="15" r="5.5"/><path d="M8.5 10 6 3h12l-2.5 7"/>
+    </g>
+    <g id="i-menu" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></g>
+    <g id="i-back" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5l-7 7 7 7"/></g>
+  </defs>
+</svg>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <svg viewBox="0 0 100 140" aria-hidden="true">
+        <circle cx="50" cy="46" r="34" fill="var(--sunshine)"/>
+        <path d="M50 20 62 52H38Z" fill="#FFF3D0"/>
+        <rect x="38" y="52" width="24" height="26" fill="var(--energy)"/>
+        <rect x="34" y="78" width="32" height="14" rx="3" fill="#0D1B3D"/>
+        <path d="M34 92c-8 6-12 14-12 22 8-2 12-6 14-10zM66 92c8 6 12 14 12 22-8-2-12-6-14-10z" fill="var(--teal)"/>
+        <path d="M50 100c6 8 8 16 0 28-8-12-6-20 0-28z" fill="var(--energy)"/>
+      </svg>
+      <div>
+        <div class="brand-name">Little Founders</div>
+        <span class="brand-sub">Business School for Kids</span>
+      </div>
+    </div>
+
+    <nav id="nav" aria-label="Main"></nav>
+
+    <div class="tier-pick">
+      <span>My tier</span>
+      <div class="tier-row" id="tierRow" role="group" aria-label="Choose tier"></div>
+      <button class="btn ghost small" id="resetBtn" style="margin-top:.4rem">Reset this tier</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Open menu"><svg class="icon"><use href="#i-menu"/></svg></button>
+      <h1 id="viewTitle">My Progress</h1>
+      <div class="meter" id="pointsMeter"><svg class="icon"><use href="#i-gem"/></svg><span id="pointsVal">0</span><small>Little Points</small></div>
+      <div class="meter streak"><svg class="icon"><use href="#i-flame"/></svg><span id="streakVal">0</span><small>streak</small></div>
+      <div class="avatar" aria-hidden="true">M</div>
+    </div>
+    <div class="view" id="view"></div>
+  </main>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ============================ tiers ============================ */
+
+  const TIERS = [
+    { id:"sprouts",  name:"Little Sprouts",  short:"Sprouts",  age:"5–7",   mins:45, colour:"green",    icon:"i-sprout", cert:"Junior Founder",
+      promise:"Explore ideas, creativity and yourself" },
+    { id:"builders", name:"Junior Builders", short:"Builders", age:"8–10",  mins:60, colour:"sunshine", icon:"i-hammer", cert:"Certified Builder",
+      promise:"Build, make and sell real products" },
+    { id:"founders", name:"Young Founders",  short:"Founders", age:"11–13", mins:75, colour:"purple",   icon:"i-rocket", cert:"Certified Young Founder",
+      promise:"Plan, validate and pitch your business" },
+    { id:"ceos",     name:"Founder CEOs",    short:"CEOs",     age:"14–17", mins:90, colour:"navy",     icon:"i-crown",  cert:"Certified Young Entrepreneur",
+      promise:"Launch, lead and make an impact" }
+  ];
+
+  /* ============================ courses ============================ */
+
+  const MODULES = [
+    { n:1, name:"Idea Starter", fr:"Lance-Idées", icon:"i-bulb", colour:"sunshine",
+      big:"Ideas come from problems you notice", badge:"Big Ideas",
+      s:{
+        sprouts:[["Notice","What bugs you?","Bug Hunt — draw five annoying things"],["Make","Draw the fix","My Big Idea page, with a scribed sentence"],["Show","Ask someone","Idea Swap with the three feedback faces"],["Change","Make it better","Version 2, with the change circled"]],
+        builders:[["Notice","Problem hunt","Log 10+ problems across three zones"],["Make","Choose and build rough","Problem sentence + a 20-minute prototype"],["Show","Get real reactions","Five people outside the team"],["Change","Version 2 and the decision","Two changes, then continue / change / restart"]],
+        founders:[["Notice","Ask before you assume","Write a script; run two live interviews"],["Make","The problem statement","Every part marked known or guess"],["Show","Test the guess","Eight people; threshold set in advance"],["Change","Validated or not","One-page Validation Brief"]],
+        ceos:[["Notice","Interviews with strangers","Scored by a peer for leading questions"],["Make","Statement and demand test","Does anyone want it — not does it work"],["Show","Signal vs. noise","Rate every piece of evidence"],["Change","Evidence-based decision","Persevere, pivot, or park"]]
+      } },
+
+    { n:2, name:"Business Basics", fr:"Les Bases des Affaires", icon:"i-briefcase", colour:"navy",
+      big:"A business trades value for value", badge:"Business Brain",
+      s:{
+        sprouts:[["Notice","The Trading Game","Mystery bags — what made people say yes?"],["Notice","Gives and Gets","Draw the two arrows for your idea"],["Show","The Helper Shop","A 10-minute pretend service stall"],["Change","Do it again tomorrow","What you need if it opens every day"]],
+        builders:[["Notice","Product vs. business","Three tests: want it, pay for it, repeat it"],["Make","Make twenty","Inputs, suppliers, and the bottleneck"],["Show","Test the making","Five real units against a timer"],["Change","The plan that survives","Real numbers, plus a fairness check"]],
+        founders:[["Notice","Who else is solving this?","Three alternatives, including doing nothing"],["Make","The one-page plan","Every line marked known or guess"],["Show","Test the core claim","The biggest guess, tested for real"],["Change","Plan v2","Results in; fairness check added"]],
+        ceos:[["Notice","The canvas","Nine blocks with confidence scores"],["Notice","Competitors and positioning","An evidenced positioning line"],["Show","Test the riskiest assumption","Threshold stated before the test runs"],["Change","Canvas v2","Redrawn in ink, changes justified"]]
+      } },
+
+    { n:3, name:"Money Smarts", fr:"Génie de l'Argent", icon:"i-chart", colour:"teal",
+      big:"Money in, money out, money kept", badge:"Money Smart",
+      s:{
+        sprouts:[["Notice","Two jars","Money IN and money OUT, five rounds"],["Notice","Where money goes","Picture recipe: what does one cost?"],["Show","Setting a price","Choose a price, run a mini market"],["Change","Saving and choosing","Spend · Save · Share envelopes"]],
+        builders:[["Notice","Cost of one","Cost sheet — including your time"],["Make","Setting a price","Cost-plus and compare, then choose"],["Show","Handling real money","A practice sale with a real float"],["Change","Money map and split rule","Forecast 10 / 25 / 50"]],
+        founders:[["Notice","Cost, price, margin","Waste and labour lines included"],["Make","Price with a strategy","Three methods, triangulated"],["Show","Test the price","Twelve people; watch for the wince"],["Change","Forecast and split rule","Low, expected, high"]],
+        ceos:[["Notice","Unit economics","Fixed vs. variable, contribution, margin"],["Make","Break-even and strategy","Three price scenarios modelled"],["Show","The ledger","A real transaction, recorded properly"],["Change","Cash plan and decisions","Six weeks; find the pinch week"]]
+      } },
+
+    { n:4, name:"Marketing Magic", fr:"La Magie du Marketing", icon:"i-megaphone", colour:"energy",
+      big:"Marketing is being useful, out loud", badge:"Marketing Magician",
+      s:{
+        sprouts:[["Notice","Signs that work","Sign Safari — which ones did you get?"],["Make","My sign","A poster in six words or fewer"],["Show","Does it work?","Three-second test on another class"],["Change","Poster v2","Fix one thing: bigger, fewer, clearer"]],
+        builders:[["Notice","Who exactly?","Two customer sketches, one validated"],["Make","Message, name, look","Brand sheet on a single page"],["Show","Poster and a second channel","Ten three-second tests + a spoken piece"],["Change","Sharpen it","Add a call to action; run the honesty check"]],
+        founders:[["Notice","Positioning for a named group","Tested on five people from that group"],["Make","Message hierarchy and creative","Two pieces, two channels, one promise each"],["Show","Count the denominator","Minimum reach 30 per channel"],["Change","Read it and plan","Response rates, then the Course 9 plan"]],
+        ceos:[["Notice","Segments and insight","Written in the customer's own voice"],["Make","Two real executions","Deliberately different, not variations"],["Show","Measured A/B test","One variable; minimum reach 50 each"],["Change","Cost per customer","Compared against your margin"]]
+      } },
+
+    { n:5, name:"Pitch Like a Pro", fr:"Présente comme un Pro", icon:"i-mic", colour:"energy",
+      big:"A pitch is a clear promise", badge:"I Can Pitch!",
+      s:{
+        sprouts:[["Notice","Big voice, kind face","Look up, speak out, smile once"],["Make","Show and tell the prop","Hold it up, count to two, then speak"],["Show","The friendly grown-up","Pitch to three adults in rotation"],["Change","Better version","Improve one sentence and perform"]],
+        builders:[["Notice","What a pitch is made of","Hook · problem · solution · ask, in 60s"],["Make","Prop and delivery","Three timed rehearsal rounds"],["Show","Another class","One question each; a peer logs them"],["Change","Rebuild and re-pitch","Fill the hole the questions found"]],
+        founders:[["Notice","Proof is the difference","Every claim sourced from Courses 1–4"],["Make","Rehearse it into shape","Memorise the beats, not the words"],["Show","A visiting panel","Three minutes plus two questions"],["Change","Fix the hole","Plus a 60-second Market Day version"]],
+        ceos:[["Notice","Structure and traction","What has actually happened, in numbers"],["Make","Visuals and demo","Seven slides max; record run one"],["Show","Judges and hostile Q&A","Five minutes plus five of questions"],["Change","Self-assess and finalise","Watch the tape; fix one thing deeply"]]
+      } },
+
+    { n:6, name:"Leadership Lab", fr:"Labo du Leadership", icon:"i-people", colour:"sky",
+      big:"Leaders make others stronger", badge:"Future Leader",
+      s:{
+        sprouts:[["Notice","Everybody has a job","Maker, Teller, Timekeeper, Tidier"],["Make","Kind and true","Star notes — one true thing each"],["Show","Turn-taking under pressure","The Squeeze: one pair of scissors"],["Change","Our team rules","Four picture rules, signed"]],
+        builders:[["Notice","Roles that mean something","Lead · Maker · Money · Voice"],["Make","Stand-ups and the agreement","Five minutes, standing, no problem-solving"],["Show","Conflict, on purpose","Scenario Lab, then one real conversation"],["Change","Lead a block","Ten minutes; the Guide steps back"]],
+        founders:[["Notice","What leaders actually do","Four behaviours, self-assessed with evidence"],["Make","Rotation and the agreement","Fair, not convenient — everyone leads"],["Show","The real conversation","Situation · behaviour · impact · request"],["Change","Lead a full session block","Twenty minutes, Guide fully out"]],
+        ceos:[["Notice","Leadership as behaviour","Name your own weakness out loud"],["Make","Delegation and decision rights","Decision map + three written handovers"],["Show","Hard conversations","Give and receive, coached live"],["Change","Operating rhythm","Operating agreement and a premortem"]]
+      } },
+
+    { n:7, name:"Young CEO", fr:"Jeune PDG", icon:"i-crown", colour:"teal",
+      big:"Running it is a skill of its own", badge:"Young CEO",
+      s:{
+        sprouts:[["Notice","What does the boss do?","Decide, check, help — Captain for the day"],["Notice","Counting how we did","Pick three things and tally them"],["Show","Look at it together","What went up? What went down?"],["Change","Make the change","Re-run the shop and compare charts"]],
+        builders:[["Notice","Three numbers","Money, customers, work — defined exactly"],["Make","Build the tracker","Date, three numbers, one note"],["Show","Notice what the numbers say","Write the decision card and act"],["Change","Check and own it","CEO note: what I decided, what happened"]],
+        founders:[["Notice","Goals with a number and a date","Two people would count it identically"],["Make","Dashboard and rhythm","One page, fixed day, ten-second read"],["Show","A decision the data caused","Recorded before you find out"],["Change","Review, adjust, plan","Weekly review two + the sprint plan"]],
+        ceos:[["Notice","What actually matters","North star, leading and lagging"],["Make","Dashboard and cadence","Linked to the ledger, never retyped"],["Show","Add, cut, or keep","Challenged by a cross-team panel"],["Change","Accountability and the plan","Sprint plan with a written stop-rule"]]
+      } },
+
+    { n:8, name:"Community Builder", fr:"Bâtisseur de Communauté", icon:"i-handshake", colour:"sky",
+      big:"A business is a neighbour, not a stranger", badge:"Community Builder",
+      s:{
+        sprouts:[["Notice","Who helps us?","Helper web — find six"],["Make","Real thank-yous","What they did and what it made possible"],["Show","Kind business","Choose one kind thing, and do it today"],["Change","Our promise","Always · never · how we say thank you"]],
+        builders:[["Notice","Who is affected?","Three rings, give and get for each"],["Make","Prepare the ask","What we want, what we offer, a fallback"],["Show","Make the ask","A real ask to a real person"],["Change","Give-back","What, to whom, how much"]],
+        founders:[["Notice","Stakeholders and power","Who is affected but has little say?"],["Make","Prepare a real negotiation","Terms drafted before you walk in"],["Show","Negotiate it","Signed on the spot, or a recorded no"],["Change","Measurable give-back","Connected, measurable, sustainable"]],
+        ceos:[["Notice","Impact and the silent ones","Externalities, including the environment"],["Make","Ethical trade-offs, named","Would they be fine reading this record?"],["Show","Negotiate real terms","Scope, dates, responsibilities, exit"],["Change","Community as strategy","Impact reported at Demo Day"]]
+      } },
+
+    { n:9, name:"Startup Challenge", fr:"Défi Startup", icon:"i-rocket", colour:"energy",
+      big:"Build it, sell it, learn from it", badge:"Launch Crew", milestone:4, milestoneName:"Market Day",
+      s:{
+        sprouts:[["Notice","What are we selling?","Two or three items, prices, and jobs"],["Make","Making the stock","Production line to a group target"],["Show","Dry run","Another class visits with play coins"],["Change","Fix and finish","Three fixes, final signs, shop set out"],["Notice","Count it up","Takings, leftovers, visitors"],["Change","What we learned","Next Time page and the money decision"]],
+        builders:[["Notice","Final plan and float","Break-even units; $50 float signed out"],["Make","Production and stall build","Batch it; set up the cash tin"],["Show","Dry run with real feedback","Twenty minutes with a friendly audience"],["Change","Fix, restock, brief","Money brief, safety brief, kit checklist"],["Notice","Reconcile and analyse","Float + takings − spend. It has to match"],["Change","Learn and decide","Startup Report; deliver the give-back"]],
+        founders:[["Notice","Lock the venture and the target","$100 float; target written on the wall"],["Make","Production and marketing live","Response tracking from day one"],["Show","Dry run at real scale","Thirty minutes; one member observes only"],["Change","Two changes, then final checks","Both justified by dry-run data"],["Notice","Reconcile and find the gap","Actual minus target, and why"],["Change","Report and decide","Venture Report against the target"]],
+        ceos:[["Notice","Lock the sprint","Fixed date, fixed budget, variable scope"],["Make","Build and go live","Ledger live from the first transaction"],["Show","Soft launch","Real stakes, small blast radius"],["Change","Iterate and scale","Two changes maximum, both from data"],["Notice","Reconcile, measure, hear it","Variance explained, never rounded away"],["Change","Report and decide","Venture Report against the stop-rule"]]
+      } },
+
+    { n:10, name:"Future Founder Mastery", fr:"Fondateur de Demain", icon:"i-trophy", colour:"sunshine",
+      big:"Your story, your evidence, your next step", badge:"Future Founder", milestone:4, milestoneName:"Demo Day",
+      s:{
+        sprouts:[["Notice","My best bits","Choose three pieces and say why"],["Make","My founder book","Four pages, in brand colours"],["Show","Practise the showing","I made… I learned… Next I want to…"],["Change","Demo Day","Show your book to the families"]],
+        builders:[["Notice","Retrospective","Three things I can do now, with evidence"],["Make","The portfolio","Six pieces — one of them a failure"],["Show","Demo Day talk","Three minutes, including what went wrong"],["Change","Demo Day","Deliver it, then write the next step"]],
+        founders:[["Notice","Retro against the target","What did we say, and what happened?"],["Make","Portfolio and next-term plan","One goal, three milestones, a first action"],["Show","Demo Day preparation","Four minutes, five slides, rehearsed twice"],["Change","Demo Day","Deliver it and follow up within 48 hours"]],
+        ceos:[["Notice","Full retrospective","Against all ten programme outcomes"],["Make","The decision and 90-day plan","Continue, pivot, or stop — all three count"],["Show","Demo Day preparation","Six slides, rehearsed twice on video"],["Change","Demo Day","Five minutes, Q&A, and a real ask"]]
+      } }
+  ];
+
+  /* ============================ badges ============================ */
+
+  const BADGES = [
+    { name:"Big Ideas", group:"Course", core:1, mod:1, why:"States their problem and who has it" },
+    { name:"Business Brain", group:"Course", core:1, mod:2, why:"Explains the give/get and what must repeat" },
+    { name:"Money Smart", group:"Course", core:1, mod:3, why:"Costs, price, and money handled correctly" },
+    { name:"Marketing Magician", group:"Course", core:1, mod:4, why:"A message a stranger understood unaided" },
+    { name:"I Can Pitch!", group:"Course", core:1, mod:5, why:"Pitched outside the team and took a question" },
+    { name:"Future Leader", group:"Course", core:1, mod:6, why:"Led real work; teammates felt the difference" },
+    { name:"Young CEO", group:"Course", core:1, mod:7, why:"Two review cycles and a data-driven decision" },
+    { name:"Community Builder", group:"Course", core:1, mod:8, why:"Real action benefiting someone outside the team" },
+    { name:"Launch Crew", group:"Course", core:1, mod:9, why:"Held a role and traded with real customers" },
+    { name:"Future Founder", group:"Course", core:1, mod:10, why:"Presented the journey with evidence" },
+
+    { name:"Problem Solver", group:"Skill", why:"Changed the idea because of specific feedback" },
+    { name:"Customer Listener", group:"Skill", why:"Collected feedback using open questions" },
+    { name:"Idea Lab", group:"Skill", why:"Ran a test that could have proved them wrong" },
+    { name:"Prototype Pro", group:"Skill", why:"Three rough versions, each changed by the last" },
+    { name:"Number Cruncher", group:"Skill", why:"A calculation that changed a decision" },
+    { name:"Storyteller", group:"Skill", why:"A listener could repeat it back correctly" },
+    { name:"Design Eye", group:"Skill", why:"The most important thing is read first" },
+    { name:"Team Player", group:"Skill", why:"Did what they took on, or renegotiated openly" },
+    { name:"Helping Hand", group:"Skill", why:"Unblocked a teammate ten times" },
+    { name:"Deal Maker", group:"Skill", why:"A partnership both sides called fair" },
+    { name:"Kind Business", group:"Skill", why:"Paid a cost to be fair to someone else" },
+    { name:"Green Founder", group:"Skill", why:"Changed a decision for environmental impact" },
+
+    { name:"Keep Building", group:"Journey", why:"Something failed. They fixed it and went again" },
+    { name:"Idea Machine", group:"Journey", why:"Fifty ideas logged on the Idea Wall" },
+    { name:"Show & Tell", group:"Journey", why:"Presented five times outside their team" },
+    { name:"Streak Star", group:"Journey", why:"Seven consecutive sessions attended" },
+    { name:"Digital Safe", group:"Journey", why:"Used an online channel with zero slips" }
+  ];
+
+  const NAV = [
+    { id:"dashboard", label:"My Progress", icon:"i-home" },
+    { id:"map",       label:"Learning Map", icon:"i-map" },
+    { id:"courses",   label:"My Courses", icon:"i-book" },
+    { id:"badges",    label:"Badges", icon:"i-medal" }
+  ];
+
+  const NODE_POS = [
+    [11,20],[35,17],[59,19],[83,25],
+    [86,52],[62,56],[38,54],[14,50],
+    [24,84],[62,85]
+  ];
+
+  const PTS = { session:10, badge:25, cert:50, event:50 };
+  const GATE_POINTS = 250;
+
+  /* ============================ state ============================ */
+
+  const blank = () => ({ done:{}, badges:{}, events:{}, cert:0 });
+  let state = {
+    tier: "builders",
+    view: "dashboard",
+    openModule: null,
+    p: { sprouts:blank(), builders:blank(), founders:blank(), ceos:blank() }
+  };
+
+  const KEY = "little-founders-v2";
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.p && parsed.p.sprouts) state = Object.assign(state, parsed);
+    } catch (e) {}
+  }
+
+  const tier = () => TIERS.find(t => t.id === state.tier);
+  const prog = () => state.p[state.tier];
+  const sessionCount = m => m.s[state.tier].length;
+  const key = (n, i) => n + ":" + i;
+  const isDone = (n, i) => !!prog().done[key(n, i)];
+  const doneIn = m => m.s[state.tier].reduce((a, _, i) => a + (isDone(m.n, i) ? 1 : 0), 0);
+  const moduleComplete = m => doneIn(m) === sessionCount(m);
+  const allComplete = () => MODULES.every(moduleComplete);
+
+  function points() {
+    const p = prog();
+    let t = Object.keys(p.done).length * PTS.session;
+    t += Object.keys(p.badges).length * PTS.badge;
+    t += Object.keys(p.events).length * PTS.event;
+    if (p.cert) t += PTS.cert;
+    return t;
+  }
+
+  function unlocked(m) {
+    const done = n => moduleComplete(MODULES[n - 1]);
+    if (m.n <= 5) return { ok:true, reqs:[] };
+    if (m.n === 6) {
+      const first5 = [1,2,3,4,5].every(done), pts = points();
+      return { ok: first5 && pts >= GATE_POINTS, reqs:[
+        { label:"Courses 1–5 complete", met:first5 },
+        { label:"Earn " + GATE_POINTS + " Little Points (" + pts + "/" + GATE_POINTS + ")", met: pts >= GATE_POINTS }
+      ]};
+    }
+    if (m.n === 9) {
+      const first8 = [1,2,3,4,5,6,7,8].every(done);
+      const b1 = !!prog().badges["Money Smart"], b2 = !!prog().badges["I Can Pitch!"];
+      return { ok: first8 && b1 && b2, reqs:[
+        { label:"Courses 1–8 complete", met:first8 },
+        { label:"Money Smart badge", met:b1 },
+        { label:"I Can Pitch! badge", met:b2 }
+      ]};
+    }
+    const prev = MODULES[m.n - 2], ok = moduleComplete(prev);
+    return { ok, reqs:[{ label: prev.name + " complete", met: ok }] };
+  }
+
+  const currentModule = () => MODULES.find(m => unlocked(m).ok && !moduleComplete(m)) || MODULES[MODULES.length - 1];
+
+  function overallPct() {
+    const total = MODULES.reduce((a, m) => a + sessionCount(m), 0);
+    return Math.round(Object.keys(prog().done).length / total * 100);
+  }
+
+  function streak() {
+    let n = 0;
+    for (const m of MODULES) {
+      for (let i = 0; i < sessionCount(m); i++) {
+        if (isDone(m.n, i)) n++; else return n;
+      }
+    }
+    return n;
+  }
+
+  /* ============================ helpers ============================ */
+
+  const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+  const ico = (id, cls) => '<svg class="icon ' + (cls || "") + '" aria-hidden="true"><use href="#' + id + '"/></svg>';
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+  const paint = c => "background:var(--" + c + ");color:var(--on-" + c + ")";
+
+  function toast(title, body, icon) {
+    const t = el("div", "toast", ico(icon || "i-star") + "<div><b>" + esc(title) + "</b><span>" + esc(body) + "</span></div>");
+    document.getElementById("toasts").appendChild(t);
+    setTimeout(() => { t.style.transition = "opacity .3s"; t.style.opacity = "0"; setTimeout(() => t.remove(), 320); }, 3600);
+  }
+
+  function bump(id) {
+    const n = document.getElementById(id);
+    if (!n) return;
+    n.classList.remove("bump"); void n.offsetWidth; n.classList.add("bump");
+  }
+
+  /* ============================ actions ============================ */
+
+  function toggleSession(m, i) {
+    const p = prog(), k = key(m.n, i), was = moduleComplete(m);
+    if (p.done[k]) delete p.done[k]; else p.done[k] = 1;
+    const now = moduleComplete(m);
+
+    if (now && !was) {
+      if (!p.badges[m.badge]) { p.badges[m.badge] = 1; toast(m.badge + " earned!", "+" + PTS.badge + " Little Points", "i-medal"); }
+      if (m.milestone && !p.events[m.milestoneName]) { p.events[m.milestoneName] = 1; toast(m.milestoneName + " complete", "+" + PTS.event + " Little Points", "i-rocket"); }
+      const next = MODULES[m.n];
+      if (next && unlocked(next).ok) toast(next.name + " unlocked", "Course " + next.n + " is open", "i-map");
+      if (allComplete() && !p.cert) { p.cert = 1; toast(tier().cert + "!", "All ten courses complete", "i-trophy"); }
+    }
+    if (!now && was) {
+      delete p.badges[m.badge];
+      if (m.milestone) delete p.events[m.milestoneName];
+      p.cert = 0;
+    }
+
+    bump("pointsMeter"); save(); render();
+  }
+
+  function toggleBadge(name) {
+    const p = prog();
+    if (p.badges[name]) delete p.badges[name];
+    else { p.badges[name] = 1; toast(name + " awarded", "+" + PTS.badge + " Little Points", "i-medal"); }
+    bump("pointsMeter"); save(); render();
+  }
+
+  function go(view, mod) {
+    state.view = view;
+    if (mod !== undefined) state.openModule = mod;
+    document.getElementById("sidebar").classList.remove("open");
+    const s = document.querySelector(".scrim"); if (s) s.remove();
+    save(); render();
+    window.scrollTo({ top: 0 });
+  }
+
+  /* ============================ views ============================ */
+
+  function viewDashboard() {
+    const v = document.getElementById("view");
+    const t = tier(), cur = currentModule(), pct = overallPct(), st = streak();
+    const earned = Object.keys(prog().badges);
+
+    const hero = el("div", "hero");
+    hero.innerHTML =
+      '<div class="big-avatar" style="' + paint("sunshine") + '">M</div>' +
+      '<div style="min-width:0">' +
+        '<span class="tier-chip" style="' + paint(t.colour) + '">' + ico(t.icon) + esc(t.name) + '</span>' +
+        '<h2 style="margin-top:.5rem">Hi, Mia!</h2>' +
+        '<p>' + esc(t.promise) + '.</p>' +
+        '<div class="facts">' +
+          '<div class="fact"><span>Ages</span><b>' + t.age + '</b></div>' +
+          '<div class="fact"><span>Session</span><b>' + t.mins + ' min</b></div>' +
+          '<div class="fact"><span>Sessions done</span><b>' + Object.keys(prog().done).length + ' / 42</b></div>' +
+          '<div class="fact"><span>Badges</span><b>' + earned.length + ' / 27</b></div>' +
+        '</div>' +
+      '</div>';
+    v.appendChild(hero);
+
+    const grid = el("div", "grid g-3");
+
+    const c1 = el("div", "card");
+    c1.innerHTML = '<header><h2>My Progress</h2><button class="btn ghost small" data-go="map">Learning Map</button></header>';
+    const circ = 2 * Math.PI * 40;
+    const rw = el("div", "ring-wrap");
+    rw.innerHTML =
+      '<svg class="ring" viewBox="0 0 100 100" role="img" aria-label="' + pct + ' percent complete">' +
+        '<circle class="bg" cx="50" cy="50" r="40"/>' +
+        '<circle class="fg" cx="50" cy="50" r="40" transform="rotate(-90 50 50)" stroke-dasharray="' + (circ * pct / 100) + ' ' + circ + '"/>' +
+        '<text x="50" y="57" text-anchor="middle">' + pct + '%</text>' +
+      '</svg>' +
+      '<p class="muted">' + (pct === 0 ? "Start with Idea Starter — find something that bugs you."
+        : pct === 100 ? "Every course complete. Certification earned."
+        : "Keep going — you are building great habits.") + '</p>';
+    c1.appendChild(rw);
+
+    const bars = el("div", "bars");
+    bars.style.marginTop = "1rem";
+    MODULES.slice(0, 5).forEach(m => {
+      const p = Math.round(doneIn(m) / sessionCount(m) * 100);
+      bars.appendChild(el("div", "bar-row",
+        ico(m.icon) +
+        '<div class="bar-label"><b>' + esc(m.name) + '</b><div class="bar"><i style="width:' + p + '%;background:var(--' + m.colour + ')"></i></div></div>' +
+        '<em>' + p + '%</em>'));
+    });
+    c1.appendChild(bars);
+    grid.appendChild(c1);
+
+    const c2 = el("div", "card");
+    const cp = Math.round(doneIn(cur) / sessionCount(cur) * 100);
+    c2.innerHTML =
+      '<header><h2>Current Course</h2></header>' +
+      '<div style="display:flex;gap:.8rem;align-items:center">' +
+        '<div class="badge-medal" style="' + paint(cur.colour) + '">' + ico(cur.icon) + '</div>' +
+        '<div><h3>' + esc(cur.name) + '</h3><span class="muted">' + esc(cur.big) + '</span></div>' +
+      '</div>' +
+      '<div class="bar" style="margin:1rem 0 .5rem"><i style="width:' + cp + '%;background:var(--' + cur.colour + ')"></i></div>' +
+      '<p class="muted">' + doneIn(cur) + ' of ' + sessionCount(cur) + ' sessions · earns the <b>' + esc(cur.badge) + '</b> badge</p>' +
+      '<button class="btn" style="margin-top:1rem" data-go="module" data-mod="' + cur.n + '">Continue learning</button>';
+    grid.appendChild(c2);
+
+    const c3 = el("div", "card");
+    const dayNames = ["1","2","3","4","5","6","7"];
+    let days = "";
+    for (let i = 0; i < 7; i++) {
+      const on = i < Math.min(st, 7);
+      days += '<div class="day"><div class="dot' + (on ? " on" : "") + '">' + (on ? ico("i-check") : "") + '</div>' + dayNames[i] + '</div>';
+    }
+    c3.innerHTML =
+      '<header><h2>Learning Streak</h2></header>' +
+      '<div class="streak-num">' + ico("i-flame") + st + '</div>' +
+      '<p class="muted" style="margin-top:.3rem">sessions in a row, no gaps</p>' +
+      '<div class="days">' + days + '</div>' +
+      '<p class="muted" style="margin-top:.9rem">' + (st >= 7 ? "Streak Star territory — ask your Guide to award it." : "Seven in a row earns Streak Star.") + '</p>';
+    grid.appendChild(c3);
+
+    v.appendChild(grid);
+
+    const grid2 = el("div", "grid g-2");
+
+    // certification
+    const done10 = MODULES.filter(moduleComplete).length;
+    const c4 = el("div", "card");
+    c4.innerHTML = '<header><h2>Certification</h2><span class="muted">' + done10 + ' / 10 courses</span></header>';
+    const cert = el("div", "cert" + (prog().cert ? " earned" : ""));
+    cert.innerHTML =
+      '<div class="cert-seal" style="' + (prog().cert ? paint(t.colour) : "") + '">' + ico(prog().cert ? "i-trophy" : "i-lock") + '</div>' +
+      '<b>' + esc(t.cert) + '</b>' +
+      '<p class="muted">' + (prog().cert
+        ? "Awarded at Demo Day. " + esc(t.name) + " complete."
+        : "Awarded at Demo Day when all ten courses are complete, with a portfolio.") + '</p>';
+    c4.appendChild(cert);
+    grid2.appendChild(c4);
+
+    // next locked
+    const nextLocked = MODULES.find(m => !unlocked(m).ok);
+    const c5 = el("div", "card");
+    if (nextLocked) {
+      const u = unlocked(nextLocked);
+      c5.innerHTML = '<header><h2>What\'s next?</h2></header>' +
+        '<p style="margin-bottom:.8rem"><b>' + esc(nextLocked.name) + '</b> is locked. To open it:</p>';
+      const ul = el("ul", "req");
+      u.reqs.forEach(r => ul.appendChild(el("li", null, ico(r.met ? "i-check" : "i-lock", r.met ? "met" : "unmet") + esc(r.label))));
+      c5.appendChild(ul);
+    } else {
+      c5.innerHTML = '<header><h2>Badges</h2><button class="btn ghost small" data-go="badges">See all</button></header>';
+      const bg = el("div", "badge-grid");
+      const show = BADGES.filter(b => prog().badges[b.name]).slice(-4);
+      if (!show.length) c5.appendChild(el("p", "muted", "No badges yet. Finish all the sessions in a course to earn its badge."));
+      else { show.forEach(b => bg.appendChild(badgeCard(b, true))); c5.appendChild(bg); }
+    }
+    grid2.appendChild(c5);
+    v.appendChild(grid2);
+  }
+
+  function viewMap() {
+    const v = document.getElementById("view");
+    const layout = el("div", "map-layout"), map = el("div", "map"), cur = currentModule();
+
+    const d = NODE_POS.map((p, i) => (i ? "L" : "M") + p[0] + " " + p[1]).join(" ");
+    const doneCount = MODULES.filter(moduleComplete).length;
+    const dDone = NODE_POS.slice(0, Math.max(doneCount, 1)).map((p, i) => (i ? "L" : "M") + p[0] + " " + p[1]).join(" ");
+    map.innerHTML =
+      '<svg class="map-bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' +
+        '<path class="map-path" d="' + d + '" vector-effect="non-scaling-stroke"/>' +
+        (doneCount > 1 ? '<path class="map-path done" d="' + dDone + '" vector-effect="non-scaling-stroke"/>' : "") +
+      '</svg>';
+
+    MODULES.forEach((m, idx) => {
+      const u = unlocked(m), complete = moduleComplete(m), isCur = m.n === cur.n && !complete;
+      const node = el("div", "node" + (u.ok ? "" : " is-locked") + (isCur ? " is-current" : ""));
+      node.style.left = NODE_POS[idx][0] + "%";
+      node.style.top = NODE_POS[idx][1] + "%";
+      const stars = Math.round(doneIn(m) / sessionCount(m) * 3);
+      let starHtml = "";
+      for (let i = 0; i < stars; i++) starHtml += ico("i-star");
+      node.innerHTML =
+        '<button class="node-btn" style="' + (u.ok ? paint(m.colour) : "") + '" data-go="module" data-mod="' + m.n + '" ' +
+          'aria-label="Course ' + m.n + ', ' + esc(m.name) + (u.ok ? "" : ", locked") + '">' +
+          ico(u.ok ? m.icon : "i-lock") + '<span class="node-num">' + m.n + '</span>' +
+        '</button>' +
+        '<span class="node-name">' + esc(m.name) + '</span>' +
+        (starHtml ? '<span class="node-stars">' + starHtml + '</span>' : "");
+      map.appendChild(node);
+    });
+    layout.appendChild(map);
+
+    const target = MODULES.find(m => !unlocked(m).ok) || cur;
+    const u = unlocked(target);
+    const panel = el("div", "panel");
+    const head = el("div", "panel-head");
+    head.setAttribute("style", u.ok ? paint(target.colour) : "background:var(--surface-3);color:var(--ink)");
+    head.innerHTML =
+      '<span class="kicker">Course ' + target.n + (u.ok ? "" : " · Locked") + '</span>' +
+      '<h2>' + esc(target.name) + '</h2><p>' + esc(target.big) + '</p>';
+    panel.appendChild(head);
+
+    const card = el("div", "card");
+    if (u.ok) {
+      card.innerHTML = '<header><h2>Where you are</h2></header>' +
+        '<p class="muted">' + doneIn(target) + ' of ' + sessionCount(target) + ' sessions complete. Finishing them all earns the <b>' + esc(target.badge) + '</b> badge.</p>' +
+        '<button class="btn" style="margin-top:1rem" data-go="module" data-mod="' + target.n + '">Open course</button>';
+    } else {
+      card.innerHTML = '<header><h2>How to unlock</h2></header>';
+      const ul = el("ul", "req");
+      u.reqs.forEach(r => ul.appendChild(el("li", null, ico(r.met ? "i-check" : "i-lock", r.met ? "met" : "unmet") + esc(r.label))));
+      card.appendChild(ul);
+    }
+    panel.appendChild(card);
+
+    const legend = el("div", "card");
+    legend.innerHTML = '<header><h2>Your map</h2></header>' +
+      '<p class="muted">' + MODULES.filter(moduleComplete).length + ' of 10 courses · ' +
+      Object.keys(prog().badges).length + ' of 27 badges · ' + points() + ' Little Points. ' +
+      'Stars show how far through each course you are.</p>';
+    panel.appendChild(legend);
+
+    layout.appendChild(panel);
+    v.appendChild(layout);
+  }
+
+  function viewCourses() {
+    const v = document.getElementById("view");
+    MODULES.forEach(m => {
+      const u = unlocked(m), pc = Math.round(doneIn(m) / sessionCount(m) * 100);
+      const card = el("div", "card");
+      card.style.padding = "1rem 1.1rem";
+      card.innerHTML =
+        '<div style="display:flex;gap:.9rem;align-items:center;flex-wrap:wrap">' +
+          '<div class="badge-medal" style="' + (u.ok ? paint(m.colour) : "") + '">' + ico(u.ok ? m.icon : "i-lock") + '</div>' +
+          '<div style="flex:1;min-width:12rem">' +
+            '<h3>' + m.n + '. ' + esc(m.name) + '</h3>' +
+            '<span class="muted">' + esc(m.big) + ' · <i>' + esc(m.fr) + '</i></span>' +
+            '<div class="bar" style="margin-top:.5rem"><i style="width:' + pc + '%;background:var(--' + m.colour + ')"></i></div>' +
+          '</div>' +
+          '<div style="text-align:right">' +
+            '<div class="muted" style="margin-bottom:.4rem">' + doneIn(m) + '/' + sessionCount(m) + ' sessions · ' + tier().mins + ' min each</div>' +
+            '<button class="btn small' + (u.ok ? "" : " ghost") + '" data-go="module" data-mod="' + m.n + '">' + (u.ok ? "Open" : "Requirements") + '</button>' +
+          '</div>' +
+        '</div>';
+      v.appendChild(card);
+    });
+  }
+
+  function viewModule() {
+    const v = document.getElementById("view");
+    const m = MODULES.find(x => x.n === state.openModule) || MODULES[0];
+    const u = unlocked(m), t = tier();
+
+    const back = el("button", "btn ghost small", ico("i-back") + "Learning Map");
+    back.dataset.go = "map";
+    back.style.justifySelf = "start";
+    v.appendChild(back);
+
+    const head = el("div", "panel-head");
+    head.setAttribute("style", u.ok ? paint(m.colour) : "background:var(--surface-3);color:var(--ink)");
+    head.innerHTML =
+      '<span class="kicker">Course ' + m.n + ' · ' + esc(t.name) + ' · ' + sessionCount(m) + ' sessions of ' + t.mins + ' min</span>' +
+      '<h2>' + esc(m.name) + '</h2><p>' + esc(m.big) + '</p>';
+    v.appendChild(head);
+
+    if (!u.ok) {
+      const card = el("div", "card");
+      card.innerHTML = '<header><h2>Locked</h2></header><p class="muted" style="margin-bottom:.8rem">Finish these first — the sequence exists so nobody prices something before Money Smarts, or sells to strangers before Pitch Like a Pro.</p>';
+      const ul = el("ul", "req");
+      u.reqs.forEach(r => ul.appendChild(el("li", null, ico(r.met ? "i-check" : "i-lock", r.met ? "met" : "unmet") + esc(r.label))));
+      card.appendChild(ul);
+      v.appendChild(card);
+      return;
+    }
+
+    const list = el("div", "sessions");
+    m.s[state.tier].forEach((s, i) => {
+      if (m.milestone === i) list.appendChild(el("div", "milestone", ico("i-rocket") + esc(m.milestoneName)));
+      const done = isDone(m.n, i);
+      const row = el("div", "session" + (done ? " done" : ""));
+      row.innerHTML =
+        '<div class="s-beat beat-' + s[0] + '">' + s[0].slice(0, 4) + '</div>' +
+        '<div class="s-body"><b>' + (i + 1) + '. ' + esc(s[1]) + '</b><span>' + esc(s[2]) + '</span></div>' +
+        '<button class="check" aria-pressed="' + done + '" aria-label="' + (done ? "Mark session " + (i + 1) + " not done" : "Mark session " + (i + 1) + " complete") + '" data-sess="' + i + '">' + ico("i-check") + '</button>';
+      list.appendChild(row);
+    });
+    list.addEventListener("click", e => {
+      const b = e.target.closest("[data-sess]");
+      if (b) toggleSession(m, +b.dataset.sess);
+    });
+    v.appendChild(list);
+
+    const complete = moduleComplete(m);
+    const foot = el("div", "card");
+    foot.innerHTML =
+      '<header><h2>Badge</h2></header>' +
+      '<div style="display:flex;gap:.9rem;align-items:center">' +
+        '<div class="badge-medal" style="' + (complete ? paint("energy") : "") + '">' + ico("i-medal") + '</div>' +
+        '<div><h3>' + esc(m.badge) + '</h3><span class="muted">' +
+          (complete ? "Earned — +" + PTS.badge + " Little Points" : "Complete all " + sessionCount(m) + " sessions to earn this") +
+        '</span></div>' +
+      '</div>';
+    v.appendChild(foot);
+  }
+
+  function badgeCard(b, earned) {
+    const c = el("div", "badge" + (earned ? " earned" : "") + (b.core ? " core" : ""));
+    c.innerHTML = '<div class="badge-medal">' + ico(earned ? (b.core ? "i-medal" : "i-star") : "i-lock") + '</div>' +
+      '<b>' + esc(b.name) + '</b><p>' + esc(b.why) + '</p>';
+    return c;
+  }
+
+  function viewBadges() {
+    const v = document.getElementById("view");
+    const p = prog(), t = tier();
+
+    const intro = el("div", "card");
+    intro.innerHTML = '<header><h2>' + Object.keys(p.badges).length + ' of 27 badges earned</h2></header>' +
+      '<p class="muted">Every badge is criterion-referenced — every learner can earn every one, and nobody\'s badge is worth less because someone else has it. Course badges award automatically when all sessions are done. Skill and journey badges are awarded by a Guide against the published criteria. The 28th award is the tier certification.</p>';
+    v.appendChild(intro);
+
+    const certCard = el("div", "card");
+    certCard.innerHTML = '<header><h2>Tier certification</h2><span class="muted">' + MODULES.filter(moduleComplete).length + ' / 10 courses</span></header>';
+    const cert = el("div", "cert" + (p.cert ? " earned" : ""));
+    cert.innerHTML =
+      '<div class="cert-seal" style="' + (p.cert ? paint(t.colour) : "") + '">' + ico(p.cert ? "i-trophy" : "i-lock") + '</div>' +
+      '<b>' + esc(t.cert) + '</b>' +
+      '<p class="muted">' + esc(t.name) + ' · ages ' + t.age + ' · worth ' + PTS.cert + ' Little Points</p>';
+    certCard.appendChild(cert);
+    v.appendChild(certCard);
+
+    ["Course", "Skill", "Journey"].forEach(g => {
+      const card = el("div", "card");
+      const list = BADGES.filter(b => b.group === g);
+      card.innerHTML = '<header><h2>' + g + ' badges</h2><span class="muted">' +
+        list.filter(b => p.badges[b.name]).length + ' / ' + list.length + '</span></header>';
+      const grid = el("div", "badge-grid");
+      list.forEach(b => {
+        const earned = !!p.badges[b.name];
+        const c = badgeCard(b, earned);
+        if (b.core) {
+          const note = el("span", "muted", earned ? "Course " + b.mod : "Finish course " + b.mod);
+          note.style.fontSize = ".68rem";
+          c.appendChild(note);
+        } else {
+          const btn = el("button", "btn ghost small", earned ? "Remove" : "Award");
+          btn.dataset.badge = b.name;
+          c.appendChild(btn);
+        }
+        grid.appendChild(c);
+      });
+      grid.addEventListener("click", e => {
+        const b = e.target.closest("[data-badge]");
+        if (b) toggleBadge(b.dataset.badge);
+      });
+      card.appendChild(grid);
+      v.appendChild(card);
+    });
+  }
+
+  /* ============================ render ============================ */
+
+  function renderNav() {
+    const nav = document.getElementById("nav");
+    nav.innerHTML = "";
+    NAV.forEach(n => {
+      const b = el("button", "nav-btn", ico(n.icon) + n.label);
+      b.dataset.go = n.id;
+      if (state.view === n.id || (state.view === "module" && n.id === "courses")) b.setAttribute("aria-current", "page");
+      nav.appendChild(b);
+    });
+
+    const tr = document.getElementById("tierRow");
+    tr.innerHTML = "";
+    TIERS.forEach(t => {
+      const b = el("button", "tier-btn",
+        '<span class="tier-top-row"><span class="tier-dot" style="background:var(--' + t.colour + ')"></span>' + t.short + '</span>' +
+        '<span class="tier-age">' + t.age + '</span>');
+      b.setAttribute("aria-pressed", String(state.tier === t.id));
+      b.title = t.name + " — " + t.promise;
+      b.addEventListener("click", () => {
+        state.tier = t.id;
+        state.openModule = null;
+        if (state.view === "module") state.view = "courses";
+        save(); render();
+      });
+      tr.appendChild(b);
+    });
+  }
+
+  const TITLES = { dashboard:"My Progress", map:"Learning Map", courses:"My Courses", badges:"Badges", module:"My Courses" };
+
+  function render() {
+    renderNav();
+    document.getElementById("viewTitle").textContent = TITLES[state.view] || "Little Founders";
+    document.getElementById("pointsVal").textContent = points();
+    document.getElementById("streakVal").textContent = streak();
+    const v = document.getElementById("view");
+    v.innerHTML = "";
+    ({ dashboard:viewDashboard, map:viewMap, courses:viewCourses, module:viewModule, badges:viewBadges }[state.view] || viewDashboard)();
+  }
+
+  /* ============================ wiring ============================ */
+
+  document.addEventListener("click", e => {
+    const g = e.target.closest("[data-go]");
+    if (g) go(g.dataset.go, g.dataset.mod ? +g.dataset.mod : undefined);
+  });
+
+  document.getElementById("menuBtn").addEventListener("click", () => {
+    const sb = document.getElementById("sidebar");
+    sb.classList.add("open");
+    const scrim = el("div", "scrim");
+    scrim.addEventListener("click", () => { sb.classList.remove("open"); scrim.remove(); });
+    document.body.appendChild(scrim);
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    state.p[state.tier] = blank();
+    state.openModule = null;
+    save(); render();
+    toast("Progress reset", tier().name + " is back to the start", "i-back");
+  });
+
+  load();
+  render();
+})();
+</script>

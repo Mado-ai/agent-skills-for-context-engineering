@@ -1,45 +1,47 @@
 # Little Founders — Business School for Kids
 
-**Where young ideas grow into big businesses.**
+**Big ideas start young.** · *Learn. Build. Lead.*
 
-A complete, multi-age entrepreneurship curriculum for learners aged 6–16, built to the Little
-Founders brand system. Ten modules, three age tiers, 42 sessions per tier, 28 badges, one
-Demo Day.
+A complete entrepreneurship curriculum for ages 5–17. Ten core courses, four age tiers, a
+spiral design that returns to every concept four times, and a certification at the end of each
+tier.
 
-> Dream. Plan. Build. Grow.
+> We teach more than lessons. We build founders.
 
 ---
 
 ## What this is
 
-A full curriculum document — everything a school, club, camp, or homeschool co-op needs to
-run the Little Founders program end to end:
+The full written program — everything a school, club, camp, or franchise partner needs to run
+Little Founders end to end:
 
-- program philosophy and learning model
-- a scope and sequence covering all ten modules across all three tiers
+- program philosophy, learning model, and outcomes
+- a scope and sequence covering all ten courses across all four tiers
 - session-by-session lesson plans with objectives, activities, vocabulary, and evidence
-- an assessment system: rubrics, portfolio requirements, badge criteria, and the Little
-  Points economy
-- standards alignment and safeguarding guidance
+- assessment: rubrics, portfolios, 28 badges, the Petits Points / Little Points economy, and
+  the four tier certifications
+- Canadian operating guidance — provincial trading and food rules, money handling,
+  safeguarding, and bilingual delivery
 
-It is a written program, not software. The dashboard, learning map, and sticker designs in
-the brand system are the delivery surfaces this curriculum feeds.
+It is a written program plus a working learner platform. It is not a substitute for legal or
+insurance advice in your province.
 
-## The three tiers
+## The four tiers
 
-| Tier | Ages | Session length | Voice | Core question |
+| Tier | Ages | Session | The promise | Certification |
 |---|---|---|---|---|
-| **Spark** | 6–8 | 45 min | Play, story, drawing | *"What would make things better?"* |
-| **Builder** | 9–12 | 60 min | Making, testing, small money | *"Who is it for, and does it work?"* |
-| **Founder** | 13–16 | 90 min | Real customers, real revenue | *"Is this a business, and can I run it?"* |
+| 🌱 **Little Sprouts** | 5–7 | 45 min | Explore ideas, creativity and yourself | **Junior Founder** |
+| 🔨 **Junior Builders** | 8–10 | 60 min | Build, make and sell real products | **Certified Builder** |
+| 🚀 **Young Founders** | 11–13 | 75 min | Plan, validate and pitch your business | **Certified Young Founder** |
+| 👑 **Founder CEOs** | 14–17 | 90 min | Launch, lead and make an impact | **Certified Young Entrepreneur** |
 
-Same ten modules, same badges, same vocabulary spine — three genuinely different levels of
-challenge. A learner who starts at Spark and finishes at Founder meets each concept three
-times, each time with more independence and more real-world stakes.
+Same ten courses at every tier — four genuinely different levels of challenge. A learner who
+starts at Little Sprouts and finishes at Founder CEOs meets each concept four times, each time
+with more independence and higher real-world stakes. That is the spiral.
 
-## The ten modules
+## The ten core courses
 
-| # | Module | Big idea | Core badge |
+| # | Course | Big idea | Core badge |
 |---|---|---|---|
 | 1 | [Idea Starter](modules/01-idea-starter.md) | Ideas come from problems you notice | Big Ideas |
 | 2 | [Business Basics](modules/02-business-basics.md) | A business trades value for value | Business Brain |
@@ -48,31 +50,44 @@ times, each time with more independence and more real-world stakes.
 | 5 | [Pitch Like a Pro](modules/05-pitch-like-a-pro.md) | A pitch is a clear promise | I Can Pitch! |
 | 6 | [Leadership Lab](modules/06-leadership-lab.md) | Leaders make others stronger | Future Leader |
 | 7 | [Young CEO](modules/07-young-ceo.md) | Running it is a skill of its own | Young CEO |
-| 8 | [Community Builder](modules/08-community-builder.md) | Business is a neighbour, not a stranger | Community Builder |
+| 8 | [Community Builder](modules/08-community-builder.md) | A business is a neighbour, not a stranger | Community Builder |
 | 9 | [Startup Challenge](modules/09-startup-challenge.md) | Build it, sell it, learn from it | Launch Crew |
 | 10 | [Future Founder Mastery](modules/10-future-founder-mastery.md) | Your story, your next step | Future Founder |
 
-Modules 1–5 are open from the start. Module 6 unlocks at 250 Little Points with modules 1–5
-complete; 7–10 unlock in sequence. See [Assessment & Badges](04-assessment-and-badges.md).
+42 sessions per tier. Courses 1–5 open from day one; 6–10 unlock in sequence. See
+[Assessment & Badges](04-assessment-and-badges.md).
+
+## Events
+
+Three showcases per tier per year, plus mentorship at the two senior tiers:
+
+| Event | When | Who comes |
+|---|---|---|
+| **Idea Fair** | After Course 1 | Families |
+| **Market Day** | Inside Course 9 | The public |
+| **Demo Day** | Closing Course 10 | Families, mentors, partners |
 
 ## Documents
 
 | File | What it covers |
 |---|---|
-| [01-program-overview.md](01-program-overview.md) | Philosophy, learning model, outcomes, delivery formats, roles |
-| [02-brand-and-voice.md](02-brand-and-voice.md) | How the brand system shows up in teaching materials and language |
-| [03-scope-and-sequence.md](03-scope-and-sequence.md) | Full 10 × 3 matrix, session counts, prerequisites, spiral map |
-| [modules/](modules/) | Ten module files, each with all three tiers |
-| [04-assessment-and-badges.md](04-assessment-and-badges.md) | Rubrics, portfolio, all 28 badges, Little Points economy |
-| [05-standards-and-safeguarding.md](05-standards-and-safeguarding.md) | Standards alignment, safety, money handling, online conduct |
-| [06-materials-list.md](06-materials-list.md) | Consumables, templates, and per-module kit contents |
+| [01-program-overview.md](01-program-overview.md) | Philosophy, learning model, tiers, outcomes, delivery formats, roles |
+| [02-brand-and-voice.md](02-brand-and-voice.md) | Brand system in the classroom, fixed terms, feedback language, French glossary |
+| [03-scope-and-sequence.md](03-scope-and-sequence.md) | Session budget, the 10 × 4 matrix, unlocks, spiral map, year and camp plans |
+| [modules/](modules/) | Ten course files, each with all four tiers |
+| [04-assessment-and-badges.md](04-assessment-and-badges.md) | Rubrics, portfolio, 28 badges, certifications, Little Points |
+| [05-standards-and-safeguarding.md](05-standards-and-safeguarding.md) | Canadian standards alignment, ratios, money, provincial trading rules, inclusion |
+| [06-materials-list.md](06-materials-list.md) | Core kit, templates, per-course additions, budget in CAD, substitutions |
+| [platform.html](platform.html) | The learner platform — learning map, courses, progress, badges |
+| [program-guide.html](program-guide.html) | One-page program guide for schools and partners |
 
 ## Start here
 
 1. Read [01-program-overview.md](01-program-overview.md) — 15 minutes.
-2. Pick a delivery format and tier in [03-scope-and-sequence.md](03-scope-and-sequence.md).
-3. Open [modules/01-idea-starter.md](modules/01-idea-starter.md) and run Session 1.
+2. Pick a tier and delivery format in [03-scope-and-sequence.md](03-scope-and-sequence.md).
+3. Work the pre-program checklist in [05-standards-and-safeguarding.md](05-standards-and-safeguarding.md).
+4. Open [modules/01-idea-starter.md](modules/01-idea-starter.md) and run Session 1.
 
 ---
 
-*Little moments. Big impact.*
+*Little minds. Big futures.* · littlefounders.ca

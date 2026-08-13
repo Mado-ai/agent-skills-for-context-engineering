@@ -1,90 +1,155 @@
 # Brand & Voice in the Classroom
 
 The Little Founders brand is not decoration on top of the curriculum. Learners meet the same
-six colours, two fonts, and eight icons on their workbook, their badge, the wall, and their
-dashboard — so the visual system carries meaning and should be used consistently.
+colours, type, and icons on their workbook, their badge, the wall, and their dashboard — so the
+visual system carries meaning and should be used consistently.
 
-## The brand system, as applied
+## Colour
 
-### Colour
+### Core palette
 
 | Name | Hex | Curriculum meaning | Where it appears |
 |---|---|---|---|
-| Sunshine | `#FFC83D` | **Ideas** — anything at the Notice beat | Idea cards, lightbulb icon, Module 1 |
-| Energy | `#FF7A1A` | **Action** — doing, building, selling | Make-beat activities, Module 9 |
-| Sky | `#4DB6F2` | **People** — customers, teams, community | Feedback cards, Modules 6 & 8 |
-| Teal | `#00B9A7` | **Growth** — money, measurement, progress | Charts, ledgers, Modules 3 & 7 |
+| Sunshine | `#FFC83D` | **Ideas** — anything at the Notice beat | Idea cards, lightbulb icon, Course 1 |
+| Energy | `#FF7A1A` | **Action** — doing, building, selling | Make-beat activities, Course 9 |
+| Sky | `#4DB6F2` | **People** — customers, teams, community | Feedback cards, Courses 6 & 8 |
+| Teal | `#00B9A7` | **Growth** — money, measurement, progress | Charts, ledgers, Courses 3 & 7 |
 | Navy | `#0D1B3D` | **Structure** — text, plans, frameworks | All body text, plan templates |
 | Cream | `#F7F4EC` | Ground | Page backgrounds, never text |
 
-Colour-coding is a real teaching aid at Spark tier: "put your idea on a yellow card, put what
-your customer said on a blue card." Keep it exact.
+### Tier colours
 
-**Accessibility:** Sunshine on Cream fails contrast for text — use Navy text on Sunshine, never
-the reverse. Never encode information in colour alone; every colour-coded card also carries
-its icon.
+Each tier owns one colour and one icon. These are identity, not meaning — a Little Sprouts
+learner should be able to find their material in a shared cupboard from across the room.
 
-### Type
+| Tier | Colour | Hex | Icon |
+|---|---|---|---|
+| Little Sprouts | Sprout Green | `#5FA63F` | 🌱 seedling |
+| Junior Builders | Sunshine | `#FFC83D` | 🔨 hammer |
+| Young Founders | Founder Purple | `#7B5EA6` | 🚀 rocket |
+| Founder CEOs | Navy | `#0D1B3D` | 👑 crown |
+
+Colour-coding is a real teaching aid at the younger tiers: "put your idea on a yellow card, put
+what your customer said on a blue card." Keep it exact.
+
+**Accessibility.** Sunshine on Cream fails contrast for text — use Navy on Sunshine, never the
+reverse. Sprout Green and Founder Purple both need white or Cream text at body size. Never
+encode information in colour alone; every colour-coded card also carries its icon.
+
+## Type
 
 - **Headings:** Nunito ExtraBold. Friendly, modern, confident.
 - **Body:** Inter Regular. Clean, readable, professional.
-- **Spark tier handouts:** Nunito Regular at 18pt minimum, generous line height, left-aligned,
-  never justified. Avoid all-caps for anything a 6-year-old must read.
+- **Little Sprouts handouts:** Nunito Regular at 18 pt minimum, generous line height,
+  left-aligned, never justified. No all-caps for anything a five-year-old must read.
 
-### Icons
+## Icons
 
-The eight brand icons carry fixed meanings across all materials:
+Fixed meanings across all materials:
 
-| Icon | Meaning | Primary module |
+| Icon | Meaning | Primary course |
 |---|---|---|
 | Lightbulb | Ideas | 1 |
-| Rocket | Launch | 9 |
-| Growth chart | Growth, measurement | 3, 7 |
 | Briefcase | Business | 2 |
-| Handshake | Partnership | 8 |
-| Trophy | Achievement | 10 |
+| Growth chart | Growth, measurement | 3, 7 |
 | Megaphone | Marketing, voice | 4 |
 | Microphone | Pitch | 5 |
+| People | Teams, leadership | 6 |
+| Crown | Running it | 7 |
+| Handshake | Partnership | 8 |
+| Rocket | Launch | 9 |
+| Trophy | Achievement | 10 |
 
-The paper plane, dotted flight path, star, and squiggle are decorative and carry no meaning —
-they are used to make a page feel in motion, not to label anything.
+The paper plane, dotted flight path, star, squiggle, and brush stroke are decorative and label
+nothing — they make a page feel in motion.
 
 ## Fixed terms
 
-These words mean one thing and are never paraphrased in learner-facing material. Guides may
-explain them in other words; printed and on-screen surfaces use these exactly.
+These mean one thing and are never paraphrased on a learner-facing surface. Guides may explain
+them in other words; printed and on-screen material uses these exactly.
 
 **Program structure**
-`Little Founders` · `Spark` · `Builder` · `Founder` · `Learning Map` · `Little Points` ·
-`Demo Day` · `Market Day` · `Idea Fair`
+`Little Founders` · `Little Sprouts` · `Junior Builders` · `Young Founders` · `Founder CEOs` ·
+`Learning Map` · `Little Points` · `Idea Fair` · `Market Day` · `Demo Day`
+
+**Certifications**
+`Junior Founder` · `Certified Builder` · `Certified Young Founder` ·
+`Certified Young Entrepreneur`
 
 **The cycle**
-`Notice` · `Make` · `Show` · `Change` — and the learner-facing pairing
-`Dream. Plan. Build. Grow.`
+`Notice` · `Make` · `Show` · `Change` — and the learner-facing `Dream. Plan. Build. Grow.`
 
-**Module names**
+**Course names**
 Idea Starter · Business Basics · Money Smarts · Marketing Magic · Pitch Like a Pro ·
 Leadership Lab · Young CEO · Community Builder · Startup Challenge · Future Founder Mastery
 
 **Roles**
 `Guide` · `Helper` · `Customer` · `Mentor`
 
+**Taglines** — used whole, never edited
+*Big ideas start young.* · *Learn. Build. Lead.* · *Little minds. Big futures.* ·
+*We teach more than lessons. We build founders.* · *Inspire today, lead tomorrow.*
+
+## Glossaire français
+
+Bilingual cohorts carry both names on every surface. These are the official French forms.
+
+| English | Français |
+|---|---|
+| Little Founders | Little Founders *(nom propre, non traduit)* |
+| Business School for Kids | École de commerce pour enfants |
+| Little Sprouts | Petites Pousses |
+| Junior Builders | Bâtisseurs Juniors |
+| Young Founders | Jeunes Fondateurs |
+| Founder CEOs | PDG Fondateurs |
+| Junior Founder | Fondateur Junior |
+| Certified Builder | Bâtisseur Certifié |
+| Certified Young Founder | Jeune Fondateur Certifié |
+| Certified Young Entrepreneur | Jeune Entrepreneur Certifié |
+| Notice · Make · Show · Change | Observer · Créer · Montrer · Améliorer |
+| Dream. Plan. Build. Grow. | Rêve. Planifie. Bâtis. Grandis. |
+| Learn. Build. Lead. | Apprendre. Bâtir. Diriger. |
+| Big ideas start young. | Les grandes idées commencent jeunes. |
+| Little minds. Big futures. | Petits esprits. Grands avenirs. |
+| Learning Map | Carte d'apprentissage |
+| Little Points | Petits Points |
+| Idea Fair · Market Day · Demo Day | Foire aux idées · Jour du marché · Jour de démonstration |
+| Guide · Helper · Customer · Mentor | Guide · Aide · Client · Mentor |
+
+**Course names**
+
+| # | English | Français |
+|---|---|---|
+| 1 | Idea Starter | Lance-Idées |
+| 2 | Business Basics | Les Bases des Affaires |
+| 3 | Money Smarts | Génie de l'Argent |
+| 4 | Marketing Magic | La Magie du Marketing |
+| 5 | Pitch Like a Pro | Présente comme un Pro |
+| 6 | Leadership Lab | Labo du Leadership |
+| 7 | Young CEO | Jeune PDG |
+| 8 | Community Builder | Bâtisseur de Communauté |
+| 9 | Startup Challenge | Défi Startup |
+| 10 | Future Founder Mastery | Fondateur de Demain |
+
+Badge names stay in the language of the cohort's certificate. Have French names signed off by a
+francophone Guide before printing — a badge a learner cannot say out loud proudly is a failed
+badge.
+
 ## Voice
 
-The brand voice is *warm, direct, and takes children seriously.* Three rules:
+*Warm, direct, and takes children seriously.* Three rules:
 
 **1. Talk to the learner, not about them.**
 - ✅ "Pick the problem that bugs you most."
 - ❌ "Students will select a problem of personal relevance."
 
 **2. Short sentences. Real words.**
-Say *money you keep*, not *net margin* — then, once they have felt it, name it: "grown-ups
-call that margin." Concept first, vocabulary second, always in that order.
+Say *money you keep*, not *net margin* — then, once they have felt it, name it: "grown-ups call
+that margin." Concept first, vocabulary second, always in that order.
 
 **3. Confidence without hype.**
-The brand says *"Where young ideas grow into big businesses."* It does not say *"become a
-millionaire."* Praise the work, not the child: "that price change was a smart call" beats
-"you're a genius."
+The brand says *big ideas start young*. It does not say *become a millionaire*. Praise the work,
+not the child: "that price change was a smart call" beats "you're a genius."
 
 ### Phrases to use
 
@@ -96,40 +161,40 @@ millionaire."* Praise the work, not the child: "that price change was a smart ca
 > *Wrong.* (Use: "what made you choose that?") ·
 > *Just* (as in "just make a poster" — nothing here is *just*) ·
 > *Disruptive*, *unicorn*, *hustle*, *grind* — startup theatre, not entrepreneurship ·
-> *Winner / loser* outside of an explicitly framed game
+> *Winner / loser* outside an explicitly framed game
 
 ## Feedback language
 
-Feedback is a taught skill from Module 1 and uses one frame at every tier:
+Feedback is a taught skill from Course 1, using one frame at every tier:
 
 ```
 I like…        (something specific that worked)
 I wonder…      (an open question, not a fix)
 What if…       (one suggestion, offered lightly)
 ```
+*J'aime… · Je me demande… · Et si…*
 
-Spark learners get it as three picture cards. Builder learners write it on sticky notes.
-Founder learners use it verbally in structured critique and are held to specificity: "I like
-your poster" is sent back; "I like that the price is the biggest thing on the poster" passes.
+Little Sprouts get it as three picture cards. Junior Builders write it on sticky notes. Young
+Founders and Founder CEOs use it verbally in structured critique and are held to specificity:
+"I like your poster" is sent back; "I like that the price is the biggest thing on the poster"
+passes.
 
 ## Certificates, badges, and naming
 
 - Badge names are fixed (see [04-assessment-and-badges.md](04-assessment-and-badges.md)) and
-  always written in Title Case with their exclamation mark where they have one: *I Can Pitch!*
-- Certificates use the learner's name plus a tier: *Mia — Builder, Little Founders*.
+  written in Title Case with their exclamation mark where they have one: *I Can Pitch!*
+- Certificates name the learner and the certification: *Mia — Certified Builder, Little
+  Founders*.
 - Never rank learners on a public surface. The Learning Map shows a learner their own progress.
   Leaderboards are not part of this program.
 
 ## Room setup
 
-If you have wall space, the brand does real work:
-
-- **The Learning Map** — the ten modules as a path; each learner has a marker they move.
+- **The Learning Map** — the ten courses as a path; each learner has a marker they move.
 - **The Idea Wall** — Sunshine cards, added to any time, never cleared without asking.
-- **The Wonder Wall** — Sky cards of things customers said. This is the wall that changes minds.
+- **The Wonder Wall** — Sky cards of things customers said. The wall that changes minds.
 - **Dream · Plan · Build · Grow** signpost at learner eye height.
 
-The photo-booth props (speech bubbles reading *CEO of my future*, *Problem Solver*, *Ideas
-Change the World*, *Future Leader*) are used at Idea Fair, Market Day, and Demo Day. Photos
-require the family media consent recorded in
-[05-standards-and-safeguarding.md](05-standards-and-safeguarding.md).
+Photo-booth props (*CEO of my future* · *Problem Solver* · *Ideas Change the World* · *Future
+Leader*) come out at Idea Fair, Market Day, and Demo Day. Photos require the media consent
+recorded in [05-standards-and-safeguarding.md](05-standards-and-safeguarding.md).
