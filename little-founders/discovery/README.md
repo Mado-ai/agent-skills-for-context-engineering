@@ -7,7 +7,7 @@ the thing a student actually holds, fills in, and takes home.
 |---|---|---|---|---|
 | 🌱 Little Sprouts | 5–7 | **How Is It Made?** | Discover the world | ✅ Built — [`how-is-it-made.html`](how-is-it-made.html) |
 | 🔨 Junior Builders | 8–10 | **Mission Control** | Learn to plan and organize | Planned |
-| 🚀 Young Founders | 11–13 | **Reverse. Rethink. Rebuild.** | Learn to question and improve | Planned |
+| 🚀 Young Founders | 11–13 | **Reverse. Rethink. Rebuild.** | Learn to question and improve | ✅ Built — [`reverse-rethink-rebuild.html`](reverse-rethink-rebuild.html) |
 | 👑 Founder CEOs | 14–17 | **GO OVERSEAS!** | Build it, brand it, take it into the world | ✅ Built — [`go-overseas.html`](go-overseas.html) |
 
 The progression is deliberate: **discover → plan → question → build.** A learner who moves through
@@ -124,7 +124,7 @@ professional before trading. The Canadian operating checks in
 
 ---
 
-## Books 2 and 3 — planned
+## Book 2 — planned
 
 **Mission Control** (8–10) — *Learn to plan and organize.* Junior Builders make and sell real
 things, so this book should be the mission planner: choosing the job, listing what you need,
@@ -132,11 +132,38 @@ sequencing the work, assigning the crew, tracking the countdown, and running the
 natural interactive spine is a mission board with a checklist, a supply manifest, a crew roster,
 and a countdown to Market Day.
 
-**Reverse. Rethink. Rebuild.** (11–13) — *Learn to question and improve.* Young Founders must
-prove someone wants it before they build it, so this book should teach teardown: take an existing
-product apart, find what annoys people about it, ask why it is like that, and rebuild it better.
-The natural interactive spine is a teardown canvas, an assumption tracker, a test designer with a
-pass threshold set before the test runs, and a before/after comparison.
+It follows the same rules as the built books: one repeating pattern taught by repetition, every
+screen ends with something the learner made, and the certificate is criterion-based.
 
-Both follow the same rules as the two built books: one repeating pattern taught by repetition,
-every screen ends with something the learner made, and the certificate is criterion-based.
+---
+
+## Book 3 — Reverse. Rethink. Rebuild.
+
+**Young Founders · Ages 11–13 · Look deeper. Think better. Build smarter.**
+
+> Question. Rethink. Improve. Create.
+
+Four steps, run on one real object the learner chooses:
+
+| Step | | What it teaches |
+|---|---|---|
+| 1 | **Observe** | Train your curiosity. Notice details. Understand how the world works |
+| 2 | **Ask better questions** | Go beyond the obvious. Ask "why," "what if," and "how else?" |
+| 3 | **Rethink solutions** | Challenge the status quo. Explore creative possibilities |
+| 4 | **Build better ideas** | Turn thinking into action. Build ideas that solve real problems |
+
+**In the digital version**
+
+- **Four worked teardowns** — a backpack, a water bottle, a bus stop, and the lunch queue, each
+  pulled apart properly, so learners see what good looks like before doing their own
+- **Parts and noticing lists** — you cannot rebuild what you have not noticed
+- **The question ladder** — write the obvious question, then push it. Ten question starters that
+  break assumptions fastest, and one question marked as *my best*
+- **Six lenses** — lighter, stronger, cheaper, simpler, kinder, for-someone-else. The instruction
+  is to use one you resist
+- **Assumption tracker** — every belief sorted into *known* or *guess*, with a live count of the
+  guesses
+- **Test designer** — the pass threshold must be written *before* the test runs, because a
+  success defined afterwards teaches nothing
+- **Before → After** comparison, what changed and why, who it helps, and a sketch pad
+- **Rebuild Report** and the **Reverse Thinker** certificate

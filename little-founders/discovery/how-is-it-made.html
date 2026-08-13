@@ -4,9 +4,9 @@
     --ground: #F7F4EC;
     --paper: #FFFFFF;
     --soft: #F2EEE2;
-    --ink: #16233F;
-    --ink-soft: #46557E;
-    --ink-mute: #7C89A9;
+    --ink: #0D1B3D;
+    --ink-soft: #3E4E76;
+    --ink-mute: #7B87A5;
     --rule: #E3DCCA;
 
     --sun: #FFC83D;
@@ -15,12 +15,12 @@
     --teal: #00B9A7;
     --rose: #E0526E;
     --purple: #7B5EA6;
-    --green: #4CA455;
-    --navy: #16233F;
+    --green: #5FA63F;
+    --navy: #0D1B3D;
 
-    --on-sun: #16233F;
+    --on-sun: #0D1B3D;
     --on-energy: #FFFFFF;
-    --on-sky: #16233F;
+    --on-sky: #0D1B3D;
     --on-teal: #FFFFFF;
     --on-rose: #FFFFFF;
     --on-purple: #FFFFFF;
@@ -172,6 +172,18 @@
 
   .ziggy-hero { width: clamp(96px, 24vw, 150px); height: auto; filter: drop-shadow(0 10px 20px rgba(224,82,110,.25)); }
 
+  .underline::after {
+    content: ""; display: block; width: 4.5rem; height: 6px; border-radius: 99px;
+    background: var(--sun); margin: .8rem auto 0;
+  }
+  .bandfoot {
+    margin-top: 3rem; background: var(--navy); border-radius: 24px;
+    padding: 1.3rem 1.6rem; display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; justify-content: center;
+    font-family: var(--display); font-weight: 900; font-size: clamp(1.1rem, 3.4vw, 1.7rem);
+  }
+  .bandfoot i { font-style: normal; }
+  @media print { .bandfoot { display: none } }
+
   .quote { font-family: var(--display); font-weight: 800; font-style: italic; color: var(--teal); }
 
   /* ---------------- ziggy speech ---------------- */
@@ -205,7 +217,7 @@
   }
   .topic:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
   .topic .badge {
-    width: 3.4rem; height: 3.4rem; border-radius: 18px; display: grid; place-items: center;
+    width: 3.4rem; height: 3.4rem; border-radius: 50%; display: grid; place-items: center;
   }
   .topic .badge .ic { width: 1.8rem; height: 1.8rem; }
   .topic b { font-family: var(--display); font-weight: 800; font-size: 1rem; display: block; line-height: 1.2; }
@@ -232,7 +244,7 @@
 
   .topic-head { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
   .topic-head .num {
-    width: 3.6rem; height: 3.6rem; border-radius: 20px; display: grid; place-items: center;
+    width: 3.6rem; height: 3.6rem; border-radius: 50%; display: grid; place-items: center;
     font-family: var(--display); font-weight: 900; font-size: 1.6rem;
   }
   .topic-head h2 { font-size: clamp(1.6rem, 5vw, 2.4rem); }
@@ -240,7 +252,7 @@
   .sec-label {
     display: flex; align-items: center; gap: .5rem;
     font-family: var(--body); font-size: .74rem; font-weight: 800;
-    letter-spacing: .1em; text-transform: uppercase; color: var(--purple); margin-bottom: .7rem;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--teal); margin-bottom: .7rem;
   }
   .sec-label .ic { width: 1rem; height: 1rem; }
 
@@ -257,7 +269,7 @@
   }
   .stage.in { opacity: 1; transform: none; }
   .stage .puck {
-    width: 3.6rem; height: 3.6rem; border-radius: 20px; display: grid; place-items: center;
+    width: 3.6rem; height: 3.6rem; border-radius: 50%; display: grid; place-items: center;
     box-shadow: var(--shadow);
   }
   .stage .puck .ic { width: 2rem; height: 2rem; }
@@ -269,6 +281,7 @@
   }
   .arrow.in { opacity: 1; }
   .arrow svg { width: 1.1rem; height: 1.1rem; }
+  .arrow { color: var(--teal); }
 
   .journey-controls { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: .9rem; align-items: center; }
   .hint { color: var(--ink-mute); font-size: .84rem; }
@@ -831,6 +844,10 @@
     const p = $("page");
     p.innerHTML = "";
     ({ home:vHome, topic:vTopic, words:vWords, card:vCard, cert:vCert }[view.name] || vHome)(p);
+    const band = el("div", "bandfoot");
+    band.innerHTML = [["Look.", "sun"], ["Ask.", "sky"], ["Make.", "energy"], ["Make it better.", "teal"]]
+      .map(([w, c]) => '<i style="color:var(--' + c + ')">' + w + '</i>').join(" ");
+    p.appendChild(band);
   }
 
   /* -------- home -------- */

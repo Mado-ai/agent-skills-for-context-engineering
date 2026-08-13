@@ -1,0 +1,1025 @@
+<title>Reverse Rethink Rebuild</title>
+<style>
+  :root {
+    --ground: #F7F4EC;
+    --paper: #FFFFFF;
+    --soft: #FBF9F3;
+    --sunk: #F1EDE1;
+    --ink: #0D1B3D;
+    --ink-soft: #3E4E76;
+    --ink-mute: #7B87A5;
+    --rule: #E3DCCA;
+    --rule-hard: #D6CDB6;
+
+    --sun: #FFC83D;
+    --energy: #FF7A1A;
+    --sky: #4DB6F2;
+    --teal: #00B9A7;
+    --purple: #7B5EA6;
+    --rose: #E0526E;
+    --green: #5FA63F;
+    --navy: #0D1B3D;
+
+    --shadow: 0 1px 2px rgba(13,27,61,.04), 0 10px 26px -16px rgba(13,27,61,.25);
+    --shadow-lg: 0 3px 8px rgba(13,27,61,.07), 0 28px 56px -28px rgba(13,27,61,.4);
+
+    --display: "Nunito", ui-rounded, "SF Pro Rounded", "Segoe UI Variable Display", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0A1730; --paper: #12234A; --soft: #16294F; --sunk: #1C3159;
+      --ink: #F4F1E8; --ink-soft: #C7D2EC; --ink-mute: #8E9CBE;
+      --rule: #26375F; --rule-hard: #35497A;
+      --sun: #FFD264; --energy: #FF9247; --sky: #74C6F7; --teal: #1ACFBB;
+      --purple: #A78BCE; --rose: #F0798F; --green: #7EC65C; --navy: #F4F1E8;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 28px -18px rgba(0,0,0,.8);
+      --shadow-lg: 0 3px 8px rgba(0,0,0,.45), 0 30px 60px -30px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0A1730; --paper: #12234A; --soft: #16294F; --sunk: #1C3159;
+    --ink: #F4F1E8; --ink-soft: #C7D2EC; --ink-mute: #8E9CBE;
+    --rule: #26375F; --rule-hard: #35497A;
+    --sun: #FFD264; --energy: #FF9247; --sky: #74C6F7; --teal: #1ACFBB;
+    --purple: #A78BCE; --rose: #F0798F; --green: #7EC65C; --navy: #F4F1E8;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 28px -18px rgba(0,0,0,.8);
+    --shadow-lg: 0 3px 8px rgba(0,0,0,.45), 0 30px 60px -30px rgba(0,0,0,.9);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--body); font-size: 1rem; line-height: 1.62; -webkit-font-smoothing: antialiased;
+  }
+  h1,h2,h3,h4 { font-family: var(--display); font-weight: 800; margin: 0; line-height: 1.12; letter-spacing: -.02em; text-wrap: balance; }
+  p { margin: 0; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; font-family: var(--body); }
+  input, textarea { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--sky); outline-offset: 3px; border-radius: 10px; }
+  .ic { width: 1.2em; height: 1.2em; flex: none; }
+
+  /* ---- top bar ---- */
+  .bar {
+    position: sticky; top: 0; z-index: 40;
+    display: flex; align-items: center; gap: .7rem; flex-wrap: wrap;
+    padding: .8rem clamp(1rem, 3vw, 2.2rem);
+    background: color-mix(in srgb, var(--ground) 92%, transparent);
+    backdrop-filter: blur(10px); border-bottom: 1px solid var(--rule);
+  }
+  .logo { display: flex; align-items: center; gap: .55rem; margin-right: auto; }
+  .logo svg { width: 28px; height: 39px; }
+  .logo b { font-family: var(--display); font-weight: 800; font-size: .95rem; line-height: 1.05; display: block; }
+  .logo span { font-size: .56rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; color: var(--teal); }
+
+  .stepdots { display: flex; gap: .35rem; }
+  .sdot {
+    width: 2.2rem; height: 2.2rem; border-radius: 50%; display: grid; place-items: center;
+    border: 2px dashed var(--rule-hard); background: var(--paper); color: var(--ink-mute);
+    transition: transform .3s cubic-bezier(.3,1.5,.5,1), border-color .25s ease;
+  }
+  .sdot .ic { width: 1.1rem; height: 1.1rem; }
+  .sdot.on { border-style: solid; color: #fff; }
+  .sdot.here { transform: scale(1.15); box-shadow: 0 0 0 4px color-mix(in srgb, var(--sun) 40%, transparent); }
+
+  .chipbtn {
+    display: inline-flex; align-items: center; gap: .4rem; padding: .45rem .9rem;
+    border-radius: 99px; font-family: var(--display); font-weight: 800; font-size: .88rem;
+    background: var(--paper); border: 2px solid var(--rule); box-shadow: var(--shadow);
+    transition: transform .12s ease;
+  }
+  .chipbtn:hover { transform: translateY(-2px); }
+
+  /* ---- layout ---- */
+  .page { max-width: 60rem; margin: 0 auto; padding: clamp(1.4rem,3.4vw,2.8rem) clamp(1rem,3vw,2.2rem) 4rem; }
+  .eyebrow { font-size: .72rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--teal); }
+  h1.big { font-size: clamp(2rem, 6.5vw, 3.6rem); margin-top: .6rem; }
+  h1.big::after { content: ""; display: block; width: 4.5rem; height: 6px; border-radius: 99px; background: var(--sun); margin-top: 1rem; }
+  .lede { color: var(--ink-soft); font-size: 1.08rem; margin-top: 1rem; max-width: 56ch; }
+
+  .card { background: var(--paper); border: 1px solid var(--rule); border-radius: 22px; padding: 1.4rem 1.5rem; box-shadow: var(--shadow); }
+  .card + .card { margin-top: 1rem; }
+  .stack { display: grid; gap: 1rem; }
+  .grid2 { display: grid; gap: 1rem; }
+  @media (min-width: 50rem) { .grid2 { grid-template-columns: 1fr 1fr; } }
+
+  .lbl { display: block; font-family: var(--display); font-weight: 800; font-size: 1rem; margin-bottom: .3rem; }
+  .hint { color: var(--ink-mute); font-size: .86rem; }
+  .fld { display: grid; gap: .35rem; }
+  .fld + .fld { margin-top: 1rem; }
+  input[type=text], input[type=number], textarea {
+    width: 100%; padding: .7rem .9rem; border-radius: 13px;
+    border: 2px solid var(--rule); background: var(--paper); resize: vertical; transition: border-color .15s ease;
+  }
+  input:focus, textarea:focus { border-color: var(--teal); outline: none; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    padding: .72rem 1.3rem; border-radius: 14px; font-family: var(--display); font-weight: 800; font-size: .96rem;
+    background: var(--energy); color: #fff; box-shadow: var(--shadow); transition: transform .12s ease, filter .12s ease;
+  }
+  .btn:hover { transform: translateY(-2px); filter: brightness(1.06); }
+  .btn.ghost { background: var(--paper); color: var(--ink); border: 2px solid var(--rule-hard); box-shadow: none; }
+  .btn.sm { padding: .42rem .85rem; font-size: .85rem; border-radius: 11px; }
+
+  .pagenav { display: flex; gap: .8rem; justify-content: space-between; margin-top: 2.6rem; flex-wrap: wrap; }
+
+  /* ---- the four-step rail (the poster device) ---- */
+  .steps4 { display: grid; gap: .5rem; grid-template-columns: repeat(auto-fit, minmax(11rem,1fr)); align-items: start; }
+  .s4 { display: grid; gap: .55rem; justify-items: center; text-align: center; position: relative; }
+  .s4 .circ {
+    width: 4.6rem; height: 4.6rem; border-radius: 50%; display: grid; place-items: center;
+    color: #fff; box-shadow: var(--shadow); position: relative;
+  }
+  .s4 .circ .ic { width: 2.2rem; height: 2.2rem; }
+  .s4 .pip {
+    position: absolute; bottom: -.2rem; right: -.2rem; width: 1.6rem; height: 1.6rem; border-radius: 50%;
+    background: var(--paper); color: var(--ink); border: 2px solid var(--rule);
+    display: grid; place-items: center; font-family: var(--display); font-weight: 800; font-size: .74rem;
+  }
+  .s4 b { font-family: var(--display); font-weight: 800; font-size: .95rem; letter-spacing: .01em; text-transform: uppercase; }
+  .s4 span { font-size: .84rem; color: var(--ink-soft); line-height: 1.4; }
+  .s4 .dash {
+    position: absolute; top: 2.2rem; left: calc(50% + 3.1rem); width: calc(100% - 6.2rem); height: 2px;
+    border-top: 3px dashed var(--teal); opacity: .7;
+  }
+  @media (max-width: 43.9rem) { .s4 .dash { display: none; } }
+
+  /* ---- worked examples ---- */
+  .exgrid { display: grid; gap: .8rem; grid-template-columns: repeat(auto-fill, minmax(13rem,1fr)); }
+  .ex { border: 2px solid var(--rule); border-radius: 20px; padding: 1rem; background: var(--paper); text-align: left; transition: transform .14s ease, box-shadow .14s ease; }
+  .ex:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+  .ex .top { display: flex; align-items: center; gap: .7rem; margin-bottom: .5rem; }
+  .ex .circ { width: 2.6rem; height: 2.6rem; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 1.1rem; }
+  .ex b { font-family: var(--display); font-weight: 800; font-size: 1rem; }
+  .ex p { font-size: .85rem; color: var(--ink-mute); }
+
+  .exdetail { display: grid; gap: .7rem; }
+  .exrow { display: grid; grid-template-columns: 2.6rem minmax(0,1fr); gap: .8rem; align-items: start; }
+  .exrow .circ { width: 2.6rem; height: 2.6rem; border-radius: 50%; display: grid; place-items: center; color: #fff; }
+  .exrow .circ .ic { width: 1.2rem; height: 1.2rem; }
+  .exrow h4 { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; font-family: var(--body); font-weight: 800; color: var(--teal); }
+  .exrow p { font-size: .94rem; }
+
+  /* ---- lists with add/remove ---- */
+  .rows { display: grid; gap: .4rem; }
+  .row { display: grid; grid-template-columns: minmax(0,1fr) 2.2rem; gap: .5rem; align-items: center; }
+  .row.dual { grid-template-columns: minmax(0,1fr) minmax(0,1fr) 2.2rem; }
+  .icon-btn { width: 2.2rem; height: 2.2rem; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--rule); color: var(--ink-mute); }
+  .icon-btn:hover { color: var(--rose); border-color: var(--rose); }
+
+  /* ---- question starters ---- */
+  .starters { display: flex; flex-wrap: wrap; gap: .45rem; }
+  .starter {
+    padding: .45rem .95rem; border-radius: 99px; border: 2px solid var(--rule);
+    background: var(--paper); font-family: var(--display); font-weight: 800; font-size: .88rem;
+    transition: transform .12s ease;
+  }
+  .starter:hover { transform: translateY(-1px); border-color: var(--energy); color: var(--energy); }
+
+  .qladder { display: grid; gap: .5rem; }
+  .qpair { border: 2px solid var(--rule); border-radius: 18px; padding: .9rem 1rem; display: grid; gap: .6rem; }
+  .qpair .weak, .qpair .better { display: grid; grid-template-columns: 5.6rem minmax(0,1fr); gap: .7rem; align-items: center; }
+  .qpair .tagw, .qpair .tagb { font-size: .62rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; text-align: right; }
+  .qpair .tagw { color: var(--ink-mute); }
+  .qpair .tagb { color: var(--energy); }
+  .qpair.best { border-color: var(--energy); background: color-mix(in srgb, var(--energy) 8%, var(--paper)); }
+  @media (max-width: 34rem) { .qpair .weak, .qpair .better { grid-template-columns: minmax(0,1fr); gap: .15rem; } .qpair .tagw, .qpair .tagb { text-align: left; } }
+
+  /* ---- lenses ---- */
+  .lenses { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fill, minmax(13rem,1fr)); }
+  .lens { border: 2px solid var(--rule); border-radius: 18px; padding: .8rem .9rem; display: grid; gap: .4rem; }
+  .lens .lhead { display: flex; align-items: center; gap: .5rem; }
+  .lens .dot { width: 1.5rem; height: 1.5rem; border-radius: 50%; }
+  .lens b { font-family: var(--display); font-weight: 800; font-size: .92rem; }
+  .lens.filled { border-color: var(--teal); background: color-mix(in srgb, var(--teal) 7%, var(--paper)); }
+
+  /* ---- assumptions ---- */
+  .atable { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  .atable th { text-align: left; font-size: .62rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--teal); padding: .45rem .35rem; }
+  .atable td { padding: .32rem .35rem; border-top: 1px solid var(--rule); }
+  .scroll { overflow-x: auto; }
+  .kg { display: flex; gap: .25rem; }
+  .kg button { padding: .3rem .6rem; border-radius: 99px; border: 2px solid var(--rule); font-size: .72rem; font-weight: 800; font-family: var(--display); background: var(--paper); }
+  .kg button[aria-pressed="true"][data-v="known"] { background: var(--teal); border-color: var(--teal); color: #fff; }
+  .kg button[aria-pressed="true"][data-v="guess"] { background: var(--energy); border-color: var(--energy); color: #fff; }
+
+  .verdict { border-radius: 18px; padding: 1rem 1.15rem; display: flex; gap: .7rem; align-items: flex-start; line-height: 1.55; }
+  .verdict.good { background: color-mix(in srgb, var(--teal) 12%, var(--paper)); border: 2px solid color-mix(in srgb, var(--teal) 40%, var(--rule)); }
+  .verdict.warn { background: color-mix(in srgb, var(--energy) 12%, var(--paper)); border: 2px solid color-mix(in srgb, var(--energy) 45%, var(--rule)); }
+  .verdict.idle { background: var(--soft); border: 2px solid var(--rule); color: var(--ink-mute); }
+
+  /* ---- before / after ---- */
+  .ba { display: grid; gap: .8rem; }
+  @media (min-width: 46rem) { .ba { grid-template-columns: 1fr auto 1fr; align-items: stretch; } }
+  .bacol { border: 2px solid var(--rule); border-radius: 20px; padding: 1rem; display: grid; gap: .5rem; align-content: start; }
+  .bacol.before { background: var(--soft); }
+  .bacol.after { border-color: var(--teal); background: color-mix(in srgb, var(--teal) 7%, var(--paper)); }
+  .bacol h4 { font-size: .68rem; letter-spacing: .13em; text-transform: uppercase; font-family: var(--body); font-weight: 800; }
+  .bacol.before h4 { color: var(--ink-mute); }
+  .bacol.after h4 { color: var(--teal); }
+  .baarrow { display: grid; place-items: center; color: var(--teal); font-size: 1.6rem; }
+
+  /* ---- canvas ---- */
+  .canvas-shell { position: relative; border-radius: 20px; overflow: hidden; border: 3px dashed var(--rule-hard); background: var(--paper); touch-action: none; }
+  canvas { display: block; width: 100%; height: auto; touch-action: none; cursor: crosshair; }
+  .canvas-empty { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; color: var(--ink-mute); font-family: var(--display); font-weight: 800; }
+  .tools { display: flex; gap: .45rem; flex-wrap: wrap; align-items: center; margin-top: .7rem; }
+  .swatch { width: 2.2rem; height: 2.2rem; border-radius: 50%; border: 3px solid var(--paper); box-shadow: 0 0 0 2px var(--rule); transition: transform .12s ease; }
+  .swatch:hover { transform: scale(1.1); }
+  .swatch[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--ink); transform: scale(1.14); }
+
+  /* ---- report ---- */
+  .bp { display: grid; gap: .7rem; grid-template-columns: repeat(auto-fill, minmax(15rem,1fr)); }
+  .bpc { border: 2px solid var(--rule); border-radius: 18px; padding: .9rem 1rem; background: var(--paper); }
+  .bpc h4 { font-family: var(--body); font-size: .62rem; letter-spacing: .11em; text-transform: uppercase; color: var(--teal); font-weight: 800; margin-bottom: .35rem; }
+  .bpc p { font-size: .92rem; }
+  .bpc.empty { background: var(--soft); border-style: dashed; }
+  .bpc.empty p { color: var(--ink-mute); font-style: italic; }
+
+  .certificate {
+    background: var(--paper); border: 8px solid var(--sun); border-radius: 28px;
+    padding: clamp(1.8rem,5vw,3.2rem); text-align: center; display: grid; gap: 1rem; justify-items: center;
+    box-shadow: var(--shadow-lg); margin-top: 1.4rem;
+  }
+  .certificate .eyebrow { color: var(--teal); }
+  .certificate h2 { font-size: clamp(1.8rem,6vw,2.8rem); }
+  .certificate .who { font-family: var(--display); font-weight: 900; font-size: clamp(1.4rem,5vw,2.2rem); color: var(--energy); border-bottom: 3px dotted var(--rule-hard); padding: .1rem 2rem .35rem; }
+  .certificate .sig { display: flex; gap: 2.5rem; flex-wrap: wrap; justify-content: center; margin-top: .8rem; }
+  .certificate .sig hr { border: 0; border-top: 2px solid var(--ink); margin: 0 0 .25rem; }
+  .certificate .sig span { font-family: var(--display); font-weight: 800; font-size: .82rem; }
+  .certificate .align { font-size: .74rem; color: var(--ink-mute); }
+
+  .bandfoot {
+    margin-top: 3rem; background: var(--navy); border-radius: 24px;
+    padding: 1.3rem 1.6rem; display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; justify-content: center;
+    font-family: var(--display); font-weight: 900; font-size: clamp(1.1rem, 3.4vw, 1.7rem);
+  }
+  .bandfoot i { font-style: normal; }
+
+  .toasts { position: fixed; right: 1rem; bottom: 1rem; display: grid; gap: .5rem; z-index: 80; }
+  .toast { background: var(--paper); border: 2px solid var(--rule); border-left: 6px solid var(--sun); border-radius: 16px; padding: .75rem 1rem; box-shadow: var(--shadow-lg); max-width: 20rem; animation: slide .3s cubic-bezier(.2,.9,.3,1); }
+  .toast b { display: block; font-family: var(--display); font-weight: 800; font-size: .92rem; }
+  .toast span { font-size: .78rem; color: var(--ink-mute); }
+  @keyframes slide { from { opacity: 0; transform: translateX(16px) } }
+
+  .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 90; }
+  .confetti i { position: absolute; width: 9px; height: 13px; border-radius: 2px; animation: fall 2.4s cubic-bezier(.3,.6,.5,1) forwards; }
+  @keyframes fall { 0% { transform: translateY(-10vh) rotate(0); opacity: 1 } 100% { transform: translateY(105vh) rotate(720deg); opacity: 0 } }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; } }
+  @media print { .bar, .pagenav, .noprint, .bandfoot { display: none !important } body { background: #fff } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <g id="i-search" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4.5 4.5"/></g>
+  <g id="i-q" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 8.5a3 3 0 1 1 3.6 2.94c-.9.2-1.6 1-1.6 1.96v.6"/><path d="M11 17.6h.01"/></g>
+  <g id="i-bulb" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 17.5h5M10.5 20.5h3M12 3.5a5.6 5.6 0 0 0-3.3 10.2c.4.3.5.7.5 1.1h5.6c0-.4.1-.8.5-1.1A5.6 5.6 0 0 0 12 3.5Z"/></g>
+  <g id="i-rocket" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5c3.4 3 4.8 6.8 4.8 10.6l-2.4 2.9H9.6L7.2 13.1C7.2 9.3 8.6 5.5 12 2.5Z"/><path d="M9.6 18.6c-1 2-3.4 2.9-3.4 2.9s0-2.9 1.5-4.4M14.4 18.6c1 2 3.4 2.9 3.4 2.9s0-2.9-1.5-4.4"/><circle cx="12" cy="10" r="1.7"/></g>
+  <g id="i-plus" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></g>
+  <g id="i-x" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></g>
+  <g id="i-next" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></g>
+  <g id="i-prev" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m6-6-6 6 6 6"/></g>
+  <g id="i-print" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V4h10v5M7 18H5a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M7 14h10v6H7v-6Z"/></g>
+  <g id="i-undo" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h9a5 5 0 0 1 0 10h-3M4 9l4-4M4 9l4 4"/></g>
+  <g id="i-trash" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5h16M9.5 6.5V4.8h5V6.5M6.5 6.5 7.4 20h9.2l.9-13.5"/></g>
+  <g id="i-report" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v13H6V3Z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></g>
+</defs></svg>
+
+<div class="bar">
+  <div class="logo">
+    <svg viewBox="0 0 100 140" aria-hidden="true">
+      <circle cx="50" cy="46" r="34" fill="var(--sun)"/><path d="M50 20 62 52H38Z" fill="#FFF3D0"/>
+      <rect x="38" y="52" width="24" height="26" fill="var(--energy)"/><rect x="34" y="78" width="32" height="14" rx="3" fill="#0D1B3D"/>
+      <path d="M34 92c-8 6-12 14-12 22 8-2 12-6 14-10zM66 92c8 6 12 14 12 22-8-2-12-6-14-10z" fill="var(--teal)"/>
+      <path d="M50 100c6 8 8 16 0 28-8-12-6-20 0-28z" fill="var(--energy)"/>
+    </svg>
+    <div><b>Reverse. Rethink. Rebuild.</b><span>Young Founders · 11–13</span></div>
+  </div>
+  <div class="stepdots" id="stepdots"></div>
+  <button class="chipbtn" data-nav="report"><svg class="ic"><use href="#i-report"/></svg>My Report</button>
+</div>
+
+<div class="page" id="page"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ===================== content ===================== */
+
+  const STEPS = [
+    { id:"observe", n:1, icon:"i-search", colour:"sun", title:"Observe",
+      short:"Look closely. Understand how things work.",
+      long:"Train your curiosity. Notice details. Understand how the world works." },
+    { id:"ask", n:2, icon:"i-q", colour:"energy", title:"Ask better questions",
+      short:"Dig deeper. Challenge assumptions.",
+      long:"Go beyond the obvious. Ask “why,” “what if,” and “how else?”" },
+    { id:"rethink", n:3, icon:"i-bulb", colour:"sky", title:"Rethink solutions",
+      short:"Explore new angles. Imagine what could be better.",
+      long:"Challenge the status quo. Explore creative possibilities." },
+    { id:"rebuild", n:4, icon:"i-rocket", colour:"teal", title:"Build better ideas",
+      short:"Design with purpose. Create ideas that make a difference.",
+      long:"Turn thinking into action. Build ideas that solve real problems." }
+  ];
+
+  const STARTERS = [
+    "Why is it like this?", "What if it didn't exist?", "How else could this work?",
+    "Who says it has to be this way?", "What is missing?", "What if the opposite were true?",
+    "Who does this not work for?", "What is the annoying part?", "What would happen if we removed it?",
+    "Who decided this, and when?"
+  ];
+
+  const LENSES = [
+    ["Lighter", "sun", "Take weight, parts, or steps away"],
+    ["Stronger", "energy", "Make the weak point the strong point"],
+    ["Cheaper", "sky", "Same job, less money — for them or for you"],
+    ["Simpler", "teal", "Fewer steps, fewer decisions, less to learn"],
+    ["Kinder", "green", "Better for people, animals, or the planet"],
+    ["For someone else", "purple", "Redesign it for a person it currently fails"]
+  ];
+
+  const EXAMPLES = [
+    { id:"backpack", em:"🎒", name:"A school backpack", colour:"sun",
+      observe:"Two straps, one big pocket, a small front pocket, a mesh side pocket, a zip that runs over the top. The weight sits low, below the shoulder blades.",
+      ask:"Why does everything have to go in one big pocket? Who decided the water bottle goes on the outside where it falls out?",
+      rethink:"Simpler lens: two half-height compartments instead of one deep one, so books stop sliding to the bottom. Kinder lens: a strap that spreads weight across the hips, because Grade 7 bags are heavy enough to hurt.",
+      rebuild:"A split-level bag with a firm shelf halfway down and a bottle pocket that sits inside the frame. Before: everything at the bottom, bottle falls out. After: heavy things at shoulder height, nothing falls." },
+    { id:"bottle", em:"🍶", name:"A water bottle", colour:"sky",
+      observe:"Screw lid, wide mouth, straight sides, a plastic loop for a finger. Fits a cup holder. The lid unscrews all the way off, so you have to hold it.",
+      ask:"Why does the lid come completely off? What happens to the lid when your hands are full — which is exactly when you are drinking?",
+      rethink:"Simpler lens: hinge the lid so it never leaves the bottle. For-someone-else lens: someone with one working hand cannot open this at all.",
+      rebuild:"A hinged lid with a one-thumb catch. Before: two hands and somewhere to put the lid. After: one thumb, lid stays attached." },
+    { id:"busstop", em:"🚏", name:"A bus stop", colour:"teal",
+      observe:"A pole, a sign with a timetable, a bench facing the road, a shelter open on one side. The open side faces the wind. The timetable is printed at adult eye height.",
+      ask:"Why is the shelter open on the windy side? Who is the bench height designed for? What does a person do here who cannot read the timetable?",
+      rethink:"For-someone-else lens: a younger child, a person using a wheelchair, someone who reads a different language. Simpler lens: replace the timetable with 'next bus in ___ minutes'.",
+      rebuild:"Shelter turned 90°, a countdown instead of a timetable, and the information repeated at two heights. Before: you must be tall, sighted, and a confident reader. After: you must be none of those." },
+    { id:"lunch", em:"🍽", name:"The lunch queue", colour:"purple",
+      observe:"One queue, one till, hot food at the end, drinks at the start. People stop at the drinks fridge and block everyone behind them. The queue is longest at 12:05.",
+      ask:"Why is the fridge at the start? Why does everyone arrive at the same minute? What is the actual bottleneck — the food or the paying?",
+      rethink:"Simpler lens: move drinks past the till. Lighter lens: pre-order removes a whole decision from the queue. Cheaper lens: a second till costs money; moving a fridge costs nothing.",
+      rebuild:"Fridge moved past the till, and one year group released two minutes early. Before: 14-minute queue. After: the bottleneck moves to the till, which is the thing worth measuring next." }
+  ];
+
+  const INK = ["#0D1B3D", "#FF7A1A", "#4DB6F2", "#00B9A7", "#FFC83D", "#7B5EA6", "#E0526E"];
+
+  /* ===================== state ===================== */
+
+  const KEY = "lf-reverse-rethink-rebuild-v1";
+  const fresh = () => ({
+    name: "", object: "", why: "",
+    parts: [], works: "", noticed: [],
+    questions: [], bestQ: "",
+    lenses: {}, assumptions: [], test: { what:"", threshold:"", result:"" },
+    before: "", after: "", changed: "", helps: "",
+    drawing: "", stamps: {}
+  });
+  let D = fresh();
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) {} }
+  function load() { try { const r = localStorage.getItem(KEY); if (r) D = Object.assign(fresh(), JSON.parse(r)); } catch (e) {} }
+
+  /* ===================== helpers ===================== */
+
+  const $ = id => document.getElementById(id);
+  const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+  const ic = id => '<svg class="ic" aria-hidden="true"><use href="#' + id + '"/></svg>';
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+  const filled = s => String(s || "").trim().length > 1;
+  const paint = c => "background:var(--" + c + ")";
+
+  function toast(t, b) {
+    const n = el("div", "toast", "<b>" + esc(t) + "</b><span>" + esc(b) + "</span>");
+    $("toasts").appendChild(n);
+    setTimeout(() => { n.style.transition = "opacity .3s"; n.style.opacity = "0"; setTimeout(() => n.remove(), 320); }, 3600);
+  }
+  function confetti() {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const box = el("div", "confetti");
+    const cols = ["#FFC83D","#FF7A1A","#4DB6F2","#00B9A7","#7B5EA6"];
+    for (let i = 0; i < 60; i++) {
+      const p = document.createElement("i");
+      p.style.left = (Math.random() * 100) + "vw";
+      p.style.background = cols[i % cols.length];
+      p.style.animationDelay = (Math.random() * .5) + "s";
+      box.appendChild(p);
+    }
+    document.body.appendChild(box);
+    setTimeout(() => box.remove(), 3200);
+  }
+
+  function bind(node, get, set) {
+    node.value = get() || "";
+    node.addEventListener("input", () => { set(node.value); save(); checkStamps(); });
+    return node;
+  }
+  function field(label, hint, get, set, opts) {
+    opts = opts || {};
+    const f = el("div", "fld");
+    const id = "f" + Math.random().toString(36).slice(2, 8);
+    f.innerHTML = '<label class="lbl" for="' + id + '">' + esc(label) + '</label>' + (hint ? '<span class="hint">' + esc(hint) + '</span>' : "");
+    const i = document.createElement(opts.area ? "textarea" : "input");
+    i.id = id;
+    if (opts.area) i.rows = opts.rows || 2; else i.type = "text";
+    if (opts.placeholder) i.placeholder = opts.placeholder;
+    bind(i, get, set);
+    f.appendChild(i);
+    return f;
+  }
+
+  function listEditor(host, arr, placeholder, onChange, dual) {
+    const rows = el("div", "rows");
+    arr.forEach((item, i) => {
+      const r = el("div", "row" + (dual ? " dual" : ""));
+      const a = document.createElement("input");
+      a.type = "text"; a.placeholder = placeholder;
+      bind(a, () => (dual ? item.a : item), x => { if (dual) item.a = x; else arr[i] = x; onChange && onChange(); });
+      r.appendChild(a);
+      if (dual) {
+        const b = document.createElement("input");
+        b.type = "text"; b.placeholder = dual;
+        bind(b, () => item.b, x => { item.b = x; onChange && onChange(); });
+        r.appendChild(b);
+      }
+      const x = el("button", "icon-btn", ic("i-x"));
+      x.setAttribute("aria-label", "Remove");
+      x.addEventListener("click", () => { arr.splice(i, 1); save(); render(); });
+      r.appendChild(x);
+      rows.appendChild(r);
+    });
+    host.appendChild(rows);
+    const add = el("button", "btn ghost sm", ic("i-plus") + "Add");
+    add.style.marginTop = ".7rem";
+    add.addEventListener("click", () => { arr.push(dual ? { a:"", b:"" } : ""); save(); render(); });
+    host.appendChild(add);
+  }
+
+  /* ===================== stamps ===================== */
+
+  function stampState() {
+    return {
+      observe: filled(D.object) && D.parts.filter(filled).length >= 3 && filled(D.works),
+      ask: D.questions.filter(q => filled(q.b)).length >= 3 && filled(D.bestQ),
+      rethink: Object.keys(D.lenses).filter(k => filled(D.lenses[k])).length >= 3 &&
+               D.assumptions.filter(a => filled(a.text)).length >= 2 && filled(D.test.threshold),
+      rebuild: filled(D.before) && filled(D.after) && filled(D.changed) && filled(D.helps)
+    };
+  }
+  function checkStamps() {
+    const s = stampState();
+    let gained = null;
+    STEPS.forEach(st => {
+      if (s[st.id] && !D.stamps[st.id]) { D.stamps[st.id] = 1; gained = st.title; }
+      if (!s[st.id] && D.stamps[st.id]) delete D.stamps[st.id];
+    });
+    save();
+    paintDots();
+    if (gained) { toast(gained + " complete", "Step badge earned."); confetti(); }
+  }
+  function paintDots() {
+    const host = $("stepdots");
+    host.innerHTML = "";
+    STEPS.forEach(st => {
+      const d = el("div", "sdot" + (D.stamps[st.id] ? " on" : "") + (cur === st.id ? " here" : ""), ic(st.icon));
+      if (D.stamps[st.id]) d.style.background = "var(--" + st.colour + ")", d.style.borderColor = "var(--" + st.colour + ")";
+      d.title = st.title;
+      host.appendChild(d);
+    });
+  }
+
+  /* ===================== drawing pad ===================== */
+
+  function makePad(host, w, h) {
+    const shell = el("div", "canvas-shell");
+    const cv = document.createElement("canvas");
+    cv.width = w; cv.height = h;
+    cv.setAttribute("role", "img");
+    cv.setAttribute("aria-label", "Sketch your rebuild");
+    shell.appendChild(cv);
+    const empty = el("div", "canvas-empty", "Sketch your rebuild here");
+    shell.appendChild(empty);
+    const ctx = cv.getContext("2d");
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    let colour = INK[0], drawing = false;
+    const undo = [];
+    function bg() { ctx.save(); ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, w, h); ctx.restore(); }
+    bg();
+    if (D.drawing) {
+      const img = new Image();
+      img.onload = () => { ctx.drawImage(img, 0, 0, w, h); empty.style.display = "none"; };
+      img.src = D.drawing;
+    }
+    const pos = e => { const r = cv.getBoundingClientRect(); return { x:(e.clientX - r.left) * (w / r.width), y:(e.clientY - r.top) * (h / r.height) }; };
+    const persist = () => { try { D.drawing = cv.toDataURL("image/png"); save(); } catch (e) {} };
+    cv.addEventListener("pointerdown", e => {
+      e.preventDefault(); cv.setPointerCapture(e.pointerId);
+      try { undo.push(cv.toDataURL()); if (undo.length > 10) undo.shift(); } catch (er) {}
+      drawing = true; empty.style.display = "none";
+      const p = pos(e);
+      ctx.strokeStyle = colour; ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + .01, p.y); ctx.stroke();
+    });
+    cv.addEventListener("pointermove", e => { if (!drawing) return; const p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+    const end = () => { if (!drawing) return; drawing = false; persist(); };
+    ["pointerup","pointercancel","pointerleave"].forEach(ev => cv.addEventListener(ev, end));
+
+    const tools = el("div", "tools");
+    INK.forEach((cRaw, i) => {
+      const b = el("button", "swatch");
+      b.style.background = cRaw;
+      b.setAttribute("aria-label", "Colour " + (i + 1));
+      b.setAttribute("aria-pressed", String(i === 0));
+      b.addEventListener("click", () => {
+        colour = cRaw;
+        tools.querySelectorAll(".swatch").forEach(x => x.setAttribute("aria-pressed", "false"));
+        b.setAttribute("aria-pressed", "true");
+      });
+      tools.appendChild(b);
+    });
+    const u = el("button", "chipbtn", ic("i-undo") + "Undo");
+    u.addEventListener("click", () => {
+      const prev = undo.pop(); if (!prev) return;
+      const img = new Image();
+      img.onload = () => { ctx.clearRect(0,0,w,h); bg(); ctx.drawImage(img, 0, 0, w, h); persist(); };
+      img.src = prev;
+    });
+    const cl = el("button", "chipbtn", ic("i-trash") + "Clear");
+    cl.addEventListener("click", () => { ctx.clearRect(0,0,w,h); bg(); empty.style.display = "grid"; D.drawing = ""; save(); });
+    tools.appendChild(u); tools.appendChild(cl);
+    host.appendChild(shell); host.appendChild(tools);
+  }
+
+  /* ===================== views ===================== */
+
+  const ORDER = ["start", "observe", "ask", "rethink", "rebuild", "report"];
+  let cur = "start";
+
+  function go(id) { cur = id; paintDots(); render(); window.scrollTo({ top: 0 }); }
+
+  function pagenav(host) {
+    const i = ORDER.indexOf(cur);
+    const nav = el("div", "pagenav");
+    const labels = { start:"Start", observe:"Observe", ask:"Ask better questions", rethink:"Rethink solutions", rebuild:"Build better ideas", report:"My Rebuild Report" };
+    if (i > 0) {
+      const b = el("button", "btn ghost", ic("i-prev") + labels[ORDER[i - 1]]);
+      b.addEventListener("click", () => go(ORDER[i - 1]));
+      nav.appendChild(b);
+    } else nav.appendChild(el("span"));
+    if (i < ORDER.length - 1) {
+      const b = el("button", "btn", labels[ORDER[i + 1]] + ic("i-next"));
+      b.addEventListener("click", () => go(ORDER[i + 1]));
+      nav.appendChild(b);
+    }
+    host.appendChild(nav);
+
+    const band = el("div", "bandfoot");
+    band.innerHTML = [["Question.","sun"],["Rethink.","energy"],["Improve.","sky"],["Create.","teal"]]
+      .map(([w, c]) => '<i style="color:var(--' + c + ')">' + w + '</i>').join(" ");
+    host.appendChild(band);
+  }
+
+  function stepHeader(host, st) {
+    host.appendChild(el("p", "eyebrow", "Step " + st.n + " of 4"));
+    const h = el("h1", "big");
+    h.textContent = st.title;
+    host.appendChild(h);
+    host.appendChild(el("p", "lede", st.long));
+  }
+
+  function fourStepRail() {
+    const r = el("div", "steps4");
+    STEPS.forEach((st, i) => {
+      const s = el("div", "s4");
+      s.innerHTML =
+        '<span class="circ" style="' + paint(st.colour) + '">' + ic(st.icon) +
+          '<span class="pip">' + st.n + '</span></span>' +
+        '<b>' + esc(st.title) + '</b><span>' + esc(st.short) + '</span>' +
+        (i < STEPS.length - 1 ? '<span class="dash"></span>' : "");
+      r.appendChild(s);
+    });
+    return r;
+  }
+
+  /* -------- start -------- */
+  function vStart(p) {
+    p.appendChild(el("p", "eyebrow", "Young Founders · Ages 11–13 · Book 3"));
+    const h = el("h1", "big");
+    h.innerHTML = 'Reverse. Rethink. <span style="color:var(--energy)">Rebuild.</span>';
+    p.appendChild(h);
+    p.appendChild(el("p", "lede", "Look deeper. Think better. Build smarter. Learn how things work, question what can be improved, and create better ideas with purpose."));
+
+    const c = el("div", "card");
+    c.style.marginTop = "1.6rem";
+    c.appendChild(fourStepRail());
+    p.appendChild(c);
+
+    const n = el("div", "card");
+    n.appendChild(field("My name", "Goes on the report and the certificate.", () => D.name, x => D.name = x.slice(0, 60), { placeholder:"Your name" }));
+    p.appendChild(n);
+
+    const ex = el("div", "card");
+    ex.innerHTML = '<span class="lbl">Worked teardowns</span><p class="hint">Four things pulled apart properly, so you can see what a good teardown looks like before you do your own. Tap one.</p>';
+    const g = el("div", "exgrid");
+    g.style.marginTop = ".9rem";
+    EXAMPLES.forEach(e => {
+      const b = el("button", "ex");
+      b.innerHTML = '<span class="top"><span class="circ" style="' + paint(e.colour) + '">' + e.em + '</span><b>' + esc(e.name) + '</b></span>' +
+        '<p>' + esc(e.ask.split("?")[0]) + '?</p>';
+      b.addEventListener("click", () => showExample(e.id));
+      g.appendChild(b);
+    });
+    ex.appendChild(g);
+    const detail = el("div");
+    detail.id = "exDetail";
+    detail.style.marginTop = "1rem";
+    ex.appendChild(detail);
+    p.appendChild(ex);
+
+    const go1 = el("button", "btn", "Start my own teardown" + ic("i-next"));
+    go1.style.marginTop = "1.4rem";
+    go1.addEventListener("click", () => go("observe"));
+    p.appendChild(go1);
+  }
+
+  function showExample(id) {
+    const e = EXAMPLES.find(x => x.id === id);
+    const host = $("exDetail");
+    if (!host || !e) return;
+    host.innerHTML = "";
+    const box = el("div", "card");
+    box.style.boxShadow = "none";
+    box.style.background = "var(--soft)";
+    box.innerHTML = '<span class="lbl">' + e.em + " " + esc(e.name) + '</span>';
+    const d = el("div", "exdetail");
+    d.style.marginTop = ".8rem";
+    STEPS.forEach(st => {
+      const r = el("div", "exrow");
+      r.innerHTML = '<span class="circ" style="' + paint(st.colour) + '">' + ic(st.icon) + '</span>' +
+        '<div><h4>' + esc(st.title) + '</h4><p>' + esc(e[st.id]) + '</p></div>';
+      d.appendChild(r);
+    });
+    box.appendChild(d);
+    host.appendChild(box);
+  }
+
+  /* -------- observe -------- */
+  function vObserve(p) {
+    const st = STEPS[0];
+    stepHeader(p, st);
+
+    const c = el("div", "card");
+    c.style.marginTop = "1.4rem";
+    c.appendChild(field("What am I taking apart?", "A real object, place, or process you can actually look at. Smaller is better — a zip beats a car.",
+      () => D.object, x => D.object = x.slice(0, 80), { placeholder:"e.g. a school backpack" }));
+    c.appendChild(field("Why this one?", "What made you pick it?", () => D.why, x => D.why = x, { area:true }));
+    p.appendChild(c);
+
+    const pc = el("div", "card");
+    pc.innerHTML = '<span class="lbl">Its parts</span><p class="hint">List every part you can see. Three is the minimum; ten is a proper look. You cannot rebuild what you have not noticed.</p>';
+    const pw = el("div");
+    pw.style.marginTop = ".8rem";
+    listEditor(pw, D.parts, "e.g. shoulder strap");
+    pc.appendChild(pw);
+    p.appendChild(pc);
+
+    const wc = el("div", "card");
+    wc.appendChild(field("How does it work?", "Explain it as if to someone who has never seen one. If you get stuck, that gap is the interesting part.",
+      () => D.works, x => D.works = x, { area:true, rows:3 }));
+    p.appendChild(wc);
+
+    const nc = el("div", "card");
+    nc.innerHTML = '<span class="lbl">What did you notice that most people would not?</span><p class="hint">The scratch, the wobble, the bit that is always dirty, the step everyone skips.</p>';
+    const nw = el("div");
+    nw.style.marginTop = ".8rem";
+    listEditor(nw, D.noticed, "e.g. the zip always sticks at the corner");
+    nc.appendChild(nw);
+    p.appendChild(nc);
+
+    const s = stampState();
+    const vd = el("div", "verdict " + (s.observe ? "good" : "idle"));
+    vd.style.marginTop = "1rem";
+    vd.innerHTML = "<span>" + (s.observe
+      ? "<b>Observe complete.</b> You have named the thing, listed its parts, and explained how it works. Now go after it."
+      : "To finish this step: name the object, list at least three parts, and explain how it works.") + "</span>";
+    p.appendChild(vd);
+  }
+
+  /* -------- ask -------- */
+  function vAsk(p) {
+    const st = STEPS[1];
+    stepHeader(p, st);
+
+    const sc = el("div", "card");
+    sc.style.marginTop = "1.4rem";
+    sc.innerHTML = '<span class="lbl">Question starters</span><p class="hint">Tap one to drop it into a new question. These are the ten that break assumptions fastest.</p>';
+    const sw = el("div", "starters");
+    sw.style.marginTop = ".8rem";
+    STARTERS.forEach(q => {
+      const b = el("button", "starter");
+      b.textContent = q;
+      b.addEventListener("click", () => {
+        D.questions.push({ a:"", b: q.replace("it", D.object || "it") });
+        save(); render();
+      });
+      sw.appendChild(b);
+    });
+    sc.appendChild(sw);
+    p.appendChild(sc);
+
+    const lc = el("div", "card");
+    lc.innerHTML = '<span class="lbl">The question ladder</span>' +
+      '<p class="hint">A weak question has one answer. A better question opens something up. Write the obvious question, then push it.</p>';
+    const ex = el("div", "verdict idle");
+    ex.style.margin = ".9rem 0";
+    ex.innerHTML = "<span><b>Weak:</b> “Is the strap comfortable?” → <b>Better:</b> “Which five minutes of the day does this strap hurt, and what is happening then?”</span>";
+    lc.appendChild(ex);
+
+    const lad = el("div", "qladder");
+    D.questions.forEach((q, i) => {
+      const pair = el("div", "qpair" + (D.bestQ && D.bestQ === q.b ? " best" : ""));
+      const w = el("div", "weak");
+      w.innerHTML = '<span class="tagw">Obvious</span>';
+      const wi = document.createElement("input");
+      wi.type = "text"; wi.placeholder = "The obvious question…";
+      bind(wi, () => q.a, x => q.a = x.slice(0, 160));
+      w.appendChild(wi);
+      const bt = el("div", "better");
+      bt.innerHTML = '<span class="tagb">Better</span>';
+      const bi = document.createElement("input");
+      bi.type = "text"; bi.placeholder = "…now push it deeper";
+      bind(bi, () => q.b, x => q.b = x.slice(0, 200));
+      bt.appendChild(bi);
+      pair.appendChild(w); pair.appendChild(bt);
+      const row = el("div");
+      row.style.cssText = "display:flex;gap:.5rem;justify-content:flex-end";
+      const pick = el("button", "btn ghost sm", D.bestQ === q.b ? "★ My best question" : "Make this my best");
+      pick.addEventListener("click", () => { D.bestQ = q.b; save(); checkStamps(); render(); });
+      const del = el("button", "icon-btn", ic("i-x"));
+      del.setAttribute("aria-label", "Remove question");
+      del.addEventListener("click", () => { D.questions.splice(i, 1); save(); render(); });
+      row.appendChild(pick); row.appendChild(del);
+      pair.appendChild(row);
+      lad.appendChild(pair);
+    });
+    lc.appendChild(lad);
+    const add = el("button", "btn ghost sm", ic("i-plus") + "Add a question");
+    add.style.marginTop = ".8rem";
+    add.addEventListener("click", () => { D.questions.push({ a:"", b:"" }); save(); render(); });
+    lc.appendChild(add);
+    p.appendChild(lc);
+
+    const s = stampState();
+    const vd = el("div", "verdict " + (s.ask ? "good" : "idle"));
+    vd.style.marginTop = "1rem";
+    vd.innerHTML = "<span>" + (s.ask
+      ? "<b>Ask complete.</b> Your best question: “" + esc(D.bestQ) + "” — everything after this answers it."
+      : "To finish this step: write at least three better questions, then mark one as your best.") + "</span>";
+    p.appendChild(vd);
+  }
+
+  /* -------- rethink -------- */
+  function vRethink(p) {
+    const st = STEPS[2];
+    stepHeader(p, st);
+
+    const lc = el("div", "card");
+    lc.style.marginTop = "1.4rem";
+    lc.innerHTML = '<span class="lbl">Six lenses</span><p class="hint">Same object, six different pressures. Force an idea through at least three — including one you do not like. The lens you resist usually produces the interesting answer.</p>';
+    const g = el("div", "lenses");
+    g.style.marginTop = ".9rem";
+    LENSES.forEach(([name, colour, note]) => {
+      const box = el("div", "lens" + (filled(D.lenses[name]) ? " filled" : ""));
+      box.innerHTML = '<div class="lhead"><span class="dot" style="' + paint(colour) + '"></span><b>' + esc(name) + '</b></div>' +
+        '<span class="hint">' + esc(note) + '</span>';
+      const t = document.createElement("textarea");
+      t.rows = 2;
+      t.placeholder = "Through this lens…";
+      bind(t, () => D.lenses[name], x => D.lenses[name] = x.slice(0, 240));
+      box.appendChild(t);
+      g.appendChild(box);
+    });
+    lc.appendChild(g);
+    p.appendChild(lc);
+
+    const ac = el("div", "card");
+    ac.innerHTML = '<span class="lbl">Assumption tracker</span>' +
+      '<p class="hint">Everything you believe about your idea is either <b>known</b> (you have evidence) or a <b>guess</b>. Be honest — the guesses are what you test.</p>';
+    const wrap = el("div", "scroll");
+    wrap.style.marginTop = ".8rem";
+    const t = el("table", "atable");
+    t.innerHTML = "<thead><tr><th>I believe…</th><th>Known or guess?</th><th></th></tr></thead>";
+    const tb = el("tbody");
+    D.assumptions.forEach((a, i) => {
+      const tr = el("tr");
+      const td = el("td");
+      const inp = document.createElement("input");
+      inp.type = "text"; inp.placeholder = "e.g. people would pay more for a hinged lid";
+      bind(inp, () => a.text, x => a.text = x.slice(0, 160));
+      td.appendChild(inp); tr.appendChild(td);
+      const td2 = el("td");
+      const kg = el("div", "kg");
+      ["known","guess"].forEach(v => {
+        const b = el("button", null, v === "known" ? "Known" : "Guess");
+        b.dataset.v = v;
+        b.setAttribute("aria-pressed", String(a.kind === v));
+        b.addEventListener("click", () => { a.kind = v; save(); render(); });
+        kg.appendChild(b);
+      });
+      td2.appendChild(kg); tr.appendChild(td2);
+      const td3 = el("td");
+      const x = el("button", "icon-btn", ic("i-x"));
+      x.setAttribute("aria-label", "Remove");
+      x.addEventListener("click", () => { D.assumptions.splice(i, 1); save(); render(); });
+      td3.appendChild(x); tr.appendChild(td3);
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); wrap.appendChild(t);
+    ac.appendChild(wrap);
+    const addA = el("button", "btn ghost sm", ic("i-plus") + "Add a belief");
+    addA.style.marginTop = ".8rem";
+    addA.addEventListener("click", () => { D.assumptions.push({ text:"", kind:"guess" }); save(); render(); });
+    ac.appendChild(addA);
+    const guesses = D.assumptions.filter(a => a.kind === "guess" && filled(a.text)).length;
+    if (D.assumptions.length) {
+      const note = el("p", "hint");
+      note.style.marginTop = ".7rem";
+      note.textContent = guesses + " guess" + (guesses === 1 ? "" : "es") + " on the board. The biggest one is what you test next.";
+      ac.appendChild(note);
+    }
+    p.appendChild(ac);
+
+    const tc = el("div", "card");
+    tc.style.borderColor = "var(--energy)";
+    tc.innerHTML = '<span class="lbl">Design the test</span>' +
+      '<p class="hint">Write the pass number <b>before</b> you run it. If you decide afterwards what counts as a success, you will always pass — and you will have learned nothing.</p>';
+    tc.appendChild(field("What will I actually do?", "Small, cheap, real. Ten people is a test; asking your friend is not.",
+      () => D.test.what, x => D.test.what = x, { area:true, placeholder:"Show the sketch to 10 people in my year and ask which they'd pick" }));
+    tc.appendChild(field("It passes if…", "A number, written now.", () => D.test.threshold, x => D.test.threshold = x,
+      { placeholder:"at least 6 out of 10 pick the new one" }));
+    tc.appendChild(field("What actually happened", "Fill this in after. Report it even if it is embarrassing — especially then.",
+      () => D.test.result, x => D.test.result = x, { area:true }));
+    p.appendChild(tc);
+
+    if (filled(D.test.threshold) && filled(D.test.result)) {
+      const vd = el("div", "verdict warn");
+      vd.style.marginTop = "1rem";
+      vd.innerHTML = "<span><b>You set the bar before you jumped.</b> Threshold: “" + esc(D.test.threshold) +
+        "”. Result: “" + esc(D.test.result) + "”. Did it clear? Say so plainly in your report — a failed test you reported honestly is worth more than a vague success.</span>";
+      p.appendChild(vd);
+    }
+
+    const s = stampState();
+    const vd2 = el("div", "verdict " + (s.rethink ? "good" : "idle"));
+    vd2.style.marginTop = "1rem";
+    vd2.innerHTML = "<span>" + (s.rethink
+      ? "<b>Rethink complete.</b> Three lenses used, beliefs sorted, and a test with a threshold set in advance."
+      : "To finish this step: fill three lenses, list two beliefs, and write a pass threshold.") + "</span>";
+    p.appendChild(vd2);
+  }
+
+  /* -------- rebuild -------- */
+  function vRebuild(p) {
+    const st = STEPS[3];
+    stepHeader(p, st);
+
+    const ba = el("div", "ba");
+    ba.style.marginTop = "1.4rem";
+    const before = el("div", "bacol before");
+    before.innerHTML = "<h4>Before</h4>";
+    const bi = document.createElement("textarea");
+    bi.rows = 5; bi.placeholder = "How it works today, including the annoying part…";
+    bind(bi, () => D.before, x => D.before = x);
+    before.appendChild(bi);
+    const arrow = el("div", "baarrow", "→");
+    const after = el("div", "bacol after");
+    after.innerHTML = "<h4>After — my rebuild</h4>";
+    const ai = document.createElement("textarea");
+    ai.rows = 5; ai.placeholder = "How it works in your version…";
+    bind(ai, () => D.after, x => D.after = x);
+    after.appendChild(ai);
+    ba.appendChild(before); ba.appendChild(arrow); ba.appendChild(after);
+    p.appendChild(ba);
+
+    const c = el("div", "card");
+    c.appendChild(field("What exactly changed, and why?", "Name the change and the evidence or lens that caused it. “I liked it better” is not a reason.",
+      () => D.changed, x => D.changed = x, { area:true, rows:3 }));
+    c.appendChild(field("Who does this help, and how would you know?", "A real person or group, and the thing you could measure.",
+      () => D.helps, x => D.helps = x, { area:true, rows:3 }));
+    p.appendChild(c);
+
+    const dc = el("div", "card");
+    dc.innerHTML = '<span class="lbl">Sketch the rebuild</span><p class="hint">Rough is fine. A drawing that is wrong is more useful than a description that is vague.</p>';
+    const host = el("div");
+    host.style.marginTop = ".8rem";
+    dc.appendChild(host);
+    p.appendChild(dc);
+    makePad(host, 900, 360);
+
+    const s = stampState();
+    const vd = el("div", "verdict " + (s.rebuild ? "good" : "idle"));
+    vd.style.marginTop = "1rem";
+    vd.innerHTML = "<span>" + (s.rebuild
+      ? "<b>Rebuild complete.</b> All four steps done — take it to your report."
+      : "To finish this step: fill before, after, what changed, and who it helps.") + "</span>";
+    p.appendChild(vd);
+  }
+
+  /* -------- report -------- */
+  function vReport(p) {
+    p.appendChild(el("p", "eyebrow", "Output"));
+    const h = el("h1", "big");
+    h.textContent = "My Rebuild Report";
+    p.appendChild(h);
+    p.appendChild(el("p", "lede", "Everything you found, questioned, tested and changed — on one page. Gaps stay visible on purpose."));
+
+    const items = [
+      ["What I took apart", D.object],
+      ["Why this one", D.why],
+      ["Its parts", D.parts.filter(filled).join(", ")],
+      ["How it works", D.works],
+      ["What I noticed", D.noticed.filter(filled).join(" · ")],
+      ["My best question", D.bestQ],
+      ["Lenses used", Object.keys(D.lenses).filter(k => filled(D.lenses[k])).join(", ")],
+      ["Things I know", D.assumptions.filter(a => a.kind === "known" && filled(a.text)).map(a => a.text).join(" · ")],
+      ["Things I am guessing", D.assumptions.filter(a => a.kind === "guess" && filled(a.text)).map(a => a.text).join(" · ")],
+      ["My test", D.test.what],
+      ["It passes if", D.test.threshold],
+      ["What happened", D.test.result],
+      ["Before", D.before],
+      ["After", D.after],
+      ["What changed and why", D.changed],
+      ["Who it helps", D.helps]
+    ];
+    const g = el("div", "bp");
+    g.style.marginTop = "1.4rem";
+    items.forEach(([k, val]) => g.appendChild(el("div", "bpc" + (filled(val) ? "" : " empty"),
+      "<h4>" + esc(k) + "</h4><p>" + esc(filled(val) ? val : "Not filled in yet") + "</p>")));
+    p.appendChild(g);
+
+    if (D.drawing) {
+      const fig = el("figure", "card");
+      fig.style.marginTop = "1rem";
+      fig.innerHTML = '<span class="lbl">My rebuild sketch</span>' +
+        '<img alt="My rebuild sketch" src="' + D.drawing + '" style="width:100%;border-radius:16px;border:2px solid var(--rule);margin-top:.7rem">';
+      p.appendChild(fig);
+    }
+
+    const done = STEPS.every(s => D.stamps[s.id]);
+    if (done) {
+      const cert = el("div", "certificate");
+      const today = new Date().toLocaleDateString(undefined, { year:"numeric", month:"long", day:"numeric" });
+      cert.innerHTML =
+        '<p class="eyebrow">Little Founders · Young Founders · Ages 11–13</p>' +
+        '<h2>🔎 Reverse Thinker</h2>' +
+        '<p>Awarded to</p><p class="who">' + esc(D.name || "…………………") + '</p>' +
+        '<p>who took ' + esc(D.object || "something ordinary") + ' apart, asked a question nobody had bothered to ask, tested a belief against a number set in advance, and rebuilt it better.</p>' +
+        '<div class="sig"><div><hr><span>Guide</span></div><div><hr><span>' + esc(today) + '</span></div></div>' +
+        '<p class="align">Question. Rethink. Improve. Create.</p>';
+      p.appendChild(cert);
+    } else {
+      const left = el("div", "card");
+      left.style.marginTop = "1rem";
+      left.innerHTML = '<span class="lbl">Still to finish</span>';
+      const s = stampState();
+      const ul = el("div", "rows");
+      ul.style.marginTop = ".7rem";
+      STEPS.forEach(st => {
+        if (s[st.id]) return;
+        const b = el("button", "btn ghost sm");
+        b.style.justifyContent = "flex-start";
+        b.innerHTML = ic(st.icon) + st.title;
+        b.addEventListener("click", () => go(st.id));
+        ul.appendChild(b);
+      });
+      left.appendChild(ul);
+      p.appendChild(left);
+    }
+
+    const pr = el("button", "btn ghost noprint", ic("i-print") + "Print my report");
+    pr.style.marginTop = "1.2rem";
+    pr.addEventListener("click", () => window.print());
+    p.appendChild(pr);
+  }
+
+  /* ===================== render ===================== */
+
+  function render() {
+    const p = $("page");
+    p.innerHTML = "";
+    ({ start:vStart, observe:vObserve, ask:vAsk, rethink:vRethink, rebuild:vRebuild, report:vReport }[cur] || vStart)(p);
+    pagenav(p);
+  }
+
+  document.addEventListener("click", e => {
+    const n = e.target.closest("[data-nav]");
+    if (n) go(n.dataset.nav);
+  });
+
+  load();
+  paintDots();
+  render();
+})();
+</script>

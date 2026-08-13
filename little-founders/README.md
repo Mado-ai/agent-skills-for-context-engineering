@@ -66,7 +66,7 @@ Each tier has a learner-facing book — the thing a student holds, fills in, and
 |---|---|---|---|
 | 🌱 Little Sprouts | **How Is It Made?** | Discover the world | [Built](discovery/how-is-it-made.html) |
 | 🔨 Junior Builders | **Mission Control** | Learn to plan and organize | Planned |
-| 🚀 Young Founders | **Reverse. Rethink. Rebuild.** | Learn to question and improve | Planned |
+| 🚀 Young Founders | **Reverse. Rethink. Rebuild.** | Learn to question and improve | [Built](discovery/reverse-rethink-rebuild.html) |
 | 👑 Founder CEOs | **GO OVERSEAS!** | Build it, brand it, take it into the world | [Built](discovery/go-overseas.html) |
 
 ## Events
