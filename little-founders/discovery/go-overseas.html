@@ -175,7 +175,7 @@
 
   /* ---- name storm ---- */
   .nametable { width: 100%; border-collapse: collapse; font-size: .88rem; }
-  .nametable th { text-align: left; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--teal); padding: .45rem .3rem; font-weight: 800; }
+  .nametable th { text-align: left; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); padding: .45rem .3rem; font-weight: 800; }
   .nametable td { padding: .3rem .3rem; border-top: 1px solid var(--rule); }
   .nametable input[type=text] { padding: .45rem .6rem; }
   .score { display: flex; gap: .15rem; }
@@ -196,7 +196,7 @@
   .slots { display: grid; gap: .7rem; grid-template-columns: repeat(auto-fit, minmax(9rem,1fr)); }
   .slot { border: 2px solid var(--rule); border-radius: 18px; padding: .7rem; display: grid; gap: .45rem; }
   .slot .sw { height: 3.2rem; border-radius: 50%; border: 2px solid var(--rule); }
-  .slot label { font-size: .64rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--teal); }
+  .slot label { font-size: .64rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); }
   .slot input[type=color] { width: 100%; height: 2.1rem; padding: 0; border: 2px solid var(--rule); border-radius: 9px; background: none; }
 
   /* ---- brand preview ---- */
@@ -228,7 +228,7 @@
   .persona .av { width: 3.6rem; height: 3.6rem; border-radius: 50%; display: grid; place-items: center; font-family: var(--display); font-weight: 900; font-size: 1.5rem; background: var(--sky); color: #fff; }
   .persona .body { padding: 1.1rem 1.4rem; display: grid; gap: .6rem; }
   .prow { display: grid; grid-template-columns: 9.5rem minmax(0,1fr); gap: .8rem; font-size: .9rem; align-items: baseline; }
-  .prow b { font-size: .64rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--teal); }
+  .prow b { font-size: .64rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); }
   .prow span { color: var(--ink-soft); }
   @media (max-width: 34rem) { .prow { grid-template-columns: minmax(0,1fr); gap: .1rem; } }
 
@@ -248,7 +248,7 @@
   .metrics { display: grid; gap: .7rem; grid-template-columns: repeat(auto-fit, minmax(9.5rem,1fr)); }
   .metric { border: 2px solid var(--rule); border-radius: 18px; padding: .9rem 1rem; background: var(--soft); }
   .metric b { display: block; font-family: var(--display); font-size: 1.65rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
-  .metric span { font-size: .64rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; color: var(--teal); }
+  .metric span { font-size: .64rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; color: var(--ink-mute); }
   .metric.good b { color: var(--ok); }
   .metric.bad b { color: var(--bad); }
 
@@ -279,7 +279,7 @@
 
   /* ---- CRM ---- */
   .crm { width: 100%; border-collapse: collapse; font-size: .88rem; }
-  .crm th { text-align: left; font-size: .62rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--teal); padding: .45rem .35rem; }
+  .crm th { text-align: left; font-size: .62rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); padding: .45rem .35rem; }
   .crm td { padding: .32rem .35rem; border-top: 1px solid var(--rule); }
   .crm input, .crm select { padding: .45rem .55rem; }
   .scroll { overflow-x: auto; }
@@ -309,7 +309,7 @@
   /* ---- blueprint ---- */
   .bp { display: grid; gap: .7rem; grid-template-columns: repeat(auto-fill, minmax(15rem,1fr)); }
   .bpc { border: 2px solid var(--rule); border-radius: 18px; padding: .9rem 1rem; background: var(--paper); }
-  .bpc h4 { font-family: var(--body); font-size: .62rem; letter-spacing: .11em; text-transform: uppercase; color: var(--teal); font-weight: 800; margin-bottom: .35rem; }
+  .bpc h4 { font-family: var(--body); font-size: .62rem; letter-spacing: .11em; text-transform: uppercase; color: var(--ink-mute); font-weight: 800; margin-bottom: .35rem; }
   .bpc p { font-size: .92rem; }
   .bpc.empty { background: var(--soft); border-style: dashed; }
   .bpc.empty p { color: var(--ink-mute); font-style: italic; }
@@ -385,9 +385,25 @@
     .app { display: block; }
     body { background: #fff; }
   }
+
+  /* ---- brand: gold rule with a centred star (from the brand board) ---- */
+  .lf-div { display: flex; align-items: center; gap: .85rem; margin: 2.4rem 0; }
+  .lf-div::before, .lf-div::after { content: ""; height: 2px; flex: 1; background: var(--sun); opacity: .55; border-radius: 2px; }
+  .lf-div svg { width: 1.05rem; height: 1.05rem; color: var(--sun); flex: none; }
+  .lf-div.short::before, .lf-div.short::after { max-width: 8rem; }
+
+  /* ---- brand: quiet structural labels (the board sets these in muted, not accent) ---- */
+  .lf-quiet { color: var(--ink-mute); }
+
+  /* ---- brand: drifting graphic elements ---- */
+  .lf-deco { position: absolute; pointer-events: none; opacity: .5; }
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <g id="lf-plane" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 12.5 21 4l-6.5 17-3.5-6.5L3 12.5Z"/><path d="m11 14.5 10-10.5"/></g>
+  <g id="lf-squiggle" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 14c4-9 8 5 12-2s6 3 8-1"/></g>
+  <g id="lf-star4"><path fill="currentColor" d="m12 2.6 2.95 6 6.6.96-4.78 4.65 1.13 6.58L12 17.48 6.1 20.6l1.13-6.58L2.45 9.36l6.6-.96L12 2.6Z"/></g>
+
   <g id="i-menu" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></g>
   <g id="i-next" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></g>
   <g id="i-prev" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m6-6-6 6 6 6"/></g>
@@ -402,12 +418,21 @@
 <div class="app">
   <aside class="rail" id="rail">
     <div class="brandmark">
-      <svg viewBox="0 0 100 140" aria-hidden="true">
-        <circle cx="50" cy="46" r="34" fill="var(--sun)"/><path d="M50 20 62 52H38Z" fill="#FFF3D0"/>
-        <rect x="38" y="52" width="24" height="26" fill="var(--energy)"/><rect x="34" y="78" width="32" height="14" rx="3" fill="#131F3A"/>
-        <path d="M34 92c-8 6-12 14-12 22 8-2 12-6 14-10zM66 92c8 6 12 14 12 22-8-2-12-6-14-10z" fill="var(--teal)"/>
-        <path d="M50 100c6 8 8 16 0 28-8-12-6-20 0-28z" fill="var(--energy)"/>
-      </svg>
+      <svg viewBox="0 0 200 306" aria-hidden="true">
+  <g fill="none" stroke="#FFC83D" stroke-width="11" stroke-linecap="round">
+    <path d="M100 20V3"/><path d="M148 34l9-14"/><path d="M52 34l-9-14"/>
+    <path d="M178 74l16-8"/><path d="M22 74L6 66"/>
+  </g>
+  <circle cx="100" cy="104" r="66" fill="#FFC83D"/>
+  <path d="M100 36l27 56H73z" fill="#FFF7E4"/>
+  <path d="M100 36l12 25H88z" fill="#0D1B3D"/>
+  <rect x="73" y="92" width="54" height="84" fill="#FF7A1A"/>
+  <rect x="73" y="92" width="18" height="84" fill="#FF9B4F"/>
+  <rect x="65" y="176" width="70" height="30" rx="5" fill="#0D1B3D"/>
+  <path d="M74 206h52l-7 44H81z" fill="#00B9A7"/>
+  <path d="M74 203c-24 12-42 33-48 63 20-4 36-14 48-29zM126 203c24 12 42 33 48 63-20-4-36-14-48-29z" fill="#00B9A7"/>
+  <path d="M100 252c12 15 17 29 0 51-17-22-12-36 0-51z" fill="#FF7A1A"/>
+</svg>
       <div><b>GO OVERSEAS!</b><span>Founder CEO · 14–17</span></div>
     </div>
     <div class="passport-mini" id="pmini"></div>
@@ -735,6 +760,10 @@
     host.appendChild(el("p", "part-tag", esc(tag)));
     host.appendChild(el("h1", null, esc(title)));
     if (lede) host.appendChild(el("p", "lede", esc(lede)));
+    const d = document.createElement("div");
+    d.className = "lf-div";
+    d.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lf-star4"/></svg>';
+    host.appendChild(d);
   }
   function chapter(host, num, title, sub) {
     const c = el("section", "ch");

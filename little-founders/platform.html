@@ -447,10 +447,26 @@
     .menu-btn { display: grid; place-items: center; }
     .scrim { position: fixed; inset: 0; background: rgba(7,16,34,.5); z-index: 45; }
   }
+
+  /* ---- brand: gold rule with a centred star (from the brand board) ---- */
+  .lf-div { display: flex; align-items: center; gap: .85rem; margin: 2.4rem 0; }
+  .lf-div::before, .lf-div::after { content: ""; height: 2px; flex: 1; background: var(--sun); opacity: .55; border-radius: 2px; }
+  .lf-div svg { width: 1.05rem; height: 1.05rem; color: var(--sun); flex: none; }
+  .lf-div.short::before, .lf-div.short::after { max-width: 8rem; }
+
+  /* ---- brand: quiet structural labels (the board sets these in muted, not accent) ---- */
+  .lf-quiet { color: var(--ink-mute); }
+
+  /* ---- brand: drifting graphic elements ---- */
+  .lf-deco { position: absolute; pointer-events: none; opacity: .5; }
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
+  <g id="lf-plane" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 12.5 21 4l-6.5 17-3.5-6.5L3 12.5Z"/><path d="m11 14.5 10-10.5"/></g>
+  <g id="lf-squiggle" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 14c4-9 8 5 12-2s6 3 8-1"/></g>
+  <g id="lf-star4"><path fill="currentColor" d="m12 2.6 2.95 6 6.6.96-4.78 4.65 1.13 6.58L12 17.48 6.1 20.6l1.13-6.58L2.45 9.36l6.6-.96L12 2.6Z"/></g>
+
     <g id="i-bulb" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
       <path d="M9 17h6M10 20h4M12 3a6 6 0 0 0-3.5 10.9c.4.3.5.7.5 1.1h6c0-.4.1-.8.5-1.1A6 6 0 0 0 12 3Z"/>
     </g>
@@ -516,14 +532,21 @@
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
-      <svg viewBox="0 0 100 140" aria-hidden="true">
-        <circle cx="50" cy="46" r="34" fill="var(--sunshine)"/>
-        <path d="M50 20 62 52H38Z" fill="#FFF3D0"/>
-        <rect x="38" y="52" width="24" height="26" fill="var(--energy)"/>
-        <rect x="34" y="78" width="32" height="14" rx="3" fill="#0D1B3D"/>
-        <path d="M34 92c-8 6-12 14-12 22 8-2 12-6 14-10zM66 92c8 6 12 14 12 22-8-2-12-6-14-10z" fill="var(--teal)"/>
-        <path d="M50 100c6 8 8 16 0 28-8-12-6-20 0-28z" fill="var(--energy)"/>
-      </svg>
+      <svg viewBox="0 0 200 306" aria-hidden="true">
+  <g fill="none" stroke="#FFC83D" stroke-width="11" stroke-linecap="round">
+    <path d="M100 20V3"/><path d="M148 34l9-14"/><path d="M52 34l-9-14"/>
+    <path d="M178 74l16-8"/><path d="M22 74L6 66"/>
+  </g>
+  <circle cx="100" cy="104" r="66" fill="#FFC83D"/>
+  <path d="M100 36l27 56H73z" fill="#FFF7E4"/>
+  <path d="M100 36l12 25H88z" fill="#0D1B3D"/>
+  <rect x="73" y="92" width="54" height="84" fill="#FF7A1A"/>
+  <rect x="73" y="92" width="18" height="84" fill="#FF9B4F"/>
+  <rect x="65" y="176" width="70" height="30" rx="5" fill="#0D1B3D"/>
+  <path d="M74 206h52l-7 44H81z" fill="#00B9A7"/>
+  <path d="M74 203c-24 12-42 33-48 63 20-4 36-14 48-29zM126 203c24 12 42 33 48 63-20-4-36-14-48-29z" fill="#00B9A7"/>
+  <path d="M100 252c12 15 17 29 0 51-17-22-12-36 0-51z" fill="#FF7A1A"/>
+</svg>
       <div>
         <div class="brand-name">Little Founders</div>
         <span class="brand-sub">Business School for Kids</span>

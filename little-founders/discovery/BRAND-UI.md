@@ -9,6 +9,33 @@ canonical spec. If a build drifts from it, this file wins.
 circular icon badges, dashed connectors, and a navy band at the bottom. Never dark chrome, never
 dense, never monospace as a personality.
 
+## The mark — get this right first
+
+The logo is the single thing that makes a screen read as Little Founders, and it is a specific
+illustration, not a generic shape. Building an approximation is the fastest way to look off-brand.
+
+**What it is, top to bottom:**
+
+1. **Rays** — five short Sunshine strokes radiating from the top and upper sides, round caps,
+   heavy weight (~11 units on a 200-wide canvas)
+2. **Bulb** — a solid Sunshine circle, no outline, filling the upper half
+3. **Pencil, drawn on top of the bulb** — a cream `#FFF7E4` triangular tip, with a Navy graphite
+   point at its very apex, over an Energy orange body with a lighter orange stripe down its
+   left third
+4. **Ferrule** — a Navy rounded bar across the base of the pencil
+5. **Rocket** — a Teal body tapering below the ferrule, with two Teal fins sweeping wide
+6. **Flame** — an Energy orange teardrop at the bottom
+
+Canonical viewBox is `0 0 200 306`. The current implementation lives in every book file; copy it
+rather than redrawing.
+
+**Lockups**
+
+- **Primary** — mark above or beside "Little Founders" in Nunito ExtraBold Navy on two lines,
+  with `BUSINESS SCHOOL FOR KIDS` beneath in **Teal**, uppercase, `.18em` letter-spacing
+- **Icon only** — the mark alone, or inside a Sunshine circle
+- **Horizontal** — mark left, wordmark right
+
 ## Tokens
 
 | Token | Hex | Use |

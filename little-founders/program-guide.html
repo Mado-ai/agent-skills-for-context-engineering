@@ -295,20 +295,38 @@
   .f-nav { fill: #0D1B3D; }
   .f-glass { fill: #FFF3D0; }
   .mark .rays { stroke: var(--sunshine); stroke-width: 5; stroke-linecap: round; fill: none; }
+
+  /* ---- brand: gold rule with a centred star (from the brand board) ---- */
+  .lf-div { display: flex; align-items: center; gap: .85rem; margin: 2.4rem 0; }
+  .lf-div::before, .lf-div::after { content: ""; height: 2px; flex: 1; background: var(--sun); opacity: .55; border-radius: 2px; }
+  .lf-div svg { width: 1.05rem; height: 1.05rem; color: var(--sun); flex: none; }
+  .lf-div.short::before, .lf-div.short::after { max-width: 8rem; }
+
+  /* ---- brand: quiet structural labels (the board sets these in muted, not accent) ---- */
+  .lf-quiet { color: var(--ink-mute); }
+
+  /* ---- brand: drifting graphic elements ---- */
+  .lf-deco { position: absolute; pointer-events: none; opacity: .5; }
 </style>
 
 <div class="wrap">
 
   <header class="hero">
     <div class="lockup">
-      <svg class="mark" viewBox="0 0 100 140" role="img" aria-label="Little Founders lightbulb rocket mark">
-        <circle class="f-sun" cx="50" cy="46" r="34"/>
-        <g class="rays"><path d="M50 8V2M22 20l-4-4M78 20l4-4M14 46H8M92 46h-6"/></g>
-        <path class="f-glass" d="M50 20 L62 52 H38 Z"/>
-        <rect class="f-ene" x="38" y="52" width="24" height="26"/>
-        <rect class="f-nav" x="34" y="78" width="32" height="14" rx="3"/>
-        <path class="f-tea" d="M34 92c-8 6-12 14-12 22 8-2 12-6 14-10zM66 92c8 6 12 14 12 22-8-2-12-6-14-10z"/>
-        <path class="f-ene" d="M50 100c6 8 8 16 0 28-8-12-6-20 0-28z"/>
+      <svg class="mark" viewBox="0 0 200 306" role="img" aria-label="Little Founders mark">
+        <g fill="none" stroke="#FFC83D" stroke-width="11" stroke-linecap="round">
+          <path d="M100 20V3"/><path d="M148 34l9-14"/><path d="M52 34l-9-14"/>
+          <path d="M178 74l16-8"/><path d="M22 74L6 66"/>
+        </g>
+        <circle cx="100" cy="104" r="66" fill="#FFC83D"/>
+        <path d="M100 36l27 56H73z" fill="#FFF7E4"/>
+        <path d="M100 36l12 25H88z" fill="#0D1B3D"/>
+        <rect x="73" y="92" width="54" height="84" fill="#FF7A1A"/>
+        <rect x="73" y="92" width="18" height="84" fill="#FF9B4F"/>
+        <rect x="65" y="176" width="70" height="30" rx="5" fill="#0D1B3D"/>
+        <path d="M74 206h52l-7 44H81z" fill="#00B9A7"/>
+        <path d="M74 203c-24 12-42 33-48 63 20-4 36-14 48-29zM126 203c24 12 42 33 48 63-20-4-36-14-48-29z" fill="#00B9A7"/>
+        <path d="M100 252c12 15 17 29 0 51-17-22-12-36 0-51z" fill="#FF7A1A"/>
       </svg>
       <div>
         <h1>Little Founders</h1>
