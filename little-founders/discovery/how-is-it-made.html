@@ -1,0 +1,1250 @@
+<title>How Is It Made?</title>
+<style>
+  :root {
+    --ground: #F7F4EC;
+    --paper: #FFFFFF;
+    --soft: #F2EEE2;
+    --ink: #16233F;
+    --ink-soft: #46557E;
+    --ink-mute: #7C89A9;
+    --rule: #E3DCCA;
+
+    --sun: #FFC83D;
+    --energy: #FF7A1A;
+    --sky: #4DB6F2;
+    --teal: #00B9A7;
+    --rose: #E0526E;
+    --purple: #7B5EA6;
+    --green: #4CA455;
+    --navy: #16233F;
+
+    --on-sun: #16233F;
+    --on-energy: #FFFFFF;
+    --on-sky: #16233F;
+    --on-teal: #FFFFFF;
+    --on-rose: #FFFFFF;
+    --on-purple: #FFFFFF;
+    --on-green: #FFFFFF;
+    --on-navy: #F7F4EC;
+
+    --shadow: 0 2px 4px rgba(22,35,63,.06), 0 12px 28px -14px rgba(22,35,63,.3);
+    --shadow-lg: 0 4px 10px rgba(22,35,63,.09), 0 26px 56px -22px rgba(22,35,63,.45);
+
+    --display: "Nunito", ui-rounded, "SF Pro Rounded", "Segoe UI Variable Display", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0A1428;
+      --paper: #132244;
+      --soft: #1A2B52;
+      --ink: #F3F0E7;
+      --ink-soft: #C6CFE7;
+      --ink-mute: #919DBE;
+      --rule: #27375F;
+      --sun: #FFD264;
+      --energy: #FF9247;
+      --sky: #71C5F7;
+      --teal: #1ACFBB;
+      --rose: #F0798F;
+      --purple: #A78BCE;
+      --green: #6BC074;
+      --navy: #C3CFEE;
+      --on-sun: #16233F;
+      --on-energy: #23150A;
+      --on-sky: #0A1428;
+      --on-teal: #03231F;
+      --on-rose: #2A0B12;
+      --on-purple: #190F29;
+      --on-green: #06210B;
+      --on-navy: #0A1428;
+      --shadow: 0 2px 4px rgba(0,0,0,.4), 0 14px 30px -16px rgba(0,0,0,.8);
+      --shadow-lg: 0 4px 10px rgba(0,0,0,.45), 0 28px 60px -24px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0A1428; --paper: #132244; --soft: #1A2B52;
+    --ink: #F3F0E7; --ink-soft: #C6CFE7; --ink-mute: #919DBE; --rule: #27375F;
+    --sun: #FFD264; --energy: #FF9247; --sky: #71C5F7; --teal: #1ACFBB;
+    --rose: #F0798F; --purple: #A78BCE; --green: #6BC074; --navy: #C3CFEE;
+    --on-sun: #16233F; --on-energy: #23150A; --on-sky: #0A1428; --on-teal: #03231F;
+    --on-rose: #2A0B12; --on-purple: #190F29; --on-green: #06210B; --on-navy: #0A1428;
+    --shadow: 0 2px 4px rgba(0,0,0,.4), 0 14px 30px -16px rgba(0,0,0,.8);
+    --shadow-lg: 0 4px 10px rgba(0,0,0,.45), 0 28px 60px -24px rgba(0,0,0,.9);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--body); font-size: 1.05rem; line-height: 1.6;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  }
+
+  h1, h2, h3 { font-family: var(--display); font-weight: 800; margin: 0; line-height: 1.1; letter-spacing: -.02em; text-wrap: balance; }
+  p { margin: 0; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; font-family: var(--display); }
+  :focus-visible { outline: 4px solid var(--sky); outline-offset: 3px; border-radius: 10px; }
+
+  .ic { width: 1.4em; height: 1.4em; flex: none; }
+
+  /* ---------------- top bar ---------------- */
+
+  .bar {
+    position: sticky; top: 0; z-index: 40;
+    display: flex; align-items: center; gap: .7rem; flex-wrap: wrap;
+    padding: .7rem clamp(.9rem, 3vw, 2rem);
+    background: color-mix(in srgb, var(--ground) 92%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .logo { display: flex; align-items: center; gap: .5rem; margin-right: auto; }
+  .logo svg { width: 26px; height: 36px; }
+  .logo b { font-family: var(--display); font-weight: 800; font-size: .95rem; line-height: 1; }
+  .logo span { display: block; font-family: var(--body); font-size: .58rem; font-weight: 700; letter-spacing: .11em; text-transform: uppercase; color: var(--teal); margin-top: .2rem; }
+
+  .stars-meter {
+    display: flex; align-items: center; gap: .35rem;
+    background: var(--paper); border: 2px solid var(--rule); border-radius: 99px;
+    padding: .3rem .8rem; font-family: var(--display); font-weight: 800;
+    font-variant-numeric: tabular-nums; box-shadow: var(--shadow);
+  }
+  .stars-meter .ic { color: var(--sun); width: 1.15rem; height: 1.15rem; }
+  .stars-meter.pop { animation: pop .5s cubic-bezier(.3,1.4,.5,1); }
+  @keyframes pop { 0%{transform:scale(1)} 40%{transform:scale(1.25) rotate(-4deg)} 100%{transform:scale(1)} }
+
+  .chipbtn {
+    display: inline-flex; align-items: center; gap: .45rem;
+    padding: .45rem .9rem; border-radius: 99px; font-weight: 800; font-size: .9rem;
+    background: var(--paper); border: 2px solid var(--rule); box-shadow: var(--shadow);
+    transition: transform .12s ease, background .12s ease;
+  }
+  .chipbtn:hover { transform: translateY(-2px); }
+  .chipbtn.on { background: var(--sun); color: var(--on-sun); border-color: var(--sun); }
+
+  /* ---------------- layout ---------------- */
+
+  .page { max-width: 62rem; margin: 0 auto; padding: clamp(1.1rem, 3vw, 2.4rem) clamp(.9rem, 3vw, 2rem) 5rem; }
+
+  .card {
+    background: var(--paper); border: 2px solid var(--rule);
+    border-radius: 24px; padding: clamp(1.1rem, 3vw, 1.7rem);
+    box-shadow: var(--shadow);
+  }
+
+  .stack { display: grid; gap: 1.1rem; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .6rem;
+    padding: .85rem 1.5rem; border-radius: 16px;
+    font-weight: 800; font-size: 1.05rem;
+    background: var(--energy); color: var(--on-energy);
+    box-shadow: var(--shadow); transition: transform .12s ease, filter .12s ease;
+  }
+  .btn:hover { transform: translateY(-2px); filter: brightness(1.06); }
+  .btn:active { transform: translateY(0); }
+  .btn.ghost { background: var(--paper); color: var(--ink); border: 2px solid var(--rule); }
+  .btn.big { padding: 1.05rem 2rem; font-size: 1.2rem; border-radius: 20px; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+  /* ---------------- cover ---------------- */
+
+  .cover { text-align: center; display: grid; gap: 1.4rem; justify-items: center; padding-top: clamp(1rem, 5vw, 3rem); }
+  .cover h1 { font-size: clamp(2.6rem, 10vw, 5.2rem); line-height: .95; }
+  .cover .sub { font-family: var(--display); font-weight: 800; font-size: clamp(1.05rem, 3vw, 1.5rem); color: var(--purple); }
+  .cover .band {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: var(--teal); color: var(--on-teal);
+    padding: .5rem 1.2rem; border-radius: 99px; font-family: var(--display); font-weight: 800; font-size: .95rem;
+  }
+  .namefield {
+    display: grid; gap: .5rem; justify-items: center; width: min(26rem, 100%);
+  }
+  .namefield label { font-family: var(--display); font-weight: 800; font-size: 1.05rem; }
+  .namefield input {
+    width: 100%; padding: .8rem 1.1rem; font: inherit; font-family: var(--display); font-weight: 700;
+    text-align: center; border-radius: 16px; border: 3px dashed var(--rule);
+    background: var(--paper); color: var(--ink);
+  }
+  .namefield input:focus { border-style: solid; border-color: var(--teal); outline: none; }
+
+  .ziggy-hero { width: clamp(96px, 24vw, 150px); height: auto; filter: drop-shadow(0 10px 20px rgba(224,82,110,.25)); }
+
+  .quote { font-family: var(--display); font-weight: 800; font-style: italic; color: var(--teal); }
+
+  /* ---------------- ziggy speech ---------------- */
+
+  .ziggy-say {
+    display: grid; grid-template-columns: auto minmax(0,1fr); gap: 1rem; align-items: center;
+    background: linear-gradient(100deg, color-mix(in srgb, var(--sun) 22%, var(--paper)), var(--paper));
+    border: 2px solid color-mix(in srgb, var(--sun) 45%, var(--rule));
+    border-radius: 22px; padding: 1rem 1.2rem;
+  }
+  .ziggy-say svg.zig { width: 62px; height: 62px; flex: none; }
+  .ziggy-say p { font-family: var(--display); font-weight: 700; font-size: clamp(1.05rem, 2.6vw, 1.3rem); line-height: 1.35; }
+  .ziggy-say .kicker { font-family: var(--body); font-size: .72rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--purple); margin-bottom: .25rem; }
+
+  .speak {
+    display: inline-flex; align-items: center; gap: .4rem; margin-top: .6rem;
+    padding: .35rem .8rem; border-radius: 99px; font-size: .82rem; font-weight: 800;
+    background: var(--paper); border: 2px solid var(--rule);
+  }
+  .speak.speaking { background: var(--teal); color: var(--on-teal); border-color: var(--teal); }
+
+  /* ---------------- topic grid ---------------- */
+
+  .topics { display: grid; gap: .9rem; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); }
+  .topic {
+    display: grid; grid-template-columns: 3.4rem minmax(0,1fr); gap: .9rem; align-items: center;
+    background: var(--paper); border: 2px solid var(--rule); border-radius: 20px;
+    padding: .9rem; text-align: left; box-shadow: var(--shadow);
+    transition: transform .14s ease, box-shadow .14s ease;
+    position: relative; overflow: hidden;
+  }
+  .topic:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+  .topic .badge {
+    width: 3.4rem; height: 3.4rem; border-radius: 18px; display: grid; place-items: center;
+  }
+  .topic .badge .ic { width: 1.8rem; height: 1.8rem; }
+  .topic b { font-family: var(--display); font-weight: 800; font-size: 1rem; display: block; line-height: 1.2; }
+  .topic small { color: var(--ink-mute); font-size: .78rem; }
+  .topic .got {
+    position: absolute; top: .5rem; right: .6rem; color: var(--sun);
+    width: 1.3rem; height: 1.3rem; opacity: 0; transform: scale(.4) rotate(-30deg);
+    transition: opacity .3s ease, transform .4s cubic-bezier(.3,1.5,.5,1);
+  }
+  .topic.done .got { opacity: 1; transform: none; }
+  .topic.done { border-color: var(--sun); }
+
+  /* ---------------- pattern cards ---------------- */
+
+  .pattern { display: grid; gap: .7rem; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
+  .pat {
+    background: var(--paper); border: 2px solid var(--rule); border-radius: 18px;
+    padding: .9rem 1rem; display: grid; grid-template-columns: auto minmax(0,1fr); gap: .8rem; align-items: center;
+  }
+  .pat b { font-family: var(--display); font-weight: 900; font-size: 1.6rem; color: var(--purple); line-height: 1; }
+  .pat span { font-family: var(--display); font-weight: 700; font-size: .98rem; }
+
+  /* ---------------- topic page ---------------- */
+
+  .topic-head { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .topic-head .num {
+    width: 3.6rem; height: 3.6rem; border-radius: 20px; display: grid; place-items: center;
+    font-family: var(--display); font-weight: 900; font-size: 1.6rem;
+  }
+  .topic-head h2 { font-size: clamp(1.6rem, 5vw, 2.4rem); }
+
+  .sec-label {
+    display: flex; align-items: center; gap: .5rem;
+    font-family: var(--body); font-size: .74rem; font-weight: 800;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--purple); margin-bottom: .7rem;
+  }
+  .sec-label .ic { width: 1rem; height: 1rem; }
+
+  /* journey */
+  .journey-wrap { position: relative; }
+  .journey {
+    display: flex; align-items: stretch; gap: .4rem; flex-wrap: wrap;
+    padding: .3rem 0;
+  }
+  .stage {
+    display: grid; gap: .35rem; justify-items: center; width: 5.6rem;
+    opacity: 0; transform: translateY(14px) scale(.85);
+    transition: opacity .35s ease, transform .45s cubic-bezier(.25,1.4,.5,1);
+  }
+  .stage.in { opacity: 1; transform: none; }
+  .stage .puck {
+    width: 3.6rem; height: 3.6rem; border-radius: 20px; display: grid; place-items: center;
+    box-shadow: var(--shadow);
+  }
+  .stage .puck .ic { width: 2rem; height: 2rem; }
+  .stage span { font-family: var(--display); font-weight: 800; font-size: .78rem; text-align: center; line-height: 1.15; }
+  .arrow {
+    display: grid; place-items: center; color: var(--ink-mute); width: 1.4rem;
+    opacity: 0; transition: opacity .3s ease .1s;
+    align-self: center; margin-bottom: 1rem;
+  }
+  .arrow.in { opacity: 1; }
+  .arrow svg { width: 1.1rem; height: 1.1rem; }
+
+  .journey-controls { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: .9rem; align-items: center; }
+  .hint { color: var(--ink-mute); font-size: .84rem; }
+
+  /* steps */
+  .steps { display: grid; gap: .7rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+  .step {
+    background: var(--paper); border: 2px solid var(--rule); border-radius: 18px; padding: 1rem;
+    display: grid; gap: .6rem; text-align: left; align-content: start;
+    transition: transform .14s ease, border-color .14s ease;
+  }
+  .step:hover { transform: translateY(-2px); }
+  .step .n {
+    width: 2.1rem; height: 2.1rem; border-radius: 50%; display: grid; place-items: center;
+    font-family: var(--display); font-weight: 900; font-size: .95rem;
+  }
+  .step p { font-size: .98rem; line-height: 1.45; }
+  .step.opened { border-color: color-mix(in srgb, var(--teal) 60%, var(--rule)); }
+  .step .veil { color: var(--ink-mute); font-family: var(--display); font-weight: 800; }
+
+  /* helpers + fact */
+  .two { display: grid; gap: 1.1rem; }
+  @media (min-width: 46rem) { .two { grid-template-columns: 1fr 1fr; } }
+
+  .helpers { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .helper {
+    background: color-mix(in srgb, var(--sky) 20%, var(--paper));
+    border: 2px solid color-mix(in srgb, var(--sky) 35%, var(--rule));
+    padding: .45rem .9rem; border-radius: 99px; font-family: var(--display); font-weight: 800; font-size: .9rem;
+  }
+  .fact {
+    background: color-mix(in srgb, var(--sun) 26%, var(--paper));
+    border: 2px solid color-mix(in srgb, var(--sun) 55%, var(--rule));
+    border-radius: 20px; padding: 1rem 1.1rem;
+  }
+  .fact b { font-family: var(--display); font-weight: 800; font-size: 1.02rem; line-height: 1.35; display: block; }
+
+  /* words */
+  .words { display: grid; gap: .5rem; }
+  .word {
+    display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: .7rem; align-items: center;
+    background: color-mix(in srgb, var(--teal) 12%, var(--paper));
+    border: 2px solid color-mix(in srgb, var(--teal) 30%, var(--rule));
+    border-radius: 16px; padding: .7rem .9rem; text-align: left; width: 100%;
+  }
+  .word b { font-family: var(--display); font-weight: 800; color: var(--teal); }
+  .word span { color: var(--ink-soft); font-size: .95rem; }
+  .word .ic { color: var(--ink-mute); width: 1.1rem; height: 1.1rem; }
+  .word.locked { background: var(--soft); border-color: var(--rule); opacity: .55; }
+  .word.locked b { color: var(--ink-mute); }
+
+  /* draw */
+  .draw-box {
+    border-left: 6px solid var(--purple);
+    background: color-mix(in srgb, var(--purple) 10%, var(--paper));
+    border-radius: 20px; padding: 1.1rem 1.2rem; display: grid; gap: .9rem;
+  }
+  .draw-box .prompt { font-family: var(--display); font-weight: 800; font-size: clamp(1.02rem, 2.5vw, 1.2rem); line-height: 1.35; }
+  .canvas-shell {
+    position: relative; border-radius: 18px; overflow: hidden;
+    border: 3px dashed color-mix(in srgb, var(--purple) 40%, var(--rule));
+    background: var(--paper); touch-action: none;
+  }
+  canvas { display: block; width: 100%; height: auto; touch-action: none; cursor: crosshair; }
+  .canvas-empty {
+    position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none;
+    color: var(--ink-mute); font-family: var(--display); font-weight: 800; font-size: 1rem;
+  }
+  .tools { display: flex; gap: .45rem; flex-wrap: wrap; align-items: center; }
+  .swatch {
+    width: 2.2rem; height: 2.2rem; border-radius: 50%; border: 3px solid var(--paper);
+    box-shadow: 0 0 0 2px var(--rule); transition: transform .12s ease;
+  }
+  .swatch:hover { transform: scale(1.1); }
+  .swatch[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--ink); transform: scale(1.14); }
+  .sizes { display: flex; gap: .3rem; margin-left: .3rem; }
+  .sizebtn { width: 2.2rem; height: 2.2rem; border-radius: 12px; border: 2px solid var(--rule); display: grid; place-items: center; background: var(--paper); }
+  .sizebtn[aria-pressed="true"] { border-color: var(--ink); background: var(--soft); }
+  .sizebtn i { display: block; border-radius: 50%; background: var(--ink); }
+
+  .idea-name {
+    width: 100%; padding: .7rem 1rem; font: inherit; font-family: var(--display); font-weight: 700;
+    border-radius: 14px; border: 2px solid var(--rule); background: var(--paper); color: var(--ink);
+  }
+  .idea-name:focus { border-color: var(--purple); outline: none; }
+
+  /* star award */
+  .star-award {
+    display: flex; align-items: center; gap: .9rem; flex-wrap: wrap;
+    background: color-mix(in srgb, var(--sun) 24%, var(--paper));
+    border: 2px solid var(--sun); border-radius: 20px; padding: 1rem 1.2rem;
+  }
+  .star-award .ic { width: 2.2rem; height: 2.2rem; color: var(--sun); }
+  .star-award b { font-family: var(--display); font-weight: 800; font-size: 1.1rem; }
+
+  /* nav footer */
+  .pagenav { display: flex; gap: .7rem; flex-wrap: wrap; justify-content: space-between; margin-top: 1.4rem; }
+
+  /* founder card */
+  .fc-field { display: grid; gap: .45rem; }
+  .fc-field label { font-family: var(--display); font-weight: 800; font-size: 1rem; }
+  .fc-field input, .fc-field textarea {
+    width: 100%; padding: .7rem 1rem; font: inherit; border-radius: 14px;
+    border: 2px solid var(--rule); background: var(--paper); color: var(--ink); resize: vertical;
+  }
+  .fc-field input:focus, .fc-field textarea:focus { border-color: var(--energy); outline: none; }
+  .jbuild { display: flex; gap: .4rem; align-items: center; flex-wrap: wrap; }
+  .jbuild input {
+    width: 7.5rem; text-align: center; padding: .6rem .5rem; border-radius: 14px;
+    border: 2px dashed var(--rule); background: var(--paper); color: var(--ink);
+    font-family: var(--display); font-weight: 800; font-size: .9rem;
+  }
+
+  /* certificate */
+  .cert {
+    background: var(--paper); border: 8px solid var(--sun); border-radius: 28px;
+    padding: clamp(1.5rem, 5vw, 3rem); text-align: center; display: grid; gap: 1rem; justify-items: center;
+    box-shadow: var(--shadow-lg);
+  }
+  .cert .eyebrow { font-family: var(--body); font-size: .72rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--teal); }
+  .cert h2 { font-size: clamp(2rem, 7vw, 3.2rem); }
+  .cert .who {
+    font-family: var(--display); font-weight: 900; font-size: clamp(1.5rem, 5vw, 2.4rem);
+    color: var(--energy); border-bottom: 3px dotted var(--rule); padding: .2rem 2rem .4rem;
+  }
+  .cert .sig { display: flex; gap: 2.5rem; flex-wrap: wrap; justify-content: center; margin-top: 1rem; }
+  .cert .sig div { min-width: 8rem; }
+  .cert .sig hr { border: 0; border-top: 2px solid var(--ink); margin: 0 0 .3rem; }
+  .cert .sig span { font-family: var(--display); font-weight: 800; font-size: .85rem; }
+  .cert .align { font-size: .74rem; color: var(--ink-mute); }
+
+  .gallery { display: grid; gap: .7rem; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); }
+  .gal { border: 2px solid var(--rule); border-radius: 16px; overflow: hidden; background: #fff; }
+  .gal img { display: block; width: 100%; height: auto; }
+  .gal figcaption { padding: .45rem .6rem; font-family: var(--display); font-weight: 800; font-size: .8rem; color: var(--ink); background: var(--paper); }
+
+  /* confetti */
+  .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 90; }
+  .confetti i {
+    position: absolute; width: 10px; height: 14px; border-radius: 2px;
+    animation: fall 2.2s cubic-bezier(.3,.6,.5,1) forwards;
+  }
+  @keyframes fall {
+    0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+    .stage { opacity: 1; transform: none; }
+    .arrow { opacity: 1; }
+  }
+
+  @media print {
+    .bar, .pagenav, .noprint { display: none !important; }
+    body { background: #fff; }
+    .cert { box-shadow: none; border-color: #FFC83D; }
+  }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <g id="s" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></g>
+
+  <!-- ui -->
+  <g id="i-star"><path fill="currentColor" d="m12 2.4 2.95 6 6.6.96-4.78 4.65 1.13 6.58L12 17.48 6.1 20.6l1.13-6.58L2.45 9.36l6.6-.96L12 2.4Z"/></g>
+  <g id="i-star-o" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m12 3.2 2.75 5.6 6.15.9-4.45 4.33 1.05 6.14L12 17.28 6.5 20.17l1.05-6.14L3.1 9.7l6.15-.9L12 3.2Z"/></g>
+  <g id="i-play" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M7 4.8 19 12 7 19.2V4.8Z"/></g>
+  <g id="i-arrow" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14m-5-6 6 6-6 6"/></g>
+  <g id="i-back" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H6m5-6-6 6 6 6"/></g>
+  <g id="i-sound" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9.5h3L12.5 6v12L8 14.5H5v-5ZM16 9.2a4 4 0 0 1 0 5.6M18.6 6.8a7.5 7.5 0 0 1 0 10.4"/></g>
+  <g id="i-undo" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h9a5 5 0 0 1 0 10h-3M4 9l4-4M4 9l4 4"/></g>
+  <g id="i-trash" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5h16M9.5 6.5V4.8h5V6.5M6.5 6.5 7.4 20h9.2l.9-13.5"/></g>
+  <g id="i-book" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5h5.5A2.5 2.5 0 0 1 12 6a2.5 2.5 0 0 1 2.5-1.5H20V18h-5.5A2.5 2.5 0 0 0 12 19.5 2.5 2.5 0 0 0 9.5 18H4V4.5ZM12 6v13.5"/></g>
+  <g id="i-card" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 10h6M7 14h4"/></g>
+  <g id="i-medal" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="15" r="5.4"/><path d="M8.6 10 6 3h12l-2.6 7"/></g>
+  <g id="i-home" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-9.5Z"/></g>
+  <g id="i-print" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V4h10v5M7 18H5a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M7 14h10v6H7v-6Z"/></g>
+  <g id="i-lock" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10" width="15" height="10" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></g>
+  <g id="i-eye" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.8"/></g>
+
+  <!-- journey icons -->
+  <g id="j-tree" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-4M12 3 6 11h12L12 3ZM8 16h8l-4-5-4 5Z"/></g>
+  <g id="j-wood" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="2"/><path d="M8 8v8M14 8v8"/></g>
+  <g id="j-graphite" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20 4 16 14 5l4 3.5L8 19.5 6 20Z"/><path d="M14 5l4 3.5"/></g>
+  <g id="j-glue" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3h4v3l2 3v11H8V9l2-3V3Z"/><path d="M8 13h8"/></g>
+  <g id="j-paint" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 5 20l6-4M9 14l7-9 3 3-9 7-1-1Z"/></g>
+  <g id="j-pencil" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4L16 5l3 3L8 19l-4 1Z"/><path d="M14 7l3 3"/></g>
+  <g id="j-chips" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h5l-1 4H3l1-4ZM12 5h6l-1 4h-6l1-4ZM9 15h7l-1 4H8l1-4Z"/></g>
+  <g id="j-pulp" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16v3a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5v-3Z"/><path d="M6 8c1-1.5 2-1.5 3 0s2 1.5 3 0 2-1.5 3 0 2 1.5 3 0"/></g>
+  <g id="j-press" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="3.5" rx="1.5"/><rect x="3" y="16.5" width="18" height="3.5" rx="1.5"/><path d="M12 9v6m0-6-2 2m2-2 2 2m-2 6-2-2m2 2 2-2"/></g>
+  <g id="j-paper" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l5 5v13H6V3Z"/><path d="M14 3v5h5"/></g>
+  <g id="j-cotton" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-6"/><circle cx="9" cy="9" r="3.2"/><circle cx="15" cy="9" r="3.2"/><circle cx="12" cy="5.5" r="3.2"/></g>
+  <g id="j-yarn" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7.5"/><path d="M5 8c4 1 8 4 9.5 8M8 4.5c3.5 2 6.5 5.5 7.8 9.5M18.5 12c-1 3-3 5-6 6"/></g>
+  <g id="j-fabric" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7c2-2 4-2 6 0s4 2 6 0 4-2 6 0v10c-2-2-4-2-6 0s-4 2-6 0-4-2-6 0V7Z"/></g>
+  <g id="j-dye" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11Z"/></g>
+  <g id="j-sew" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="7" r="2.4"/><circle cx="6" cy="17" r="2.4"/><path d="M8 8.5 20 17M8 15.5 20 7"/></g>
+  <g id="j-tshirt" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 4 7l2 4 2-1v9h8v-9l2 1 2-4-5-3a3 3 0 0 1-6 0Z"/></g>
+  <g id="j-wheat" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V8"/><path d="M12 8c-3-1-4-3-3-5 2 0 3.5 1.5 3 5ZM12 8c3-1 4-3 3-5-2 0-3.5 1.5-3 5ZM12 13c-3-1-4-3-3-5 2 0 3.5 1.5 3 5ZM12 13c3-1 4-3 3-5-2 0-3.5 1.5-3 5Z"/></g>
+  <g id="j-flour" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h8l2 15H6L8 6Z"/><path d="M8.5 6c0-2 1.5-3 3.5-3s3.5 1 3.5 3"/><path d="M9 12h6"/></g>
+  <g id="j-dough" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16c0-4 3.5-7 8-7s8 3 8 7c0 1.6-1 2.5-3 2.5H7c-2 0-3-.9-3-2.5Z"/><path d="M3 19h18"/></g>
+  <g id="j-rise" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19c0-4 3.5-7 8-7s8 3 8 7H4Z"/><path d="M12 9V3m0 0L9 6m3-3 3 3"/></g>
+  <g id="j-bake" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="3"/><path d="M3.5 9h17M7 12.5h10v4H7z"/></g>
+  <g id="j-bread" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11c0-3 3.5-5 8-5s8 2 8 5c0 1.5-1.2 2-2 2v6H6v-6c-.8 0-2-.5-2-2Z"/><path d="M9 8.5c0 1.5-.5 2-1.5 2.5M14 8.5c0 1.5.5 2 1.5 2.5"/></g>
+  <g id="j-fruit" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="7"/><path d="M12 7V4M12 5c2-2 4-2 5-1-1 2-3 2.5-5 1Z"/></g>
+  <g id="j-wash" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="15" r="5"/><path d="M6 4v3M9 3v4M15 3v4M18 4v3"/></g>
+  <g id="j-squeeze" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11h12l-3 5H9l-3-5Z"/><path d="M12 11V4M8 6l4-2 4 2M12 16v4"/></g>
+  <g id="j-juice" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10l-1.4 13H8.4L7 7Z"/><path d="M7.4 11h9.2M14 7l2-4"/></g>
+  <g id="j-bottle" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4l2.2 3v12H7.8V9L10 6V2Z"/><path d="M7.8 13h8.4"/></g>
+  <g id="j-design" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="13" height="17" rx="2"/><path d="M7 8h6M7 12h4"/><path d="m17 12 3.5 3.5L16 20l-3 .8.8-3L17 12Z"/></g>
+  <g id="j-beads" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="10" r="3"/><circle cx="11" cy="16" r="3"/></g>
+  <g id="j-melt" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13h14a7 7 0 0 1-14 0Z"/><path d="M8 8c0-1.5 1-2 1-3.5M12 7c0-2 1-2.5 1-4M16 8c0-1.5 1-2 1-3.5M6 20h12"/></g>
+  <g id="j-mould" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4V6Z"/><path d="M9 6v5h6V6M9 18v-5h6v5"/></g>
+  <g id="j-toy" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="6"/><circle cx="6.5" cy="7" r="2.6"/><circle cx="17.5" cy="7" r="2.6"/><path d="M10 13.5h.01M14 13.5h.01M10 17c1.3 1 2.7 1 4 0"/></g>
+  <g id="j-cacao" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c4 2 6 6 6 10s-2 8-6 8-6-4-6-8 2-8 6-10Z"/><path d="M12 5v15M9 8.5c0 3 0 6 .8 9M15 8.5c0 3 0 6-.8 9"/></g>
+  <g id="j-beans" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="8.5" cy="9" rx="4" ry="5" transform="rotate(-25 8.5 9)"/><ellipse cx="15" cy="15" rx="4" ry="5" transform="rotate(-25 15 15)"/><path d="M7 6.5c1 2 1.5 4 1 5.5M13.5 12.5c1 2 1.5 4 1 5.5"/></g>
+  <g id="j-roast" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 4-3 5-3 9a3 3 0 0 0 6 0c0-1.2-.4-2-.4-2 2.4 1.3 3.4 3.3 3.4 5.2A6 6 0 0 1 6 15.2C6 10 10.5 8 12 3Z"/></g>
+  <g id="j-grind" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h16a8 8 0 0 1-8 8 8 8 0 0 1-8-8Z"/><path d="M12 18v3M8 21h8M14 4l4 4M18 4l-4 4"/></g>
+  <g id="j-sugar" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="9" width="10" height="9" rx="1.5"/><path d="M7 12h10M12 9v9M6 5l1 2 2 .5L7 9l-.4 2M17 3l.6 1.6L19 5l-1.4.9-.3 1.6"/></g>
+  <g id="j-chocolate" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 12h16M9.5 5v14M14.5 5v14"/></g>
+  <g id="j-idea" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17.5h6M10 20.5h4M12 3a6 6 0 0 0-3.5 10.9c.4.3.5.7.5 1.1h6c0-.4.1-.8.5-1.1A6 6 0 0 0 12 3Z"/></g>
+  <g id="j-write" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4L15 6l3 3L8 19l-4 1Z"/><path d="M4 21h16"/></g>
+  <g id="j-print" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="7" rx="2"/><path d="M7 13.5h10v7H7v-7Z"/></g>
+  <g id="j-fold" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4V5Z"/><path d="M12 5v14M12 5 4 12M12 19l8-7"/></g>
+  <g id="j-cover" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v18M12.5 8h3.5M12.5 11h3.5"/></g>
+  <g id="j-woodpieces" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="5" rx="1.6"/><rect x="3" y="11" width="12" height="5" rx="1.6"/><rect x="6" y="18" width="14" height="4" rx="1.6"/></g>
+  <g id="j-shape" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18h18M6 18l3-9h6l3 9"/><path d="M9 12h6"/></g>
+  <g id="j-join" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="8" height="6" rx="1.6"/><rect x="13" y="9" width="8" height="6" rx="1.6"/><path d="M11 12h2M12 6v3M12 15v3"/></g>
+  <g id="j-finish" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20 3 21l1-3 9-9 2 2-9 9Z"/><path d="M13 9l4-4 2 2-4 4M18 3l.7 1.6L20.5 5l-1.6.8-.3 1.7"/></g>
+  <g id="j-chair" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v10M17 3v10M6 13h12M8 13v8M16 13v8M7 8h10"/></g>
+  <g id="j-farm" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V21H4V10.5Z"/><path d="M9.5 21v-6h5v6M12 4v6"/></g>
+  <g id="j-harvest" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10h17l-2 9H5.5l-2-9Z"/><path d="M8 10c0-3 1.8-5 4-5s4 2 4 5"/></g>
+  <g id="j-pack" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5v-9Z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></g>
+  <g id="j-truck" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6h11v10h-11V6ZM13.5 9.5H17l3.5 3.5V16h-7V9.5Z"/><circle cx="6.5" cy="18" r="2"/><circle cx="16.5" cy="18" r="2"/></g>
+  <g id="j-store" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v11h16V10M3 6.5 5 3h14l2 3.5a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0Z"/><path d="M9.5 21v-6h5v6"/></g>
+  <g id="j-home" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-9.5Z"/></g>
+</defs></svg>
+
+<div class="bar">
+  <div class="logo">
+    <svg viewBox="0 0 100 140" aria-hidden="true">
+      <circle cx="50" cy="46" r="34" fill="var(--sun)"/>
+      <path d="M50 20 62 52H38Z" fill="#FFF3D0"/>
+      <rect x="38" y="52" width="24" height="26" fill="var(--energy)"/>
+      <rect x="34" y="78" width="32" height="14" rx="3" fill="#16233F"/>
+      <path d="M34 92c-8 6-12 14-12 22 8-2 12-6 14-10zM66 92c8 6 12 14 12 22-8-2-12-6-14-10z" fill="var(--teal)"/>
+      <path d="M50 100c6 8 8 16 0 28-8-12-6-20 0-28z" fill="var(--energy)"/>
+    </svg>
+    <div><b>Little Founders</b><span>Discovery Series</span></div>
+  </div>
+  <div class="stars-meter" id="starMeter"><svg class="ic"><use href="#i-star"/></svg><span id="starCount">0</span>/10</div>
+  <button class="chipbtn" data-nav="home"><svg class="ic"><use href="#i-home"/></svg>Home</button>
+  <button class="chipbtn" data-nav="words"><svg class="ic"><use href="#i-book"/></svg>Words</button>
+  <button class="chipbtn" data-nav="card"><svg class="ic"><use href="#i-card"/></svg>My Card</button>
+  <button class="chipbtn" data-nav="cert"><svg class="ic"><use href="#i-medal"/></svg>Award</button>
+</div>
+
+<div class="page" id="page"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ===================== content ===================== */
+
+  const ZIGGY = `<svg class="zig" viewBox="0 0 100 100" aria-label="Ziggy the Fox">
+    <path d="M14 20c0 0 2 14 8 22L14 20Z" fill="#E0526E"/>
+    <path d="M86 20c0 0-2 14-8 22L86 20Z" fill="#E0526E"/>
+    <path d="M18 22c4-8 10-10 14-8l8 6h20l8-6c4-2 10 0 14 8 6 12 4 30-6 42-6 7-14 11-26 11s-20-4-26-11C14 52 12 34 18 22Z" fill="#FF7A1A"/>
+    <path d="M32 60c4 9 10 13 18 13s14-4 18-13c-6 4-11 6-18 6s-12-2-18-6Z" fill="#FFF6EA"/>
+    <ellipse cx="37" cy="47" rx="4.6" ry="5.4" fill="#16233F"/>
+    <ellipse cx="63" cy="47" rx="4.6" ry="5.4" fill="#16233F"/>
+    <circle cx="38.6" cy="45" r="1.6" fill="#fff"/>
+    <circle cx="64.6" cy="45" r="1.6" fill="#fff"/>
+    <path d="M50 62c-3.4 0-6-2.2-6-4.6 0-1.6 1.4-2.6 3-2.6h6c1.6 0 3 1 3 2.6 0 2.4-2.6 4.6-6 4.6Z" fill="#16233F"/>
+    <path d="M28 30c3-3 7-3 9-1M72 30c-3-3-7-3-9-1" stroke="#D9600F" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+  </svg>`;
+
+  const PALETTE = ["teal", "sky", "purple", "energy", "rose", "green"];
+
+  const TOPICS = [
+    { n:1, title:"How is a Pencil made?", colour:"sky", icon:"j-pencil",
+      hook:"Look at a pencil. It started as a TREE! Let's follow how it is made.",
+      journey:[["Tree","j-tree"],["Wood","j-wood"],["Graphite","j-graphite"],["Glue & shape","j-glue"],["Paint","j-paint"],["Pencil","j-pencil"]],
+      steps:["Wood from cedar trees is cut into thin flat slats.","Graphite (a soft grey rock) is mixed with clay and baked into thin sticks.","The stick is glued between two slats, shaped round, painted, and an eraser is added."],
+      helpers:["Foresters","Factory workers","Painters"],
+      fact:"One pencil can draw a line about 35 miles long!",
+      words:[["Graphite","the soft grey stuff that makes the pencil mark"],["Slat","a thin flat piece of wood"]],
+      prompt:"How would you make a BETTER pencil? One that never breaks? One that changes colour? Draw it!" },
+
+    { n:2, title:"How is Paper made?", colour:"teal", icon:"j-paper",
+      hook:"Paper also comes from TREES — or from old paper we recycle!",
+      journey:[["Tree","j-tree"],["Wood chips","j-chips"],["Pulp","j-pulp"],["Press & dry","j-press"],["Paper","j-paper"]],
+      steps:["Wood is chopped into tiny chips.","The chips are cooked into a soft, wet paste called pulp.","The pulp is pressed flat and dried into thin sheets of paper."],
+      helpers:["Foresters","Mill workers"],
+      fact:"Paper can be recycled and made new again 5–7 times!",
+      words:[["Pulp","soft wet wood used to make paper"],["Recycle","to make something old into something new"]],
+      prompt:"What cool thing could you invent out of paper? Draw it!" },
+
+    { n:3, title:"How is a T-shirt made?", colour:"rose", icon:"j-tshirt",
+      hook:"Your T-shirt began as a fluffy plant — COTTON!",
+      journey:[["Cotton","j-cotton"],["Yarn","j-yarn"],["Fabric","j-fabric"],["Dye","j-dye"],["Cut & sew","j-sew"],["T-shirt","j-tshirt"]],
+      steps:["Cotton is picked from the cotton plant.","It is spun into long threads called yarn.","The yarn is woven into fabric, dyed a colour, then cut and sewn."],
+      helpers:["Farmers","Spinners","Tailors"],
+      fact:"Cotton is a plant — your shirt grew in a field!",
+      words:[["Yarn","thread made from cotton"],["Dye","colour added to fabric"]],
+      prompt:"Design your DREAM T-shirt! Draw the picture that goes on it." },
+
+    { n:4, title:"How is Bread made?", colour:"energy", icon:"j-bread",
+      hook:"Warm bread starts in a field of golden WHEAT.",
+      journey:[["Wheat","j-wheat"],["Flour","j-flour"],["Dough","j-dough"],["Rise","j-rise"],["Bake","j-bake"],["Bread","j-bread"]],
+      steps:["Wheat is grown on a farm and harvested.","The grains are ground into flour at a mill.","Flour is mixed with water and yeast into dough, it rises, then bakes."],
+      helpers:["Farmers","Millers","Bakers"],
+      fact:"Yeast is tiny living things that make bread puff up big!",
+      words:[["Yeast","tiny living helpers that make dough rise"],["Mill","a place that grinds wheat into flour"]],
+      prompt:"Invent a brand-new bread! What shape and taste? Draw it." },
+
+    { n:5, title:"How is Juice made?", colour:"sun", icon:"j-juice",
+      hook:"Squeeze! Juice comes from juicy FRUIT.",
+      journey:[["Fruit","j-fruit"],["Wash","j-wash"],["Squeeze","j-squeeze"],["Juice","j-juice"],["Bottle","j-bottle"]],
+      steps:["Fruit like oranges is picked from trees.","The fruit is washed clean.","It is squeezed to make juice, then poured into bottles."],
+      helpers:["Farmers","Factory workers"],
+      fact:"It takes about 3 oranges to fill one glass of juice!",
+      words:[["Squeeze","to press hard to get the juice out"],["Harvest","to pick fruit when it is ready"]],
+      prompt:"Mix a NEW juice flavour! Draw the bottle and give it a name." },
+
+    { n:6, title:"How is a Toy made?", colour:"purple", icon:"j-toy",
+      hook:"Most plastic toys begin as tiny plastic beads!",
+      journey:[["Design","j-design"],["Plastic beads","j-beads"],["Melt","j-melt"],["Mould","j-mould"],["Paint","j-paint"],["Toy","j-toy"]],
+      steps:["A designer draws the toy idea.","Tiny plastic beads are melted into soft goo.","The goo is poured into a mould, cooled hard, then painted."],
+      helpers:["Designers","Factory workers"],
+      fact:"A mould is a special shape that gives the toy its form.",
+      words:[["Mould","a shape that plastic is poured into"],["Design","a plan or drawing for something new"]],
+      prompt:"Invent a brand-new toy! Draw it and give it a name." },
+
+    { n:7, title:"How is Chocolate made?", colour:"energy", icon:"j-chocolate",
+      hook:"Yum! Chocolate grows on a TREE — the cacao tree.",
+      journey:[["Cacao pod","j-cacao"],["Beans","j-beans"],["Roast","j-roast"],["Grind","j-grind"],["Add sugar","j-sugar"],["Chocolate","j-chocolate"]],
+      steps:["Cacao beans come from pods on cacao trees.","The beans are dried, roasted, and ground into a paste.","Sugar and milk are mixed in, then poured into moulds to set hard."],
+      helpers:["Farmers","Chocolatiers"],
+      fact:"Chocolate grows on trees — it starts as a bean!",
+      words:[["Cacao","the bean that chocolate is made from"],["Roast","to heat something to bring out its flavour"]],
+      prompt:"Design your OWN chocolate bar! Draw the wrapper." },
+
+    { n:8, title:"How is a Book made?", colour:"sky", icon:"j-cover",
+      hook:"The book in your hands began as an IDEA in someone's head!",
+      journey:[["Idea","j-idea"],["Write","j-write"],["Print","j-print"],["Fold pages","j-fold"],["Add cover","j-cover"],["Book","i-book"]],
+      steps:["An author writes the words and an artist draws the pictures.","The pages are printed onto big sheets of paper.","The sheets are folded, cut, a cover is added, and it is bound together."],
+      helpers:["Authors","Illustrators","Printers"],
+      fact:"A book is many sheets of paper folded and joined together.",
+      words:[["Author","the person who writes a book"],["Bind","to join the pages together"]],
+      prompt:"Write and draw the cover of YOUR book! What is it about?" },
+
+    { n:9, title:"How is a Chair made?", colour:"teal", icon:"j-chair",
+      hook:"Sit down! A wooden chair started as a strong TREE.",
+      journey:[["Tree","j-tree"],["Wood pieces","j-woodpieces"],["Shape","j-shape"],["Join","j-join"],["Finish","j-finish"],["Chair","j-chair"]],
+      steps:["Wood is cut from trees into pieces.","The pieces are shaped and rubbed smooth (sanded).","They are joined together and painted or polished."],
+      helpers:["Carpenters","Factory workers"],
+      fact:"A chair needs 4 strong legs to keep its balance!",
+      words:[["Carpenter","a person who makes things from wood"],["Sand","to rub wood smooth"]],
+      prompt:"Design a super-comfy chair! Draw your invention." },
+
+    { n:10, title:"How does food get to the store?", colour:"green", icon:"j-store",
+      hook:"Your food travels a long way — from a FARM all the way to YOU!",
+      journey:[["Farm","j-farm"],["Harvest","j-harvest"],["Pack","j-pack"],["Truck","j-truck"],["Store","j-store"],["Home","j-home"]],
+      steps:["Food is grown or raised on a farm.","It is harvested and packed into boxes.","Trucks carry it to the store, and you take it home."],
+      helpers:["Farmers","Drivers","Shopkeepers"],
+      fact:"Some food travels hundreds of miles to reach your plate!",
+      words:[["Harvest","to gather food when it is ready"],["Deliver","to bring something to a place"]],
+      prompt:"Draw the journey of your FAVOURITE food from the farm to you!" }
+  ];
+
+  const PATTERN = [
+    "Where does it come from?",
+    "What happens to it?",
+    "Who helps make it?",
+    "What does it become?"
+  ];
+
+  const INK = ["#16233F", "#FF7A1A", "#4DB6F2", "#00B9A7", "#E0526E", "#7B5EA6", "#FFC83D", "#4CA455"];
+
+  /* ===================== state ===================== */
+
+  const KEY = "lf-how-is-it-made-v1";
+  let S = { name:"", stars:{}, drawings:{}, ideas:{}, card:{}, seen:{} };
+
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) S = Object.assign(S, JSON.parse(raw));
+    } catch (e) {}
+  }
+
+  const starCount = () => Object.keys(S.stars).length;
+
+  /* ===================== helpers ===================== */
+
+  const $ = id => document.getElementById(id);
+  const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+  const ic = (id, cls) => '<svg class="ic ' + (cls || "") + '" aria-hidden="true"><use href="#' + id + '"/></svg>';
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+  const paint = c => "background:var(--" + c + ");color:var(--on-" + c + ")";
+
+  /* speech */
+  const canSpeak = typeof speechSynthesis !== "undefined";
+  let speakingBtn = null;
+  function speak(text, btn) {
+    if (!canSpeak) return;
+    speechSynthesis.cancel();
+    if (speakingBtn) speakingBtn.classList.remove("speaking");
+    if (speakingBtn === btn) { speakingBtn = null; return; }
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.88; u.pitch = 1.08;
+    u.onend = () => { if (btn) btn.classList.remove("speaking"); speakingBtn = null; };
+    if (btn) { btn.classList.add("speaking"); speakingBtn = btn; }
+    speechSynthesis.speak(u);
+  }
+  function speakBtn(text, label) {
+    if (!canSpeak) return "";
+    return '<button class="speak" data-speak="' + esc(text) + '">' + ic("i-sound") + (label || "Read to me") + '</button>';
+  }
+
+  function confetti() {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const box = el("div", "confetti");
+    const cols = ["#FFC83D", "#FF7A1A", "#4DB6F2", "#00B9A7", "#E0526E", "#7B5EA6"];
+    for (let i = 0; i < 60; i++) {
+      const p = document.createElement("i");
+      p.style.left = (Math.random() * 100) + "vw";
+      p.style.background = cols[i % cols.length];
+      p.style.animationDelay = (Math.random() * .5) + "s";
+      p.style.transform = "rotate(" + (Math.random() * 360) + "deg)";
+      box.appendChild(p);
+    }
+    document.body.appendChild(box);
+    setTimeout(() => box.remove(), 3200);
+  }
+
+  function updateMeter() {
+    $("starCount").textContent = starCount();
+    const m = $("starMeter");
+    m.classList.remove("pop"); void m.offsetWidth; m.classList.add("pop");
+  }
+
+  /* ===================== drawing pad ===================== */
+
+  function makePad(host, storeKey, w, h) {
+    const shell = el("div", "canvas-shell");
+    const cv = document.createElement("canvas");
+    cv.width = w; cv.height = h;
+    cv.setAttribute("role", "img");
+    cv.setAttribute("aria-label", "Drawing area");
+    shell.appendChild(cv);
+    const empty = el("div", "canvas-empty", "Draw here with your finger or mouse");
+    shell.appendChild(empty);
+
+    const ctx = cv.getContext("2d");
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    let colour = INK[0], size = 6, drawing = false, dirty = false;
+    const undoStack = [];
+
+    function fillBg() { ctx.save(); ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, w, h); ctx.restore(); }
+    fillBg();
+
+    const saved = S.drawings[storeKey];
+    if (saved) {
+      const img = new Image();
+      img.onload = () => { ctx.drawImage(img, 0, 0, w, h); dirty = true; empty.style.display = "none"; };
+      img.src = saved;
+    }
+
+    function pos(e) {
+      const r = cv.getBoundingClientRect();
+      return { x: (e.clientX - r.left) * (w / r.width), y: (e.clientY - r.top) * (h / r.height) };
+    }
+    function push() { try { undoStack.push(cv.toDataURL()); if (undoStack.length > 12) undoStack.shift(); } catch (e) {} }
+    function persist() {
+      try { S.drawings[storeKey] = cv.toDataURL("image/png"); save(); } catch (e) {}
+    }
+
+    cv.addEventListener("pointerdown", e => {
+      e.preventDefault();
+      cv.setPointerCapture(e.pointerId);
+      push();
+      drawing = true; dirty = true; empty.style.display = "none";
+      const p = pos(e);
+      ctx.strokeStyle = colour; ctx.lineWidth = size;
+      ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + .01, p.y); ctx.stroke();
+    });
+    cv.addEventListener("pointermove", e => {
+      if (!drawing) return;
+      const p = pos(e);
+      ctx.lineTo(p.x, p.y); ctx.stroke();
+    });
+    const end = () => { if (!drawing) return; drawing = false; persist(); host.dispatchEvent(new CustomEvent("drawn")); };
+    cv.addEventListener("pointerup", end);
+    cv.addEventListener("pointercancel", end);
+    cv.addEventListener("pointerleave", end);
+
+    const tools = el("div", "tools");
+    INK.forEach((cRaw, i) => {
+      const b = el("button", "swatch");
+      b.style.background = cRaw;
+      b.setAttribute("aria-label", "Colour " + (i + 1));
+      b.setAttribute("aria-pressed", String(i === 0));
+      b.addEventListener("click", () => {
+        colour = cRaw;
+        tools.querySelectorAll(".swatch").forEach(x => x.setAttribute("aria-pressed", "false"));
+        b.setAttribute("aria-pressed", "true");
+      });
+      tools.appendChild(b);
+    });
+    const sizes = el("div", "sizes");
+    [[4, "Thin"], [8, "Medium"], [16, "Thick"]].forEach(([sv, lbl], i) => {
+      const b = el("button", "sizebtn", '<i style="width:' + Math.max(4, sv / 1.6) + 'px;height:' + Math.max(4, sv / 1.6) + 'px"></i>');
+      b.setAttribute("aria-label", lbl + " brush");
+      b.setAttribute("aria-pressed", String(i === 1));
+      b.addEventListener("click", () => {
+        size = sv;
+        sizes.querySelectorAll(".sizebtn").forEach(x => x.setAttribute("aria-pressed", "false"));
+        b.setAttribute("aria-pressed", "true");
+      });
+      sizes.appendChild(b);
+    });
+    size = 8;
+    tools.appendChild(sizes);
+
+    const undo = el("button", "chipbtn", ic("i-undo") + "Undo");
+    undo.addEventListener("click", () => {
+      const prev = undoStack.pop();
+      if (!prev) return;
+      const img = new Image();
+      img.onload = () => { ctx.clearRect(0, 0, w, h); fillBg(); ctx.drawImage(img, 0, 0, w, h); persist(); };
+      img.src = prev;
+    });
+    const clear = el("button", "chipbtn", ic("i-trash") + "Start again");
+    clear.addEventListener("click", () => {
+      push(); ctx.clearRect(0, 0, w, h); fillBg();
+      dirty = false; empty.style.display = "grid";
+      delete S.drawings[storeKey]; save();
+    });
+    tools.appendChild(undo); tools.appendChild(clear);
+
+    host.appendChild(shell);
+    host.appendChild(tools);
+    return { hasInk: () => dirty };
+  }
+
+  /* ===================== views ===================== */
+
+  let view = { name: "home", n: null };
+
+  function go(name, n) {
+    view = { name, n: n == null ? null : n };
+    render();
+    window.scrollTo({ top: 0 });
+  }
+
+  function render() {
+    const p = $("page");
+    p.innerHTML = "";
+    ({ home:vHome, topic:vTopic, words:vWords, card:vCard, cert:vCert }[view.name] || vHome)(p);
+  }
+
+  /* -------- home -------- */
+
+  function vHome(p) {
+    const cover = el("div", "cover");
+    cover.innerHTML =
+      '<span class="band">' + ic("i-star") + 'Discovery Series · Ages 5–8</span>' +
+      '<h1>HOW IS<br>IT MADE?</h1>' +
+      '<p class="sub">A Little Founders Discovery Book</p>' +
+      ZIGGY.replace('class="zig"', 'class="ziggy-hero"');
+    p.appendChild(cover);
+
+    const nf = el("div", "namefield");
+    nf.innerHTML = '<label for="whoami">My name is…</label>' +
+      '<input id="whoami" type="text" placeholder="Type your name" value="' + esc(S.name) + '" autocomplete="off">';
+    cover.appendChild(nf);
+    nf.querySelector("input").addEventListener("input", e => { S.name = e.target.value.slice(0, 40); save(); });
+
+    cover.appendChild(el("p", "quote", "“Where young ideas grow into big businesses”"));
+
+    const say = el("div", "ziggy-say");
+    say.style.marginTop = "1.6rem";
+    const introText = "Hi! I am Ziggy the Fox. Everything around you was MADE — your pencil, your bread, even this book! Let's be detectives and find out HOW.";
+    say.innerHTML = ZIGGY +
+      '<div><p class="kicker">Be a Maker Detective!</p><p>' + esc(introText) + '</p>' + speakBtn(introText) + '</div>';
+    p.appendChild(say);
+
+    const pat = el("div", "card");
+    pat.style.marginTop = "1.1rem";
+    pat.innerHTML = '<div class="sec-label">' + ic("i-eye") + 'The Maker Pattern — look for this on every page</div>';
+    const grid = el("div", "pattern");
+    PATTERN.forEach((q, i) => grid.appendChild(el("div", "pat", '<b>' + (i + 1) + '</b><span>' + esc(q) + '</span>')));
+    pat.appendChild(grid);
+    pat.appendChild(el("p", "hint", "And then… think like a founder: “How could I make it even better?” That is how founders invent new things!"));
+    pat.lastChild.style.marginTop = ".9rem";
+    p.appendChild(pat);
+
+    const h = el("h2");
+    h.style.margin = "2rem 0 .9rem";
+    h.textContent = "What's Inside";
+    p.appendChild(h);
+
+    const topics = el("div", "topics");
+    TOPICS.forEach(t => {
+      const b = el("button", "topic" + (S.stars[t.n] ? " done" : ""));
+      b.innerHTML =
+        '<span class="badge" style="' + paint(t.colour) + '">' + ic(t.icon) + '</span>' +
+        '<span><b>' + esc(t.title) + '</b><small>' + t.journey.length + ' steps · ' + t.journey[0][0] + ' → ' + t.journey[t.journey.length - 1][0] + '</small></span>' +
+        '<svg class="ic got"><use href="#i-star"/></svg>';
+      b.addEventListener("click", () => go("topic", t.n));
+      topics.appendChild(b);
+    });
+    p.appendChild(topics);
+
+    const foot = el("div", "pagenav");
+    foot.innerHTML = '';
+    const b1 = el("button", "btn big", ic("i-play") + "Start with number 1");
+    b1.addEventListener("click", () => go("topic", 1));
+    foot.appendChild(b1);
+    const b2 = el("button", "btn ghost", ic("i-medal") + "My award");
+    b2.addEventListener("click", () => go("cert"));
+    foot.appendChild(b2);
+    p.appendChild(foot);
+  }
+
+  /* -------- topic -------- */
+
+  function vTopic(p) {
+    const t = TOPICS.find(x => x.n === view.n) || TOPICS[0];
+    S.seen[t.n] = 1; save();
+
+    const head = el("div", "topic-head");
+    head.innerHTML = '<span class="num" style="' + paint(t.colour) + '">' + t.n + '</span><h2>' + esc(t.title) + '</h2>';
+    p.appendChild(head);
+
+    const say = el("div", "ziggy-say");
+    say.style.marginTop = "1.2rem";
+    say.innerHTML = ZIGGY + '<div><p class="kicker">Read this out loud together</p><p>' + esc(t.hook) + '</p>' + speakBtn(t.hook) + '</div>';
+    p.appendChild(say);
+
+    /* journey */
+    const jc = el("div", "card");
+    jc.style.marginTop = "1.1rem";
+    jc.innerHTML = '<div class="sec-label">' + ic("i-arrow") + 'The journey</div>';
+    const jw = el("div", "journey-wrap");
+    const j = el("div", "journey");
+    t.journey.forEach((st, i) => {
+      if (i) {
+        const a = el("div", "arrow", '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"/></svg>');
+        a.dataset.step = i;
+        j.appendChild(a);
+      }
+      const s = el("div", "stage");
+      s.dataset.step = i;
+      s.innerHTML = '<span class="puck" style="' + paint(PALETTE[i % PALETTE.length]) + '">' + ic(st[1]) + '</span><span>' + esc(st[0]) + '</span>';
+      j.appendChild(s);
+    });
+    jw.appendChild(j);
+    jc.appendChild(jw);
+
+    const ctrl = el("div", "journey-controls");
+    const playBtn = el("button", "btn", ic("i-play") + "Play the journey");
+    const nextBtn = el("button", "btn ghost", "Next step " + ic("i-arrow"));
+    const status = el("span", "hint", "");
+    ctrl.appendChild(playBtn); ctrl.appendChild(nextBtn); ctrl.appendChild(status);
+    jc.appendChild(ctrl);
+    p.appendChild(jc);
+
+    let shown = 0;
+    const total = t.journey.length;
+    function reveal(i) {
+      const s = j.querySelector('.stage[data-step="' + i + '"]');
+      const a = j.querySelector('.arrow[data-step="' + i + '"]');
+      if (a) a.classList.add("in");
+      if (s) s.classList.add("in");
+    }
+    function step() {
+      if (shown >= total) return;
+      reveal(shown);
+      shown++;
+      status.textContent = shown + " of " + total;
+      if (shown === total) {
+        nextBtn.disabled = true;
+        status.textContent = "The whole journey! " + t.journey[0][0] + " → " + t.journey[total - 1][0];
+        checkStar();
+      }
+    }
+    nextBtn.addEventListener("click", step);
+    playBtn.addEventListener("click", () => {
+      playBtn.disabled = true;
+      const timer = setInterval(() => {
+        step();
+        if (shown >= total) { clearInterval(timer); playBtn.disabled = false; }
+      }, 520);
+    });
+    step();
+
+    /* steps */
+    const sc = el("div", "card");
+    sc.style.marginTop = "1.1rem";
+    sc.innerHTML = '<div class="sec-label">' + ic("i-eye") + 'What happens? Tap each card' + '</div>';
+    const steps = el("div", "steps");
+    t.steps.forEach((txt, i) => {
+      const b = el("button", "step");
+      b.innerHTML = '<span class="n" style="' + paint(t.colour) + '">' + (i + 1) + '</span><p class="veil">Tap to find out…</p>';
+      let open = false;
+      b.addEventListener("click", () => {
+        open = !open;
+        b.classList.toggle("opened", open);
+        b.querySelector("p").className = open ? "" : "veil";
+        b.querySelector("p").textContent = open ? txt : "Tap to find out…";
+        if (open) speak(txt, null);
+      });
+      steps.appendChild(b);
+    });
+    sc.appendChild(steps);
+    p.appendChild(sc);
+
+    /* helpers + fact */
+    const two = el("div", "two");
+    two.style.marginTop = "1.1rem";
+    const hc = el("div", "card");
+    hc.innerHTML = '<div class="sec-label">' + ic("i-star-o") + 'Who helps make it?</div>';
+    const hl = el("div", "helpers");
+    t.helpers.forEach(x => hl.appendChild(el("span", "helper", esc(x))));
+    hc.appendChild(hl);
+    two.appendChild(hc);
+
+    const fc = el("div", "fact");
+    fc.innerHTML = '<div class="sec-label">' + ic("i-star") + 'Did you know?</div><b>' + esc(t.fact) + '</b>' + speakBtn(t.fact, "Hear it");
+    two.appendChild(fc);
+    p.appendChild(two);
+
+    /* words */
+    const wc = el("div", "card");
+    wc.style.marginTop = "1.1rem";
+    wc.innerHTML = '<div class="sec-label">' + ic("i-book") + 'New words — tap to hear them</div>';
+    const wl = el("div", "words");
+    t.words.forEach(([w, d]) => {
+      const b = el("button", "word");
+      b.innerHTML = '<b>' + esc(w) + '</b><span>' + esc(d) + '</span>' + ic("i-sound");
+      b.addEventListener("click", () => speak(w + ". " + d, null));
+      wl.appendChild(b);
+    });
+    wc.appendChild(wl);
+    p.appendChild(wc);
+
+    /* founder prompt */
+    const dbHost = el("div", "draw-box");
+    dbHost.style.marginTop = "1.1rem";
+    dbHost.innerHTML = '<div class="sec-label">' + ic("j-idea") + 'Think like a founder</div>' +
+      '<p class="prompt">' + esc(t.prompt) + '</p>';
+    const nameIn = document.createElement("input");
+    nameIn.className = "idea-name";
+    nameIn.placeholder = "Give your idea a name…";
+    nameIn.value = S.ideas[t.n] || "";
+    nameIn.addEventListener("input", e => { S.ideas[t.n] = e.target.value.slice(0, 60); save(); checkStar(); });
+    dbHost.appendChild(nameIn);
+    p.appendChild(dbHost);
+
+    const pad = makePad(dbHost, "t" + t.n, 900, 340);
+    dbHost.addEventListener("drawn", checkStar);
+
+    /* star */
+    const award = el("div", "star-award");
+    award.style.marginTop = "1.1rem";
+    p.appendChild(award);
+
+    function checkStar() {
+      const doneJourney = shown >= total;
+      const doneDraw = pad.hasInk() || !!S.drawings["t" + t.n];
+      const already = !!S.stars[t.n];
+      if (doneJourney && doneDraw && !already) {
+        S.stars[t.n] = 1; save(); updateMeter(); confetti();
+        speak("You earned a Maker Star!", null);
+      }
+      const got = !!S.stars[t.n];
+      award.innerHTML = got
+        ? ic("i-star") + '<b>Maker Star earned!</b><span class="hint">You know how ' + esc(t.journey[t.journey.length - 1][0].toLowerCase()) + ' is made — and you invented a better one.</span>'
+        : ic("i-star-o") + '<b>Earn your Maker Star</b><span class="hint">Play the whole journey, then draw your founder idea.</span>';
+    }
+    checkStar();
+
+    /* nav */
+    const nav = el("div", "pagenav");
+    const prev = el("button", "btn ghost", ic("i-back") + (t.n > 1 ? TOPICS[t.n - 2].title.replace("How is ", "").replace("How does ", "") : "Home"));
+    prev.addEventListener("click", () => t.n > 1 ? go("topic", t.n - 1) : go("home"));
+    const next = el("button", "btn", (t.n < 10 ? "Next: " + TOPICS[t.n].title.replace("How is ", "").replace("How does ", "") : "My Founder Card") + ic("i-arrow"));
+    next.addEventListener("click", () => t.n < 10 ? go("topic", t.n + 1) : go("card"));
+    nav.appendChild(prev); nav.appendChild(next);
+    p.appendChild(nav);
+  }
+
+  /* -------- words -------- */
+
+  function vWords(p) {
+    const h = el("h2");
+    h.textContent = "My Maker Words";
+    p.appendChild(h);
+    const sub = el("p", "hint", "Words unlock as you earn each Maker Star. Tap any unlocked word to hear it.");
+    sub.style.margin = ".5rem 0 1.2rem";
+    p.appendChild(sub);
+
+    const c = el("div", "card");
+    const list = el("div", "words");
+    TOPICS.forEach(t => {
+      const open = !!S.stars[t.n];
+      t.words.forEach(([w, d]) => {
+        const b = el("button", "word" + (open ? "" : " locked"));
+        b.innerHTML = '<b>' + esc(w) + '</b><span>' + (open ? esc(d) : "Earn Maker Star " + t.n + " to unlock") + '</span>' + ic(open ? "i-sound" : "i-lock");
+        if (open) b.addEventListener("click", () => speak(w + ". " + d, null));
+        else b.addEventListener("click", () => go("topic", t.n));
+        list.appendChild(b);
+      });
+    });
+    c.appendChild(list);
+    p.appendChild(c);
+  }
+
+  /* -------- founder card -------- */
+
+  function vCard(p) {
+    const h = el("h2");
+    h.textContent = "Now YOU be the Maker Detective";
+    p.appendChild(h);
+
+    const say = el("div", "ziggy-say");
+    say.style.margin = "1rem 0 1.2rem";
+    const txt = "Pick anything you love — a shoe, a ball, a cookie! Find out how it is made and fill in your Founder Card.";
+    say.innerHTML = ZIGGY + '<div><p class="kicker">Your big project</p><p>' + esc(txt) + '</p>' + speakBtn(txt) + '</div>';
+    p.appendChild(say);
+
+    const c = el("div", "card");
+    c.style.borderColor = "var(--energy)";
+    c.style.borderWidth = "3px";
+    const title = el("h3");
+    title.style.textAlign = "center";
+    title.style.marginBottom = "1.2rem";
+    title.textContent = 'My “How Is It Made?” Founder Card';
+    c.appendChild(title);
+
+    const stack = el("div", "stack");
+
+    function field(key, label, placeholder, big) {
+      const f = el("div", "fc-field");
+      f.innerHTML = '<label for="fc-' + key + '">' + esc(label) + '</label>';
+      const input = document.createElement(big ? "textarea" : "input");
+      input.id = "fc-" + key;
+      if (big) input.rows = 2;
+      input.placeholder = placeholder;
+      input.value = S.card[key] || "";
+      input.addEventListener("input", e => { S.card[key] = e.target.value.slice(0, 300); save(); });
+      f.appendChild(input);
+      return f;
+    }
+
+    stack.appendChild(field("chose", "1. I chose:", "e.g. a soccer ball"));
+    stack.appendChild(field("from", "2. It is made from:", "What stuff is it made of?"));
+    stack.appendChild(field("who", "3. Who helps make it:", "Which people help?"));
+
+    const jf = el("div", "fc-field");
+    jf.innerHTML = '<label>4. The steps — the journey:</label>';
+    const jb = el("div", "jbuild");
+    for (let i = 0; i < 4; i++) {
+      if (i) jb.appendChild(el("span", "hint", "→"));
+      const inp = document.createElement("input");
+      inp.placeholder = "Step " + (i + 1);
+      inp.value = (S.card.journey || [])[i] || "";
+      inp.addEventListener("input", e => {
+        S.card.journey = S.card.journey || ["", "", "", ""];
+        S.card.journey[i] = e.target.value.slice(0, 24);
+        save();
+      });
+      jb.appendChild(inp);
+    }
+    jf.appendChild(jb);
+    stack.appendChild(jf);
+
+    stack.appendChild(field("better", "5. I would make it better by:", "What would you change?", true));
+
+    const idea = el("div", "fc-field");
+    idea.innerHTML = '<label>6. My NEW idea — draw it!</label>';
+    stack.appendChild(idea);
+
+    c.appendChild(stack);
+    p.appendChild(c);
+
+    const padHost = el("div", "draw-box");
+    padHost.style.marginTop = "1.1rem";
+    padHost.innerHTML = '<p class="prompt">Draw your brand-new invention.</p>';
+    p.appendChild(padHost);
+    makePad(padHost, "founder-card", 900, 380);
+
+    const nav = el("div", "pagenav");
+    const b = el("button", "btn", ic("i-medal") + "See my award");
+    b.addEventListener("click", () => go("cert"));
+    nav.appendChild(b);
+    p.appendChild(nav);
+  }
+
+  /* -------- certificate -------- */
+
+  function vCert(p) {
+    const stars = starCount();
+    const done = stars === 10;
+
+    const c = el("div", "cert");
+    const today = new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+    c.innerHTML =
+      '<svg viewBox="0 0 100 140" style="width:52px;height:72px" aria-hidden="true">' +
+        '<circle cx="50" cy="46" r="34" fill="var(--sun)"/><path d="M50 20 62 52H38Z" fill="#FFF3D0"/>' +
+        '<rect x="38" y="52" width="24" height="26" fill="var(--energy)"/><rect x="34" y="78" width="32" height="14" rx="3" fill="#16233F"/>' +
+        '<path d="M34 92c-8 6-12 14-12 22 8-2 12-6 14-10zM66 92c8 6 12 14 12 22-8-2-12-6-14-10z" fill="var(--teal)"/>' +
+        '<path d="M50 100c6 8 8 16 0 28-8-12-6-20 0-28z" fill="var(--energy)"/></svg>' +
+      '<p class="eyebrow">Little Founders · Discovery Series</p>' +
+      '<h2>Maker Detective</h2>' +
+      '<p>This is for our amazing maker detective</p>' +
+      '<p class="who">' + esc(S.name || "…………………") + '</p>' +
+      '<p>You discovered how everyday things are made — and learned to ask “How can I make it better?” like a true founder.</p>' +
+      '<p><b>' + stars + ' of 10 Maker Stars</b></p>' +
+      '<div class="sig"><div><hr><span>Teacher</span></div><div><hr><span>' + esc(today) + '</span></div></div>' +
+      '<p class="align">Aligned to EntreComp · CASEL 5 · Ontario curriculum · 4Cs</p>';
+    p.appendChild(c);
+
+    const nav = el("div", "pagenav noprint");
+    const pr = el("button", "btn", ic("i-print") + "Print my award");
+    pr.addEventListener("click", () => window.print());
+    nav.appendChild(pr);
+    if (!done) {
+      const go1 = el("button", "btn ghost", "Keep discovering" + ic("i-arrow"));
+      const nextT = TOPICS.find(t => !S.stars[t.n]);
+      go1.addEventListener("click", () => go("topic", nextT ? nextT.n : 1));
+      nav.appendChild(go1);
+    }
+    p.appendChild(nav);
+
+    /* gallery of ideas */
+    const keys = Object.keys(S.drawings);
+    if (keys.length) {
+      const h = el("h2");
+      h.style.margin = "2.4rem 0 1rem";
+      h.textContent = "My inventions";
+      h.className = "noprint";
+      p.appendChild(h);
+      const g = el("div", "gallery noprint");
+      TOPICS.forEach(t => {
+        const d = S.drawings["t" + t.n];
+        if (!d) return;
+        const f = el("figure", "gal");
+        f.innerHTML = '<img alt="My idea for ' + esc(t.title) + '" src="' + d + '"><figcaption>' +
+          esc(S.ideas[t.n] || t.title.replace("How is ", "").replace("How does ", "")) + '</figcaption>';
+        g.appendChild(f);
+      });
+      if (S.drawings["founder-card"]) {
+        const f = el("figure", "gal");
+        f.innerHTML = '<img alt="My founder card invention" src="' + S.drawings["founder-card"] + '"><figcaption>My big idea</figcaption>';
+        g.appendChild(f);
+      }
+      p.appendChild(g);
+    }
+  }
+
+  /* ===================== wiring ===================== */
+
+  document.addEventListener("click", e => {
+    const s = e.target.closest("[data-speak]");
+    if (s) { speak(s.dataset.speak, s); return; }
+    const n = e.target.closest("[data-nav]");
+    if (n) go(n.dataset.nav);
+  });
+
+  load();
+  updateMeter();
+  render();
+})();
+</script>

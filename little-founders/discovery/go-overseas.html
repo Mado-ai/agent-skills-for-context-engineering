@@ -1,0 +1,1755 @@
+<title>GO OVERSEAS Brand Builder</title>
+<style>
+  :root {
+    --ground: #F6F3EA;
+    --paper: #FFFFFF;
+    --soft: #F0ECE0;
+    --sunk: #E9E3D3;
+    --ink: #131F3A;
+    --ink-soft: #405181;
+    --ink-mute: #78859F;
+    --rule: #E0D9C7;
+    --rule-hard: #CFC6AE;
+
+    --sun: #FFC83D;
+    --energy: #FF7A1A;
+    --sky: #3EA9EC;
+    --teal: #00B9A7;
+    --rose: #E0526E;
+    --purple: #7B5EA6;
+    --green: #3E9B53;
+    --navy: #131F3A;
+
+    --ok: #17915E;
+    --warn: #C2761B;
+    --bad: #C33B52;
+
+    --shadow: 0 1px 2px rgba(19,31,58,.05), 0 10px 26px -14px rgba(19,31,58,.3);
+    --shadow-lg: 0 3px 8px rgba(19,31,58,.08), 0 30px 60px -26px rgba(19,31,58,.5);
+
+    --display: "Nunito", ui-rounded, "SF Pro Rounded", "Segoe UI Variable Display", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #070E1F; --paper: #101B36; --soft: #16233F; --sunk: #1C2B4C;
+      --ink: #F1EEE5; --ink-soft: #BEC9E4; --ink-mute: #8794B5;
+      --rule: #24314F; --rule-hard: #33436A;
+      --sun: #FFD264; --energy: #FF9247; --sky: #64BDF5; --teal: #1ACFBB;
+      --rose: #F0798F; --purple: #A78BCE; --green: #5FBB72; --navy: #C4CFEC;
+      --ok: #3FCB8E; --warn: #F0A947; --bad: #F4778C;
+      --shadow: 0 1px 2px rgba(0,0,0,.45), 0 12px 28px -16px rgba(0,0,0,.85);
+      --shadow-lg: 0 3px 8px rgba(0,0,0,.5), 0 32px 64px -28px rgba(0,0,0,.95);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #070E1F; --paper: #101B36; --soft: #16233F; --sunk: #1C2B4C;
+    --ink: #F1EEE5; --ink-soft: #BEC9E4; --ink-mute: #8794B5;
+    --rule: #24314F; --rule-hard: #33436A;
+    --sun: #FFD264; --energy: #FF9247; --sky: #64BDF5; --teal: #1ACFBB;
+    --rose: #F0798F; --purple: #A78BCE; --green: #5FBB72; --navy: #C4CFEC;
+    --ok: #3FCB8E; --warn: #F0A947; --bad: #F4778C;
+    --shadow: 0 1px 2px rgba(0,0,0,.45), 0 12px 28px -16px rgba(0,0,0,.85);
+    --shadow-lg: 0 3px 8px rgba(0,0,0,.5), 0 32px 64px -28px rgba(0,0,0,.95);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--body); font-size: .96rem; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,h2,h3,h4 { font-family: var(--display); font-weight: 800; margin: 0; line-height: 1.12; letter-spacing: -.02em; text-wrap: balance; }
+  p { margin: 0; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; font-family: var(--body); }
+  input, textarea, select { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--sky); outline-offset: 2px; border-radius: 8px; }
+  .ic { width: 1.2em; height: 1.2em; flex: none; }
+
+  /* ================ shell ================ */
+
+  .app { display: grid; grid-template-columns: 17rem minmax(0,1fr); min-height: 100vh; }
+
+  .rail {
+    background: var(--paper); border-right: 1px solid var(--rule);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    padding: 1.1rem .9rem 2rem; display: flex; flex-direction: column; gap: 1rem;
+  }
+  .brandmark { display: flex; align-items: center; gap: .55rem; padding: 0 .4rem; }
+  .brandmark svg { width: 26px; height: 36px; }
+  .brandmark b { font-family: var(--display); font-weight: 800; font-size: .92rem; line-height: 1; display: block; }
+  .brandmark span { font-size: .56rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; color: var(--energy); }
+
+  .passport-mini { display: grid; grid-template-columns: repeat(5, 1fr); gap: .3rem; padding: .55rem; background: var(--soft); border-radius: 12px; }
+  .pmini {
+    aspect-ratio: 1; border-radius: 8px; display: grid; place-items: center; font-size: .85rem;
+    background: var(--paper); border: 1px dashed var(--rule-hard); opacity: .4; filter: grayscale(1);
+    transition: opacity .3s ease, filter .3s ease, transform .4s cubic-bezier(.3,1.5,.5,1);
+  }
+  .pmini.got { opacity: 1; filter: none; border-style: solid; border-color: var(--sun); background: color-mix(in srgb, var(--sun) 18%, var(--paper)); transform: rotate(-4deg); }
+
+  .steps-nav { display: grid; gap: .1rem; }
+  .snav {
+    display: grid; grid-template-columns: 1.5rem minmax(0,1fr); gap: .55rem; align-items: baseline;
+    padding: .48rem .55rem; border-radius: 10px; text-align: left; width: 100%;
+    color: var(--ink-soft); font-size: .86rem;
+  }
+  .snav:hover { background: var(--soft); color: var(--ink); }
+  .snav[aria-current="step"] { background: var(--sunk); color: var(--ink); font-weight: 700; }
+  .snav i { font-style: normal; font-family: var(--mono); font-size: .68rem; color: var(--ink-mute); letter-spacing: .02em; }
+  .snav[aria-current="step"] i { color: var(--energy); }
+  .snav.done i::after { content: " ✓"; color: var(--ok); }
+
+  main { min-width: 0; }
+  .topline {
+    position: sticky; top: 0; z-index: 30;
+    display: flex; align-items: center; gap: .8rem; flex-wrap: wrap;
+    padding: .7rem clamp(1rem, 3vw, 2.4rem);
+    background: color-mix(in srgb, var(--ground) 90%, transparent);
+    backdrop-filter: blur(10px); border-bottom: 1px solid var(--rule);
+  }
+  .menu-btn { display: none; }
+  .topline .where { font-family: var(--mono); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); margin-right: auto; }
+  .prog { height: 6px; width: 8rem; background: var(--sunk); border-radius: 99px; overflow: hidden; }
+  .prog i { display: block; height: 100%; background: var(--energy); border-radius: 99px; transition: width .5s cubic-bezier(.3,.9,.3,1); }
+
+  .view { padding: clamp(1.2rem, 3vw, 2.6rem) clamp(1rem, 3vw, 2.4rem) 6rem; max-width: 60rem; }
+
+  .part-tag {
+    display: inline-flex; align-items: center; gap: .5rem;
+    font-family: var(--mono); font-size: .68rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--energy); margin-bottom: .7rem;
+  }
+  .view > h1 { font-size: clamp(1.8rem, 5vw, 2.9rem); }
+  .view > .lede { color: var(--ink-soft); font-size: 1.05rem; margin-top: .7rem; max-width: 58ch; }
+
+  .ch { margin-top: 2.1rem; }
+  .ch-head { display: flex; align-items: baseline; gap: .7rem; flex-wrap: wrap; margin-bottom: .5rem; }
+  .ch-head h2 { font-size: 1.4rem; }
+  .ch-num { font-family: var(--mono); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); }
+  .ch > .sub { color: var(--ink-soft); margin-bottom: 1rem; max-width: 60ch; }
+
+  .card { background: var(--paper); border: 1px solid var(--rule); border-radius: 18px; padding: 1.2rem 1.3rem; box-shadow: var(--shadow); }
+  .card + .card { margin-top: .9rem; }
+  .grid2 { display: grid; gap: .9rem; }
+  @media (min-width: 52rem) { .grid2 { grid-template-columns: 1fr 1fr; } }
+
+  .lbl { display: block; font-family: var(--display); font-weight: 800; font-size: .95rem; margin-bottom: .35rem; }
+  .hint { color: var(--ink-mute); font-size: .82rem; }
+  .fld { display: grid; gap: .3rem; }
+  .fld + .fld { margin-top: .85rem; }
+  input[type=text], input[type=number], textarea, select {
+    width: 100%; padding: .62rem .8rem; border-radius: 10px;
+    border: 1px solid var(--rule-hard); background: var(--paper); resize: vertical;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--energy); outline: none; }
+  input[type=number] { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+    padding: .6rem 1.1rem; border-radius: 11px; font-weight: 700; font-size: .92rem;
+    background: var(--energy); color: #fff; box-shadow: var(--shadow);
+    transition: transform .12s ease, filter .12s ease;
+  }
+  .btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
+  .btn.ghost { background: var(--paper); color: var(--ink); border: 1px solid var(--rule-hard); box-shadow: none; }
+  .btn.sm { padding: .35rem .7rem; font-size: .8rem; border-radius: 9px; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+  .pagenav { display: flex; gap: .7rem; justify-content: space-between; margin-top: 2.4rem; flex-wrap: wrap; }
+
+  /* ---- name storm ---- */
+  .nametable { width: 100%; border-collapse: collapse; font-size: .86rem; }
+  .nametable th { text-align: left; font-family: var(--mono); font-size: .62rem; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-mute); padding: .4rem .3rem; font-weight: 700; }
+  .nametable td { padding: .28rem .3rem; border-top: 1px solid var(--rule); }
+  .nametable input[type=text] { padding: .4rem .55rem; }
+  .score { display: flex; gap: .12rem; }
+  .score button { width: 1.35rem; height: 1.35rem; border-radius: 5px; border: 1px solid var(--rule-hard); font-size: .7rem; font-family: var(--mono); background: var(--paper); }
+  .score button[aria-pressed="true"] { background: var(--teal); color: #fff; border-color: var(--teal); }
+  .total { font-family: var(--mono); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .winner { background: color-mix(in srgb, var(--sun) 16%, transparent); }
+
+  /* ---- colours ---- */
+  .hues { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem,1fr)); gap: .5rem; }
+  .hue { border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; text-align: left; background: var(--paper); }
+  .hue .chip { height: 2.6rem; }
+  .hue .meta { padding: .45rem .6rem; }
+  .hue b { display: block; font-size: .82rem; font-family: var(--display); font-weight: 800; }
+  .hue span { font-size: .7rem; color: var(--ink-mute); }
+  .hue[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 2px var(--ink); }
+
+  .slots { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fit, minmax(9rem,1fr)); }
+  .slot { border: 1px solid var(--rule); border-radius: 12px; padding: .6rem; display: grid; gap: .4rem; }
+  .slot .sw { height: 3rem; border-radius: 8px; border: 1px solid var(--rule-hard); }
+  .slot label { font-family: var(--mono); font-size: .62rem; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-mute); }
+  .slot input[type=color] { width: 100%; height: 2rem; padding: 0; border: 1px solid var(--rule-hard); border-radius: 6px; background: none; }
+
+  /* ---- brand preview ---- */
+  .preview {
+    border-radius: 18px; overflow: hidden; border: 1px solid var(--rule-hard);
+    box-shadow: var(--shadow-lg);
+  }
+  .pv-top { padding: 1.6rem 1.4rem; display: grid; gap: .8rem; }
+  .pv-logo { display: flex; align-items: center; gap: .7rem; }
+  .pv-mark { width: 3rem; height: 3rem; border-radius: 14px; display: grid; place-items: center; font-weight: 900; font-size: 1.3rem; }
+  .pv-name { font-weight: 800; font-size: 1.5rem; line-height: 1.05; letter-spacing: -.02em; }
+  .pv-tag { font-size: .92rem; opacity: .85; }
+  .pv-cta { display: inline-flex; align-self: flex-start; padding: .55rem 1.1rem; border-radius: 10px; font-weight: 700; font-size: .9rem; }
+  .pv-strip { display: flex; height: .8rem; }
+  .pv-strip i { flex: 1; }
+
+  /* ---- fonts ---- */
+  .fontgrid { display: grid; gap: .5rem; grid-template-columns: repeat(auto-fill, minmax(12rem,1fr)); }
+  .fontbtn { border: 1px solid var(--rule); border-radius: 12px; padding: .7rem .8rem; text-align: left; background: var(--paper); }
+  .fontbtn[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 2px var(--ink); }
+  .fontbtn b { display: block; font-size: 1.25rem; line-height: 1.15; }
+  .fontbtn span { font-size: .7rem; color: var(--ink-mute); font-family: var(--mono); letter-spacing: .04em; }
+
+  /* ---- values ---- */
+  .value-row { border: 1px solid var(--rule); border-radius: 14px; padding: .9rem; display: grid; gap: .6rem; }
+  .value-row + .value-row { margin-top: .6rem; }
+  .rowhead { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+
+  /* ---- persona ---- */
+  .persona {
+    border: 1px solid var(--rule-hard); border-radius: 18px; overflow: hidden;
+    background: var(--paper); box-shadow: var(--shadow);
+  }
+  .persona .head { display: flex; align-items: center; gap: .9rem; padding: 1rem 1.2rem; background: var(--soft); border-bottom: 1px solid var(--rule); }
+  .persona .av { width: 3.4rem; height: 3.4rem; border-radius: 50%; display: grid; place-items: center; font-family: var(--display); font-weight: 900; font-size: 1.4rem; background: var(--sky); color: #fff; }
+  .persona .body { padding: 1rem 1.2rem; display: grid; gap: .55rem; }
+  .prow { display: grid; grid-template-columns: 9.5rem minmax(0,1fr); gap: .7rem; font-size: .88rem; align-items: baseline; }
+  .prow b { font-family: var(--mono); font-size: .64rem; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-mute); }
+  .prow span { color: var(--ink-soft); }
+  @media (max-width: 34rem) { .prow { grid-template-columns: minmax(0,1fr); gap: .1rem; } }
+
+  /* ---- journey ladder ---- */
+  .ladder { display: grid; gap: .35rem; }
+  .rung { display: grid; grid-template-columns: 2rem minmax(0,1fr); gap: .8rem; align-items: center; }
+  .rung .dot { width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center; font-family: var(--mono); font-size: .72rem; font-weight: 700; color: #fff; }
+  .rung .say { font-family: var(--display); font-weight: 800; font-size: .95rem; }
+  .rung input { margin-top: .2rem; }
+
+  /* ---- money ---- */
+  .costrow { display: grid; grid-template-columns: minmax(0,1fr) 8rem 2rem; gap: .45rem; align-items: center; }
+  .costrow + .costrow { margin-top: .35rem; }
+  .icon-btn { width: 2rem; height: 2rem; border-radius: 8px; display: grid; place-items: center; border: 1px solid var(--rule); color: var(--ink-mute); }
+  .icon-btn:hover { color: var(--bad); border-color: var(--bad); }
+
+  .metrics { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fit, minmax(9rem,1fr)); }
+  .metric { border: 1px solid var(--rule); border-radius: 12px; padding: .75rem .9rem; background: var(--soft); }
+  .metric b { display: block; font-family: var(--mono); font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .metric span { font-family: var(--mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); }
+  .metric.good b { color: var(--ok); }
+  .metric.bad b { color: var(--bad); }
+
+  .verdict { border-radius: 12px; padding: .85rem 1rem; font-weight: 600; display: flex; gap: .6rem; align-items: flex-start; }
+  .verdict.good { background: color-mix(in srgb, var(--ok) 14%, var(--paper)); border: 1px solid color-mix(in srgb, var(--ok) 40%, var(--rule)); }
+  .verdict.bad { background: color-mix(in srgb, var(--bad) 12%, var(--paper)); border: 1px solid color-mix(in srgb, var(--bad) 40%, var(--rule)); }
+  .verdict.idle { background: var(--soft); border: 1px solid var(--rule); color: var(--ink-mute); font-weight: 500; }
+
+  /* ---- pill pickers ---- */
+  .pills { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .pill {
+    padding: .4rem .85rem; border-radius: 99px; border: 1px solid var(--rule-hard);
+    background: var(--paper); font-size: .86rem; font-weight: 600;
+  }
+  .pill[aria-pressed="true"] { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+
+  /* ---- funnel ---- */
+  .funnel { display: grid; gap: .3rem; }
+  .fstage {
+    color: #fff; border-radius: 10px; padding: .8rem 1rem; display: grid; gap: .3rem;
+    margin: 0 auto; width: 100%;
+  }
+  .fstage .ftop { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; }
+  .fstage b { font-family: var(--display); font-weight: 800; font-size: 1rem; letter-spacing: .02em; }
+  .fstage .fnum { font-family: var(--mono); font-size: .82rem; font-variant-numeric: tabular-nums; opacity: .9; }
+  .fstage input { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.3); color: #fff; }
+  .fstage input::placeholder { color: rgba(255,255,255,.65); }
+
+  /* ---- CRM ---- */
+  .crm { width: 100%; border-collapse: collapse; font-size: .86rem; }
+  .crm th { text-align: left; font-family: var(--mono); font-size: .62rem; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-mute); padding: .4rem .35rem; }
+  .crm td { padding: .3rem .35rem; border-top: 1px solid var(--rule); }
+  .crm input, .crm select { padding: .4rem .5rem; }
+  .stat { font-family: var(--mono); font-size: .66rem; letter-spacing: .06em; text-transform: uppercase; padding: .2rem .5rem; border-radius: 99px; font-weight: 700; }
+  .scroll { overflow-x: auto; }
+  .pipe { display: flex; gap: .3rem; flex-wrap: wrap; margin-top: .8rem; }
+  .pipe div { flex: 1; min-width: 6rem; border-radius: 10px; padding: .5rem .6rem; text-align: center; background: var(--soft); border: 1px solid var(--rule); }
+  .pipe b { display: block; font-family: var(--mono); font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+  .pipe span { font-size: .64rem; font-family: var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); }
+
+  /* ---- automation ---- */
+  .flow { display: grid; gap: .25rem; justify-items: stretch; }
+  .fnode {
+    border: 1px solid var(--rule-hard); border-radius: 12px; padding: .6rem .8rem;
+    background: var(--paper); display: grid; grid-template-columns: 1.7rem minmax(0,1fr) auto auto; gap: .5rem; align-items: center;
+  }
+  .fnode .n { width: 1.7rem; height: 1.7rem; border-radius: 6px; display: grid; place-items: center; background: var(--purple); color: #fff; font-family: var(--mono); font-size: .7rem; font-weight: 700; }
+  .fdown { justify-self: center; color: var(--ink-mute); font-size: 1.1rem; line-height: 1; }
+
+  /* ---- checklist ---- */
+  .checks { display: grid; gap: .35rem; }
+  .chk { display: grid; grid-template-columns: 1.4rem minmax(0,1fr); gap: .6rem; align-items: start; padding: .5rem .6rem; border-radius: 10px; border: 1px solid var(--rule); text-align: left; width: 100%; }
+  .chk .box { width: 1.4rem; height: 1.4rem; border-radius: 6px; border: 2px solid var(--rule-hard); display: grid; place-items: center; color: transparent; }
+  .chk[aria-pressed="true"] { background: color-mix(in srgb, var(--ok) 10%, var(--paper)); border-color: color-mix(in srgb, var(--ok) 40%, var(--rule)); }
+  .chk[aria-pressed="true"] .box { background: var(--ok); border-color: var(--ok); color: #fff; }
+  .chk b { font-weight: 700; display: block; }
+  .chk span { font-size: .82rem; color: var(--ink-mute); }
+
+  /* ---- blueprint ---- */
+  .bp { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fill, minmax(15rem,1fr)); }
+  .bpc { border: 1px solid var(--rule); border-radius: 14px; padding: .8rem .9rem; background: var(--paper); }
+  .bpc h4 { font-family: var(--mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); font-weight: 700; margin-bottom: .3rem; }
+  .bpc p { font-size: .9rem; }
+  .bpc.empty p { color: var(--ink-mute); font-style: italic; }
+
+  /* ---- passport ---- */
+  .passport {
+    background: linear-gradient(145deg, var(--navy), color-mix(in srgb, var(--navy) 70%, #000));
+    color: #F1EEE5; border-radius: 22px; padding: clamp(1.3rem, 4vw, 2.2rem);
+    box-shadow: var(--shadow-lg); border: 1px solid rgba(255,255,255,.12);
+  }
+  :root[data-theme="dark"] .passport, :root:not([data-theme="light"]) .passport { color: #0A1226; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .passport { color: #0A1226; } }
+  .passport .pp-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.4rem; }
+  .passport .pp-title { font-family: var(--display); font-weight: 900; font-size: clamp(1.4rem, 4vw, 2rem); letter-spacing: .02em; }
+  .passport .pp-sub { font-family: var(--mono); font-size: .66rem; letter-spacing: .2em; text-transform: uppercase; opacity: .8; }
+  .stamps { display: grid; grid-template-columns: repeat(auto-fit, minmax(7rem,1fr)); gap: .7rem; }
+  .stamp {
+    border-radius: 14px; padding: .9rem .6rem; text-align: center; display: grid; gap: .35rem; justify-items: center;
+    border: 2px dashed rgba(255,255,255,.28); opacity: .45;
+    transition: opacity .4s ease, transform .5s cubic-bezier(.3,1.5,.5,1), border-color .3s ease;
+  }
+  .stamp .em { font-size: 1.5rem; line-height: 1; }
+  .stamp b { font-family: var(--mono); font-size: .64rem; letter-spacing: .12em; text-transform: uppercase; }
+  .stamp small { font-size: .66rem; opacity: .8; line-height: 1.25; }
+  .stamp.got { opacity: 1; border-style: solid; border-color: var(--sun); background: rgba(255,200,61,.16); transform: rotate(-3deg); }
+  .stamp.got b { color: var(--sun); }
+
+  .certificate {
+    background: var(--paper); border: 8px solid var(--sun); border-radius: 24px;
+    padding: clamp(1.6rem, 5vw, 3rem); text-align: center; display: grid; gap: .9rem; justify-items: center;
+    box-shadow: var(--shadow-lg); margin-top: 1.4rem;
+  }
+  .certificate .eyebrow { font-family: var(--mono); font-size: .66rem; letter-spacing: .2em; text-transform: uppercase; color: var(--teal); }
+  .certificate h2 { font-size: clamp(1.8rem, 6vw, 2.8rem); }
+  .certificate .who { font-family: var(--display); font-weight: 900; font-size: clamp(1.4rem, 5vw, 2.2rem); color: var(--energy); border-bottom: 3px dotted var(--rule-hard); padding: .1rem 2rem .35rem; }
+  .certificate .sig { display: flex; gap: 2.5rem; flex-wrap: wrap; justify-content: center; margin-top: .8rem; }
+  .certificate .sig hr { border: 0; border-top: 2px solid var(--ink); margin: 0 0 .25rem; }
+  .certificate .sig span { font-family: var(--display); font-weight: 800; font-size: .8rem; }
+  .certificate .align { font-size: .72rem; color: var(--ink-mute); }
+
+  .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 90; }
+  .confetti i { position: absolute; width: 9px; height: 13px; border-radius: 2px; animation: fall 2.4s cubic-bezier(.3,.6,.5,1) forwards; }
+  @keyframes fall { 0% { transform: translateY(-10vh) rotate(0); opacity: 1 } 100% { transform: translateY(105vh) rotate(720deg); opacity: 0 } }
+
+  .toasts { position: fixed; right: 1rem; bottom: 1rem; display: grid; gap: .5rem; z-index: 80; }
+  .toast {
+    background: var(--paper); border: 1px solid var(--rule-hard); border-left: 5px solid var(--sun);
+    border-radius: 11px; padding: .65rem .95rem; box-shadow: var(--shadow-lg); max-width: 20rem;
+    animation: slide .3s cubic-bezier(.2,.9,.3,1);
+  }
+  .toast b { display: block; font-family: var(--display); font-weight: 800; font-size: .88rem; }
+  .toast span { font-size: .76rem; color: var(--ink-mute); }
+  @keyframes slide { from { opacity: 0; transform: translateX(16px) } }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; } }
+
+  @media (max-width: 62rem) {
+    .app { grid-template-columns: minmax(0,1fr); }
+    .rail { position: fixed; inset: 0 auto 0 0; width: 17.5rem; z-index: 50; transform: translateX(-101%); transition: transform .25s ease; box-shadow: var(--shadow-lg); }
+    .rail.open { transform: none; }
+    .menu-btn { display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 9px; border: 1px solid var(--rule-hard); }
+    .scrim { position: fixed; inset: 0; background: rgba(7,14,31,.55); z-index: 45; }
+  }
+
+  @media print {
+    .rail, .topline, .pagenav, .noprint { display: none !important; }
+    .app { display: block; }
+    body { background: #fff; }
+  }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <g id="i-menu" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></g>
+  <g id="i-next" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></g>
+  <g id="i-prev" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m6-6-6 6 6 6"/></g>
+  <g id="i-plus" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></g>
+  <g id="i-x" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></g>
+  <g id="i-check" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></g>
+  <g id="i-up" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5m-6 6 6-6 6 6"/></g>
+  <g id="i-down" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m6-6-6 6-6-6"/></g>
+  <g id="i-print" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V4h10v5M7 18H5a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M7 14h10v6H7v-6Z"/></g>
+</defs></svg>
+
+<div class="app">
+  <aside class="rail" id="rail">
+    <div class="brandmark">
+      <svg viewBox="0 0 100 140" aria-hidden="true">
+        <circle cx="50" cy="46" r="34" fill="var(--sun)"/><path d="M50 20 62 52H38Z" fill="#FFF3D0"/>
+        <rect x="38" y="52" width="24" height="26" fill="var(--energy)"/><rect x="34" y="78" width="32" height="14" rx="3" fill="#131F3A"/>
+        <path d="M34 92c-8 6-12 14-12 22 8-2 12-6 14-10zM66 92c8 6 12 14 12 22-8-2-12-6-14-10z" fill="var(--teal)"/>
+        <path d="M50 100c6 8 8 16 0 28-8-12-6-20 0-28z" fill="var(--energy)"/>
+      </svg>
+      <div><b>GO OVERSEAS!</b><span>Founder CEO · 14–17</span></div>
+    </div>
+    <div class="passport-mini" id="pmini"></div>
+    <nav class="steps-nav" id="stepsNav" aria-label="Parts"></nav>
+  </aside>
+
+  <main>
+    <div class="topline">
+      <button class="menu-btn" id="menuBtn" aria-label="Open menu"><svg class="ic"><use href="#i-menu"/></svg></button>
+      <span class="where" id="where">Start</span>
+      <span class="hint" id="progLabel">0 / 10 stamps</span>
+      <div class="prog"><i id="progBar" style="width:0%"></i></div>
+    </div>
+    <div class="view" id="view"></div>
+  </main>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ===================== reference data ===================== */
+
+  const HUES = [
+    ["Trust Blue", "#2C6FD1", "trust · calm · reliable"],
+    ["Growth Green", "#3E9B53", "growth · nature · health"],
+    ["Optimism Yellow", "#FFC83D", "optimism · energy · youth"],
+    ["Premium Black", "#15171C", "premium · confidence · focus"],
+    ["Bold Red", "#D93A3A", "urgency · passion · appetite"],
+    ["Creative Purple", "#7B5EA6", "creative · imaginative · premium"],
+    ["Friendly Orange", "#FF7A1A", "friendly · energetic · playful"],
+    ["Fresh Teal", "#00B9A7", "fresh · balanced · modern"],
+    ["Warm Pink", "#E0526E", "warm · playful · caring"],
+    ["Steady Navy", "#131F3A", "professional · stable · serious"],
+    ["Clean White", "#FFFFFF", "simple · open · honest"],
+    ["Earth Brown", "#7A5A3C", "natural · crafted · warm"]
+  ];
+
+  const FONTS = [
+    { id:"sans", name:"Modern Sans", stack:'system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', note:"clean · neutral · tech" },
+    { id:"rounded", name:"Friendly Rounded", stack:'ui-rounded, "SF Pro Rounded", "Segoe UI Variable", system-ui, sans-serif', note:"warm · approachable" },
+    { id:"serif", name:"Classic Serif", stack:'Georgia, "Times New Roman", serif', note:"trusted · established" },
+    { id:"editorial", name:"Editorial Serif", stack:'"Iowan Old Style", Palatino, "Book Antiqua", Georgia, serif', note:"premium · considered" },
+    { id:"mono", name:"Tech Mono", stack:'ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace', note:"technical · precise" },
+    { id:"condensed", name:"Condensed Bold", stack:'"Arial Narrow", "Helvetica Neue Condensed", "Segoe UI", sans-serif', note:"loud · sporty · urban" }
+  ];
+
+  const NAME_CRITERIA = ["Simple", "Memorable", "Easy to say", "Easy to spell", "Relevant", "Room to grow"];
+
+  const JOURNEY = [
+    ["I don't know you", "#78859F"],
+    ["I notice you", "#3EA9EC"],
+    ["I become interested", "#00B9A7"],
+    ["I compare you", "#7B5EA6"],
+    ["I trust you", "#FFC83D"],
+    ["I buy", "#FF7A1A"],
+    ["I come back", "#3E9B53"],
+    ["I recommend you", "#E0526E"]
+  ];
+
+  const FUNNEL = [
+    ["👀", "AWARENESS", "They see us", "#3EA9EC"],
+    ["💭", "CONSIDERATION", "They think about us", "#00B9A7"],
+    ["❤️", "TRUST", "They believe we can help", "#7B5EA6"],
+    ["🛒", "CONVERSION", "They take action", "#FF7A1A"],
+    ["🔁", "RETENTION", "They come back", "#3E9B53"],
+    ["📣", "ADVOCACY", "They tell someone else", "#E0526E"]
+  ];
+
+  const AWARENESS = ["Social media", "Search", "Events", "Partnerships", "Referrals", "Content", "Advertising", "Community", "Press", "Word of mouth"];
+  const CONSIDERATION = ["Reviews", "Proof", "Benefits", "Comparisons", "Examples", "FAQs", "Testimonials", "Guarantee", "Case study", "Free sample"];
+  const CONVERSIONS = ["Buy", "Book", "Register", "Call", "Request a quote", "Download", "Subscribe", "Visit us"];
+
+  const CRM_STATUS = [
+    ["Lead", "#78859F"], ["Prospect", "#3EA9EC"], ["Customer", "#00B9A7"],
+    ["Returning", "#3E9B53"], ["Advocate", "#E0526E"]
+  ];
+
+  const POLICY_LIST = [
+    ["returns", "Return Policy", "Can someone send it back? By when? Who pays postage?"],
+    ["cancel", "Cancellation Policy", "Can a booking be cancelled? How much notice?"],
+    ["shipping", "Shipping Policy", "How is it delivered, how fast, and what does it cost?"],
+    ["payment", "Payment Policy", "What payment methods, when is payment due, deposits?"],
+    ["guidelines", "Community Guidelines", "How do people behave in your space? What is not allowed?"]
+  ];
+
+  const TERMS_LIST = [
+    ["payments", "Payments", "When money is due and what happens if it is not paid"],
+    ["responsibilities", "Responsibilities", "What you promise to do, and what the customer must do"],
+    ["use", "Acceptable use", "What people may and may not do with your product or space"],
+    ["refunds", "Refunds & cancellations", "Points back at your policy so the two agree"],
+    ["limits", "Limitations", "What you are not responsible for — honestly stated"],
+    ["ownership", "Ownership", "Who owns the designs, photos, and content"],
+    ["accounts", "Account rules", "If people sign up: age, one account each, closing an account"]
+  ];
+
+  const STAMPS = [
+    ["idea", "💡", "IDEA", "One-sentence business"],
+    ["brand", "🎨", "BRAND", "Name, colours, fonts"],
+    ["purpose", "❤️", "PURPOSE", "Mission, vision, values"],
+    ["customer", "👥", "CUSTOMER", "Persona and journey"],
+    ["money", "💰", "MONEY", "Costs, price, margin"],
+    ["marketing", "📣", "MARKETING", "Funnel and CTA"],
+    ["crm", "🔄", "CRM", "Real customer list"],
+    ["automation", "⚡", "AUTOMATION", "A working system"],
+    ["community", "🌎", "COMMUNITY", "A promise to members"],
+    ["launch", "🚀", "LAUNCH", "Blueprint complete"]
+  ];
+
+  const PARTS = [
+    { id:"start", tag:"Start", title:"GO OVERSEAS!" },
+    { id:"idea", tag:"Part 1", title:"Start with the idea" },
+    { id:"identity", tag:"Part 2", title:"Give it an identity" },
+    { id:"beliefs", tag:"Part 3", title:"What does my brand believe?" },
+    { id:"audience", tag:"Part 4", title:"Know who you're building for" },
+    { id:"price", tag:"Part 5", title:"Price it" },
+    { id:"notice", tag:"Part 6", title:"Get people to notice you" },
+    { id:"funnel", tag:"Part 7", title:"The marketing funnel" },
+    { id:"numbers", tag:"Part 8", title:"Understand the numbers" },
+    { id:"crm", tag:"Part 9", title:"Build relationships" },
+    { id:"automation", tag:"Part 10", title:"Automation" },
+    { id:"community", tag:"Part 11", title:"Build the community" },
+    { id:"protect", tag:"Part 12", title:"Protect the business" },
+    { id:"blueprint", tag:"Part 13", title:"My Brand Blueprint" },
+    { id:"passport", tag:"Part 14", title:"GO OVERSEAS!" }
+  ];
+
+  /* ===================== state ===================== */
+
+  const KEY = "lf-go-overseas-v1";
+  const fresh = () => ({
+    founder: "",
+    idea: { problem:"", offer:"", type:"", why:"", different:"", sentence:"" },
+    names: [], chosenName: "",
+    feelings: [],
+    colours: { primary:"#FF7A1A", secondary:"#131F3A", accent:"#FFC83D", background:"#F6F3EA" },
+    fonts: { headline:"rounded", body:"sans", accent:"mono" },
+    tagline: "",
+    mission: { who:"", what:"", how:"" },
+    vision: "",
+    values: [],
+    persona: { name:"", age:"", place:"", needs:"", frustrates:"", buys:"", time:"", trust:"" },
+    journey: ["","","","","","","",""],
+    costs: [], price: { method:"", amount:"" },
+    awareness: [], consideration: [], cta: { action:"", text:"" },
+    funnelNotes: ["","","","","",""],
+    ads: { spend:"", leads:"", customers:"", order:"" },
+    crm: [], automation: [],
+    community: { why:"", common:"", included:"", helping:"", promise:"" },
+    privacy: [], policies: {}, terms: {},
+    launch: "",
+    stamps: {}
+  });
+  let B = fresh();
+
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(B)); } catch (e) {} }
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) B = Object.assign(fresh(), JSON.parse(raw));
+    } catch (e) {}
+  }
+
+  /* ===================== helpers ===================== */
+
+  const $ = id => document.getElementById(id);
+  const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+  const ic = id => '<svg class="ic" aria-hidden="true"><use href="#' + id + '"/></svg>';
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+  const num = v => { const n = parseFloat(v); return isFinite(n) ? n : 0; };
+  const money = n => "$" + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const filled = s => String(s || "").trim().length > 1;
+  const fontStack = id => (FONTS.find(f => f.id === id) || FONTS[0]).stack;
+
+  function toast(title, body) {
+    const t = el("div", "toast", "<b>" + esc(title) + "</b><span>" + esc(body) + "</span>");
+    $("toasts").appendChild(t);
+    setTimeout(() => { t.style.transition = "opacity .3s"; t.style.opacity = "0"; setTimeout(() => t.remove(), 320); }, 3800);
+  }
+  function confetti() {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const box = el("div", "confetti");
+    const cols = ["#FFC83D", "#FF7A1A", "#3EA9EC", "#00B9A7", "#E0526E", "#7B5EA6"];
+    for (let i = 0; i < 70; i++) {
+      const p = document.createElement("i");
+      p.style.left = (Math.random() * 100) + "vw";
+      p.style.background = cols[i % cols.length];
+      p.style.animationDelay = (Math.random() * .6) + "s";
+      box.appendChild(p);
+    }
+    document.body.appendChild(box);
+    setTimeout(() => box.remove(), 3400);
+  }
+
+  /* bound inputs */
+  function bind(node, get, set) {
+    node.value = get() || "";
+    node.addEventListener("input", () => { set(node.value); save(); refreshStamps(); });
+    return node;
+  }
+  function field(label, hint, get, set, opts) {
+    opts = opts || {};
+    const f = el("div", "fld");
+    const id = "f" + Math.random().toString(36).slice(2, 8);
+    f.innerHTML = '<label class="lbl" for="' + id + '">' + esc(label) + '</label>' +
+      (hint ? '<span class="hint">' + esc(hint) + '</span>' : "");
+    const input = document.createElement(opts.area ? "textarea" : "input");
+    input.id = id;
+    if (opts.area) input.rows = opts.rows || 2;
+    else input.type = opts.type || "text";
+    if (opts.placeholder) input.placeholder = opts.placeholder;
+    bind(input, get, set);
+    if (opts.onInput) input.addEventListener("input", opts.onInput);
+    f.appendChild(input);
+    return f;
+  }
+
+  /* ===================== stamps ===================== */
+
+  function stampChecks() {
+    const c = B.colours, p = B.persona;
+    return {
+      idea: filled(B.idea.sentence) && filled(B.idea.problem),
+      brand: filled(B.chosenName) && !!c.primary && !!c.secondary && !!c.accent && !!B.fonts.headline,
+      purpose: filled(B.mission.who) && filled(B.mission.what) && filled(B.mission.how) && filled(B.vision) && B.values.filter(v => filled(v.name) && filled(v.looks)).length >= 2,
+      customer: [p.name, p.age, p.needs, p.frustrates, p.time].filter(filled).length >= 4 && B.journey.filter(filled).length >= 4,
+      money: B.costs.filter(x => num(x.amount) > 0).length >= 3 && num(B.price.amount) > 0,
+      marketing: B.awareness.length >= 2 && B.consideration.length >= 2 && filled(B.cta.text),
+      crm: B.crm.filter(r => filled(r.name)).length >= 3,
+      automation: B.automation.filter(filled).length >= 4,
+      community: filled(B.community.promise) && filled(B.community.why),
+      launch: false
+    };
+  }
+
+  function refreshStamps(silent) {
+    const c = stampChecks();
+    c.launch = STAMPS.slice(0, 9).every(([k]) => c[k]) && filled(B.launch);
+    let gained = null;
+    STAMPS.forEach(([k, em, label]) => {
+      if (c[k] && !B.stamps[k]) { B.stamps[k] = 1; gained = label; }
+      if (!c[k] && B.stamps[k]) delete B.stamps[k];
+    });
+    save();
+    paintProgress();
+    if (gained && !silent) {
+      toast(gained + " stamped!", "Founder Passport updated.");
+      confetti();
+    }
+    return c;
+  }
+
+  const stampCount = () => STAMPS.filter(([k]) => B.stamps[k]).length;
+
+  function paintProgress() {
+    const n = stampCount();
+    $("progBar").style.width = (n * 10) + "%";
+    $("progLabel").textContent = n + " / 10 stamps";
+    const mini = $("pmini");
+    mini.innerHTML = "";
+    STAMPS.forEach(([k, em, label]) => {
+      const d = el("div", "pmini" + (B.stamps[k] ? " got" : ""), em);
+      d.title = label;
+      mini.appendChild(d);
+    });
+    renderNav();
+  }
+
+  /* ===================== nav ===================== */
+
+  let cur = "start";
+
+  function renderNav() {
+    const nav = $("stepsNav");
+    nav.innerHTML = "";
+    const c = stampChecks();
+    const doneMap = {
+      idea:"idea", identity:"brand", beliefs:"purpose", audience:"customer", price:"money",
+      notice:"marketing", funnel:"marketing", numbers:"money", crm:"crm", automation:"automation",
+      community:"community", blueprint:"launch"
+    };
+    PARTS.forEach(p => {
+      const b = el("button", "snav" + (doneMap[p.id] && B.stamps[doneMap[p.id]] ? " done" : ""),
+        '<i>' + esc(p.tag) + '</i><span>' + esc(p.title) + '</span>');
+      if (p.id === cur) b.setAttribute("aria-current", "step");
+      b.addEventListener("click", () => go(p.id));
+      nav.appendChild(b);
+    });
+  }
+
+  function go(id) {
+    cur = id;
+    const p = PARTS.find(x => x.id === id) || PARTS[0];
+    $("where").textContent = p.tag + " · " + p.title;
+    $("rail").classList.remove("open");
+    const s = document.querySelector(".scrim"); if (s) s.remove();
+    render();
+    window.scrollTo({ top: 0 });
+  }
+
+  function pagenav(host) {
+    const i = PARTS.findIndex(p => p.id === cur);
+    const nav = el("div", "pagenav");
+    if (i > 0) {
+      const b = el("button", "btn ghost", ic("i-prev") + PARTS[i - 1].title);
+      b.addEventListener("click", () => go(PARTS[i - 1].id));
+      nav.appendChild(b);
+    } else nav.appendChild(el("span"));
+    if (i < PARTS.length - 1) {
+      const b = el("button", "btn", PARTS[i + 1].title + ic("i-next"));
+      b.addEventListener("click", () => go(PARTS[i + 1].id));
+      nav.appendChild(b);
+    }
+    host.appendChild(nav);
+  }
+
+  function header(host, tag, title, lede) {
+    host.appendChild(el("p", "part-tag", esc(tag)));
+    host.appendChild(el("h1", null, esc(title)));
+    if (lede) host.appendChild(el("p", "lede", esc(lede)));
+  }
+  function chapter(host, num, title, sub) {
+    const c = el("section", "ch");
+    c.innerHTML = '<div class="ch-head"><span class="ch-num">' + esc(num) + '</span><h2>' + esc(title) + '</h2></div>' +
+      (sub ? '<p class="sub">' + esc(sub) + '</p>' : "");
+    host.appendChild(c);
+    return c;
+  }
+
+  /* ===================== brand preview ===================== */
+
+  function brandPreview() {
+    const c = B.colours;
+    const name = B.chosenName || "Your Brand";
+    const wrap = el("div", "preview");
+    const initial = (name.trim()[0] || "B").toUpperCase();
+    wrap.innerHTML =
+      '<div class="pv-top" style="background:' + esc(c.background) + ';color:' + esc(c.secondary) + ';font-family:' + fontStack(B.fonts.body) + '">' +
+        '<div class="pv-logo">' +
+          '<span class="pv-mark" style="background:' + esc(c.primary) + ';color:' + esc(c.background) + ';font-family:' + fontStack(B.fonts.headline) + '">' + esc(initial) + '</span>' +
+          '<span class="pv-name" style="font-family:' + fontStack(B.fonts.headline) + '">' + esc(name) + '</span>' +
+        '</div>' +
+        '<p class="pv-tag">' + esc(B.tagline || B.idea.sentence || "Your one-sentence promise goes here.") + '</p>' +
+        '<span class="pv-cta" style="background:' + esc(c.accent) + ';color:' + esc(c.secondary) + ';font-family:' + fontStack(B.fonts.accent) + '">' +
+          esc(B.cta.text || "Get started") + '</span>' +
+      '</div>' +
+      '<div class="pv-strip">' +
+        '<i style="background:' + esc(c.primary) + '"></i><i style="background:' + esc(c.secondary) + '"></i>' +
+        '<i style="background:' + esc(c.accent) + '"></i><i style="background:' + esc(c.background) + '"></i>' +
+      '</div>';
+    return wrap;
+  }
+
+  /* ===================== views ===================== */
+
+  function render() {
+    const v = $("view");
+    v.innerHTML = "";
+    ({ start:vStart, idea:vIdea, identity:vIdentity, beliefs:vBeliefs, audience:vAudience, price:vPrice,
+       notice:vNotice, funnel:vFunnel, numbers:vNumbers, crm:vCRM, automation:vAuto, community:vCommunity,
+       protect:vProtect, blueprint:vBlueprint, passport:vPassport }[cur] || vStart)(v);
+    pagenav(v);
+    renderNav();
+  }
+
+  /* -------- start -------- */
+  function vStart(v) {
+    header(v, "Founder CEO · Ages 14–17 · Book 4", "GO OVERSEAS!",
+      "Build your first real brand from zero. From an idea in your head to a brand people can recognise, trust and buy from.");
+
+    const flow = el("div", "card");
+    flow.style.marginTop = "1.4rem";
+    flow.innerHTML = '<span class="lbl">The mindset</span>';
+    const pills = el("div", "pills");
+    ["Think","Define","Brand","Price","Market","Connect","Automate","Launch","Grow"].forEach((w, i) => {
+      const s = el("span", "pill");
+      s.textContent = w;
+      s.setAttribute("aria-pressed", "false");
+      s.style.borderColor = ["#3EA9EC","#00B9A7","#7B5EA6","#FF7A1A","#E0526E","#3E9B53","#FFC83D","#131F3A","#2C6FD1"][i];
+      pills.appendChild(s);
+    });
+    flow.appendChild(pills);
+    v.appendChild(flow);
+
+    const c = el("div", "card");
+    c.appendChild(field("Founder name", "Goes on your certificate at the end.",
+      () => B.founder, x => B.founder = x.slice(0, 60), { placeholder: "Your name" }));
+    v.appendChild(c);
+
+    const map = el("div", "card");
+    map.innerHTML = '<span class="lbl">What you will build</span><p class="hint" style="margin-bottom:.8rem">Fourteen parts. Ten passport stamps. One complete brand.</p>';
+    const bp = el("div", "bp");
+    [["💡 Idea","One sentence that explains your business"],
+     ["🎨 Brand","Name, colours, fonts, live brand card"],
+     ["❤️ Purpose","Mission, vision, values defined as behaviours"],
+     ["👥 Customer","A persona and an eight-step journey"],
+     ["💰 Money","Real costs, a price, and a gross margin"],
+     ["📣 Marketing","Awareness, consideration, conversion, funnel"],
+     ["📊 Numbers","Cost per lead, cost per conversion, verdict"],
+     ["🔄 CRM","A working customer list with a pipeline"],
+     ["⚡ Automation","A step-by-step system map"],
+     ["🌎 Community","A promise members can hold you to"],
+     ["🛡 Protection","Privacy map, policies, business rules"],
+     ["🚀 Launch","The Brand Blueprint and Founder Passport"]].forEach(([t, d]) => {
+      bp.appendChild(el("div", "bpc", "<h4>" + esc(t) + "</h4><p>" + esc(d) + "</p>"));
+    });
+    map.appendChild(bp);
+    v.appendChild(map);
+  }
+
+  /* -------- part 1: idea -------- */
+  function vIdea(v) {
+    header(v, "Part 1", "Start with the idea", "What am I building?");
+    const ch = chapter(v, "Chapter 1", "My Business Idea", "Answer these first. The one-sentence version comes last, and it gets easier once the five answers exist.");
+    const c = el("div", "card");
+    c.appendChild(field("What problem am I solving?", "Whose problem is it, and when does it hurt?",
+      () => B.idea.problem, x => B.idea.problem = x, { area:true, placeholder:"People who… struggle to… because…" }));
+    c.appendChild(field("What am I offering?", "", () => B.idea.offer, x => B.idea.offer = x, { area:true }));
+    const typeF = el("div", "fld");
+    typeF.innerHTML = '<span class="lbl">Product, service, or both?</span>';
+    const tp = el("div", "pills");
+    ["Product","Service","Both"].forEach(t => {
+      const b = el("button", "pill");
+      b.textContent = t;
+      b.setAttribute("aria-pressed", String(B.idea.type === t));
+      b.addEventListener("click", () => { B.idea.type = t; save(); render(); });
+      tp.appendChild(b);
+    });
+    typeF.appendChild(tp);
+    c.appendChild(typeF);
+    c.appendChild(field("Why would someone care?", "", () => B.idea.why, x => B.idea.why = x, { area:true }));
+    c.appendChild(field("What makes my idea different?", "If a competitor could say the same sentence, it is not a difference.",
+      () => B.idea.different, x => B.idea.different = x, { area:true }));
+    ch.appendChild(c);
+
+    const out = el("div", "card");
+    out.style.borderColor = "var(--energy)";
+    out.innerHTML = '<span class="lbl">Workbook output — My Business in One Sentence</span>' +
+      '<p class="hint" style="margin-bottom:.6rem">Template: <b>We help [who] to [do what] by [how].</b> Under 25 words.</p>';
+    const ta = document.createElement("textarea");
+    ta.rows = 2;
+    ta.placeholder = "We help…";
+    bind(ta, () => B.idea.sentence, x => { B.idea.sentence = x.slice(0, 220); });
+    const count = el("p", "hint");
+    const upd = () => {
+      const w = (B.idea.sentence || "").trim().split(/\s+/).filter(Boolean).length;
+      count.textContent = w + " words" + (w > 25 ? " — try to cut it down" : w >= 6 ? " — good length" : "");
+      count.style.color = w > 25 ? "var(--warn)" : "";
+    };
+    ta.addEventListener("input", upd);
+    out.appendChild(ta);
+    out.appendChild(count);
+    upd();
+    ch.appendChild(out);
+  }
+
+  /* -------- part 2: identity -------- */
+  function vIdentity(v) {
+    header(v, "Part 2", "Give it an identity", "Turn the idea into a brand.");
+
+    /* ch 2 — name */
+    const ch2 = chapter(v, "Chapter 2", "Name My Business", "Name Storm → Shortlist → Test → Choose. Score each name 0–2 on the six tests, then pick the winner — or a lower scorer, if you can say why.");
+    const nc = el("div", "card");
+    const tblWrap = el("div", "scroll");
+    const tbl = el("table", "nametable");
+    const best = B.names.length ? Math.max.apply(null, B.names.map(n => (n.scores || []).reduce((a, b) => a + b, 0))) : -1;
+    tbl.innerHTML = "<thead><tr><th>Name idea</th>" +
+      NAME_CRITERIA.map(c => "<th>" + esc(c) + "</th>").join("") + "<th>Total</th><th></th></tr></thead>";
+    const tb = el("tbody");
+    B.names.forEach((row, i) => {
+      row.scores = row.scores || [0,0,0,0,0,0];
+      const total = row.scores.reduce((a, b) => a + b, 0);
+      const tr = el("tr", total === best && total > 0 ? "winner" : "");
+      const td0 = el("td");
+      const inp = document.createElement("input");
+      inp.type = "text"; inp.placeholder = "Name " + (i + 1);
+      bind(inp, () => row.name, x => row.name = x.slice(0, 40));
+      inp.addEventListener("input", () => { if (B.chosenName && !B.names.some(n => n.name === B.chosenName)) {} });
+      td0.appendChild(inp);
+      tr.appendChild(td0);
+      NAME_CRITERIA.forEach((_, ci) => {
+        const td = el("td");
+        const sc = el("div", "score");
+        [0,1,2].forEach(val => {
+          const b = el("button", null, String(val));
+          b.setAttribute("aria-pressed", String(row.scores[ci] === val));
+          b.setAttribute("aria-label", NAME_CRITERIA[ci] + " score " + val);
+          b.addEventListener("click", () => { row.scores[ci] = val; save(); render(); });
+          sc.appendChild(b);
+        });
+        td.appendChild(sc);
+        tr.appendChild(td);
+      });
+      tr.appendChild(el("td", "total", String(total)));
+      const tdx = el("td");
+      const x = el("button", "icon-btn", ic("i-x"));
+      x.setAttribute("aria-label", "Remove name");
+      x.addEventListener("click", () => { B.names.splice(i, 1); save(); render(); });
+      tdx.appendChild(x);
+      tr.appendChild(tdx);
+      tb.appendChild(tr);
+    });
+    tbl.appendChild(tb);
+    tblWrap.appendChild(tbl);
+    nc.appendChild(tblWrap);
+
+    const addRow = el("div");
+    addRow.style.marginTop = ".8rem";
+    const add = el("button", "btn ghost sm", ic("i-plus") + "Add a name idea");
+    add.addEventListener("click", () => { B.names.push({ name:"", scores:[0,0,0,0,0,0] }); save(); render(); });
+    addRow.appendChild(add);
+    if (B.names.length < 10) {
+      const hint = el("span", "hint");
+      hint.style.marginLeft = ".6rem";
+      hint.textContent = "Aim for 10 before you shortlist. Bad ideas make the good ones visible.";
+      addRow.appendChild(hint);
+    }
+    nc.appendChild(addRow);
+    ch2.appendChild(nc);
+
+    const pick = el("div", "card");
+    pick.innerHTML = '<span class="lbl">My chosen name</span>';
+    const ps = el("div", "pills");
+    B.names.filter(n => filled(n.name)).forEach(n => {
+      const b = el("button", "pill");
+      b.textContent = n.name;
+      b.setAttribute("aria-pressed", String(B.chosenName === n.name));
+      b.addEventListener("click", () => { B.chosenName = n.name; save(); refreshStamps(); render(); });
+      ps.appendChild(b);
+    });
+    if (!B.names.filter(n => filled(n.name)).length) ps.appendChild(el("span", "hint", "Add some name ideas above first."));
+    pick.appendChild(ps);
+    pick.appendChild(field("Tagline (optional)", "Five to eight words that say what you do.",
+      () => B.tagline, x => B.tagline = x.slice(0, 80), { placeholder:"e.g. Build your first brand." }));
+    ch2.appendChild(pick);
+
+    /* ch 3 — colours */
+    const ch3 = chapter(v, "Chapter 3", "My Brand Colours", "Not “choose your favourite colours.” Ask: what should people feel when they see my brand?");
+    const feel = el("div", "card");
+    feel.innerHTML = '<span class="lbl">Pick the feelings you want — then choose colours that carry them</span>';
+    const hues = el("div", "hues");
+    hues.style.marginTop = ".7rem";
+    HUES.forEach(([nm, hex, meaning]) => {
+      const b = el("button", "hue");
+      b.setAttribute("aria-pressed", String(B.feelings.includes(nm)));
+      b.innerHTML = '<span class="chip" style="background:' + hex + '"></span>' +
+        '<span class="meta"><b>' + esc(nm) + '</b><span>' + esc(meaning) + '</span></span>';
+      b.addEventListener("click", () => {
+        const i = B.feelings.indexOf(nm);
+        if (i >= 0) B.feelings.splice(i, 1); else B.feelings.push(nm);
+        if (i < 0) {
+          if (!B._touched) { B.colours.primary = hex; B._touched = 1; }
+        }
+        save(); render();
+      });
+      hues.appendChild(b);
+    });
+    feel.appendChild(hues);
+    ch3.appendChild(feel);
+
+    const slotsCard = el("div", "card");
+    slotsCard.innerHTML = '<span class="lbl">My four brand colours</span><p class="hint">Primary carries the brand. Secondary is your text. Accent is for buttons only — the thing you want clicked. Background is the calm one.</p>';
+    const slots = el("div", "slots");
+    slots.style.marginTop = ".8rem";
+    [["primary","Primary"],["secondary","Secondary"],["accent","Accent"],["background","Background"]].forEach(([k, label]) => {
+      const s = el("div", "slot");
+      s.innerHTML = '<label>' + label + '</label><div class="sw" style="background:' + esc(B.colours[k]) + '"></div>';
+      const inp = document.createElement("input");
+      inp.type = "color";
+      inp.value = B.colours[k];
+      inp.setAttribute("aria-label", label + " colour");
+      inp.addEventListener("input", e => {
+        B.colours[k] = e.target.value;
+        s.querySelector(".sw").style.background = e.target.value;
+        save(); updatePreview();
+      });
+      s.appendChild(inp);
+      slots.appendChild(s);
+    });
+    slotsCard.appendChild(slots);
+    ch3.appendChild(slotsCard);
+
+    /* ch 4 — fonts */
+    const ch4 = chapter(v, "Chapter 4", "My Brand Fonts", "Three roles: headline, body, accent. Consistency is the whole point — one set of fonts, used the same way every time, is what makes a brand look like a brand.");
+    [["headline","Headline font","Titles and your logo wordmark"],
+     ["body","Body font","Paragraphs and long text — readability wins here"],
+     ["accent","Accent font","Buttons, labels, numbers, small caps"]].forEach(([slot, label, note]) => {
+      const c = el("div", "card");
+      c.innerHTML = '<span class="lbl">' + label + '</span><p class="hint">' + note + '</p>';
+      const g = el("div", "fontgrid");
+      g.style.marginTop = ".7rem";
+      FONTS.forEach(f => {
+        const b = el("button", "fontbtn");
+        b.setAttribute("aria-pressed", String(B.fonts[slot] === f.id));
+        b.innerHTML = '<b style="font-family:' + f.stack + '">' + esc(B.chosenName || "Brand Name") + '</b>' +
+          '<span>' + esc(f.name) + ' · ' + esc(f.note) + '</span>';
+        b.addEventListener("click", () => { B.fonts[slot] = f.id; save(); refreshStamps(); render(); });
+        g.appendChild(b);
+      });
+      c.appendChild(g);
+      ch4.appendChild(c);
+    });
+    const note = el("p", "hint");
+    note.style.marginTop = ".6rem";
+    note.textContent = "These families are on almost every device, so your brand looks the same for everyone without loading anything.";
+    ch4.appendChild(note);
+
+    /* style card */
+    const sc = chapter(v, "Output", "My Brand Style Card", "This updates live as you change anything above.");
+    const pv = el("div");
+    pv.id = "pvHost";
+    pv.appendChild(brandPreview());
+    sc.appendChild(pv);
+    const meta = el("div", "card");
+    meta.style.marginTop = ".9rem";
+    meta.innerHTML =
+      '<div class="bp">' +
+        '<div class="bpc"><h4>Name</h4><p>' + esc(B.chosenName || "—") + '</p></div>' +
+        '<div class="bpc"><h4>Feelings</h4><p>' + esc(B.feelings.join(", ") || "—") + '</p></div>' +
+        '<div class="bpc"><h4>Colours</h4><p style="font-family:var(--mono);font-size:.82rem">' +
+          Object.values(B.colours).map(esc).join(" · ") + '</p></div>' +
+        '<div class="bpc"><h4>Fonts</h4><p>' +
+          esc((FONTS.find(f => f.id === B.fonts.headline) || {}).name) + " / " +
+          esc((FONTS.find(f => f.id === B.fonts.body) || {}).name) + " / " +
+          esc((FONTS.find(f => f.id === B.fonts.accent) || {}).name) + '</p></div>' +
+      '</div>';
+    sc.appendChild(meta);
+  }
+
+  function updatePreview() {
+    const host = $("pvHost");
+    if (!host) return;
+    host.innerHTML = "";
+    host.appendChild(brandPreview());
+  }
+
+  /* -------- part 3: beliefs -------- */
+  function vBeliefs(v) {
+    header(v, "Part 3", "What does my brand believe?", "This is where Founder CEO gets more serious than the younger books. A mission is not a slogan and a value is not a word — it is a behaviour someone could catch you breaking.");
+
+    const ch5 = chapter(v, "Chapter 5", "Mission", "What do we do today, for whom, and why?");
+    const m = el("div", "card");
+    const mrow = el("div", "grid2");
+    mrow.appendChild(field("We help…", "Who exactly?", () => B.mission.who, x => B.mission.who = x, { placeholder:"students who…" }));
+    mrow.appendChild(field("to…", "Do what?", () => B.mission.what, x => B.mission.what = x, { placeholder:"find part-time work" }));
+    m.appendChild(mrow);
+    m.appendChild(field("by…", "How do you do it — the method, not the ambition.", () => B.mission.how, x => B.mission.how = x, { placeholder:"matching them to local shifts in under 24 hours" }));
+    const preview = el("div", "verdict idle");
+    preview.style.marginTop = ".9rem";
+    const paintM = () => {
+      const done = filled(B.mission.who) && filled(B.mission.what) && filled(B.mission.how);
+      preview.className = "verdict " + (done ? "good" : "idle");
+      preview.innerHTML = "<span>" + (done
+        ? "<b>Mission:</b> We help " + esc(B.mission.who) + " to " + esc(B.mission.what) + " by " + esc(B.mission.how) + "."
+        : "Fill the three blanks to build your mission statement.") + "</span>";
+    };
+    m.addEventListener("input", paintM);
+    m.appendChild(preview);
+    paintM();
+    ch5.appendChild(m);
+
+    const ch6 = chapter(v, "Chapter 6", "Vision", "What future are we trying to create? Ask: if our business becomes successful, what changes because we existed?");
+    const vi = el("div", "card");
+    vi.appendChild(field("Our vision", "Write it as a world, not as a company milestone. “Every teenager in our city can find their first job in a week” beats “be the biggest app.”",
+      () => B.vision, x => B.vision = x, { area:true, rows:3 }));
+    ch6.appendChild(vi);
+
+    const ch7 = chapter(v, "Chapter 7", "Core Values", "Do not just pick Integrity / Innovation / Excellence. Define the behaviour — what it means, and what it actually looks like on a normal Tuesday.");
+    const vc = el("div", "card");
+    const ex = el("div", "verdict idle");
+    ex.innerHTML = "<span><b>Example — Keep It Simple.</b> What it means: we make complicated things easier. What it looks like: clear pricing, clear instructions, simple communication.</span>";
+    vc.appendChild(ex);
+    const list = el("div");
+    list.style.marginTop = ".9rem";
+    B.values.forEach((val, i) => {
+      const row = el("div", "value-row");
+      const head = el("div", "rowhead");
+      const nameIn = document.createElement("input");
+      nameIn.type = "text"; nameIn.placeholder = "Value name — e.g. Keep It Simple";
+      bind(nameIn, () => val.name, x => val.name = x.slice(0, 60));
+      head.appendChild(nameIn);
+      const del = el("button", "icon-btn", ic("i-x"));
+      del.setAttribute("aria-label", "Remove value");
+      del.addEventListener("click", () => { B.values.splice(i, 1); save(); render(); });
+      head.appendChild(del);
+      row.appendChild(head);
+      row.appendChild(field("What it means", "", () => val.means, x => val.means = x, { area:true }));
+      row.appendChild(field("What it looks like", "Something a customer could actually see or a teammate could be held to.", () => val.looks, x => val.looks = x, { area:true }));
+      list.appendChild(row);
+    });
+    vc.appendChild(list);
+    const addV = el("button", "btn ghost sm", ic("i-plus") + "Add a value");
+    addV.style.marginTop = ".8rem";
+    addV.addEventListener("click", () => { B.values.push({ name:"", means:"", looks:"" }); save(); render(); });
+    vc.appendChild(addV);
+    if (B.values.length > 4) vc.appendChild(el("p", "hint", "More than four values means none of them are values. Consider cutting."));
+    ch7.appendChild(vc);
+  }
+
+  /* -------- part 4: audience -------- */
+  function vAudience(v) {
+    header(v, "Part 4", "Know who you're building for", "Your product isn't for everyone. The moment you say “everyone”, your marketing has nowhere to point.");
+
+    const ch8 = chapter(v, "Chapter 8", "My Target Audience", "Build one specific person. Give them a name. If you cannot picture them ordering, the profile is still too vague.");
+    const c = el("div", "card");
+    const g = el("div", "grid2");
+    g.appendChild(field("Their name", "", () => B.persona.name, x => B.persona.name = x, { placeholder:"Sam" }));
+    g.appendChild(field("How old are they?", "", () => B.persona.age, x => B.persona.age = x, { placeholder:"16" }));
+    c.appendChild(g);
+    c.appendChild(field("Where are they?", "", () => B.persona.place, x => B.persona.place = x, { placeholder:"Grade 11, lives 20 minutes from downtown" }));
+    c.appendChild(field("What do they need?", "", () => B.persona.needs, x => B.persona.needs = x, { area:true }));
+    c.appendChild(field("What frustrates them?", "The specific annoyance, not a general complaint.", () => B.persona.frustrates, x => B.persona.frustrates = x, { area:true }));
+    c.appendChild(field("What do they already buy?", "Your real competition is what they spend on today.", () => B.persona.buys, x => B.persona.buys = x, { area:true }));
+    c.appendChild(field("Where do they spend time?", "Online and off. This is your channel list, written early.", () => B.persona.time, x => B.persona.time = x, { area:true }));
+    c.appendChild(field("What makes them trust a company?", "", () => B.persona.trust, x => B.persona.trust = x, { area:true }));
+    ch8.appendChild(c);
+
+    const card = el("div", "persona");
+    card.style.marginTop = ".9rem";
+    const initial = ((B.persona.name || "?").trim()[0] || "?").toUpperCase();
+    const rows = [
+      ["Age", B.persona.age], ["Where", B.persona.place], ["Needs", B.persona.needs],
+      ["Frustrated by", B.persona.frustrates], ["Already buys", B.persona.buys],
+      ["Spends time", B.persona.time], ["Trusts because", B.persona.trust]
+    ];
+    card.innerHTML =
+      '<div class="head"><span class="av" style="background:' + esc(B.colours.primary) + '">' + esc(initial) + '</span>' +
+      '<div><b style="font-family:var(--display);font-size:1.15rem">' + esc(B.persona.name || "My customer") + '</b>' +
+      '<div class="hint">My first customer persona</div></div></div>' +
+      '<div class="body">' + rows.map(([k, val]) =>
+        '<div class="prow"><b>' + esc(k) + '</b><span>' + esc(val || "—") + '</span></div>').join("") + '</div>';
+    ch8.appendChild(card);
+
+    const ch9 = chapter(v, "Chapter 9", "Customer Journey", "Before the funnel, think like the customer. Write one line for each step: what would have to happen, for this person, to move to the next rung?");
+    const jc = el("div", "card");
+    const lad = el("div", "ladder");
+    JOURNEY.forEach(([label, colour], i) => {
+      const r = el("div", "rung");
+      const left = el("span", "dot", String(i + 1));
+      left.style.background = colour;
+      const right = el("div");
+      right.innerHTML = '<div class="say">' + esc(label) + '</div>';
+      const inp = document.createElement("input");
+      inp.type = "text";
+      inp.placeholder = "What makes this happen?";
+      bind(inp, () => B.journey[i], x => B.journey[i] = x.slice(0, 160));
+      right.appendChild(inp);
+      r.appendChild(left); r.appendChild(right);
+      lad.appendChild(r);
+    });
+    jc.appendChild(lad);
+    ch9.appendChild(jc);
+  }
+
+  /* -------- part 5: price -------- */
+  function vPrice(v) {
+    header(v, "Part 5", "Price it", "Cost ≠ price. One is arithmetic, the other is a decision.");
+
+    const ch10 = chapter(v, "Chapter 10", "What Does It Really Cost?", "Everything it takes to deliver one unit. Founders forget transaction fees, packaging, and their own labour — and then wonder where the money went.");
+    const c = el("div", "card");
+    const rows = el("div");
+    if (!B.costs.length) {
+      ["Product/service cost","Packaging","Labour","Delivery","Software","Advertising","Transaction fees"].forEach(l => B.costs.push({ label:l, amount:"" }));
+      save();
+    }
+    let totalEl;
+    function paintTotal() {
+      const t = B.costs.reduce((a, x) => a + num(x.amount), 0);
+      totalEl.innerHTML = '<b>' + money(t) + '</b><span>Total cost per unit</span>';
+      return t;
+    }
+    B.costs.forEach((row, i) => {
+      const r = el("div", "costrow");
+      const l = document.createElement("input");
+      l.type = "text"; l.placeholder = "Cost name";
+      bind(l, () => row.label, x => row.label = x.slice(0, 50));
+      const a = document.createElement("input");
+      a.type = "number"; a.min = "0"; a.step = "0.01"; a.placeholder = "0.00";
+      a.value = row.amount || "";
+      a.addEventListener("input", () => { row.amount = a.value; save(); paintTotal(); paintMargin(); refreshStamps(); });
+      const x = el("button", "icon-btn", ic("i-x"));
+      x.setAttribute("aria-label", "Remove cost");
+      x.addEventListener("click", () => { B.costs.splice(i, 1); save(); render(); });
+      r.appendChild(l); r.appendChild(a); r.appendChild(x);
+      rows.appendChild(r);
+    });
+    c.appendChild(rows);
+    const addC = el("button", "btn ghost sm", ic("i-plus") + "Add another cost");
+    addC.style.marginTop = ".7rem";
+    addC.addEventListener("click", () => { B.costs.push({ label:"", amount:"" }); save(); render(); });
+    c.appendChild(addC);
+    const mets = el("div", "metrics");
+    mets.style.marginTop = ".9rem";
+    totalEl = el("div", "metric");
+    mets.appendChild(totalEl);
+    c.appendChild(mets);
+    ch10.appendChild(c);
+
+    const ch11 = chapter(v, "Chapter 11", "Pricing My Business", "Three ways to arrive at a number. Strong founders check all three, then choose one and can say why.");
+    const pc = el("div", "card");
+    const meth = el("div", "fld");
+    meth.innerHTML = '<span class="lbl">Which method am I using?</span>';
+    const mp = el("div", "pills");
+    [["Cost-based","cost + a mark-up"],["Competitor-based","near what others charge"],["Value-based","what it is worth to them"]].forEach(([m, note]) => {
+      const b = el("button", "pill");
+      b.textContent = m;
+      b.title = note;
+      b.setAttribute("aria-pressed", String(B.price.method === m));
+      b.addEventListener("click", () => { B.price.method = m; save(); render(); });
+      mp.appendChild(b);
+    });
+    meth.appendChild(mp);
+    pc.appendChild(meth);
+
+    const pf = field("My selling price", "Per unit, what the customer pays.",
+      () => B.price.amount, x => B.price.amount = x, { type:"number" });
+    pf.querySelector("input").addEventListener("input", () => { paintMargin(); });
+    pc.appendChild(pf);
+
+    const marginBox = el("div");
+    marginBox.style.marginTop = ".9rem";
+    pc.appendChild(marginBox);
+
+    function paintMargin() {
+      const cost = B.costs.reduce((a, x) => a + num(x.amount), 0);
+      const price = num(B.price.amount);
+      const gp = price - cost;
+      const gm = price > 0 ? (gp / price * 100) : 0;
+      marginBox.innerHTML = "";
+      const m = el("div", "metrics");
+      m.innerHTML =
+        '<div class="metric"><b>' + money(price) + '</b><span>Selling price</span></div>' +
+        '<div class="metric"><b>' + money(cost) + '</b><span>Total cost</span></div>' +
+        '<div class="metric ' + (gp > 0 ? "good" : gp < 0 ? "bad" : "") + '"><b>' + money(gp) + '</b><span>Gross profit</span></div>' +
+        '<div class="metric ' + (gm >= 30 ? "good" : gm > 0 ? "" : "bad") + '"><b>' + (price > 0 ? gm.toFixed(1) + "%" : "—") + '</b><span>Gross margin</span></div>';
+      marginBox.appendChild(m);
+      const vd = el("div", "verdict " + (price <= 0 ? "idle" : gp <= 0 ? "bad" : gm < 20 ? "bad" : "good"));
+      vd.style.marginTop = ".8rem";
+      vd.innerHTML = "<span>" + (price <= 0
+        ? "Enter a price to see your gross profit and margin."
+        : gp <= 0
+          ? "<b>You lose " + money(Math.abs(gp)) + " on every sale.</b> Selling more makes this worse, not better. Cut a cost or raise the price."
+          : gm < 20
+            ? "<b>Margin is thin at " + gm.toFixed(1) + "%.</b> One refund, one mistake, or one price rise from a supplier wipes out the profit on several sales."
+            : "<b>" + money(gp) + " kept per sale (" + gm.toFixed(1) + "% margin).</b> That is the money that has to cover getting the customer in the first place — check Part 8.") + "</span>";
+      marginBox.appendChild(vd);
+    }
+    paintMargin();
+    paintTotal();
+    ch11.appendChild(pc);
+  }
+
+  /* -------- part 6: notice -------- */
+  function vNotice(v) {
+    header(v, "Part 6", "Get people to notice you", "Three different jobs, in order. Most beginner marketing fails because it does the third job to people who have not done the first.");
+
+    function picker(host, list, arrKey, label, note) {
+      const c = el("div", "card");
+      c.innerHTML = '<span class="lbl">' + esc(label) + '</span><p class="hint">' + esc(note) + '</p>';
+      const p = el("div", "pills");
+      p.style.marginTop = ".7rem";
+      list.forEach(item => {
+        const b = el("button", "pill");
+        b.textContent = item;
+        b.setAttribute("aria-pressed", String(B[arrKey].includes(item)));
+        b.addEventListener("click", () => {
+          const i = B[arrKey].indexOf(item);
+          if (i >= 0) B[arrKey].splice(i, 1); else B[arrKey].push(item);
+          save(); refreshStamps(); render();
+        });
+        p.appendChild(b);
+      });
+      c.appendChild(p);
+      host.appendChild(c);
+      return c;
+    }
+
+    const ch12 = chapter(v, "Chapter 12", "Awareness", "How will somebody who has never heard of me discover my business? Pick two or three you can actually do this month — not ten you cannot.");
+    picker(ch12, AWARENESS, "awareness", "My awareness channels", "Choose the ones where your persona from Part 4 actually spends time.");
+
+    const ch13 = chapter(v, "Chapter 13", "Consideration", "Now they know you exist. Why should they choose you over the alternative — including doing nothing?");
+    picker(ch13, CONSIDERATION, "consideration", "My proof and trust builders", "Each one answers a doubt. Pick the ones that answer your customer's biggest doubt first.");
+
+    const ch14 = chapter(v, "Chapter 14", "Conversion", "What do I want the customer to do next? Every campaign needs one clear call to action. Two calls to action means none.");
+    const cc = el("div", "card");
+    cc.innerHTML = '<span class="lbl">The action I want</span>';
+    const ap = el("div", "pills");
+    ap.style.margin = ".6rem 0 .9rem";
+    CONVERSIONS.forEach(a => {
+      const b = el("button", "pill");
+      b.textContent = a;
+      b.setAttribute("aria-pressed", String(B.cta.action === a));
+      b.addEventListener("click", () => { B.cta.action = a; save(); refreshStamps(); render(); });
+      ap.appendChild(b);
+    });
+    cc.appendChild(ap);
+    cc.appendChild(field("My call to action — the exact words on the button", "Short, specific, starts with a verb. “Book my free trial” beats “Submit”.",
+      () => B.cta.text, x => B.cta.text = x.slice(0, 40), { placeholder:"Book my free trial" }));
+    ch14.appendChild(cc);
+
+    const pv = chapter(v, "Live", "How it looks on your brand", "Your call to action, in your colours and fonts.");
+    const host = el("div");
+    host.id = "pvHost";
+    host.appendChild(brandPreview());
+    pv.appendChild(host);
+  }
+
+  /* -------- part 7: funnel -------- */
+  function vFunnel(v) {
+    header(v, "Part 7", "The marketing funnel", "Six stages. Each one loses some people — that is normal and not a failure. The question is always: what happens next, and what makes them move down?");
+
+    const c = el("div", "card");
+    const f = el("div", "funnel");
+    FUNNEL.forEach(([em, name, meaning, colour], i) => {
+      const w = 100 - i * 7;
+      const s = el("div", "fstage");
+      s.style.background = colour;
+      s.style.maxWidth = w + "%";
+      s.innerHTML = '<div class="ftop"><b>' + em + " " + esc(name) + '</b><span class="fnum">' + esc(meaning) + '</span></div>';
+      const inp = document.createElement("input");
+      inp.type = "text";
+      inp.placeholder = "What we will actually do at this stage…";
+      bind(inp, () => B.funnelNotes[i], x => B.funnelNotes[i] = x.slice(0, 140));
+      s.appendChild(inp);
+      f.appendChild(s);
+    });
+    c.appendChild(f);
+    v.appendChild(c);
+
+    const help = el("div", "card");
+    help.innerHTML = '<span class="lbl">Where your Part 6 choices land</span>' +
+      '<div class="bp" style="margin-top:.7rem">' +
+      '<div class="bpc"><h4>Awareness</h4><p>' + esc(B.awareness.join(", ") || "Nothing chosen yet") + '</p></div>' +
+      '<div class="bpc"><h4>Consideration + Trust</h4><p>' + esc(B.consideration.join(", ") || "Nothing chosen yet") + '</p></div>' +
+      '<div class="bpc"><h4>Conversion</h4><p>' + esc(B.cta.text || B.cta.action || "No call to action yet") + '</p></div>' +
+      '<div class="bpc"><h4>Retention + Advocacy</h4><p>' + esc(B.journey[6] || B.journey[7] || "Fill in the last two rungs of your customer journey in Part 4.") + '</p></div>' +
+      '</div>';
+    v.appendChild(help);
+  }
+
+  /* -------- part 8: numbers -------- */
+  function vNumbers(v) {
+    header(v, "Part 8", "Understand the numbers", "This is where founders stop saying “the ad got lots of views” and start making decisions with numbers.");
+
+    const c = el("div", "card");
+    const g = el("div", "grid2");
+    ["spend|Advertising spend|What you put in|500",
+     "leads|Leads generated|People who showed interest|50",
+     "customers|Customers who bought|People who actually paid|10",
+     "order|Average order value|What one customer spends|150"].forEach(spec => {
+      const [k, label, note, ph] = spec.split("|");
+      const f = field(label, note, () => B.ads[k], x => B.ads[k] = x, { type:"number", placeholder: ph });
+      f.querySelector("input").addEventListener("input", paint);
+      g.appendChild(f);
+    });
+    c.appendChild(g);
+    const out = el("div");
+    out.style.marginTop = "1rem";
+    c.appendChild(out);
+    v.appendChild(c);
+
+    function paint() {
+      const spend = num(B.ads.spend), leads = num(B.ads.leads), custs = num(B.ads.customers), order = num(B.ads.order);
+      const cost = B.costs.reduce((a, x) => a + num(x.amount), 0);
+      const price = num(B.price.amount);
+      const marginPct = price > 0 ? (price - cost) / price : 0;
+      const cpl = leads > 0 ? spend / leads : 0;
+      const cpc = custs > 0 ? spend / custs : 0;
+      const gpPerCustomer = order > 0 ? order * marginPct : (price > 0 ? price - cost : 0);
+      out.innerHTML = "";
+
+      const m = el("div", "metrics");
+      m.innerHTML =
+        '<div class="metric"><b>' + (leads > 0 ? money(cpl) : "—") + '</b><span>Cost per lead</span></div>' +
+        '<div class="metric"><b>' + (custs > 0 ? money(cpc) : "—") + '</b><span>Cost per conversion</span></div>' +
+        '<div class="metric"><b>' + (leads > 0 && custs > 0 ? (custs / leads * 100).toFixed(1) + "%" : "—") + '</b><span>Lead → customer</span></div>' +
+        '<div class="metric"><b>' + (gpPerCustomer > 0 ? money(gpPerCustomer) : "—") + '</b><span>Gross profit / customer</span></div>';
+      out.appendChild(m);
+
+      const ready = custs > 0 && gpPerCustomer > 0;
+      const works = ready && gpPerCustomer > cpc;
+      const vd = el("div", "verdict " + (!ready ? "idle" : works ? "good" : "bad"));
+      vd.style.marginTop = ".9rem";
+      vd.innerHTML = "<span>" + (!ready
+        ? "Fill in spend, customers, and an order value — and set your price in Part 5 — to get a verdict."
+        : works
+          ? "<b>This is working.</b> Each customer costs " + money(cpc) + " to win and leaves " + money(gpPerCustomer) +
+            " of gross profit. You keep " + money(gpPerCustomer - cpc) + " per customer, so spending more is a reasonable next move."
+          : "<b>This is not working yet.</b> Each customer costs " + money(cpc) + " to win but only leaves " + money(gpPerCustomer) +
+            " of gross profit — you lose " + money(cpc - gpPerCustomer) + " every time someone buys. Spending more advertising money makes the hole bigger. " +
+            "Fix one of three things: raise the price, cut the cost, or improve the conversion rate.") + "</span>";
+      out.appendChild(vd);
+
+      if (ready) {
+        const steps = el("div", "card");
+        steps.style.marginTop = ".9rem";
+        steps.style.boxShadow = "none";
+        steps.innerHTML = '<span class="lbl">The working</span>' +
+          '<p style="font-family:var(--mono);font-size:.84rem;line-height:1.9">' +
+          "CPL &nbsp;= " + money(spend) + " ÷ " + leads + " leads &nbsp;= <b>" + money(cpl) + "</b><br>" +
+          "CPConv = " + money(spend) + " ÷ " + custs + " customers = <b>" + money(cpc) + "</b><br>" +
+          "Gross profit/customer = " + money(order || price) + " × " + (marginPct * 100).toFixed(1) + "% margin = <b>" + money(gpPerCustomer) + "</b><br>" +
+          "Verdict = " + money(gpPerCustomer) + " − " + money(cpc) + " = <b>" + money(gpPerCustomer - cpc) + "</b> per customer" +
+          '</p>';
+        out.appendChild(steps);
+      }
+    }
+    paint();
+  }
+
+  /* -------- part 9: CRM -------- */
+  function vCRM(v) {
+    header(v, "Part 9", "Build relationships", "CRM is not software. It is remembering who your customers are and what relationship you have with them. The software comes later, when the list gets too big for your memory.");
+
+    const ch = chapter(v, "Chapter 17", "My CRM", "Add real people — even three is enough to make the habit real. Update the status as the relationship moves.");
+    const c = el("div", "card");
+    const wrap = el("div", "scroll");
+    const t = el("table", "crm");
+    t.innerHTML = "<thead><tr><th>Customer</th><th>Status</th><th>Last contact</th><th>Interested in</th><th>Next step</th><th></th></tr></thead>";
+    const tb = el("tbody");
+    B.crm.forEach((row, i) => {
+      const tr = el("tr");
+      function cell(key, ph) {
+        const td = el("td");
+        const inp = document.createElement("input");
+        inp.type = "text"; inp.placeholder = ph;
+        bind(inp, () => row[key], x => row[key] = x.slice(0, 60));
+        td.appendChild(inp);
+        return td;
+      }
+      tr.appendChild(cell("name", "Name"));
+      const tds = el("td");
+      const sel = document.createElement("select");
+      CRM_STATUS.forEach(([s]) => {
+        const o = document.createElement("option");
+        o.value = s; o.textContent = s;
+        if (row.status === s) o.selected = true;
+        sel.appendChild(o);
+      });
+      sel.addEventListener("change", () => { row.status = sel.value; save(); render(); });
+      tds.appendChild(sel);
+      tr.appendChild(tds);
+      tr.appendChild(cell("last", "e.g. May 3"));
+      tr.appendChild(cell("interest", "Starter Pack"));
+      tr.appendChild(cell("next", "Follow up"));
+      const tdx = el("td");
+      const x = el("button", "icon-btn", ic("i-x"));
+      x.setAttribute("aria-label", "Remove row");
+      x.addEventListener("click", () => { B.crm.splice(i, 1); save(); render(); });
+      tdx.appendChild(x);
+      tr.appendChild(tdx);
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+    wrap.appendChild(t);
+    c.appendChild(wrap);
+    const add = el("button", "btn ghost sm", ic("i-plus") + "Add a person");
+    add.style.marginTop = ".8rem";
+    add.addEventListener("click", () => { B.crm.push({ name:"", status:"Lead", last:"", interest:"", next:"" }); save(); render(); });
+    c.appendChild(add);
+
+    const pipe = el("div", "pipe");
+    CRM_STATUS.forEach(([s, colour]) => {
+      const n = B.crm.filter(r => r.status === s && filled(r.name)).length;
+      const d = el("div", null, '<b style="color:' + colour + '">' + n + '</b><span>' + esc(s) + '</span>');
+      pipe.appendChild(d);
+    });
+    c.appendChild(pipe);
+    c.appendChild(el("p", "hint", "Lead → Prospect → Customer → Returning Customer → Advocate. A healthy business has people in every column, not just the first."));
+    c.lastChild.style.marginTop = ".7rem";
+    ch.appendChild(c);
+  }
+
+  /* -------- part 10: automation -------- */
+  function vAuto(v) {
+    header(v, "Part 10", "Automation", "If something happens repeatedly, can we build a system for it? Automation is not robots — it is deciding once instead of deciding every time.");
+
+    const ch = chapter(v, "Chapter 18", "My First Automation Map", "Map one repeating process end to end. Start with what happens when a new person arrives.");
+    const c = el("div", "card");
+    if (!B.automation.length) {
+      B.automation = ["Customer fills out a form", "Added to CRM", "Welcome email sent", "Team notified", "Follow-up scheduled", "Customer receives reminder"];
+      save();
+    }
+    const flow = el("div", "flow");
+    B.automation.forEach((step, i) => {
+      if (i) flow.appendChild(el("div", "fdown", "↓"));
+      const n = el("div", "fnode");
+      const badge = el("span", "n", String(i + 1));
+      const inp = document.createElement("input");
+      inp.type = "text";
+      inp.placeholder = "What happens…";
+      bind(inp, () => B.automation[i], x => B.automation[i] = x.slice(0, 90));
+      const up = el("button", "icon-btn", ic("i-up"));
+      up.setAttribute("aria-label", "Move up");
+      up.disabled = i === 0;
+      up.addEventListener("click", () => {
+        if (i === 0) return;
+        const tmp = B.automation[i - 1]; B.automation[i - 1] = B.automation[i]; B.automation[i] = tmp;
+        save(); render();
+      });
+      const x = el("button", "icon-btn", ic("i-x"));
+      x.setAttribute("aria-label", "Remove step");
+      x.addEventListener("click", () => { B.automation.splice(i, 1); save(); render(); });
+      n.appendChild(badge); n.appendChild(inp); n.appendChild(up); n.appendChild(x);
+      flow.appendChild(n);
+    });
+    c.appendChild(flow);
+    const add = el("button", "btn ghost sm", ic("i-plus") + "Add a step");
+    add.style.marginTop = ".8rem";
+    add.addEventListener("click", () => { B.automation.push(""); save(); render(); });
+    c.appendChild(add);
+    ch.appendChild(c);
+
+    const q = el("div", "card");
+    q.innerHTML = '<span class="lbl">The test</span>' +
+      '<p class="hint">For each step ask: does a human have to make a judgement here? If yes, keep the human. If no, that step is a candidate for a system. Automating a judgement call is how businesses annoy people.</p>';
+    ch.appendChild(q);
+  }
+
+  /* -------- part 11: community -------- */
+  function vCommunity(v) {
+    header(v, "Part 11", "Build the community", "An audience is people who see your brand. A community is people who participate in it. The second is much harder and much more valuable.");
+
+    const ch = chapter(v, "Chapter 19", "Community", "Four questions, then a promise you would be embarrassed to break.");
+    const c = el("div", "card");
+    c.appendChild(field("Why would someone join us?", "What do they get that they cannot get alone?", () => B.community.why, x => B.community.why = x, { area:true }));
+    c.appendChild(field("What do members have in common?", "", () => B.community.common, x => B.community.common = x, { area:true }));
+    c.appendChild(field("How do we make them feel included?", "Especially the quiet ones and the new ones.", () => B.community.included, x => B.community.included = x, { area:true }));
+    c.appendChild(field("How can customers help each other?", "The best communities do work the founder never has to do.", () => B.community.helping, x => B.community.helping = x, { area:true }));
+    ch.appendChild(c);
+
+    const p = el("div", "card");
+    p.style.borderColor = "var(--teal)";
+    p.appendChild(field("My Community Promise", "One sentence. Something members could hold you to.",
+      () => B.community.promise, x => B.community.promise = x, { area:true, rows:2, placeholder:"We will always…" }));
+    ch.appendChild(p);
+  }
+
+  /* -------- part 12: protect -------- */
+  function vProtect(v) {
+    header(v, "Part 12", "Protect the business", "This is business literacy, not law. You are learning what these documents are for — a real lawyer reviews the real thing.");
+
+    const ch20 = chapter(v, "Chapter 20", "Privacy", "Personal information is anything that identifies a person. Businesses collect it to do their job — and owe people honesty about what they hold and why.");
+    const c = el("div", "card");
+    c.innerHTML = '<span class="lbl">What information does my business collect?</span><p class="hint">One row per piece of information. If you cannot justify why you need it, do not collect it — that is the whole rule, in one line.</p>';
+    const wrap = el("div", "scroll");
+    const t = el("table", "crm");
+    t.innerHTML = "<thead><tr><th>Information</th><th>Why I need it</th><th>How I keep it safe</th><th></th></tr></thead>";
+    const tb = el("tbody");
+    if (!B.privacy.length) {
+      B.privacy = [{ what:"Name", why:"To address the order", safe:"" }, { what:"Email", why:"To send the confirmation", safe:"" }];
+      save();
+    }
+    B.privacy.forEach((row, i) => {
+      const tr = el("tr");
+      ["what","why","safe"].forEach((k, idx) => {
+        const td = el("td");
+        const inp = document.createElement("input");
+        inp.type = "text";
+        inp.placeholder = ["Email address", "Why do you need it?", "Who can see it?"][idx];
+        bind(inp, () => row[k], x => row[k] = x.slice(0, 80));
+        td.appendChild(inp);
+        tr.appendChild(td);
+      });
+      const tdx = el("td");
+      const x = el("button", "icon-btn", ic("i-x"));
+      x.setAttribute("aria-label", "Remove row");
+      x.addEventListener("click", () => { B.privacy.splice(i, 1); save(); render(); });
+      tdx.appendChild(x); tr.appendChild(tdx);
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); wrap.appendChild(t);
+    c.appendChild(wrap);
+    const add = el("button", "btn ghost sm", ic("i-plus") + "Add information");
+    add.style.marginTop = ".8rem";
+    add.addEventListener("click", () => { B.privacy.push({ what:"", why:"", safe:"" }); save(); render(); });
+    c.appendChild(add);
+    ch20.appendChild(c);
+
+    const ch21 = chapter(v, "Chapter 21", "Policies", "A good policy helps both sides know what to expect. Write each one in plain language — if a customer needs help understanding it, it is not doing its job.");
+    const pc = el("div", "card");
+    POLICY_LIST.forEach(([k, label, note]) => {
+      pc.appendChild(field(label, note, () => B.policies[k], x => B.policies[k] = x, { area:true, rows:2 }));
+    });
+    ch21.appendChild(pc);
+
+    const ch22 = chapter(v, "Chapter 22", "Terms & Conditions", "The rules for using or buying from the business. Build the checklist — then have a real professional review the actual terms before you trade.");
+    const tc = el("div", "card");
+    const checks = el("div", "checks");
+    TERMS_LIST.forEach(([k, label, note]) => {
+      const b = el("button", "chk");
+      b.setAttribute("aria-pressed", String(!!B.terms[k]));
+      b.innerHTML = '<span class="box">' + ic("i-check") + '</span><span><b>' + esc(label) + '</b><span>' + esc(note) + '</span></span>';
+      b.addEventListener("click", () => { B.terms[k] = !B.terms[k]; save(); render(); });
+      checks.appendChild(b);
+    });
+    tc.appendChild(checks);
+    const n = Object.values(B.terms).filter(Boolean).length;
+    tc.appendChild(el("p", "hint", n + " of " + TERMS_LIST.length + " covered. This is a business rules checklist, not legal terms — real terms should be reviewed by an appropriate professional before you trade."));
+    tc.lastChild.style.marginTop = ".8rem";
+    ch22.appendChild(tc);
+  }
+
+  /* -------- part 13: blueprint -------- */
+  function vBlueprint(v) {
+    header(v, "Part 13", "My Brand Blueprint", "Everything you built, on one page. Gaps are visible on purpose — they are your to-do list.");
+
+    const pv = el("div");
+    pv.id = "pvHost";
+    pv.style.marginTop = "1.2rem";
+    pv.appendChild(brandPreview());
+    v.appendChild(pv);
+
+    const cost = B.costs.reduce((a, x) => a + num(x.amount), 0);
+    const price = num(B.price.amount);
+    const gp = price - cost;
+    const gm = price > 0 ? (gp / price * 100).toFixed(1) + "%" : "";
+    const spend = num(B.ads.spend), leads = num(B.ads.leads), custs = num(B.ads.customers);
+
+    const items = [
+      ["Business name", B.chosenName],
+      ["In one sentence", B.idea.sentence],
+      ["Product or service", B.idea.type],
+      ["What makes it different", B.idea.different],
+      ["Colours", Object.values(B.colours).join(" · ")],
+      ["Fonts", [B.fonts.headline, B.fonts.body, B.fonts.accent].map(f => (FONTS.find(x => x.id === f) || {}).name).join(" / ")],
+      ["Mission", filled(B.mission.who) ? "We help " + B.mission.who + " to " + B.mission.what + " by " + B.mission.how + "." : ""],
+      ["Vision", B.vision],
+      ["Core values", B.values.filter(x => filled(x.name)).map(x => x.name).join(", ")],
+      ["Target audience", B.persona.name ? B.persona.name + ", " + (B.persona.age || "?") + " — " + (B.persona.needs || "") : ""],
+      ["Customer persona", B.persona.frustrates],
+      ["Cost per unit", cost > 0 ? money(cost) : ""],
+      ["Price", price > 0 ? money(price) + " (" + (B.price.method || "method not set") + ")" : ""],
+      ["Gross profit", price > 0 ? money(gp) + (gm ? " · " + gm + " margin" : "") : ""],
+      ["Awareness strategy", B.awareness.join(", ")],
+      ["Consideration strategy", B.consideration.join(", ")],
+      ["Conversion", B.cta.text],
+      ["Marketing funnel", B.funnelNotes.filter(filled).length + " of 6 stages planned"],
+      ["Cost per lead", leads > 0 ? money(spend / leads) : ""],
+      ["Cost per conversion", custs > 0 ? money(spend / custs) : ""],
+      ["CRM", B.crm.filter(r => filled(r.name)).length ? B.crm.filter(r => filled(r.name)).length + " people tracked" : ""],
+      ["Automation", B.automation.filter(filled).length ? B.automation.filter(filled).length + " steps mapped" : ""],
+      ["Community promise", B.community.promise],
+      ["Policies", Object.keys(B.policies).filter(k => filled(B.policies[k])).length + " of 5 written"]
+    ];
+
+    const grid = el("div", "bp");
+    grid.style.marginTop = "1.1rem";
+    items.forEach(([k, val]) => {
+      grid.appendChild(el("div", "bpc" + (filled(val) ? "" : " empty"),
+        "<h4>" + esc(k) + "</h4><p>" + esc(filled(val) ? val : "Not filled in yet") + "</p>"));
+    });
+    v.appendChild(grid);
+
+    const done = items.filter(([, val]) => filled(val)).length;
+    const bar = el("div", "verdict " + (done === items.length ? "good" : "idle"));
+    bar.style.marginTop = "1rem";
+    bar.innerHTML = "<span><b>" + done + " of " + items.length + " sections complete.</b> " +
+      (done === items.length ? "Your blueprint is finished — take it to the Founder Passport." : "Empty cards above show what is left.") + "</span>";
+    v.appendChild(bar);
+
+    const launch = el("div", "card");
+    launch.style.marginTop = "1rem";
+    launch.style.borderColor = "var(--energy)";
+    launch.appendChild(field("My launch plan — the first real thing I will do, and when", "This earns the 🚀 LAUNCH stamp. Make it small enough to start this week.",
+      () => B.launch, x => B.launch = x, { area:true, rows:2, placeholder:"On Saturday I will…" }));
+    v.appendChild(launch);
+
+    const pr = el("button", "btn ghost noprint", ic("i-print") + "Print my blueprint");
+    pr.style.marginTop = "1rem";
+    pr.addEventListener("click", () => window.print());
+    v.appendChild(pr);
+  }
+
+  /* -------- part 14: passport -------- */
+  function vPassport(v) {
+    header(v, "Part 14", "GO OVERSEAS!", "This was never about operating internationally. It means: take your idea beyond your notebook, beyond your classroom, and into the real world.");
+
+    const c = stampChecks();
+    c.launch = STAMPS.slice(0, 9).every(([k]) => c[k]) && filled(B.launch);
+
+    const pp = el("div", "passport");
+    pp.style.marginTop = "1.3rem";
+    pp.innerHTML = '<div class="pp-top"><div><div class="pp-sub">Little Founders · Founder CEO</div>' +
+      '<div class="pp-title">FOUNDER PASSPORT</div></div>' +
+      '<div class="pp-sub">' + stampCount() + ' / 10 stamps</div></div>';
+    const st = el("div", "stamps");
+    STAMPS.forEach(([k, em, label, note]) => {
+      const d = el("div", "stamp" + (B.stamps[k] ? " got" : ""));
+      d.innerHTML = '<span class="em">' + em + '</span><b>' + esc(label) + '</b><small>' + esc(note) + '</small>';
+      st.appendChild(d);
+    });
+    pp.appendChild(st);
+    v.appendChild(pp);
+
+    if (stampCount() < 10) {
+      const todo = el("div", "card");
+      todo.style.marginTop = "1rem";
+      todo.innerHTML = '<span class="lbl">Still to earn</span>';
+      const list = el("div", "checks");
+      list.style.marginTop = ".6rem";
+      STAMPS.forEach(([k, em, label, note], i) => {
+        if (B.stamps[k]) return;
+        const b = el("button", "chk");
+        b.setAttribute("aria-pressed", "false");
+        b.innerHTML = '<span class="box">' + ic("i-check") + '</span><span><b>' + em + " " + esc(label) + '</b><span>' + esc(note) + '</span></span>';
+        const target = ["idea","identity","beliefs","audience","price","notice","crm","automation","community","blueprint"][i];
+        b.addEventListener("click", () => go(target));
+        list.appendChild(b);
+      });
+      todo.appendChild(list);
+      v.appendChild(todo);
+    } else {
+      const cert = el("div", "certificate");
+      const today = new Date().toLocaleDateString(undefined, { year:"numeric", month:"long", day:"numeric" });
+      cert.innerHTML =
+        '<p class="eyebrow">Little Founders · Founder CEO · Ages 14–17</p>' +
+        '<h2>👑 Certified Founder CEO</h2>' +
+        '<p>Awarded to</p>' +
+        '<p class="who">' + esc(B.founder || "…………………") + '</p>' +
+        '<p>who took an idea from a blank page to a complete brand — named it, gave it a purpose, priced it, found its customer, built its funnel, tracked its numbers, and made a plan to launch it into the world.</p>' +
+        '<p style="font-family:var(--display);font-weight:800">' + esc(B.chosenName || "Their brand") + '</p>' +
+        '<div class="sig"><div><hr><span>Founder</span></div><div><hr><span>' + esc(today) + '</span></div></div>' +
+        '<p class="align">Presented at the Little Founders Investor Panel · Founder Finale</p>';
+      v.appendChild(cert);
+
+      const pr = el("button", "btn noprint", ic("i-print") + "Print my certificate");
+      pr.style.marginTop = "1rem";
+      pr.addEventListener("click", () => window.print());
+      v.appendChild(pr);
+    }
+
+    const finale = el("div", "card");
+    finale.style.marginTop = "1.2rem";
+    finale.innerHTML = '<span class="lbl">The Founder Finale</span>' +
+      '<p class="hint">Present your complete brand to the Little Founders Investor Panel: the one-sentence business, the brand card, who it is for, the numbers, and the one thing you are doing next. Five minutes. Bring the blueprint.</p>';
+    v.appendChild(finale);
+  }
+
+  /* ===================== wiring ===================== */
+
+  $("menuBtn").addEventListener("click", () => {
+    const r = $("rail");
+    r.classList.add("open");
+    const sc = el("div", "scrim");
+    sc.addEventListener("click", () => { r.classList.remove("open"); sc.remove(); });
+    document.body.appendChild(sc);
+  });
+
+  load();
+  refreshStamps(true);
+  go("start");
+})();
+</script>

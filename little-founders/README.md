@@ -57,6 +57,18 @@ with more independence and higher real-world stakes. That is the spiral.
 42 sessions per tier. Courses 1–5 open from day one; 6–10 unlock in sequence. See
 [Assessment & Badges](04-assessment-and-badges.md).
 
+## The book series
+
+Each tier has a learner-facing book — the thing a student holds, fills in, and takes home. See
+[discovery/README.md](discovery/README.md).
+
+| Tier | Book | Teaches | Status |
+|---|---|---|---|
+| 🌱 Little Sprouts | **How Is It Made?** | Discover the world | [Built](discovery/how-is-it-made.html) |
+| 🔨 Junior Builders | **Mission Control** | Learn to plan and organize | Planned |
+| 🚀 Young Founders | **Reverse. Rethink. Rebuild.** | Learn to question and improve | Planned |
+| 👑 Founder CEOs | **GO OVERSEAS!** | Build it, brand it, take it into the world | [Built](discovery/go-overseas.html) |
+
 ## Events
 
 Three showcases per tier per year, plus mentorship at the two senior tiers:
