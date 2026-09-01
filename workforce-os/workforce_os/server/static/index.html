@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Workforce OS v0.4</title>
+<style>
+  :root {
+    --bg:#0e1116; --panel:#161b22; --line:#262d36; --text:#e6edf3; --muted:#8b949e;
+    --accent:#4493f8; --ok:#3fb950; --warn:#d29922; --danger:#f85149; color-scheme:dark;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font:14px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+  header { padding:20px 24px; border-bottom:1px solid var(--line);
+           display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  h1 { font-size:17px; margin:0; font-weight:600; letter-spacing:-.01em; }
+  .badge { font-size:11px; padding:3px 8px; border-radius:20px; border:1px solid var(--line);
+           color:var(--muted); }
+  .badge.on { color:var(--ok); border-color:var(--ok); }
+  main { padding:24px; max-width:1200px; margin:0 auto; }
+  .auth { margin-left:auto; display:flex; gap:8px; align-items:center; }
+  input, button { font:inherit; }
+  input { background:#0d1117; border:1px solid var(--line); color:var(--text);
+          padding:7px 10px; border-radius:6px; min-width:220px; }
+  button { background:var(--accent); border:0; color:#fff; padding:7px 14px;
+           border-radius:6px; cursor:pointer; font-weight:500; }
+  button:hover { filter:brightness(1.1); }
+  .grid { display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; }
+  .stat { font-size:28px; font-weight:600; letter-spacing:-.02em; }
+  .label { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.05em; }
+  section { margin-top:28px; }
+  h2 { font-size:14px; text-transform:uppercase; letter-spacing:.06em;
+       color:var(--muted); font-weight:600; margin:0 0 12px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:9px 10px; border-bottom:1px solid var(--line);
+           vertical-align:top; }
+  th { color:var(--muted); font-weight:500; font-size:12px; }
+  .pill { font-size:11px; padding:2px 8px; border-radius:12px; border:1px solid var(--line); }
+  .pill.active { color:var(--ok); border-color:var(--ok); }
+  .pill.paused { color:var(--warn); border-color:var(--warn); }
+  .pill.retired, .pill.high { color:var(--danger); border-color:var(--danger); }
+  .empty { color:var(--muted); padding:14px 10px; }
+  .note { color:var(--muted); font-size:12px; margin-top:6px; }
+  .scroll { overflow-x:auto; }
+</style>
+</head>
+<body>
+<header>
+  <h1>AI Workforce OS</h1>
+  <span class="badge">v0.4 pre-production</span>
+  <span class="badge" id="mode">connecting…</span>
+  <div class="auth">
+    <input id="token" type="password" placeholder="Owner token" autocomplete="off">
+    <button id="load">Load</button>
+  </div>
+</header>
+<main>
+  <div class="grid" id="stats"></div>
+
+  <section>
+    <h2>Awaiting the Owner</h2>
+    <div class="card scroll" id="attention"></div>
+    <p class="note">High-risk actions do not execute until the Owner approves them.
+       Approval mints a single-use token bound to that agent, tool and argument set.</p>
+  </section>
+
+  <section>
+    <h2>Projects</h2>
+    <div class="card scroll" id="projects"></div>
+  </section>
+
+  <section>
+    <h2>Agents</h2>
+    <div class="card scroll" id="agents"></div>
+  </section>
+
+  <section>
+    <h2>Recent tool calls</h2>
+    <div class="card scroll" id="calls"></div>
+    <p class="note">Every call is recorded — allowed or denied — with its reason code.
+       “attempted” means the tool ran but did not confirm the action; the runtime never
+       claims an external action it cannot confirm.</p>
+  </section>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) =>
+  ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+
+let token = sessionStorage.getItem("wos_token") || "";
+$("token").value = token;
+
+async function api(path) {
+  const res = await fetch(path, { headers: token ? { "X-Owner-Token": token } : {} });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message || res.statusText);
+  return res.json();
+}
+
+function table(rows, columns, emptyText) {
+  if (!rows || !rows.length) return `<div class="empty">${esc(emptyText)}</div>`;
+  const head = columns.map((c) => `<th>${esc(c.label)}</th>`).join("");
+  const body = rows.map((r) =>
+    `<tr>${columns.map((c) => `<td>${c.render ? c.render(r) : esc(r[c.key])}</td>`).join("")}</tr>`
+  ).join("");
+  return `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+}
+
+const pill = (v, cls) => `<span class="pill ${cls || esc(v)}">${esc(v)}</span>`;
+
+async function load() {
+  token = $("token").value.trim();
+  sessionStorage.setItem("wos_token", token);
+  try {
+    const health = await api("/api/health");
+    $("mode").textContent = health.config.offline ? "offline · local provider" : health.config.provider;
+    $("mode").className = "badge on";
+  } catch (e) {
+    $("mode").textContent = "unreachable";
+  }
+
+  try {
+    const view = await api("/api/architect/system-view");
+    const t = view.totals;
+    $("stats").innerHTML = [
+      ["Projects", t.projects], ["Active agents", `${t.active_agents} / ${t.agents}`],
+      ["Open tasks", t.open_tasks], ["Pending approvals", t.pending_approvals],
+      ["Open CAPAs", t.open_capas], ["Audited events", t.events],
+    ].map(([label, value]) =>
+      `<div class="card"><div class="label">${esc(label)}</div>
+       <div class="stat">${esc(value)}</div></div>`).join("");
+
+    $("attention").innerHTML = table(view.attention_required, [
+      { label: "Type", render: (r) => pill(r.kind, r.kind === "approval" ? "high" : "paused") },
+      { label: "Summary", key: "summary" },
+      { label: "Opened", key: "created_at" },
+    ], "Nothing is waiting on the Owner.");
+
+    $("projects").innerHTML = table(view.projects, [
+      { label: "Project", key: "name" },
+      { label: "Agents", render: (r) => `${esc(r.active_agents)} active / ${esc(r.agents)}` },
+      { label: "Open tasks", key: "open_tasks" },
+      { label: "Open CAPAs", key: "open_capas" },
+      { label: "Spend (USD)", render: (r) => esc((r.spend.cost_usd ?? 0).toFixed(4)) },
+    ], "No projects yet.");
+  } catch (e) {
+    $("stats").innerHTML = `<div class="card"><div class="label">Not authenticated</div>
+      <div class="note">${esc(e.message)} — enter the Owner token above.</div></div>`;
+    $("attention").innerHTML = $("projects").innerHTML = "";
+  }
+
+  try {
+    const { agents } = await api("/api/agents");
+    $("agents").innerHTML = table(agents, [
+      { label: "Name", key: "name" }, { label: "Role", key: "role" },
+      { label: "Level", render: (r) => "L" + esc(r.level) },
+      { label: "Status", render: (r) => pill(r.status) },
+      { label: "Version", key: "active_version" },
+    ], "No agents yet.");
+
+    const { tool_calls } = await api("/api/tool-calls?limit=25");
+    $("calls").innerHTML = table(tool_calls, [
+      { label: "Tool", key: "tool_name" },
+      { label: "Decision", render: (r) => pill(r.decision, r.decision === "denied" ? "high" : "active") },
+      { label: "Status", key: "status" },
+      { label: "Reason", key: "reason_code" },
+      { label: "Confirmed", render: (r) => (r.confirmed ? "yes" : "no") },
+      { label: "Latency", render: (r) => esc(Math.round(r.latency_ms)) + " ms" },
+    ], "No tool calls recorded yet.");
+  } catch (e) {
+    $("agents").innerHTML = `<div class="empty">${esc(e.message)}</div>`;
+  }
+}
+
+$("load").addEventListener("click", load);
+$("token").addEventListener("keydown", (e) => { if (e.key === "Enter") load(); });
+load();
+</script>
+</body>
+</html>

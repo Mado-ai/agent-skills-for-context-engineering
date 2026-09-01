@@ -1,0 +1,12 @@
+[project]
+name = "workforce-os"
+version = "0.4.0"
+description = "AI Workforce OS — a governed, testable pre-production runtime for AI agent workforces"
+requires-python = ">=3.10"
+dependencies = []          # standard library only, by design
+
+[project.scripts]
+workforce-os = "workforce_os.server.app:main"
+
+[tool.setuptools.packages.find]
+include = ["workforce_os*"]
