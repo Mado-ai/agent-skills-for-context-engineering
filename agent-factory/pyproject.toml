@@ -1,0 +1,20 @@
+[project]
+name = "ai-agent-factory"
+version = "0.4.0"
+description = "Control plane for an elastic, governed AI workforce"
+requires-python = ">=3.11"
+# The runtime core has NO third-party dependencies by design (ADR-0001):
+# a benchmark suite that cannot run is worth less than a slow one that can.
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "psutil>=5.9"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

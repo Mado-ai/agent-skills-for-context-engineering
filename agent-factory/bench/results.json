@@ -1,0 +1,916 @@
+{
+  "environment": {
+    "python": "3.11.15",
+    "platform": "Linux-6.18.44-fc-v22-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "cpu_count": 4,
+    "sqlite": "3.45.1"
+  },
+  "groups": {
+    "scale": [
+      {
+        "label": "10 agents",
+        "agents": 10,
+        "tasks": 500,
+        "workers": 8,
+        "factory_seconds": 0.017,
+        "contracts_per_second": 588.87,
+        "execution_seconds": 0.987,
+        "tasks_per_second": 506.64,
+        "completed": 500,
+        "failed": 0,
+        "error_rate": 0.0,
+        "retry_rate": 0.0,
+        "queue_latency": {
+          "p50": 431.127,
+          "p95": 832.295,
+          "p99": 862.669,
+          "max": 862.669,
+          "mean": 409.448
+        },
+        "execution_latency": {
+          "p50": 7.211,
+          "p95": 43.85,
+          "p99": 92.213,
+          "max": 194.761,
+          "mean": 13.201
+        },
+        "claim_latency": {
+          "p50": 0.081,
+          "p95": 0.14,
+          "p99": 0.409,
+          "max": 9.311,
+          "mean": 0.14
+        },
+        "db_write_latency": {
+          "p50": 0.031,
+          "p95": 0.064,
+          "p99": 0.136,
+          "max": 8.838,
+          "mean": 0.081
+        },
+        "peak_rss_mb": 35.9,
+        "db_size_mb": 16.8,
+        "events_written": 3767,
+        "events_per_task": 7.53,
+        "ledger_rows": 444,
+        "final_queue_depth": 0,
+        "live_instances": 11,
+        "notes": "submit=0.03s for 500 packets; empty_polls=200",
+        "wall_seconds": 1.2
+      },
+      {
+        "label": "50 agents",
+        "agents": 50,
+        "tasks": 1000,
+        "workers": 8,
+        "factory_seconds": 0.121,
+        "contracts_per_second": 411.76,
+        "execution_seconds": 1.772,
+        "tasks_per_second": 564.24,
+        "completed": 1000,
+        "failed": 0,
+        "error_rate": 0.0,
+        "retry_rate": 0.0,
+        "queue_latency": {
+          "p50": 841.388,
+          "p95": 1602.93,
+          "p99": 1664.524,
+          "max": 1674.958,
+          "mean": 842.001
+        },
+        "execution_latency": {
+          "p50": 6.832,
+          "p95": 41.373,
+          "p99": 83.832,
+          "max": 235.405,
+          "mean": 13.036
+        },
+        "claim_latency": {
+          "p50": 0.085,
+          "p95": 0.165,
+          "p99": 0.323,
+          "max": 9.98,
+          "mean": 0.151
+        },
+        "db_write_latency": {
+          "p50": 0.03,
+          "p95": 0.059,
+          "p99": 0.51,
+          "max": 6.492,
+          "mean": 0.1
+        },
+        "peak_rss_mb": 42.7,
+        "db_size_mb": 16.41,
+        "events_written": 7508,
+        "events_per_task": 7.51,
+        "ledger_rows": 952,
+        "final_queue_depth": 0,
+        "live_instances": 52,
+        "notes": "submit=0.08s for 1000 packets; empty_polls=200",
+        "wall_seconds": 2.2
+      },
+      {
+        "label": "100 agents",
+        "agents": 100,
+        "tasks": 2000,
+        "workers": 8,
+        "factory_seconds": 0.196,
+        "contracts_per_second": 511.2,
+        "execution_seconds": 3.981,
+        "tasks_per_second": 502.38,
+        "completed": 2000,
+        "failed": 0,
+        "error_rate": 0.0,
+        "retry_rate": 0.0,
+        "queue_latency": {
+          "p50": 1864.598,
+          "p95": 3688.738,
+          "p99": 3839.384,
+          "max": 3859.828,
+          "mean": 1915.657
+        },
+        "execution_latency": {
+          "p50": 8.545,
+          "p95": 53.217,
+          "p99": 110.665,
+          "max": 250.357,
+          "mean": 15.164
+        },
+        "claim_latency": {
+          "p50": 0.088,
+          "p95": 0.142,
+          "p99": 0.292,
+          "max": 10.093,
+          "mean": 0.15
+        },
+        "db_write_latency": {
+          "p50": 0.034,
+          "p95": 0.067,
+          "p99": 0.129,
+          "max": 7.794,
+          "mean": 0.079
+        },
+        "peak_rss_mb": 55.5,
+        "db_size_mb": 27.74,
+        "events_written": 14806,
+        "events_per_task": 7.4,
+        "ledger_rows": 1968,
+        "final_queue_depth": 0,
+        "live_instances": 100,
+        "notes": "submit=0.15s for 2000 packets; empty_polls=200",
+        "wall_seconds": 4.5
+      },
+      {
+        "label": "250 agents",
+        "agents": 250,
+        "tasks": 2500,
+        "workers": 8,
+        "factory_seconds": 0.518,
+        "contracts_per_second": 482.16,
+        "execution_seconds": 5.42,
+        "tasks_per_second": 461.28,
+        "completed": 2500,
+        "failed": 0,
+        "error_rate": 0.0,
+        "retry_rate": 0.0,
+        "queue_latency": {
+          "p50": 2528.673,
+          "p95": 4998.279,
+          "p99": 5243.438,
+          "max": 5310.129,
+          "mean": 2634.876
+        },
+        "execution_latency": {
+          "p50": 9.299,
+          "p95": 57.684,
+          "p99": 121.988,
+          "max": 446.08,
+          "mean": 16.688
+        },
+        "claim_latency": {
+          "p50": 0.087,
+          "p95": 0.159,
+          "p99": 0.291,
+          "max": 10.961,
+          "mean": 0.153
+        },
+        "db_write_latency": {
+          "p50": 0.035,
+          "p95": 0.069,
+          "p99": 0.13,
+          "max": 8.399,
+          "mean": 0.082
+        },
+        "peak_rss_mb": 70.4,
+        "db_size_mb": 42.82,
+        "events_written": 19206,
+        "events_per_task": 7.68,
+        "ledger_rows": 2476,
+        "final_queue_depth": 0,
+        "live_instances": 250,
+        "notes": "submit=0.19s for 2500 packets; empty_polls=200",
+        "wall_seconds": 6.4
+      },
+      {
+        "label": "500 agents",
+        "agents": 500,
+        "tasks": 5000,
+        "workers": 8,
+        "factory_seconds": 1.055,
+        "contracts_per_second": 474.1,
+        "execution_seconds": 11.463,
+        "tasks_per_second": 436.18,
+        "completed": 5000,
+        "failed": 0,
+        "error_rate": 0.0,
+        "retry_rate": 0.0,
+        "queue_latency": {
+          "p50": 5471.147,
+          "p95": 10560.226,
+          "p99": 11185.456,
+          "max": 11313.349,
+          "mean": 5511.542
+        },
+        "execution_latency": {
+          "p50": 11.114,
+          "p95": 56.766,
+          "p99": 108.131,
+          "max": 532.57,
+          "mean": 17.818
+        },
+        "claim_latency": {
+          "p50": 0.084,
+          "p95": 0.14,
+          "p99": 0.28,
+          "max": 11.404,
+          "mean": 0.153
+        },
+        "db_write_latency": {
+          "p50": 0.033,
+          "p95": 0.068,
+          "p99": 0.431,
+          "max": 7.673,
+          "mean": 0.113
+        },
+        "peak_rss_mb": 129.8,
+        "db_size_mb": 112.5,
+        "events_written": 38206,
+        "events_per_task": 7.64,
+        "ledger_rows": 4953,
+        "final_queue_depth": 0,
+        "live_instances": 500,
+        "notes": "submit=0.39s for 5000 packets; empty_polls=200",
+        "wall_seconds": 13.2
+      },
+      {
+        "label": "1000 agents",
+        "agents": 1000,
+        "tasks": 10000,
+        "workers": 8,
+        "factory_seconds": 2.127,
+        "contracts_per_second": 470.24,
+        "execution_seconds": 26.814,
+        "tasks_per_second": 372.94,
+        "completed": 10000,
+        "failed": 0,
+        "error_rate": 0.0,
+        "retry_rate": 0.0,
+        "queue_latency": {
+          "p50": 12639.117,
+          "p95": 24991.966,
+          "p99": 26339.337,
+          "max": 26682.583,
+          "mean": 12746.632
+        },
+        "execution_latency": {
+          "p50": 14.912,
+          "p95": 57.327,
+          "p99": 114.47,
+          "max": 479.26,
+          "mean": 21.115
+        },
+        "claim_latency": {
+          "p50": 0.082,
+          "p95": 0.154,
+          "p99": 0.294,
+          "max": 10.972,
+          "mean": 0.152
+        },
+        "db_write_latency": {
+          "p50": 0.034,
+          "p95": 0.07,
+          "p99": 0.137,
+          "max": 7.528,
+          "mean": 0.076
+        },
+        "peak_rss_mb": 291.9,
+        "db_size_mb": 233.07,
+        "events_written": 76206,
+        "events_per_task": 7.62,
+        "ledger_rows": 9966,
+        "final_queue_depth": 0,
+        "live_instances": 1000,
+        "notes": "submit=0.79s for 10000 packets; empty_polls=200",
+        "wall_seconds": 30.1
+      }
+    ],
+    "workers": [
+      {
+        "label": "worker-sweep w=1",
+        "agents": 100,
+        "tasks": 2000,
+        "workers": 1,
+        "factory_seconds": 0.177,
+        "contracts_per_second": 563.57,
+        "execution_seconds": 3.36,
+        "tasks_per_second": 595.23,
+        "completed": 2000,
+        "failed": 0,
+        "error_rate": 0.0,
+        "retry_rate": 0.0,
+        "queue_latency": {
+          "p50": 1482.665,
+          "p95": 3158.452,
+          "p99": 3313.146,
+          "max": 3351.097,
+          "mean": 1591.522
+        },
+        "execution_latency": {
+          "p50": 1.295,
+          "p95": 2.214,
+          "p99": 11.21,
+          "max": 44.386,
+          "mean": 1.571
+        },
+        "claim_latency": {
+          "p50": 0.083,
+          "p95": 0.152,
+          "p99": 0.295,
+          "max": 9.06,
+          "mean": 0.142
+        },
+        "db_write_latency": {
+          "p50": 0.032,
+          "p95": 0.067,
+          "p99": 0.457,
+          "max": 7.306,
+          "mean": 0.108
+        },
+        "peak_rss_mb": 65.0,
+        "db_size_mb": 19.66,
+        "events_written": 14806,
+        "events_per_task": 7.4,
+        "ledger_rows": 1968,
+        "final_queue_depth": 0,
+        "live_instances": 100,
+        "notes": "submit=0.15s for 2000 packets; empty_polls=25",
+        "wall_seconds": 3.9
+      },
+      {
+        "label": "worker-sweep w=2",
+        "agents": 100,
+        "tasks": 2000,
+        "workers": 2,
+        "factory_seconds": 0.192,
+        "contracts_per_second": 521.5,
+        "execution_seconds": 3.555,
+        "tasks_per_second": 562.59,
+        "completed": 2000,
+        "failed": 0,
+        "error_rate": 0.0,
+        "retry_rate": 0.0,
+        "queue_latency": {
+          "p50": 1685.704,
+          "p95": 3341.072,
+          "p99": 3512.52,
+          "max": 3541.079,
+          "mean": 1745.794
+        },
+        "execution_latency": {
+          "p50": 2.901,
+          "p95": 8.188,
+          "p99": 13.34,
+          "max": 51.703,
+          "mean": 3.399
+        },
+        "claim_latency": {
+          "p50": 0.08,
+          "p95": 0.127,
+          "p99": 0.272,
+          "max": 11.177,
+          "mean": 0.146
+        },
+        "db_write_latency": {
+          "p50": 0.031,
+          "p95": 0.06,
+          "p99": 0.406,
+          "max": 7.905,
+          "mean": 0.114
+        },
+        "peak_rss_mb": 48.2,
+        "db_size_mb": 20.85,
+        "events_written": 14806,
+        "events_per_task": 7.4,
+        "ledger_rows": 1968,
+        "final_queue_depth": 0,
+        "live_instances": 100,
+        "notes": "submit=0.15s for 2000 packets; empty_polls=50",
+        "wall_seconds": 4.1
+      },
+      {
+        "label": "worker-sweep w=4",
+        "agents": 100,
+        "tasks": 2000,
+        "workers": 4,
+        "factory_seconds": 0.185,
+        "contracts_per_second": 539.93,
+        "execution_seconds": 3.787,
+        "tasks_per_second": 528.19,
+        "completed": 2000,
+        "failed": 0,
+        "error_rate": 0.0,
+        "retry_rate": 0.0,
+        "queue_latency": {
+          "p50": 1817.95,
+          "p95": 3580.967,
+          "p99": 3740.675,
+          "max": 3756.98,
+          "mean": 1871.195
+        },
+        "execution_latency": {
+          "p50": 4.734,
+          "p95": 21.852,
+          "p99": 41.693,
+          "max": 140.294,
+          "mean": 7.31
+        },
+        "claim_latency": {
+          "p50": 0.081,
+          "p95": 0.138,
+          "p99": 0.29,
+          "max": 9.93,
+          "mean": 0.143
+        },
+        "db_write_latency": {
+          "p50": 0.033,
+          "p95": 0.058,
+          "p99": 0.123,
+          "max": 7.178,
+          "mean": 0.072
+        },
+        "peak_rss_mb": 50.6,
+        "db_size_mb": 28.68,
+        "events_written": 14806,
+        "events_per_task": 7.4,
+        "ledger_rows": 1968,
+        "final_queue_depth": 0,
+        "live_instances": 100,
+        "notes": "submit=0.16s for 2000 packets; empty_polls=100",
+        "wall_seconds": 4.4
+      },
+      {
+        "label": "worker-sweep w=8",
+        "agents": 100,
+        "tasks": 2000,
+        "workers": 8,
+        "factory_seconds": 0.179,
+        "contracts_per_second": 557.17,
+        "execution_seconds": 3.928,
+        "tasks_per_second": 509.13,
+        "completed": 2000,
+        "failed": 0,
+        "error_rate": 0.0,
+        "retry_rate": 0.0,
+        "queue_latency": {
+          "p50": 1930.159,
+          "p95": 3638.009,
+          "p99": 3828.677,
+          "max": 3858.397,
+          "mean": 1962.814
+        },
+        "execution_latency": {
+          "p50": 7.969,
+          "p95": 59.166,
+          "p99": 107.67,
+          "max": 237.026,
+          "mean": 14.99
+        },
+        "claim_latency": {
+          "p50": 0.09,
+          "p95": 0.184,
+          "p99": 0.297,
+          "max": 12.791,
+          "mean": 0.173
+        },
+        "db_write_latency": {
+          "p50": 0.034,
+          "p95": 0.069,
+          "p99": 0.493,
+          "max": 9.315,
+          "mean": 0.13
+        },
+        "peak_rss_mb": 56.3,
+        "db_size_mb": 40.8,
+        "events_written": 14806,
+        "events_per_task": 7.4,
+        "ledger_rows": 1968,
+        "final_queue_depth": 0,
+        "live_instances": 100,
+        "notes": "submit=0.15s for 2000 packets; empty_polls=200",
+        "wall_seconds": 4.5
+      },
+      {
+        "label": "worker-sweep w=16",
+        "agents": 100,
+        "tasks": 2000,
+        "workers": 16,
+        "factory_seconds": 0.191,
+        "contracts_per_second": 524.67,
+        "execution_seconds": 5.158,
+        "tasks_per_second": 387.72,
+        "completed": 2000,
+        "failed": 0,
+        "error_rate": 0.0,
+        "retry_rate": 0.0,
+        "queue_latency": {
+          "p50": 2361.68,
+          "p95": 4648.764,
+          "p99": 4843.835,
+          "max": 4888.291,
+          "mean": 2361.869
+        },
+        "execution_latency": {
+          "p50": 18.836,
+          "p95": 125.496,
+          "p99": 257.059,
+          "max": 1282.208,
+          "mean": 38.516
+        },
+        "claim_latency": {
+          "p50": 0.081,
+          "p95": 0.156,
+          "p99": 0.429,
+          "max": 11.265,
+          "mean": 0.156
+        },
+        "db_write_latency": {
+          "p50": 0.032,
+          "p95": 0.072,
+          "p99": 0.633,
+          "max": 8.438,
+          "mean": 0.12
+        },
+        "peak_rss_mb": 62.6,
+        "db_size_mb": 74.0,
+        "events_written": 14808,
+        "events_per_task": 7.4,
+        "ledger_rows": 1968,
+        "final_queue_depth": 0,
+        "live_instances": 102,
+        "notes": "submit=0.15s for 2000 packets; empty_polls=400",
+        "wall_seconds": 5.7
+      },
+      {
+        "label": "worker-sweep w=32",
+        "agents": 100,
+        "tasks": 2000,
+        "workers": 32,
+        "factory_seconds": 0.217,
+        "contracts_per_second": 460.08,
+        "execution_seconds": 5.323,
+        "tasks_per_second": 375.74,
+        "completed": 2000,
+        "failed": 0,
+        "error_rate": 0.0,
+        "retry_rate": 0.0,
+        "queue_latency": {
+          "p50": 2160.364,
+          "p95": 4519.14,
+          "p99": 4701.123,
+          "max": 4773.992,
+          "mean": 2246.569
+        },
+        "execution_latency": {
+          "p50": 38.661,
+          "p95": 255.909,
+          "p99": 638.031,
+          "max": 1378.55,
+          "mean": 77.187
+        },
+        "claim_latency": {
+          "p50": 0.08,
+          "p95": 0.156,
+          "p99": 0.35,
+          "max": 8.756,
+          "mean": 0.14
+        },
+        "db_write_latency": {
+          "p50": 0.033,
+          "p95": 0.063,
+          "p99": 0.133,
+          "max": 8.021,
+          "mean": 0.077
+        },
+        "peak_rss_mb": 72.4,
+        "db_size_mb": 97.75,
+        "events_written": 14812,
+        "events_per_task": 7.41,
+        "ledger_rows": 1968,
+        "final_queue_depth": 0,
+        "live_instances": 106,
+        "notes": "submit=0.16s for 2000 packets; empty_polls=800",
+        "wall_seconds": 6.0
+      }
+    ],
+    "shapes": [
+      {
+        "label": "with 2 tool calls/task",
+        "agents": 100,
+        "tasks": 1000,
+        "workers": 8,
+        "factory_seconds": 0.177,
+        "contracts_per_second": 564.25,
+        "execution_seconds": 2.715,
+        "tasks_per_second": 368.26,
+        "completed": 1000,
+        "failed": 0,
+        "error_rate": 0.0,
+        "retry_rate": 0.0,
+        "queue_latency": {
+          "p50": 1227.286,
+          "p95": 2454.329,
+          "p99": 2555.48,
+          "max": 2605.375,
+          "mean": 1265.616
+        },
+        "execution_latency": {
+          "p50": 11.082,
+          "p95": 74.77,
+          "p99": 114.889,
+          "max": 544.537,
+          "mean": 20.415
+        },
+        "claim_latency": {
+          "p50": 0.088,
+          "p95": 0.156,
+          "p99": 0.332,
+          "max": 10.059,
+          "mean": 0.149
+        },
+        "db_write_latency": {
+          "p50": 0.039,
+          "p95": 0.078,
+          "p99": 0.118,
+          "max": 7.849,
+          "mean": 0.084
+        },
+        "peak_rss_mb": 50.0,
+        "db_size_mb": 19.32,
+        "events_written": 9806,
+        "events_per_task": 9.81,
+        "ledger_rows": 991,
+        "final_queue_depth": 0,
+        "live_instances": 100,
+        "notes": "submit=0.06s for 1000 packets; empty_polls=200",
+        "wall_seconds": 3.2
+      },
+      {
+        "label": "with CPU work",
+        "agents": 100,
+        "tasks": 1000,
+        "workers": 8,
+        "factory_seconds": 0.183,
+        "contracts_per_second": 545.69,
+        "execution_seconds": 2.858,
+        "tasks_per_second": 349.84,
+        "completed": 1000,
+        "failed": 0,
+        "error_rate": 0.0,
+        "retry_rate": 0.0,
+        "queue_latency": {
+          "p50": 1402.61,
+          "p95": 2586.75,
+          "p99": 2680.534,
+          "max": 2694.172,
+          "mean": 1364.715
+        },
+        "execution_latency": {
+          "p50": 9.036,
+          "p95": 86.17,
+          "p99": 191.14,
+          "max": 536.315,
+          "mean": 21.438
+        },
+        "claim_latency": {
+          "p50": 0.081,
+          "p95": 0.162,
+          "p99": 0.65,
+          "max": 10.185,
+          "mean": 0.185
+        },
+        "db_write_latency": {
+          "p50": 0.033,
+          "p95": 0.069,
+          "p99": 0.154,
+          "max": 7.84,
+          "mean": 0.077
+        },
+        "peak_rss_mb": 42.2,
+        "db_size_mb": 13.49,
+        "events_written": 7806,
+        "events_per_task": 7.81,
+        "ledger_rows": 952,
+        "final_queue_depth": 0,
+        "live_instances": 100,
+        "notes": "submit=0.07s for 1000 packets; empty_polls=200",
+        "wall_seconds": 3.3
+      },
+      {
+        "label": "10% failure injection",
+        "agents": 100,
+        "tasks": 1000,
+        "workers": 8,
+        "factory_seconds": 0.19,
+        "contracts_per_second": 525.01,
+        "execution_seconds": 2.271,
+        "tasks_per_second": 395.44,
+        "completed": 898,
+        "failed": 180,
+        "error_rate": 0.16698,
+        "retry_rate": 0.0,
+        "queue_latency": {
+          "p50": 876.574,
+          "p95": 1692.945,
+          "p99": 1770.248,
+          "max": 1782.243,
+          "mean": 893.95
+        },
+        "execution_latency": {
+          "p50": 7.663,
+          "p95": 45.179,
+          "p99": 90.398,
+          "max": 171.339,
+          "mean": 13.797
+        },
+        "claim_latency": {
+          "p50": 0.091,
+          "p95": 0.167,
+          "p99": 0.471,
+          "max": 11.517,
+          "mean": 0.164
+        },
+        "db_write_latency": {
+          "p50": 0.033,
+          "p95": 0.073,
+          "p99": 0.421,
+          "max": 9.825,
+          "mean": 0.127
+        },
+        "peak_rss_mb": 43.1,
+        "db_size_mb": 16.14,
+        "events_written": 8095,
+        "events_per_task": 7.51,
+        "ledger_rows": 1077,
+        "final_queue_depth": 102,
+        "live_instances": 101,
+        "notes": "submit=0.06s for 1000 packets; empty_polls=402",
+        "wall_seconds": 2.8
+      }
+    ],
+    "registry": [
+      {
+        "templates": 100,
+        "seed_seconds": 0.04,
+        "db_mb": 0.88,
+        "capability_search_ms": {
+          "p50": 0.01,
+          "p95": 0.021,
+          "p99": 0.118,
+          "max": 0.118,
+          "mean": 0.015
+        },
+        "list_page_ms": {
+          "p50": 1.027,
+          "p95": 1.299,
+          "p99": 1.68,
+          "max": 1.68,
+          "mean": 1.084
+        },
+        "duplicate_scan_ms": {
+          "p50": 0.085,
+          "p95": 0.122,
+          "p99": 0.295,
+          "max": 0.295,
+          "mean": 0.099
+        },
+        "overview_ms": {
+          "p50": 0.052,
+          "p95": 0.061,
+          "p99": 0.179,
+          "max": 0.179,
+          "mean": 0.059
+        }
+      },
+      {
+        "templates": 1000,
+        "seed_seconds": 0.38,
+        "db_mb": 10.03,
+        "capability_search_ms": {
+          "p50": 0.014,
+          "p95": 0.019,
+          "p99": 0.159,
+          "max": 0.159,
+          "mean": 0.018
+        },
+        "list_page_ms": {
+          "p50": 1.044,
+          "p95": 1.151,
+          "p99": 1.407,
+          "max": 1.407,
+          "mean": 1.058
+        },
+        "duplicate_scan_ms": {
+          "p50": 0.976,
+          "p95": 1.251,
+          "p99": 1.682,
+          "max": 1.682,
+          "mean": 1.039
+        },
+        "overview_ms": {
+          "p50": 0.321,
+          "p95": 0.378,
+          "p99": 0.592,
+          "max": 0.592,
+          "mean": 0.339
+        }
+      },
+      {
+        "templates": 5000,
+        "seed_seconds": 1.79,
+        "db_mb": 47.3,
+        "capability_search_ms": {
+          "p50": 0.014,
+          "p95": 0.026,
+          "p99": 0.209,
+          "max": 0.209,
+          "mean": 0.023
+        },
+        "list_page_ms": {
+          "p50": 1.072,
+          "p95": 1.188,
+          "p99": 1.324,
+          "max": 1.324,
+          "mean": 1.09
+        },
+        "duplicate_scan_ms": {
+          "p50": 6.321,
+          "p95": 7.729,
+          "p99": 9.042,
+          "max": 9.042,
+          "mean": 6.535
+        },
+        "overview_ms": {
+          "p50": 1.654,
+          "p95": 1.965,
+          "p99": 2.23,
+          "max": 2.23,
+          "mean": 1.706
+        }
+      },
+      {
+        "templates": 10000,
+        "seed_seconds": 3.94,
+        "db_mb": 93.93,
+        "capability_search_ms": {
+          "p50": 0.013,
+          "p95": 0.02,
+          "p99": 0.209,
+          "max": 0.209,
+          "mean": 0.021
+        },
+        "list_page_ms": {
+          "p50": 1.027,
+          "p95": 1.097,
+          "p99": 1.375,
+          "max": 1.375,
+          "mean": 1.053
+        },
+        "duplicate_scan_ms": {
+          "p50": 11.532,
+          "p95": 11.76,
+          "p99": 14.204,
+          "max": 14.204,
+          "mean": 11.622
+        },
+        "overview_ms": {
+          "p50": 3.174,
+          "p95": 3.399,
+          "p99": 4.306,
+          "max": 4.306,
+          "mean": 3.257
+        }
+      }
+    ]
+  }
+}

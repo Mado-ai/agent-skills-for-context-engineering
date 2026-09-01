@@ -14,6 +14,9 @@ Context engineering is the discipline of curating everything that enters a model
 - `examples/` — 5 complete demonstration projects (digital-brain-skill, llm-as-judge-skills, book-sft-pipeline, x-to-book-system, interleaved-thinking)
 - `docs/` — Research materials and reference documentation
 - `researcher/` — Research output examples
+- `agent-factory/` — **AI Agent Factory v0.4**: a self-contained, governed runtime for an
+  elastic AI workforce (Python 3.11, zero runtime dependencies). Independent of the skills
+  collection; see `agent-factory/README.md` and `agent-factory/CURRENT_STATE.md`.
 - `template/SKILL.md` — Canonical skill template (use when creating new skills)
 - `SKILL.md` (root) — Collection-level metadata and skill map
 - `.claude-plugin/marketplace.json` — Claude Code marketplace manifest (5 bundled plugins)
@@ -32,6 +35,14 @@ npm test             # vitest (19 tests)
 npm run lint         # eslint
 npm run format       # prettier
 npm run typecheck    # tsc --noEmit
+```
+
+### agent-factory (Python >= 3.11, no runtime dependencies)
+```
+cd agent-factory
+python3 demo.py                  # end-to-end governance walkthrough
+python3 -m pytest tests/ -q      # 103 tests
+python3 -m bench.run_all scale   # benchmarks to 1,000 agents
 ```
 
 ### examples/interleaved-thinking (Python >= 3.10)
