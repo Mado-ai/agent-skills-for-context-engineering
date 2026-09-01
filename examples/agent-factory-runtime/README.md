@@ -7,12 +7,18 @@ agents themselves cannot reach.**
 > **Local R&D build.** Nothing is deployed. No external action is performed. No
 > paid model calls are made — the benchmark suite costs $0.00 to run.
 
+> **This is the worked implementation behind the collection's workforce-governance
+> skills.** Each of those skills teaches one concept platform-agnostically and links
+> here for a running version of it: agent-contracts, agent-permissions, work-packets,
+> tool-governance, workforce-elasticity, quality-enforcement, cost-governance, and
+> agent-observability. Read the skills for the principles; read this for the details.
+
 ---
 
 ## Start here
 
 ```bash
-cd agent-factory
+cd examples/agent-factory-runtime
 python3 demo.py                      # end-to-end walkthrough, ~1 second
 python3 -m pytest tests/ -q          # 103 tests
 python3 -m bench.run_all scale       # benchmarks to 1,000 agents

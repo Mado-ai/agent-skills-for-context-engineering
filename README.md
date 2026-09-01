@@ -70,6 +70,21 @@ These skills cover formal cognitive modeling for rational agent systems.
 |-------|-------------|
 | [bdi-mental-states](skills/bdi-mental-states/) | **NEW** Transform external RDF context into agent mental states (beliefs, desires, intentions) using formal BDI ontology patterns for deliberative reasoning and explainability |
 
+### Workforce Governance Skills
+
+These skills cover what changes when agents create, direct, and pay for other agents. Context engineering keeps one agent effective; governance keeps a fleet of them accountable, bounded, and affordable.
+
+| Skill | Description |
+|-------|-------------|
+| [agent-contracts](skills/agent-contracts/) | **NEW** Define agents as versioned, validated contracts with a lifecycle in which an invalid definition can never reach production |
+| [agent-permissions](skills/agent-permissions/) | **NEW** Capability-based authority, owner-gated actions, single-use execution tokens, and tenant isolation that agents cannot talk their way around |
+| [work-packets](skills/work-packets/) | **NEW** Replace free-form agent chat with structured delegation that can only narrow authority, plus DAG dependencies and recursion bounds |
+| [tool-governance](skills/tool-governance/) | **NEW** Risk-classify tools R0–R5 and run a pre-execution policy chain that treats model-generated arguments as untrusted input |
+| [workforce-elasticity](skills/workforce-elasticity/) | **NEW** Scale agent fleets by demand rather than by configuration, and measure the real bottleneck instead of assuming more workers helps |
+| [quality-enforcement](skills/quality-enforcement/) | **NEW** Turn evaluation scores into control flow — pass, rework, escalate, reject — and close corrective loops that cannot be closed without verification |
+| [cost-governance](skills/cost-governance/) | **NEW** Enforce nested budgets before work starts, attribute spend, and bound blast radius so agents cannot spawn without limit |
+| [agent-observability](skills/agent-observability/) | **NEW** Reconstruct what happened across a delegation tree from one trace id, with an audit trail that survives the crash worth investigating |
+
 ## Design Philosophy
 
 ### Progressive Disclosure
@@ -134,6 +149,14 @@ This installs all 14 skills in a single plugin. Skills are activated automatical
 | `advanced-evaluation` | "implement LLM-as-judge", "compare model outputs", "mitigate bias" |
 | `project-development` | "start LLM project", "design batch pipeline", "evaluate task-model fit" |
 | `bdi-mental-states` | "model agent mental states", "implement BDI architecture", "transform RDF to beliefs", "build cognitive agent" |
+| `agent-contracts` | "define an agent contract", "build an agent factory", "version agent definitions", "let agents create agents" |
+| `agent-permissions` | "restrict what an agent can do", "add human approval to an agent", "prevent privilege escalation", "isolate tenants" |
+| `work-packets` | "structure agent-to-agent delegation", "build a task DAG", "stop runaway agent recursion" |
+| `tool-governance` | "control which tools an agent can call", "classify tool risk", "require approval before an agent acts" |
+| `workforce-elasticity` | "scale an agent system", "run thousands of agents", "stop paying for idle agents", "benchmark an agent platform" |
+| `quality-enforcement` | "act on an evaluation score", "make an agent retry failed work", "build a corrective action loop" |
+| `cost-governance` | "cap agent spending", "stop runaway agent costs", "attribute LLM cost to a project" |
+| `agent-observability` | "trace what an agent did", "debug a multi-agent failure", "audit agent actions" |
 
 <img width="1014" height="894" alt="Screenshot 2025-12-26 at 12 34 47 PM" src="https://github.com/user-attachments/assets/f79aaf03-fd2d-4c71-a630-7027adeb9bfe" />
 
@@ -170,6 +193,7 @@ The [examples](examples/) folder contains complete system designs that demonstra
 | [x-to-book-system](examples/x-to-book-system/) | Multi-agent system that monitors X accounts and generates daily synthesized books | multi-agent-patterns, memory-systems, context-optimization, tool-design, evaluation |
 | [llm-as-judge-skills](examples/llm-as-judge-skills/) | Production-ready LLM evaluation tools with TypeScript implementation, 19 passing tests | advanced-evaluation, tool-design, context-fundamentals, evaluation |
 | [book-sft-pipeline](examples/book-sft-pipeline/) | Train models to write in any author's style. Includes Gertrude Stein case study with 70% human score on Pangram, $2 total cost | project-development, context-compression, multi-agent-patterns, evaluation |
+| [agent-factory-runtime](examples/agent-factory-runtime/) | **NEW** Working reference runtime for a governed AI workforce: contract lifecycle, leased queue, permission engine, tool gateway, quality gates, benchmarks to 1,000 agents. Zero dependencies, 103 tests | agent-contracts, agent-permissions, work-packets, tool-governance, workforce-elasticity, quality-enforcement, cost-governance, agent-observability |
 
 Each example includes:
 - Complete PRD with architecture decisions

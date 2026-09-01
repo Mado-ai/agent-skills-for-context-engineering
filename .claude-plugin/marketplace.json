@@ -5,13 +5,13 @@
     "email": "muratcan.koylan@outlook.com"
   },
   "metadata": {
-    "description": "Context Engineering skills for building production-grade AI agent systems",
-    "version": "2.1.0"
+    "description": "Context engineering and workforce governance skills for building production-grade AI agent systems",
+    "version": "2.2.0"
   },
   "plugins": [
     {
       "name": "context-engineering",
-      "description": "Comprehensive context engineering skills for building production-grade AI agent systems — covering fundamentals, degradation patterns, compression, optimization, latent briefing (KV sharing between agents), multi-agent coordination, memory systems, tool design, filesystem context, hosted agents, evaluation, advanced evaluation, project development, and cognitive architecture",
+      "description": "Comprehensive context engineering and agent governance skills for building production-grade AI agent systems — covering fundamentals, degradation patterns, compression, optimization, latent briefing (KV sharing between agents), multi-agent coordination, memory systems, tool design, filesystem context, hosted agents, evaluation, advanced evaluation, project development, cognitive architecture, and workforce governance: agent contracts, permissions, structured delegation, tool risk gating, elasticity, quality enforcement, cost control, and observability",
       "source": "./",
       "strict": false,
       "skills": [
@@ -28,7 +28,15 @@
         "./skills/advanced-evaluation",
         "./skills/project-development",
         "./skills/bdi-mental-states",
-        "./skills/latent-briefing"
+        "./skills/latent-briefing",
+        "./skills/agent-contracts",
+        "./skills/agent-permissions",
+        "./skills/work-packets",
+        "./skills/tool-governance",
+        "./skills/workforce-elasticity",
+        "./skills/quality-enforcement",
+        "./skills/cost-governance",
+        "./skills/agent-observability"
       ]
     }
   ]

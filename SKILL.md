@@ -1,6 +1,6 @@
 ---
 name: context-engineering-collection
-description: A comprehensive collection of Agent Skills for context engineering, multi-agent architectures, and production agent systems. Use when building, optimizing, or debugging agent systems that require effective context management.
+description: A comprehensive collection of Agent Skills for context engineering, multi-agent architectures, agent workforce governance, and production agent systems. Use when building, optimizing, governing, or debugging agent systems that require effective context management or accountable multi-agent operation.
 ---
 
 # Agent Skills for Context Engineering
@@ -16,6 +16,8 @@ Activate these skills when:
 - Designing multi-agent architectures
 - Creating or evaluating tools for agents
 - Implementing memory and persistence layers
+- Governing what agents are permitted to do, spend, and create
+- Scaling an agent fleet, or diagnosing why it does not scale
 
 ## Skill Map
 
@@ -58,6 +60,20 @@ Orchestrator-worker systems can compound tokens when supervisors accumulate long
 **Evaluation Frameworks**
 Production agent evaluation requires multi-dimensional rubrics covering factual accuracy, completeness, tool efficiency, and process quality. Effective patterns include LLM-as-judge for scalability, human evaluation for edge cases, and end-state evaluation for agents that mutate persistent state.
 
+### Workforce Governance
+
+**Agents as Contracts**
+Once agents create and direct other agents, a prompt is no longer a sufficient definition. An agent becomes a versioned, validated contract carrying its own tools, permissions, budgets, quality policy, and lifecycle — and the contract, not the prompt, is what the runtime enforces. The controlling design rule is that an invalid definition must be unable to reach an active state by any path, which is a property of the lifecycle graph rather than a rule someone must remember.
+
+**Authority Separated from Reach**
+Seniority widens what an agent can see and coordinate; it grants nothing. Authority comes from explicit capability grants, and a small set of actions — creating agents, raising budgets, overriding quality, defining ground truth — remains unreachable for any agent principal at any level. Approvals mint single-use credentials bound to specific parameters rather than expanding what an agent may do afterwards.
+
+**Delegation as Protocol**
+Agents exchange structured work packets rather than messages. A packet carries tools, budget, deadline, output schema, depth and spawn allowance as fields the runtime reads, so delegation can only narrow authority. Recursion is bounded by depth, fan-out width, and total task-tree size together, because any two of the three still leave the product unbounded.
+
+**Elasticity over Headcount**
+Agent count is not the metric; productive workflow loops are. Definitions are cheap and instances are not, so capacity follows demand and idle instances are reaped. Scaling claims are measured rather than asserted, and control-plane throughput is measured separately from model-provider throughput because they are different ceilings with different fixes.
+
 ### Development Methodology
 
 **Project Development**
@@ -94,6 +110,14 @@ Internal skills in this collection:
 - [advanced-evaluation](skills/advanced-evaluation/SKILL.md)
 - [project-development](skills/project-development/SKILL.md)
 - [bdi-mental-states](skills/bdi-mental-states/SKILL.md)
+- [agent-contracts](skills/agent-contracts/SKILL.md)
+- [agent-permissions](skills/agent-permissions/SKILL.md)
+- [work-packets](skills/work-packets/SKILL.md)
+- [tool-governance](skills/tool-governance/SKILL.md)
+- [workforce-elasticity](skills/workforce-elasticity/SKILL.md)
+- [quality-enforcement](skills/quality-enforcement/SKILL.md)
+- [cost-governance](skills/cost-governance/SKILL.md)
+- [agent-observability](skills/agent-observability/SKILL.md)
 
 External resources on context engineering:
 - Research on attention mechanisms and context window limitations
@@ -105,6 +129,6 @@ External resources on context engineering:
 ## Skill Metadata
 
 **Created**: 2025-12-20
-**Last Updated**: 2026-04-14
+**Last Updated**: 2026-09-01
 **Author**: Agent Skills for Context Engineering Contributors
-**Version**: 1.3.0
+**Version**: 1.4.0

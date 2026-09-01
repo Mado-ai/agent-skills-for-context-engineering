@@ -4,19 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Agent Skills for Context Engineering — an open collection of 14 Agent Skills teaching context engineering principles for production AI agent systems. Skills are platform-agnostic (Claude Code, Cursor, GitHub Copilot, any Open Plugins-conformant tool).
+Agent Skills for Context Engineering — an open collection of 22 Agent Skills teaching context engineering and agent workforce governance for production AI agent systems. Skills are platform-agnostic (Claude Code, Cursor, GitHub Copilot, any Open Plugins-conformant tool).
 
 Context engineering is the discipline of curating everything that enters a model's context window (system prompts, tool definitions, retrieved documents, message history, tool outputs) to maximize signal within limited attention budget.
 
 ## Repository Structure
 
-- `skills/` — 14 skill directories, each containing a `SKILL.md` with YAML frontmatter (`name`, `description`) and optional `references/` and `scripts/` subdirectories
-- `examples/` — 5 complete demonstration projects (digital-brain-skill, llm-as-judge-skills, book-sft-pipeline, x-to-book-system, interleaved-thinking)
+- `skills/` — 22 skill directories, each containing a `SKILL.md` with YAML frontmatter (`name`, `description`) and optional `references/` and `scripts/` subdirectories
+- `examples/` — 6 complete demonstration projects (digital-brain-skill, llm-as-judge-skills, book-sft-pipeline, x-to-book-system, interleaved-thinking, agent-factory-runtime)
 - `docs/` — Research materials and reference documentation
 - `researcher/` — Research output examples
-- `agent-factory/` — **AI Agent Factory v0.4**: a self-contained, governed runtime for an
-  elastic AI workforce (Python 3.11, zero runtime dependencies). Independent of the skills
-  collection; see `agent-factory/README.md` and `agent-factory/CURRENT_STATE.md`.
 - `template/SKILL.md` — Canonical skill template (use when creating new skills)
 - `SKILL.md` (root) — Collection-level metadata and skill map
 - `.claude-plugin/marketplace.json` — Claude Code marketplace manifest (5 bundled plugins)
@@ -37,9 +34,13 @@ npm run format       # prettier
 npm run typecheck    # tsc --noEmit
 ```
 
-### agent-factory (Python >= 3.11, no runtime dependencies)
+### examples/agent-factory-runtime (Python >= 3.11, no runtime dependencies)
+
+Reference runtime for the workforce-governance skills. Self-contained; the skills
+point to it as the worked implementation.
+
 ```
-cd agent-factory
+cd examples/agent-factory-runtime
 python3 demo.py                  # end-to-end governance walkthrough
 python3 -m pytest tests/ -q      # 103 tests
 python3 -m bench.run_all scale   # benchmarks to 1,000 agents
@@ -78,7 +79,7 @@ When creating or editing skills:
 
 ## Plugin Architecture
 
-All 14 skills are distributed as a single plugin (`context-engineering`) in the marketplace manifest. This avoids cache duplication — Claude Code caches each plugin's `source` directory separately, so multiple plugins pointing to `source: "./"` would each cache a full copy of the repo.
+All 22 skills are distributed as a single plugin (`context-engineering`) in the marketplace manifest. This avoids cache duplication — Claude Code caches each plugin's `source` directory separately, so multiple plugins pointing to `source: "./"` would each cache a full copy of the repo.
 
 Progressive disclosure pattern: only skill names/descriptions load at startup; full content loads on activation.
 
