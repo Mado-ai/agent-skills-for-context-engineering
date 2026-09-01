@@ -13,7 +13,7 @@ Results below are from an actual run, not an expectation. Reproduce with
 | Check | Command | Result |
 |---|---|---|
 | TypeScript | `npm run typecheck` | **PASS** — 0 errors, strict mode with `noUncheckedIndexedAccess` |
-| Unit and integration | `npm test` | **PASS** — 178 passed, 0 failed, 0 skipped (12 files, 5.76s) |
+| Unit and integration | `npm test` | **PASS** — 184 passed, 0 failed, 0 skipped (12 files, ~6s) |
 | End-to-end smoke | `npm run smoke` | **PASS** — 15/15 steps, from a fresh database |
 
 ### By suite
@@ -24,7 +24,7 @@ Results below are from an actual run, not an expectation. Reproduce with
 | `api.test.ts` | 21 | Route regressions, error envelope, status codes, auth posture |
 | `approvals.test.ts` | 17 | Request, decision, token issue/use/expiry/replay/revocation |
 | `delegation.test.ts` | 17 | Packet lifecycle, delegation bounds, dynamic instantiation, reaping |
-| `security.test.ts` | 15 | One test per security property the runtime claims |
+| `security.test.ts` | 21 | One test per security property the runtime claims, plus handler-level scope enforcement |
 | `chief.test.ts` | 15 | Situation reporting, mechanical skepticism, proposals, gateway-bound actions |
 | `memory.test.ts` | 14 | Four layers, precedence, scope, provenance, supersession, TTL |
 | `gateway.test.ts` | 13 | Authorization, schema validation, audit, dry-run, tool catalogue |
@@ -32,7 +32,7 @@ Results below are from an actual run, not an expectation. Reproduce with
 | `quality.test.ts` | 12 | Gates, rework, escalation, CAPA, separation of duties |
 | `scheduler.test.ts` | 12 | One-shot, interval and event jobs, claiming, retries, loop triggering |
 | `persistence.test.ts` | 10 | Migrations, checksum drift, FKs, CHECKs, transactions, secret-free schema |
-| **Total** | **178** | |
+| **Total** | **184** | |
 
 ---
 
@@ -75,6 +75,8 @@ Each is a named test in `security.test.ts`:
 | Authoritative write requires permission | ✅ grant *and* provenance, tested separately |
 | Agent cannot alter its own contract | ✅ via the registry and via `policy.update` with a valid Owner token |
 | Audit remains append-only | ✅ interface shape asserted, plus database triggers |
+| Handlers cannot reach an unchecked project | ✅ `task.create`, `quality.evaluate`, `report.compose` each tested across a project boundary |
+| Authoritative provenance cannot be forged | ✅ tested with a valid execution token in hand |
 
 ---
 
@@ -109,9 +111,12 @@ Stated plainly, because a coverage claim without this is not worth much.
 
 ---
 
-## 4. Bugs the tests found
+## 4. Bugs found while building
 
-Three real defects, all fixed:
+Six real defects, all fixed. Three came from tests failing; three from
+auditing the tool handlers against what the policy engine actually checks.
+
+### Found by tests
 
 1. **Schema feedback leaked before authorization.** The gateway validated
    arguments against the tool's declared schema *before* deciding
@@ -128,6 +133,36 @@ Three real defects, all fixed:
 
 The second and third are the useful kind: the system did the right thing
 (refused to overspend) and then reported the wrong reason.
+
+### Found by auditing handlers against the policy engine
+
+The pattern in all three: **the gateway authorizes against the project on the
+request, and a handler then acted on a different one it resolved from its own
+arguments.**
+
+4. **`memory.write_authoritative` forged human provenance.** The handler
+   hard-coded `origin: 'human'` using the caller's `source` argument, which
+   defeated the exact rule it was meant to uphold — an agent could launder its
+   own inference into canonical fact by passing `source: "owner"`. The handler
+   now records the write as the agent write it is, so the memory service
+   requires a granted Owner approval among the evidence references. Migration
+   004 brings the catalogue entry in line and makes `evidence_refs` required.
+5. **`task.create` acted on `args.project_id`**, unchecked, so an agent could
+   authorize against a project it held and create a task in one it did not.
+6. **`quality.evaluate` and `report.compose`** resolved a task from arguments
+   and acted on that task's project — reading another project's artifact
+   content through evaluation results, or writing an artifact into another
+   project's task.
+
+All three now route through a `requireProjectScope` guard, and each has a test
+that exercises the crossing directly.
+
+Worth noting what the audit *also* found: `memory.write_authoritative` was
+already gated by the gateway on risk class alone, since its `high` class meets
+the default approval threshold. The provenance hole was therefore reachable
+only by an agent whose contract set a laxer threshold — but that threshold is a
+contract field, so relying on it was the wrong defence. Both layers now hold
+independently, and there is a test for each.
 
 ---
 

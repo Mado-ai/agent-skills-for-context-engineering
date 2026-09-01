@@ -16,7 +16,7 @@ under `workforce-os/`.
 - Zod schemas for every runtime object: agent contracts, work packets, memory
   records, quality gates and evaluations, CAPA, approvals and tokens, budgets
   and usage, tool definitions and calls, events, jobs.
-- 23 entities across three versioned SQL migrations. Application-generated
+- 23 entities across four versioned SQL migrations. Application-generated
   time-sortable ids, so the audit tables need no sequence and stay portable.
 - Migration runner with per-migration checksums. Editing an applied migration
   is a hard error, not a warning.
@@ -126,8 +126,21 @@ under `workforce-os/`.
 
 ### Fixed while building
 
+Found by the tests, or by auditing the handlers against the policy engine:
+
 - The gateway validated arguments before deciding authorization, letting an
   unauthorized caller learn a tool's schema. Authorization now comes first.
 - Packets and tasks had no legal path from their pre-start states to
   `escalated`, so a budget denial died on a lifecycle error that masked the
   real cause.
+- **`memory.write_authoritative` forged human provenance.** The handler
+  hard-coded `origin: 'human'` from the caller's `source` argument, which
+  defeated the rule it was supposed to uphold: an agent could launder its own
+  inference into canonical fact. The handler now records the write as an agent
+  write, so the memory service requires a granted Owner approval among the
+  evidence references.
+- **Three handlers reached projects the policy engine never checked.**
+  `task.create` acted on `args.project_id`, and `quality.evaluate` and
+  `report.compose` acted on whatever project a supplied task belonged to, while
+  the gateway had authorized against the project on the *request*. All three
+  now re-check scope for the project they actually resolved.

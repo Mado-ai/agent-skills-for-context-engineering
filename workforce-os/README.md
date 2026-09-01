@@ -32,7 +32,7 @@ The governance is real code, not scaffolding:
 - **Append-only audit**, enforced by the absence of any mutation path *and* by
   database triggers.
 
-**178 tests, all offline.** The default model provider is deterministic; the
+**184 tests, all offline.** The default model provider is deterministic; the
 full suite needs no API access and no network.
 
 ---
@@ -52,7 +52,7 @@ npm start            # Control Center on http://127.0.0.1:8787
 Verify it:
 
 ```bash
-npm test             # 178 tests
+npm test             # 184 tests
 npm run smoke        # 15-step end-to-end check with real pass/fail output
 npm run typecheck
 ```
@@ -134,7 +134,7 @@ workforce-os/
     llm/            provider interface, deterministic mock, Claude adapter
     api/            HTTP router, routes, server
     ui/             the Control Center
-  tests/            12 suites, 178 tests
+  tests/            12 suites, 184 tests
   scripts/smoke.ts  end-to-end smoke test
   docs/             architecture, security, API, data model, test report
 ```

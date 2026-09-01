@@ -42,6 +42,8 @@ regresses. `tests/security.test.ts` is one test per claim, named after it.
 | No agent holds Owner level | `registry/validation.ts` | `no agent holds Owner access level` |
 | Owner-gated tools always need approval | `policy/engine.ts` | `every owner-gated tool needs an approval, for every agent that holds it` |
 | Denials are recorded before the caller sees them | `gateway.ts` | `every denial is recorded before the error reaches the caller` |
+| Handlers cannot reach a project the policy engine did not check | `gateway/handlers.ts` | `task.create cannot create a task in another project`; `report.compose cannot write an artifact into another project's task`; `quality.evaluate cannot evaluate another project's task` |
+| Authoritative provenance cannot be forged | `gateway/handlers.ts`, `memory/service.ts` | `memory.write_authoritative cannot forge human provenance` |
 
 ---
 
@@ -107,10 +109,27 @@ Properties, each separately tested:
 - **Constant-time comparison** on the fingerprint.
 - **Revocable.** Revoking the approval invalidates its outstanding tokens.
 
+### Handler-resolved entities
+
+The gateway authorizes against the project on the **request**. A handler that
+then reads `args.project_id`, or resolves a task or artifact and acts on
+whatever project *that* belongs to, is acting on something the policy engine
+never saw. Three handlers did exactly that before an audit caught it
+(`task.create`, `quality.evaluate`, `report.compose`); all now route through a
+`requireProjectScope` guard, and each crossing has its own test.
+
+This is worth stating as a rule rather than a fix: **a handler that resolves an
+entity from its arguments must re-check scope for whatever that entity belongs
+to.** Any new handler that does so and skips the guard reintroduces the class.
+
 ### Memory integrity
 
 Authoritative writes need the contract grant *and* provenance that is either
-human-sourced or references a **granted** approval. A lower layer may not
+human-sourced or references a **granted** approval. The tool handler does not
+assert human provenance on the caller's behalf — it records the write as the
+agent write it is, so an agent reaching this tool must produce an Owner
+approval reference. (The handler previously hard-coded `origin: 'human'`; see
+`V04_TEST_REPORT.md` §4.) A lower layer may not
 supersede a higher one. Reads are scope-filtered in the repository, and a
 cross-project read is a denial rather than an empty result.
 

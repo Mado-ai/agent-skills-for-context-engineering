@@ -243,6 +243,12 @@ forbidden → project scope → data scope → access level → concurrency → 
 Owner approval → budget. Default is deny; a request is allowed only when every
 check passes.
 
+One rule constrains handlers themselves: the gateway authorizes against the
+project on the *request*, so a handler that resolves a different project from
+its own arguments must re-check scope for it. `requireProjectScope` in
+`handlers.ts` exists for that, and every handler that resolves an entity from
+arguments routes through it.
+
 **No shell, filesystem-write, or arbitrary-code tool is registered.** v0.4
 runtime agents have no route to a shell, and a test enumerates the catalogue to
 keep it that way.

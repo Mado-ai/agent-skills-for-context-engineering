@@ -317,3 +317,211 @@ describe('security boundaries', () => {
     expect(securityEvents.some((e) => e.kind === 'tool.denied')).toBe(true);
   });
 });
+
+/**
+ * Handler-level scope checks.
+ *
+ * The gateway authorizes against the project on the *request*. A handler that
+ * resolves a different project from its own arguments — `args.project_id`, or
+ * the project a supplied task belongs to — is acting on something the policy
+ * engine never saw. These tests cover that gap for every handler that does it.
+ */
+describe('handler-level scope enforcement', () => {
+  let f: Fixture;
+  beforeEach(() => {
+    f = createFixture();
+  });
+  afterEach(() => f.close());
+
+  it('task.create cannot create a task in another project', async () => {
+    await expectDenial(
+      () =>
+        f.runtime.gateway.call({
+          agentId: f.contentMaster.agent_id,
+          toolName: 'task.create',
+          // Authorized against a project this agent does hold …
+          projectId: f.projects.content.project_id,
+          // … while naming one it does not.
+          args: { project_id: f.projects.hardware.project_id, title: 'Smuggled task' },
+        }),
+      'DENIED_PROJECT_SCOPE',
+    );
+  });
+
+  it('report.compose cannot write an artifact into another project’s task', async () => {
+    const hardwareTask = f.runtime.execution.createTask(
+      { project_id: f.projects.hardware.project_id, title: 'Hardware task' },
+      { type: 'owner', id: 'owner' },
+    );
+    await expectDenial(
+      () =>
+        f.runtime.gateway.call({
+          agentId: f.contentMaster.agent_id,
+          toolName: 'report.compose',
+          projectId: f.projects.content.project_id,
+          args: { task_id: hardwareTask.task_id, summary: 'Written across a project boundary.' },
+        }),
+      'DENIED_PROJECT_SCOPE',
+    );
+  });
+
+  it('quality.evaluate cannot evaluate another project’s task', async () => {
+    const hardwareTask = f.runtime.execution.createTask(
+      { project_id: f.projects.hardware.project_id, title: 'Hardware task' },
+      { type: 'owner', id: 'owner' },
+    );
+    const artifact = f.runtime.repos.tasks.insertArtifact({
+      task_id: hardwareTask.task_id,
+      packet_id: null,
+      agent_id: f.hardwareMaster.agent_id,
+      project_id: f.projects.hardware.project_id,
+      trace_id: hardwareTask.trace_id,
+      kind: 'result',
+      content: { summary: 'Hardware work.' },
+      provenance: { origin: 'agent', origin_id: f.hardwareMaster.agent_id, evidence_refs: [] },
+      attempt: 1,
+    });
+
+    await expectDenial(
+      () =>
+        f.runtime.gateway.call({
+          agentId: f.contentMaster.agent_id,
+          toolName: 'quality.evaluate',
+          projectId: f.projects.content.project_id,
+          args: {
+            task_id: hardwareTask.task_id,
+            artifact_id: artifact.artifact_id,
+            gate_key: 'gate.acceptance',
+          },
+        }),
+      'DENIED_PROJECT_SCOPE',
+    );
+  });
+
+  /**
+   * `memory.write_authoritative` is defended twice over. Its `high` risk class
+   * means the gateway already demands an Owner approval token from any agent
+   * whose contract gates at `high` — but that threshold is a contract field an
+   * author could set to `critical`, so the memory service independently
+   * requires approval-backed provenance. These two tests cover the second
+   * layer, with the first already satisfied.
+   */
+  function approveToolCall(args: Record<string, unknown>) {
+    const approval = f.runtime.approvals.request({
+      requested_by_agent_id: f.chief.agent_id,
+      action: 'tool.memory.write_authoritative',
+      tool_name: 'memory.write_authoritative',
+      project_id: f.projects.hardware.project_id,
+      args,
+      justification: 'The Owner confirmed this standard applies.',
+      risk_class: 'high',
+    });
+    const decision = f.runtime.approvals.decide({
+      approval_id: approval.approval_id,
+      decision: 'approved',
+      decided_by: 'owner',
+    });
+    return { approvalId: approval.approval_id, token: decision.token! };
+  }
+
+  it('the gateway gates authoritative memory on risk class alone', async () => {
+    await expectDenial(
+      () =>
+        f.runtime.gateway.call({
+          agentId: f.chief.agent_id,
+          toolName: 'memory.write_authoritative',
+          projectId: f.projects.hardware.project_id,
+          args: {
+            key: 'policy.ungated',
+            content: { value: 'x' },
+            source: 'owner',
+            evidence_refs: ['apr_none'],
+          },
+        }),
+      'APPROVAL_REQUIRED',
+    );
+  });
+
+  it('memory.write_authoritative cannot forge human provenance', async () => {
+    // The Chief holds the grant and a valid execution token for this exact
+    // call. Passing source: "owner" must still not make the write
+    // human-sourced, because the evidence names no granted approval.
+    const args = {
+      key: 'policy.forged',
+      content: { value: 'I decided this is canonical' },
+      source: 'owner',
+      evidence_refs: ['art_not_an_approval'],
+    };
+    const { token } = approveToolCall(args);
+
+    await expectDenial(
+      () =>
+        f.runtime.gateway.call({
+          agentId: f.chief.agent_id,
+          toolName: 'memory.write_authoritative',
+          projectId: f.projects.hardware.project_id,
+          args,
+          approvalToken: token,
+        }),
+      'DENIED_FORBIDDEN_ACTION',
+    );
+  });
+
+  it('memory.write_authoritative succeeds when the evidence names a granted approval', async () => {
+    // Bootstrapping note: the approval that authorises the call is itself the
+    // evidence that the Owner sanctioned the promotion.
+    const draftArgs = {
+      key: 'policy.ratified',
+      content: { value: 'an Owner-approved standard' },
+      source: 'owner',
+      evidence_refs: [] as string[],
+    };
+    const approval = f.runtime.approvals.request({
+      requested_by_agent_id: f.chief.agent_id,
+      action: 'tool.memory.write_authoritative',
+      tool_name: 'memory.write_authoritative',
+      project_id: f.projects.hardware.project_id,
+      args: { ...draftArgs, evidence_refs: ['self'] },
+      justification: 'The Owner confirmed this standard applies.',
+      risk_class: 'high',
+    });
+    const finalArgs = { ...draftArgs, evidence_refs: [approval.approval_id] };
+
+    // Re-request against the exact arguments the call will carry, so the
+    // token's fingerprint matches.
+    const real = f.runtime.approvals.request({
+      requested_by_agent_id: f.chief.agent_id,
+      action: 'tool.memory.write_authoritative',
+      tool_name: 'memory.write_authoritative',
+      project_id: f.projects.hardware.project_id,
+      args: finalArgs,
+      justification: 'The Owner confirmed this standard applies.',
+      risk_class: 'high',
+    });
+    f.runtime.approvals.decide({
+      approval_id: approval.approval_id,
+      decision: 'approved',
+      decided_by: 'owner',
+    });
+    const decision = f.runtime.approvals.decide({
+      approval_id: real.approval_id,
+      decision: 'approved',
+      decided_by: 'owner',
+    });
+
+    const result = await f.runtime.gateway.call({
+      agentId: f.chief.agent_id,
+      toolName: 'memory.write_authoritative',
+      projectId: f.projects.hardware.project_id,
+      args: finalArgs,
+      approvalToken: decision.token!,
+    });
+
+    const record = f.runtime.memory.get(result.output.memory_id as string)!;
+    expect(record.authoritative).toBe(true);
+    // The trail records who actually wrote it, not who was claimed.
+    expect(record.provenance.origin).toBe('agent');
+    expect(record.provenance.origin_id).toBe(f.chief.agent_id);
+    expect(record.provenance.evidence_refs).toContain(approval.approval_id);
+  });
+});

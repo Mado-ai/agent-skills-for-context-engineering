@@ -1,4 +1,5 @@
 import { RuntimeError } from '../domain/index.js';
+import { agentCanSeeProject } from '../policy/engine.js';
 import type { ToolHandler, ToolHandlerContext } from './gateway.js';
 import type { Runtime } from '../runtime.js';
 
@@ -20,6 +21,31 @@ export function createHandlers(getRuntime: () => Runtime): Map<string, ToolHandl
   const handlers = new Map<string, ToolHandler>();
 
   const rt = () => getRuntime();
+
+  /**
+   * Re-check project scope for a project the handler resolved from its own
+   * arguments.
+   *
+   * The gateway authorizes against the project on the *request*. A handler that
+   * then reads `args.project_id`, or resolves a task or artifact and acts on
+   * whatever project that belongs to, is acting on a project the policy engine
+   * never saw. Every such handler routes through here.
+   */
+  function requireProjectScope(agentId: string, projectId: string | null, what: string): void {
+    if (projectId === null) return;
+    const runtime = rt();
+    const agent = runtime.repos.agents.getAgent(agentId);
+    if (!agent) throw new RuntimeError('NOT_FOUND', `agent ${agentId} not found`);
+    const contract = runtime.repos.agents.getContractVersion(agentId, agent.current_version)?.contract;
+    if (!contract) throw new RuntimeError('CONTRACT_INVALID', `agent ${agentId} has no current contract`);
+    if (!agentCanSeeProject(contract, projectId)) {
+      throw new RuntimeError(
+        'DENIED_PROJECT_SCOPE',
+        `agent ${agentId} has no access to project ${projectId} (via ${what})`,
+        { project_id: projectId, via: what },
+      );
+    }
+  }
 
   handlers.set('registry.inspect', (args) => {
     const registry = rt().registry;
@@ -62,6 +88,12 @@ export function createHandlers(getRuntime: () => Runtime): Map<string, ToolHandl
   });
 
   handlers.set('memory.write_authoritative', (args, ctx) => {
+    // Provenance is recorded as what it actually is: a write by this agent.
+    // Asserting `origin: 'human'` here on the caller's say-so would let any
+    // agent holding this tool launder its own inference into canonical fact,
+    // which is precisely what the memory service's check exists to stop. The
+    // service therefore requires a granted Owner approval among the evidence
+    // references before it will accept this.
     const record = rt().memory.write(ctx.agentId, {
       layer: 'authoritative',
       key: args.key,
@@ -70,17 +102,19 @@ export function createHandlers(getRuntime: () => Runtime): Map<string, ToolHandl
       source: args.source,
       supersedes_id: args.supersedes_id ?? null,
       provenance: {
-        origin: 'human',
-        origin_id: String(args.source),
+        origin: 'agent',
+        origin_id: ctx.agentId,
         trace_id: ctx.traceId,
         task_id: ctx.taskId,
         evidence_refs: (args.evidence_refs as string[] | undefined) ?? [],
+        note: `source asserted as "${String(args.source)}"`,
       },
     });
     return { memory_id: record.memory_id };
   });
 
   handlers.set('task.create', (args, ctx) => {
+    requireProjectScope(ctx.agentId, (args.project_id as string) ?? null, 'task.create project_id');
     const task = rt().execution.createTask(
       {
         project_id: args.project_id,
@@ -123,6 +157,9 @@ export function createHandlers(getRuntime: () => Runtime): Map<string, ToolHandl
   });
 
   handlers.set('quality.evaluate', async (args, ctx) => {
+    const target = rt().repos.tasks.getTask(args.task_id as string);
+    if (!target) throw new RuntimeError('NOT_FOUND', `task ${args.task_id} not found`);
+    requireProjectScope(ctx.agentId, target.project_id, 'the task being evaluated');
     const evaluation = await rt().quality.evaluate({
       task_id: args.task_id as string,
       artifact_id: args.artifact_id as string,
@@ -136,6 +173,7 @@ export function createHandlers(getRuntime: () => Runtime): Map<string, ToolHandl
     const runtime = rt();
     const task = runtime.repos.tasks.getTask(args.task_id as string);
     if (!task) throw new RuntimeError('NOT_FOUND', `task ${args.task_id} not found`);
+    requireProjectScope(ctx.agentId, task.project_id, 'the task being written to');
     const artifact = runtime.repos.tasks.insertArtifact({
       task_id: task.task_id,
       packet_id: ctx.packetId,
