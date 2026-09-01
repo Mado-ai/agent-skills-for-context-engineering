@@ -21,8 +21,10 @@ export type TaskStatus = z.infer<typeof TaskStatus>;
  * state the quality and approval loops do not expect.
  */
 export const TASK_TRANSITIONS: Record<TaskStatus, TaskStatus[]> = {
-  pending: ['assigned', 'cancelled', 'blocked'],
-  assigned: ['running', 'blocked', 'cancelled', 'pending'],
+  // As with packets, escalation is reachable from every live state: a task
+  // that cannot start — no budget, no capacity — must escalate rather than sit.
+  pending: ['assigned', 'cancelled', 'blocked', 'escalated'],
+  assigned: ['running', 'blocked', 'cancelled', 'pending', 'escalated'],
   running: ['awaiting_review', 'awaiting_approval', 'blocked', 'failed', 'escalated', 'cancelled'],
   awaiting_review: ['completed', 'rework', 'escalated', 'failed'],
   rework: ['running', 'assigned', 'escalated', 'failed', 'cancelled'],

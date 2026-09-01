@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Workforce OS — Control Center</title>
+<link rel="stylesheet" href="/styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>◈</text></svg>">
+</head>
+<body>
+<div id="shell">
+  <nav id="nav">
+    <div class="brand">
+      <span class="mark">◈</span>
+      <span class="brand-text">
+        <strong>AI Workforce OS</strong>
+        <em>v0.4 · pre-production</em>
+      </span>
+    </div>
+    <ul id="navlist"></ul>
+    <div class="nav-foot">
+      <div id="healthdot" class="dot pending" title="runtime status"></div>
+      <span id="healthtext">connecting…</span>
+    </div>
+  </nav>
+  <main>
+    <header id="topbar">
+      <div>
+        <h1 id="viewtitle">Command Center</h1>
+        <p id="viewsub"></p>
+      </div>
+      <div class="topbar-actions">
+        <span id="lastsync" class="muted"></span>
+        <button id="refresh" class="btn">Refresh</button>
+      </div>
+    </header>
+    <div id="flash"></div>
+    <section id="view"><div class="loading">Loading…</div></section>
+  </main>
+</div>
+<script type="module" src="/app.js"></script>
+</body>
+</html>

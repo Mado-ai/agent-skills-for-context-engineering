@@ -1,6 +1,19 @@
-import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
+import type { DatabaseSync as DatabaseSyncType } from 'node:sqlite';
+
+/**
+ * `node:sqlite` is loaded through createRequire rather than a static import.
+ *
+ * It is a real Node 22 builtin, but because it is still flagged experimental it
+ * is absent from `module.builtinModules` — the list bundlers consult. Vite (and
+ * so Vitest) therefore strips the `node:` prefix and tries to resolve a package
+ * called "sqlite", which does not exist. A runtime require is opaque to that
+ * static analysis and resolves correctly under both `tsx` and Vitest.
+ */
+const nodeRequire = createRequire(import.meta.url);
+const { DatabaseSync } = nodeRequire('node:sqlite') as { DatabaseSync: typeof DatabaseSyncType };
 
 /**
  * Local development persistence.
@@ -15,7 +28,7 @@ import { dirname, resolve } from 'node:path';
 export type SqlValue = string | number | bigint | null | Uint8Array;
 
 export interface Db {
-  readonly raw: DatabaseSync;
+  readonly raw: DatabaseSyncType;
   readonly path: string;
   all<T = Record<string, unknown>>(sql: string, ...params: SqlValue[]): T[];
   get<T = Record<string, unknown>>(sql: string, ...params: SqlValue[]): T | undefined;

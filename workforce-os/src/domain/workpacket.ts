@@ -37,8 +37,11 @@ export type PacketStatus = z.infer<typeof PacketStatus>;
 
 export const PACKET_TRANSITIONS: Record<PacketStatus, PacketStatus[]> = {
   created: ['dispatched', 'cancelled'],
-  dispatched: ['accepted', 'rejected', 'expired', 'cancelled'],
-  accepted: ['in_progress', 'failed', 'expired', 'cancelled'],
+  // Escalation is reachable from every live state, not just from work in
+  // flight: a packet the receiver cannot afford to start still has to be
+  // escalated rather than left to expire silently.
+  dispatched: ['accepted', 'rejected', 'expired', 'cancelled', 'escalated'],
+  accepted: ['in_progress', 'failed', 'expired', 'cancelled', 'escalated'],
   in_progress: ['delivered', 'failed', 'escalated', 'expired', 'cancelled'],
   delivered: ['accepted_final', 'rework_requested', 'rejected', 'escalated'],
   rework_requested: ['in_progress', 'escalated', 'failed', 'cancelled'],

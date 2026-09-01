@@ -270,23 +270,24 @@ export function createToolGateway(deps: GatewayDeps) {
         throw new RuntimeError(code, reason, { call_id: callId, ...details }, traceId);
       };
 
-      // Arguments are validated against the schema the tool catalogue declares,
-      // before any policy decision, so a malformed call never reaches a handler.
-      if (resolved.tool) {
-        const violations = validateAgainstSchema(args, resolved.tool.input_schema as Record<string, unknown>);
-        if (violations.length > 0) {
-          return denyAndThrow('VALIDATION_FAILED', `arguments do not match the schema for ${request.toolName}`, {
-            violations,
-          });
-        }
-      }
-
+      // Authorization is decided first, deliberately. A caller with no right to
+      // this tool is refused before it learns anything about the tool's shape,
+      // so schema feedback is never an enumeration aid.
       const decision = decide(request, resolved, fingerprint);
 
       if (!decision.allowed) {
         return denyAndThrow(decision.code ?? 'DENIED_DEFAULT', decision.reason, {
           checks: decision.checks.filter((c) => !c.passed),
           requires_approval: decision.requiresApproval,
+        });
+      }
+
+      // Only then are the arguments checked against the schema the tool
+      // catalogue declares, so a malformed call never reaches a handler.
+      const violations = validateAgainstSchema(args, resolved.tool!.input_schema as Record<string, unknown>);
+      if (violations.length > 0) {
+        return denyAndThrow('VALIDATION_FAILED', `arguments do not match the schema for ${request.toolName}`, {
+          violations,
         });
       }
 
