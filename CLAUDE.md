@@ -18,10 +18,27 @@ Context engineering is the discipline of curating everything that enters a model
 - `SKILL.md` (root) — Collection-level metadata and skill map
 - `.claude-plugin/marketplace.json` — Claude Code marketplace manifest (5 bundled plugins)
 - `.plugin/plugin.json` — Open Plugins format manifest (v2.0.0)
+- `workforce-os/` — **a separate project, not a skill.** A standalone
+  pre-production runtime for a governed multi-agent system (agent contracts,
+  tool gateway, typed delegation, memory layers, quality gates, Owner
+  approvals). It has its own `package.json`, tests and docs. The skill-authoring
+  rules below do not apply to it; see `workforce-os/README.md`.
 
 ## Build & Test Commands
 
 No top-level build system. Individual example projects have their own tooling:
+
+### workforce-os (TypeScript, Node >= 22.5)
+```
+cd workforce-os
+npm install
+npm run migrate      # versioned SQL migrations
+npm run seed         # bootstrap organisation
+npm test             # vitest (178 tests, fully offline)
+npm run smoke        # end-to-end smoke test
+npm run typecheck    # tsc --noEmit
+npm start            # Control Center on 127.0.0.1:8787
+```
 
 ### examples/llm-as-judge-skills (TypeScript, Node >= 18)
 ```

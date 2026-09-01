@@ -223,6 +223,17 @@ skill-name/
 
 See the [template](template/) folder for the canonical skill structure.
 
+### `workforce-os/` — a separate project
+
+`workforce-os/` is not a skill. It is a standalone pre-production runtime for a
+governed multi-agent system: versioned agent contracts, a default-deny tool
+gateway, typed delegation, four-layer memory, quality gates with CAPA, and
+Owner-gated actions behind single-use execution tokens. It has its own
+dependencies, tests and documentation, and does not affect the skills above.
+
+See [`workforce-os/README.md`](workforce-os/README.md). It is not deployable —
+`workforce-os/docs/V04_SECURITY.md` lists the blockers.
+
 ## Contributing
 
 This repository follows the Agent Skills open development model. Contributions are welcome from the broader ecosystem. When contributing:
