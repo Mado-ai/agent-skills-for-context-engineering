@@ -60,3 +60,6 @@ Private/
 
 # Local history
 .specstory/
+
+# Linter caches
+.ruff_cache/

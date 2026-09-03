@@ -1,0 +1,331 @@
+{
+  "schema_version": 1,
+  "revision": "2026-09-03",
+  "notes": "Stability scores are maintainer-curated heuristics (packaging reliability, breakage history, tool-surface churn) \u2014 not a benchmark. Override any field with a user overlay at ~/.agent-reach/registry.json.",
+  "profiles": {
+    "minimal": [
+      "fetch"
+    ],
+    "standard": [
+      "search",
+      "fetch"
+    ],
+    "research": [
+      "search",
+      "fetch",
+      "extract",
+      "docs"
+    ],
+    "browser": [
+      "search",
+      "fetch",
+      "browse"
+    ]
+  },
+  "default_profile": "standard",
+  "providers": [
+    {
+      "id": "fetch",
+      "name": "Fetch (MCP reference server)",
+      "summary": "Retrieves a URL and converts it to markdown for the model. The keyless baseline for internet access.",
+      "capabilities": [
+        "fetch"
+      ],
+      "runtime": "python",
+      "transport": "stdio",
+      "command": {
+        "exec": "uvx",
+        "args": [
+          "mcp-server-fetch"
+        ]
+      },
+      "fallback_commands": [
+        {
+          "exec": "python3",
+          "args": [
+            "-m",
+            "mcp_server_fetch"
+          ]
+        }
+      ],
+      "keys": [],
+      "stability": 90,
+      "cost": "free",
+      "expected_tools": [
+        "fetch"
+      ],
+      "probe": {
+        "tool": "fetch",
+        "arguments": {
+          "url": "https://example.com",
+          "max_length": 400
+        }
+      },
+      "docs": "https://github.com/modelcontextprotocol/servers/tree/main/src/fetch"
+    },
+    {
+      "id": "duckduckgo",
+      "name": "DuckDuckGo Search",
+      "summary": "Keyless web search plus page fetch. The zero-signup fallback when no search API key is available.",
+      "capabilities": [
+        "search",
+        "fetch"
+      ],
+      "runtime": "python",
+      "transport": "stdio",
+      "command": {
+        "exec": "uvx",
+        "args": [
+          "duckduckgo-mcp-server"
+        ]
+      },
+      "fallback_commands": [],
+      "keys": [],
+      "stability": 72,
+      "cost": "free",
+      "expected_tools": [
+        "search",
+        "fetch_content"
+      ],
+      "probe": {
+        "tool": "search",
+        "arguments": {
+          "query": "model context protocol",
+          "max_results": 3
+        }
+      },
+      "docs": "https://github.com/nickclyde/duckduckgo-mcp-server"
+    },
+    {
+      "id": "tavily",
+      "name": "Tavily Search",
+      "summary": "Search API purpose-built for agents: ranked results with page extracts, so the model gets content instead of link lists.",
+      "capabilities": [
+        "search",
+        "extract",
+        "crawl"
+      ],
+      "runtime": "node",
+      "transport": "stdio",
+      "command": {
+        "exec": "npx",
+        "args": [
+          "-y",
+          "tavily-mcp@latest"
+        ]
+      },
+      "fallback_commands": [],
+      "keys": [
+        {
+          "env": "TAVILY_API_KEY",
+          "required": true,
+          "signup": "https://app.tavily.com",
+          "free_tier": "1000 credits/month"
+        }
+      ],
+      "stability": 93,
+      "cost": "freemium",
+      "expected_tools": [
+        "tavily-search",
+        "tavily-extract"
+      ],
+      "probe": {
+        "tool": "tavily-search",
+        "arguments": {
+          "query": "model context protocol",
+          "max_results": 3
+        }
+      },
+      "docs": "https://github.com/tavily-ai/tavily-mcp"
+    },
+    {
+      "id": "brave-search",
+      "name": "Brave Search",
+      "summary": "Independent web index with a generous free tier. Good breadth, returns snippets rather than full extracts.",
+      "capabilities": [
+        "search"
+      ],
+      "runtime": "node",
+      "transport": "stdio",
+      "command": {
+        "exec": "npx",
+        "args": [
+          "-y",
+          "@brave/brave-search-mcp-server"
+        ]
+      },
+      "fallback_commands": [],
+      "keys": [
+        {
+          "env": "BRAVE_API_KEY",
+          "required": true,
+          "signup": "https://api-dashboard.search.brave.com",
+          "free_tier": "2000 queries/month"
+        }
+      ],
+      "stability": 85,
+      "cost": "freemium",
+      "expected_tools": [
+        "brave_web_search"
+      ],
+      "probe": {
+        "tool": "brave_web_search",
+        "arguments": {
+          "query": "model context protocol",
+          "count": 3
+        }
+      },
+      "docs": "https://github.com/brave/brave-search-mcp-server"
+    },
+    {
+      "id": "exa",
+      "name": "Exa",
+      "summary": "Embedding-based search with a deep-research mode. Strongest on semantic and niche technical queries.",
+      "capabilities": [
+        "search",
+        "deep_research"
+      ],
+      "runtime": "node",
+      "transport": "stdio",
+      "command": {
+        "exec": "npx",
+        "args": [
+          "-y",
+          "exa-mcp-server"
+        ]
+      },
+      "fallback_commands": [],
+      "keys": [
+        {
+          "env": "EXA_API_KEY",
+          "required": true,
+          "signup": "https://dashboard.exa.ai",
+          "free_tier": "trial credits"
+        }
+      ],
+      "stability": 84,
+      "cost": "freemium",
+      "expected_tools": [
+        "web_search_exa"
+      ],
+      "probe": {
+        "tool": "web_search_exa",
+        "arguments": {
+          "query": "model context protocol",
+          "numResults": 3
+        }
+      },
+      "docs": "https://github.com/exa-labs/exa-mcp-server"
+    },
+    {
+      "id": "firecrawl",
+      "name": "Firecrawl",
+      "summary": "Renders JavaScript-heavy pages and crawls whole sites into clean markdown. Use when plain fetch returns empty shells.",
+      "capabilities": [
+        "fetch",
+        "extract",
+        "crawl"
+      ],
+      "runtime": "node",
+      "transport": "stdio",
+      "command": {
+        "exec": "npx",
+        "args": [
+          "-y",
+          "firecrawl-mcp"
+        ]
+      },
+      "fallback_commands": [],
+      "keys": [
+        {
+          "env": "FIRECRAWL_API_KEY",
+          "required": true,
+          "signup": "https://firecrawl.dev",
+          "free_tier": "500 credits"
+        }
+      ],
+      "stability": 82,
+      "cost": "freemium",
+      "expected_tools": [
+        "firecrawl_scrape"
+      ],
+      "probe": {
+        "tool": "firecrawl_scrape",
+        "arguments": {
+          "url": "https://example.com",
+          "formats": [
+            "markdown"
+          ]
+        }
+      },
+      "docs": "https://github.com/firecrawl/firecrawl-mcp-server"
+    },
+    {
+      "id": "context7",
+      "name": "Context7 Docs",
+      "summary": "Version-pinned library documentation on demand. Cuts hallucinated APIs more than general web search does.",
+      "capabilities": [
+        "docs"
+      ],
+      "runtime": "node",
+      "transport": "stdio",
+      "command": {
+        "exec": "npx",
+        "args": [
+          "-y",
+          "@upstash/context7-mcp"
+        ]
+      },
+      "fallback_commands": [],
+      "keys": [
+        {
+          "env": "CONTEXT7_API_KEY",
+          "required": false,
+          "signup": "https://context7.com/dashboard",
+          "free_tier": "keyless with rate limits"
+        }
+      ],
+      "stability": 78,
+      "cost": "freemium",
+      "expected_tools": [
+        "resolve-library-id",
+        "query-docs"
+      ],
+      "probe": {
+        "tool": "resolve-library-id",
+        "arguments": {
+          "libraryName": "fastapi"
+        }
+      },
+      "docs": "https://github.com/upstash/context7"
+    },
+    {
+      "id": "playwright",
+      "name": "Playwright Browser",
+      "summary": "Drives a real browser for pages that need login, clicks, or rendering. Heaviest option \u2014 install only when fetching is not enough.",
+      "capabilities": [
+        "browse",
+        "fetch"
+      ],
+      "runtime": "node",
+      "transport": "stdio",
+      "command": {
+        "exec": "npx",
+        "args": [
+          "-y",
+          "@playwright/mcp@latest",
+          "--headless"
+        ]
+      },
+      "fallback_commands": [],
+      "keys": [],
+      "stability": 75,
+      "cost": "free",
+      "expected_tools": [
+        "browser_navigate"
+      ],
+      "probe": null,
+      "docs": "https://github.com/microsoft/playwright-mcp"
+    }
+  ]
+}

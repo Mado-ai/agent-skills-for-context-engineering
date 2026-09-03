@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-reach"
+version = "0.1.0"
+description = "Give an AI agent internet capability in one command: pick the access method, install it, verify it live."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Agent Skills for Context Engineering contributors" }]
+keywords = [
+    "ai-agents",
+    "mcp",
+    "model-context-protocol",
+    "web-search",
+    "context-engineering",
+    "agent-tools",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+requires-python = ">=3.10"
+# No runtime dependencies on purpose: this tool installs internet access for
+# agents, so it must run before anything else is set up.
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "ruff>=0.4"]
+
+[project.scripts]
+agent-reach = "agent_reach.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["agent_reach*"]
+
+[tool.setuptools.package-data]
+agent_reach = ["data/*.json"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

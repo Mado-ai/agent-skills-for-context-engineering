@@ -166,6 +166,7 @@ The [examples](examples/) folder contains complete system designs that demonstra
 
 | Example | Description | Skills Applied |
 |---------|-------------|----------------|
+| [agent-reach](examples/agent-reach/) | **NEW** One command to give an agent internet access: selects an MCP search/fetch provider, writes the client config, and verifies it with a live MCP handshake. Python CLI, 93 tests, zero runtime dependencies | tool-design, context-optimization, evaluation |
 | [digital-brain-skill](examples/digital-brain-skill/) | **NEW** Personal operating system for founders and creators. Complete Claude Code skill with 6 modules, 4 automation scripts | context-fundamentals, context-optimization, memory-systems, tool-design, multi-agent-patterns, evaluation, project-development |
 | [x-to-book-system](examples/x-to-book-system/) | Multi-agent system that monitors X accounts and generates daily synthesized books | multi-agent-patterns, memory-systems, context-optimization, tool-design, evaluation |
 | [llm-as-judge-skills](examples/llm-as-judge-skills/) | Production-ready LLM evaluation tools with TypeScript implementation, 19 passing tests | advanced-evaluation, tool-design, context-fundamentals, evaluation |
@@ -175,6 +176,25 @@ Each example includes:
 - Complete PRD with architecture decisions
 - Skills mapping showing which concepts informed each decision
 - Implementation guidance
+
+### Agent Reach Example
+
+The [agent-reach](examples/agent-reach/) example is a working CLI that installs
+internet capability into an AI agent and then proves it works:
+
+- **Selection as a context decision**: covers the requested capabilities with the
+  fewest servers that quality allows, because every MCP server's tool definitions
+  occupy the agent's attention budget for the whole session
+- **Verification over configuration**: each check starts the real server over
+  stdio and runs `initialize` / `tools/list` / `tools/call`, so a pulled package,
+  a rejected key, or a renamed tool surfaces immediately
+- **Catalog as data**: providers live in a JSON registry with a user overlay, so
+  access methods can turn over without a code release
+- **Transparent trade-offs**: every skipped provider is reported with its reason
+
+Running its own health check against the live catalog caught real upstream drift
+(Context7 renamed `get-library-docs` to `query-docs`), which is the failure mode
+the example exists to demonstrate.
 
 ### Digital Brain Skill Example
 

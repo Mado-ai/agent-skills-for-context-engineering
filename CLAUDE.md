@@ -34,6 +34,15 @@ npm run format       # prettier
 npm run typecheck    # tsc --noEmit
 ```
 
+### examples/agent-reach (Python >= 3.10, no runtime dependencies)
+```
+cd examples/agent-reach
+pip install -e .
+python -m unittest discover -s tests -t .   # 93 tests, no network required
+ruff check .
+agent-reach detect                          # runtimes, clients, API keys
+```
+
 ### examples/interleaved-thinking (Python >= 3.10)
 ```
 cd examples/interleaved-thinking
